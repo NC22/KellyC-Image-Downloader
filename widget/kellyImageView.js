@@ -1,3 +1,6 @@
+// v 1.0.5 26.08.18
+// data-ignore-click
+
 function KellyImgView(cfg) {
     
     var handler = this;    
@@ -7,7 +10,6 @@ function KellyImgView(cfg) {
     
     var image = false; // current loaded image, false if not show (getCurrentImage().image)
     var imageBounds = false; 
-    var selectedSource = false; // opened source
     var selectedGallery = 'default'; // inherit by opened source
    
     var idGroup = 'kellyImgView'; // DOM viewer class base name
@@ -15,13 +17,14 @@ function KellyImgView(cfg) {
     var block = false;
     var fadeTime = 500; // not synced with css
     var buttonsMargin = 6;
+	var blockShown = false;
     
     var cursor = 0;
     
     // todo touch move by x, go to previuse \ next by swipe
     // realise throw dragStart \ DragMove functions that related to image block
     
-    var drag = false;
+    var isMoved = false;
     
     var scale = 1;
     
@@ -31,13 +34,14 @@ function KellyImgView(cfg) {
     var buttons = {};
     
     var images = []; // gallery_prefix - array of images ( string \ a \ img \ element with data-src attribute )
-    var userEvents = { onBeforeGalleryOpen : false, onBeforeShow : false }; 
+    var userEvents = { onBeforeGalleryOpen : false, onBeforeShow : false, onClose : false }; 
  
     var moveable = true;
-    var swipe = false;
+    var swipe = false;	
+	var bodyLockCss = false;
+	var lockMoveMethod = 'lockMove'; // hideScroll (position : fixed элементы все равно сдвигаются если привязаны к правой стороне) | lockMove (блокирует движение но скроллбар остается)
  
-    // userEvents.onBeforeShow(handler, image);
-    // todo onImageShow(handler, image);
+	// transition opacity глючит в некоторых браузерах, дать возможность отключить
     // todo при переинициализации базовых кнопок добавить возможность их отключать и выводить только конкретные
     // метод для удаления кнопок
     
@@ -55,6 +59,10 @@ function KellyImgView(cfg) {
             
             if (cfg.userEvents.onBeforeShow) {
                 userEvents.onBeforeShow = cfg.userEvents.onBeforeShow;
+            }
+			
+			if (cfg.userEvents.onClose) {
+                userEvents.onClose = cfg.userEvents.onClose;
             }
         }
         
@@ -77,6 +85,50 @@ function KellyImgView(cfg) {
     
         return imgElement.complete && imgElement.naturalHeight !== 0;
     }
+	
+	function showBodyScroll(show) {
+		var body = document.body;
+		
+		body.className = body.className.replace(idGroup + '-margin', '').trim();
+		body.className = body.className.replace(idGroup + '-lock', '').trim();
+		
+		if (show) {
+
+			return;
+			
+		} else {
+		
+			if (!body || !body.clientWidth) return false;
+		
+			var diff = screen.width - body.clientWidth;
+			if (!diff || diff <= 0) return false;
+			
+			if (bodyLockCss !== false) {
+				bodyLockCss.innerHTML = '';
+			}
+	
+			var head = document.head || document.getElementsByTagName('head')[0];
+			
+			bodyLockCss = document.createElement('style');
+			bodyLockCss.type = 'text/css';
+			
+			head.appendChild(bodyLockCss);
+			
+			css = '.' + idGroup + '-margin {';
+			css += 'margin-right : ' + diff + 'px;';
+			css += '}';
+			
+			if (bodyLockCss.styleSheet){
+			  bodyLockCss.styleSheet.cssText = css;
+			} else {
+			  bodyLockCss.appendChild(document.createTextNode(css));
+			}
+			
+			body.className += ' ' + idGroup + '-lock ' + idGroup + '-margin';
+		}
+
+		return true;
+	}
     
     this.getButton = function(index) {
     
@@ -90,19 +142,30 @@ function KellyImgView(cfg) {
     this.getButtons = function() {
         return buttons;
     }
-        
-    this.getCurrentImage = function() {
-        return { image : image, source : selectedSource, gallery : selectedGallery, index : cursor};
+	
+    this.getImages = function() {
+        return images;
+    }
+           
+    this.getCurrentState = function() {
+        return { 
+			image : image, 
+			gallery : selectedGallery, 
+			index : cursor,
+			cursor : cursor,
+			shown : blockShown,
+			blockShown : blockShown,
+		};
     }
     
     this.hideButtons = function(hide) {
         for (var k in buttons){
             if (typeof buttons[k] !== 'function') {
-            
-                //if ((k == 'next' || k == 'prev') && images.length < 2 ) {
-                //    buttons[k].style.opacity = '0';
-                //    continue;
-                //} 
+            				
+				if ((k == 'prev' || k == 'next') && (!images[selectedGallery] || images[selectedGallery].length <= 1)) {
+					buttons[k].style.opacity = '0';
+					continue;
+				}
             
                 if (hide) buttons[k].style.opacity = '0';
                 else buttons[k].style.opacity = '1';
@@ -135,16 +198,14 @@ function KellyImgView(cfg) {
             if (addition.className) className = addition.className;
         }
         
-        if (!w) w = 32;
-        if (!h) h = 32;
-        if (!additionStyle) additionStyle = 'text-align : center; line-height : 32px; cursor : pointer; background : rgba(204,204,204,0.5); color : #000;';
-        if (!className) className = idGroup + '-btn';
+        if (!additionStyle) additionStyle = '';
+        if (!className) className = idGroup + '-btn ' + idGroup + '-btn-' + index ;
         
-        w = 'width : ' + w + 'px;';
-        h = 'height : ' + h + 'px;';
+		if (w) additionStyle += 'width : ' + w + 'px;';
+        if (h) additionStyle += 'height : ' + h + 'px;';
         
         var button = document.createElement('div');
-            button.setAttribute('style', 'position : absolute; display : block; opacity : 0;' + w + h + additionStyle);
+            if (additionStyle) button.setAttribute('style', additionStyle);
             button.onclick = onclick;
             button.className = className;
             button.innerHTML = innerHTML;
@@ -158,9 +219,9 @@ function KellyImgView(cfg) {
     this.addBaseButtons = function(){
         if (buttons['close']) return true;
         
-        handler.addButton('&#10006;', 'close', function() { handler.cancelLoad(); });
-        handler.addButton('&lt;', 'prev', function() { handler.nextImage(false); });
-        handler.addButton('&gt;', 'next', function() { handler.nextImage(true); });
+        handler.addButton(getSvgIcon('close', '#000'), 'close', function() { handler.cancelLoad(); });
+        handler.addButton(getSvgIcon('left', '#000'), 'prev', function() { handler.nextImage(false); });
+        handler.addButton(getSvgIcon('right', '#000'), 'next', function() { handler.nextImage(true); });
         
         return true;
     }
@@ -168,13 +229,22 @@ function KellyImgView(cfg) {
     this.onUpdateImagePos = function(pos) {
     
         if (!image) return false;
-        
+		// console.log(window.getComputedStyle(image));
+		
+		if (!pos) {
+			pos = {						
+				left : parseInt(image.style.left),
+				top : parseInt(image.style.top),
+			}
+		}
+    
         var clientBounds = handler.getClientBounds();
         
         var item = 0;
         var horizontal = false;
         
-        var left = pos.left + imageBounds.resizedWidth + 12;
+		
+        var left = pos.left + parseInt(image.style.width) + 12;
         var top = pos.top;
         
         for (var k in buttons){
@@ -185,7 +255,7 @@ function KellyImgView(cfg) {
                 
                 if (item == 1) {
                     // console.log(top - buttonBounds.height)
-                    if (left + buttonBounds.width > clientBounds.width - 12) {
+                    if (left + buttonBounds.width > clientBounds.screenWidth - 12) {
                         horizontal = true;
                         left = pos.left;
                         top -= buttonBounds.height +  12;                    
@@ -214,6 +284,8 @@ function KellyImgView(cfg) {
     
     function showMainBlock(show) {
            
+		if (show && blockShown) return;
+		
         // will be extended if something from this events will be used for some thing else
         
         var disableMoveContainer = function(disable) {
@@ -240,8 +312,13 @@ function KellyImgView(cfg) {
         
         if (show) {
         
-            disableMoveContainer(true);
-            
+			if (lockMoveMethod == 'hideScroll') {
+				showBodyScroll(false);
+			} else {				
+				disableMoveContainer(true);
+			}
+			
+            blockShown = true;
             block = document.getElementById(idGroup);        
             block.style.opacity = '1';
             block.style.visibility = 'visible';        
@@ -271,7 +348,7 @@ function KellyImgView(cfg) {
                
                 var right = c == 3 || c == 32 || c == 68 || c == 102;
                 var left = c == 1 || c == 29 || c == 65 || c == 100;
-                // todo check when event occurse
+               
                 if (right || left) {
                     
                     handler.nextImage(right, 1, e);
@@ -287,15 +364,20 @@ function KellyImgView(cfg) {
                 
                 
             }, 'next_image_key');    
-        } else {              
-            
+        } else {       
+			
             setTimeout(function() { 
             
-                disableMoveContainer(false);      
-
+				if (lockMoveMethod == 'hideScroll') {
+					showBodyScroll(true);
+				} else {				
+					disableMoveContainer(false);
+				} 
+				
                 block.style.visibility = 'hidden';                 
                 handler.removeEventListener(window, "scroll", 'img_view_');
-            
+				blockShown = false;
+				
             }, fadeTime);  
             
             
@@ -305,78 +387,94 @@ function KellyImgView(cfg) {
         }     
     }
     
-    // initialize image viewer from source with start cursor \ gallery and image src, or go to nextimage in selected gallery
+    // initialize image viewer from gallery pointer with start cursor \ gallery and image src, or go to nextimage in selected gallery
     
-    // source - dom element with kellyGallery and kellyGalleryIndex attributes (todo source as array?), if false, go to next \ prev in current gallery
+    // galleryItemPointer - dom element with kellyGallery and kellyGalleryIndex attributes, if false, go to next \ prev in current gallery
 	// initial image must be setted in href \ src \ or in data-image attribute, else - set kellyGalleryIndex to -1 to start from begining of gallery array
     // next - bool  (true \ false, if false go to previuse) 
     
-    // use nextImage method instead
+    // for navigation use nextImage method instead if gallery already opened
     
-    this.loadImage = function(source, next) {
+    this.loadImage = function(galleryItemPointer, galleryData) {
         
         if (beasy) return false;
         
         beasy = true;
         scale = 1;
         console.log('load image');
-        
-        if (source) {
-        
-            selectedSource = source;
-            
-            showMainBlock(true);
-           
-            // change gallery by source - affects on next image functions and buttons
-            
-            if (source.getAttribute('kellyGallery')) {
-                selectedGallery = source.getAttribute('kellyGallery');
-            } 
-            
-            if (source.getAttribute('kellyGalleryIndex')) {
-                cursor = parseInt(source.getAttribute('kellyGalleryIndex'));
-            }
-            
-        } else {
-            source = getNextImage(next, true);
+		
+		if (userEvents.onBeforeGalleryOpen) {
+            userEvents.onBeforeGalleryOpen(handler, galleryItemPointer, galleryData);
+        }
+		
+        if (!blockShown) showMainBlock(true);
+		
+		if (!galleryItemPointer && !galleryData) {
+		
+			galleryItemPointer = images[selectedGallery][cursor];
+			
+		} else if (galleryData) {
+			
+			if (galleryData.gallery) {
+				selectedGallery = galleryData.gallery;
+			}
+			
+			if (typeof galleryData.cursor != 'undefined') {
+				if (galleryData.cursor == 'next') {
+					galleryItemPointer = getNextImage(true, true);
+				} else if (galleryData.cursor == 'prev') {
+					galleryItemPointer = getNextImage(false, true);
+				} else {
+					cursor = galleryData.cursor;
+					galleryItemPointer = images[selectedGallery][cursor];
+				}
+			}
         }
                 
+		
         handler.hideButtons(true);
         handler.hideLoader(false);
         handler.updateBlockPosition();    
         
   		image = document.createElement("img");
-        image.src = getImageLink(source);  
+        image.src = getImageUrlFromPointer(galleryItemPointer);  
         
         if (isImgLoaded(image)) handler.imageShow();
         else image.onload = function() { handler.imageShow(); return false; }
+		
+		
     }
-    
+	
     this.getClientBounds = function() {
     
-        var w = window,
-            d = document,
-            e = d.documentElement,
-            g = d.getElementsByTagName('body')[0],
-            x = w.innerWidth || e.clientWidth || g.clientWidth,
-            y = w.innerHeight|| e.clientHeight|| g.clientHeight;
-        
-            return {width : x, height : y};
+		var elem = (document.compatMode === "CSS1Compat") ? 
+			document.documentElement :
+			document.body;
+
+        return {
+            screenHeight: elem.clientHeight,
+			screenWidth: elem.clientWidth,
+        };
     }
     
     this.getScale = function() { return scale; }
     
     this.scale = function(plus) {
-        if (plus) scale++;
-        else scale--;
+		
+		var newScale = scale;
+		var step = 0.1;
+        if (!plus) step = step * -1;
+		
+		newScale += step;
         
-        if (scale < 1) scale = 1;
-        
+        if (newScale < 0.5) return;
+		scale = newScale;
+		
         var rHeight = imageBounds.resizedHeight; // resized variables
         var rWidth = imageBounds.resizedWidth;
         
-        var newHeight = rHeight + (100 * (scale - 1));
-                
+        var newHeight = Math.round(rHeight * scale);
+		
         var k = newHeight / rHeight;
         
         rHeight = k * rHeight;
@@ -390,47 +488,91 @@ function KellyImgView(cfg) {
         
         image.style.left = Math.floor(posCenter.left - (rWidth / 2)) + 'px';
         image.style.top = Math.floor(posCenter.top - (rHeight / 2)) + 'px';
-        
+		
+		
+        handler.onUpdateImagePos();
     }
-       
+    
+	// get local coordinats event pos
+	
     function getEventDot(e) {
         e = e || window.event;
         var x, y;
-        var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
-        var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
-
-        if (e.touches) {
-            x = e.touches[0].clientX + scrollX;
-            y = e.touches[0].clientY + scrollY;
-        } else {
+		
+		// 
+        var scrollX = 0; // document.body.scrollLeft + document.documentElement.scrollLeft;
+        var scrollY = 0; // document.body.scrollTop + document.documentElement.scrollTop;
+		
+		var touches = [];
+		if (e.touches && e.touches.length > 0) {
+			
+			for (var i = 0; i < e.touches.length; i++) {
+				touches[i] = {
+					x : e.touches[i].clientX + scrollX,
+					y : e.touches[i].clientY + scrollY,
+				}
+				
+				if (i == 0) {
+					x = touches[0].x;
+					y = touches[0].y;
+				}
+			}
+			
+		} else {
             // e.pageX e.pageY e.x e.y bad for cross-browser
             x = e.clientX + scrollX;
-            y = e.clientY + scrollY;
-        }
-
+            y = e.clientY + scrollY;		
+		}
+		
         //var rect = canvas.getBoundingClientRect();
-        x -= /*rect.left+*/ scrollX;
-        y -= /*rect.top +*/ scrollY;
 
-        return {x: x, y: y};
+        return {x: x, y: y, touches : touches};
     }
     
     this.updateCursor = function(e) {
     
         console.log(getEventDot(e));
     }
+	
+	function calcDistance(pointA, pointB) {
+		var a = pointA.x - pointB.x;
+		var b = pointA.y - pointB.y;
+
+		return Math.sqrt( a*a + b*b );
+	}
 
     this.drag = function(e) {
+		
+		var prevTouches = lastPos ? lastPos.touches : false;
+		
         lastPos = getEventDot(e);
-            
-        if (moveable) {
+        if (lastPos.touches && lastPos.touches.length > 2){
+			return;
+		}
+		
+		/*
+		if (!animationFrame) return false;
+		
+		window.requestAnimationFrame(function() {
+			animationFrame = true;
+		})
+		
+		animationFrame = false;
+		*/
+		
+		if (prevTouches && prevTouches.length > 1 && lastPos.touches.length > 1) {
+		
+			var zoomIn = calcDistance(prevTouches[0], prevTouches[1]) < calcDistance(lastPos.touches[0], lastPos.touches[1]) ? true : false;
+			handler.scale(zoomIn);
+			
+		} else if (moveable || scale != 1) {
         
             var newPos = {left : move.left + lastPos.x - move.x, top : move.top + lastPos.y - move.y}
             
             image.style.left = newPos.left + 'px';
             image.style.top =  newPos.top + 'px';
             
-        } else if (swipe) {
+        } else if (scale == 1 && swipe) { // lastPos && lastPos.touches.length == 1
         
             var newPos = {left : move.left + lastPos.x - move.x, top : move.top}
             image.style.left = newPos.left + 'px';
@@ -442,13 +584,15 @@ function KellyImgView(cfg) {
     
     this.dragEnd = function(e) {
     
-        drag = false;
+        isMoved = false;
         handler.removeEventListener(document.body, "mousemove", 'image_drag_');
         handler.removeEventListener(document.body, "mouseup", 'image_drag_');
         handler.removeEventListener(document.body, "touchmove", 'image_drag_');
         handler.removeEventListener(document.body, "touchend", 'image_drag_');
         
-        if (swipe && lastPos) {
+		if (!lastPos) return;
+		
+        if (scale == 1 && swipe) { // lastPos && lastPos.touches.length == 1
             
             //image.style.transition = 'left 0.3s';
             
@@ -464,10 +608,14 @@ function KellyImgView(cfg) {
                 handler.nextImage(next);
                 
             } else {
-                var newPos = {left : move.left, top : move.top}
-            
-                image.style.left = newPos.left + 'px';                
-                handler.onUpdateImagePos(newPos);
+			
+				if (image) {
+				
+					var newPos = {left : move.left, top : move.top}
+				
+					image.style.left = newPos.left + 'px';                
+					handler.onUpdateImagePos(newPos);
+				}
             }
             
         }     
@@ -477,18 +625,18 @@ function KellyImgView(cfg) {
     
     this.dragStart = function(e) {
         
-        if (drag) return false;
-        
+        if (isMoved) return false;        
         if (beasy) return false;
         
         move = getEventDot(e);
+
         move.left = parseInt(image.style.left);
         move.top = parseInt(image.style.top);
         
         // console.log(move); // 884 - 554
         // move.x = parseInt(image.style.left)
         
-        drag = true; 
+        isMoved = true; 
         handler.addEventListner(document.body, "mousemove", function (e) {
             handler.drag(e);
         }, 'image_drag_');
@@ -552,8 +700,8 @@ function KellyImgView(cfg) {
         
         var padding = 20;
         
-        var maxWidth = bounds.width - padding; 
-        var maxHeight = bounds.height - padding; 
+        var maxWidth = bounds.screenWidth - padding; 
+        var maxHeight = bounds.screenHeight - padding; 
         
         if (!imageBounds) {
             imageBounds = {
@@ -581,8 +729,8 @@ function KellyImgView(cfg) {
         image.style.position = 'absolute';
         
         // console.log('maxWidth : ' + maxWidth + ' image Width' + image.width + ' maxHeight : ' + maxHeight + ' image Height ' + image.height);
-        
-        var newPos = {left : Math.round((bounds.width - imageBounds.resizedWidth) / 2), top : Math.round((bounds.height - imageBounds.resizedHeight) / 2 )};
+		
+        var newPos = {left : Math.round((bounds.screenWidth - imageBounds.resizedWidth) / 2), top : Math.round((bounds.screenHeight - imageBounds.resizedHeight) / 2 )};
         
         // todo check this values after scale
         
@@ -598,10 +746,11 @@ function KellyImgView(cfg) {
     // hide show image block and cancel load
     
     this.cancelLoad = function(stage) {
-            
+
+	   
         if (stage == 2) {
             beasy = false; 
-            drag = false;
+            isMoved = false;
             
             if (image) {
                 image.src = '';
@@ -612,7 +761,10 @@ function KellyImgView(cfg) {
            
             var imgContainer = document.getElementById(idGroup+ '-img'); 
                 imgContainer.innerHTML = '';
-                
+            
+			if (userEvents.onClose) {
+				userEvents.onClose(handler);
+			}				
             return;
             
         } else {
@@ -644,17 +796,25 @@ function KellyImgView(cfg) {
     }
 
     
-    // get next image from current gallery (next - false - get previuse)
-    function getImageLink(source) {
+    // get image url from source string or element
+	// if source is member of exist gallery - move cursor to source index and switch to source gallery
+	
+    function getImageUrlFromPointer(source) {
+	
         var sourceImg = '';
-        
-        if (typeof source === 'string') {
-            return validateUrl(source);
-        } else {        
-                 if (source.tagName == 'A') sourceImg = source.href;
-            else if (source.tagName == 'IMG') sourceImg = source.src;
-            else sourceImg = source.getAttribute('data-image');
-        }
+		
+		// change gallery by source - affects on next image functions and buttons
+		
+		if (typeof source !== 'string' && source.getAttribute('kellyGallery') && source.getAttribute('kellyGalleryIndex')) {
+		
+			selectedGallery = source.getAttribute('kellyGallery');
+			cursor = parseInt(source.getAttribute('kellyGalleryIndex'));
+			sourceImg = getUrlFromGalleryItem(images[selectedGallery][cursor]);
+			
+		} else {
+		
+			sourceImg = getUrlFromGalleryItem(source);
+		}
         
         if (!sourceImg) {
             console.log('image not found for element');
@@ -663,11 +823,61 @@ function KellyImgView(cfg) {
         
         return validateUrl(sourceImg);
     }
+	
+	function getUrlFromGalleryItem(item) {
+	
+		var url = '';
+		if (typeof item == 'string') {
+		
+			url  = item;
+			
+		} else {
+		
+			url = item.getAttribute('data-image');
+			if (!url) {
+			
+					 if (item.tagName == 'A') url = item.href;
+				else if (item.tagName == 'IMG') url = item.src;
+			}
+		}
+		
+		return validateUrl(url);
+	}
     
     function validateUrl(source) {
-        if (!source) return '';
+        if (!source) return '';	
         return source.trim();
     }
+	
+	function getSvgIcon(name, color) {
+	
+		if (!color) color = '#000';
+		
+		var icon = '';
+		var bounds = '170 170';
+		
+		if (name == 'close') {
+		
+			icon = '<g>\
+					<title>' + name + '</title>\
+					<line x1="27.5" x2="145.5" y1="24.9" y2="131.9" fill="none" stroke="' + color + '" stroke-linecap="round" stroke-linejoin="undefined" stroke-width="19"/>\
+					<line x1="144" x2="28" y1="24.9" y2="131.9" fill="none" stroke="' + color + '" stroke-linecap="round" stroke-linejoin="undefined" stroke-width="19"/>\
+					</g>';
+					
+		} else if (name == 'left' || name == 'right') {
+		
+			bounds = '120 120';
+			icon = '<g>\
+					 <title>' + name + '</title>\
+				     <path transform="rotate(' + (name == 'right' ? '90' : '-90') + ' 61.24249267578127,65.71360778808595) " id="svg_1" \
+					 d="m12.242498,108.588584l48.999996,-85.74996l48.999996,85.74996l-97.999992,0z" \
+					 stroke-width="1.5" stroke="' + color + '" fill="' + color + '"/>\
+				     </g>';
+		} 
+		
+		return '<?xml version="1.0" encoding="UTF-8"?>\
+					<svg viewBox="0 0 ' + bounds + '" xmlns="http://www.w3.org/2000/svg">' + icon + '</svg>'; 
+	}
     
     function getNextImage(next, updateCursor) {
 
@@ -695,7 +905,7 @@ function KellyImgView(cfg) {
             image = false;            
             imageBounds = false;
             
-            handler.loadImage(false, next);
+            handler.loadImage(false, {cursor : next ? 'next' : 'prev'});
             
         } else { // select image and fade
         
@@ -720,26 +930,29 @@ function KellyImgView(cfg) {
     }
         
     // accept events to A or IMG elements, or elements with attribute "data-image" and specify gallery name, or accept data for some galleryName
-    // input - array of elements or className or array of src strings
+    // galleryItems - array of elements or className or array of src strings
     // data-ignore-click = child for prevent loadImage when click on child nodes
     // galleryName - key for gallery that store this elements, detecting of next element based on this key
     
-    this.acceptEvents = function(input, galleryName) {
+    this.addToGallery = function(galleryItems, galleryName) {
         
         if (!galleryName) galleryName = 'default';
     
-        if (typeof input === 'string') {
-            var className = input;
+        if (typeof galleryItems === 'string') {
+            var className = galleryItems;
             images[galleryName] = document.getElementsByClassName(className);
-        } else if (input.length) {
-          
-            images[galleryName] = input;
+        } else if (galleryItems.length) {
+            images[galleryName] = galleryItems;
         } else return false;
         
         if (images[galleryName].length && typeof images[galleryName][0] === 'string') {
+		
+			// image gallery contain only urls
         
-        } else {
+		} else {
         
+			// image gallery contain elements associated with gallery items
+			
             for (var i = 0, l = images[galleryName].length; i < l; i++)  {
                 images[galleryName][i].setAttribute('kellyGallery', galleryName);
                 images[galleryName][i].setAttribute('kellyGalleryIndex', i);
@@ -753,7 +966,7 @@ function KellyImgView(cfg) {
                 }
             }	
         }
-        
+		
         return true;    
     }
     
