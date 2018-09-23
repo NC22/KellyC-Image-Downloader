@@ -10,6 +10,7 @@ function KellyImgView(cfg) {
     
     var image = false; // current loaded image, false if not show (getCurrentImage().image)
     var imageBounds = false; 
+	
     var selectedGallery = 'default'; // inherit by opened source
    
     var idGroup = 'kellyImgView'; // DOM viewer class base name
@@ -33,8 +34,14 @@ function KellyImgView(cfg) {
     
     var buttons = {};
     
-    var images = []; // gallery_prefix - array of images ( string \ a \ img \ element with data-src attribute )
-    var userEvents = { onBeforeGalleryOpen : false, onBeforeShow : false, onClose : false }; 
+    var images = {}; // gallery_prefix - array of images ( string \ a \ img \ element with data-src attribute )
+	var imagesData = {};
+	
+    var userEvents = { 
+		onBeforeGalleryOpen : false, // 
+		onBeforeShow : false, // изображение загружено но не показано, переменные окружения обновлены
+		onClose : false, //
+	}; 
  
     var moveable = true;
     var swipe = false;	
@@ -147,7 +154,8 @@ function KellyImgView(cfg) {
         return images;
     }
            
-    this.getCurrentState = function() {
+    this.getCurrentState = function() {	
+		
         return { 
 			image : image, 
 			gallery : selectedGallery, 
@@ -155,20 +163,26 @@ function KellyImgView(cfg) {
 			cursor : cursor,
 			shown : blockShown,
 			blockShown : blockShown,
+			imageData : imagesData[selectedGallery] ? imagesData[selectedGallery] : false,
 		};
     }
     
     this.hideButtons = function(hide) {
         for (var k in buttons){
             if (typeof buttons[k] !== 'function') {
-            				
+			
+            	buttons[k].className = buttons[k].className.replace(idGroup + '-hidden', '').trim();
+				
 				if ((k == 'prev' || k == 'next') && (!images[selectedGallery] || images[selectedGallery].length <= 1)) {
+					buttons[k].className += ' ' + idGroup + '-hidden';
 					buttons[k].style.opacity = '0';
 					continue;
 				}
             
-                if (hide) buttons[k].style.opacity = '0';
-                else buttons[k].style.opacity = '1';
+                if (hide) {
+					buttons[k].className += ' ' + idGroup + '-hidden';
+					buttons[k].style.opacity = '0';
+                } else buttons[k].style.opacity = '1';
             }
         }
     }
@@ -209,7 +223,7 @@ function KellyImgView(cfg) {
             button.onclick = onclick;
             button.className = className;
             button.innerHTML = innerHTML;
-            
+			
         buttons[index] = button;
         block.appendChild(buttons[index]);
         
@@ -249,7 +263,9 @@ function KellyImgView(cfg) {
         
         for (var k in buttons){
             if (typeof buttons[k] !== 'function') {
-            
+				//console.log(buttons[k].style.opacity)
+				//if (buttons[k].className.indexOf('hidden') != -1) continue;
+				
                 item++;                
                 var buttonBounds = buttons[k].getBoundingClientRect();
                 
@@ -934,16 +950,28 @@ function KellyImgView(cfg) {
     // data-ignore-click = child for prevent loadImage when click on child nodes
     // galleryName - key for gallery that store this elements, detecting of next element based on this key
     
-    this.addToGallery = function(galleryItems, galleryName) {
+    this.addToGallery = function(galleryItems, galleryName, data) {
         
         if (!galleryName) galleryName = 'default';
-    
+		
+		// accept by class name
+		
         if (typeof galleryItems === 'string') {
             var className = galleryItems;
             images[galleryName] = document.getElementsByClassName(className);
+			
+		// accept by list of urls
+		
         } else if (galleryItems.length) {
             images[galleryName] = galleryItems;
+			
         } else return false;
+		
+		// addition data for gallery elements
+		
+		if (typeof data == 'object') {
+			imagesData[galleryName] = data;
+		}
         
         if (images[galleryName].length && typeof images[galleryName][0] === 'string') {
 		

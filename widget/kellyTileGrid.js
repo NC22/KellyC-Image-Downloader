@@ -26,20 +26,24 @@ function kellyTileGrid(cfg) {
 		unfitedExtendMin : 2, // для последнего ряда - подгоняем по ширине не обращая внимания на требуемую высоту если осталось указанное кол-во изображений невместифшихся в сетку с требуемой высотой
 		dontWait : false,
 		fixed : false,
+		tmpBounds : false,
+		oversizedHeightRatio : 0.2,
+		// внимание к длинным картинкам -oversized
 	};
     
     var handler = this;
     var events = { 
 		onGridUpdated : false, // after updateTileGrid method
 		
-		getResizableElement : false, // 
-		getBoundElement : false, // getCheckLoadElement		
+		getResizableElement : false, // элемент к которому в тайле будет применены атрибуты width \ height, по умолчанию сам тайл
+		getBoundElement : false, // элемент из которого можно получить данные о пропорция тайла (свойства data-width \ data-height) , по умолчанию сам тайл
 		
 		isBoundsLoaded : false, // is element loaded
 		// getScaleElement
 		onBadBounds : false, // element is loaded, but bounds is unsetted or loaded with error 
 		onResize : false, // window resize
 		onLoadBounds : false, // some of unknown bounds element is ready
+		onResizeImage : false,
 	};
 	
 	var imgEvents = {
@@ -140,12 +144,12 @@ function kellyTileGrid(cfg) {
 		console.log(data);
 		
 		if (events.onBadBounds) {
-
+			
 			return events.onBadBounds(handler, data);
 			
 		} else {
 		
-			data.tile.style.display = 'none';
+			if (data.tile) data.tile.style.display = 'none';
 		}
 		
 		return false;
@@ -309,58 +313,63 @@ function kellyTileGrid(cfg) {
 		
         if (tilesLoaded == tiles.length || (rules.dontWait && tilesLoaded >= rules.dontWait)) {
 		
-                landscape = 0;
-                portrait = 0;
-                currentTileRow = new Array();        
-                
-                var screenSize = tilesBlock.getBoundingClientRect().width; 
-                
-                requiredWidth = Math.floor(screenSize); 
-                if (screenSize < requiredWidth) requiredWidth = screenSize;
+			landscape = 0;
+			portrait = 0;
+			currentTileRow = new Array();        
+			
+			var screenSize = tilesBlock.getBoundingClientRect().width; 
+			
+			requiredWidth = Math.floor(screenSize); 
+			if (screenSize < requiredWidth) requiredWidth = screenSize;
 
-                if (!requiredWidth) {
-                    console.log('fail to get required width by block');
-                    console.log(tilesBlock);
-                    return false;
-                }
-                   
-                for (var i=0; i <= tiles.length-1; i++){ 
+			if (!requiredWidth) {
+				console.log('fail to get required width by block');
+				console.log(tilesBlock);
+				return false;
+			}
+			   
+			for (var i=0; i <= tiles.length-1; i++){ 
+				
+				// если понадобятся lazy load \ порядок загрузки изображений, лучше вынести в отдельное решение при необходимости, 
+				// здесь нужен только контроль текущего состояния пропорций элементов
+				
+				if (tilesLoaded != tiles.length && rules.dontWait && tiles[i].getAttribute('data-rowItem-rendered')) continue;
+				if (!tilesLoadState[i] && !rules.tmpBounds) break;
+									
+				var tileMainEl = this.getBoundElement(tiles[i]);
+				var alternativeBounds = false;					
+				
+				var imageInfo = {
+					portrait : false,
+					image : this.getResizableElement(tiles[i]),
+					width : 0,
+					height : 0,
+					tile : tiles[i],
+				};
+				
+				if (tilesLoadState[i]) {
+				
+					if (rules.dontWait && rules.tmpBounds && tiles[i].className.indexOf(tileClass + '-tmp-bounds') !== -1) {
+						tiles[i].className = tiles[i].className.replace(tileClass + '-tmp-bounds', '');
+					}
 					
-					// если понадобятся lazy load \ порядок загрузки изображений, лучше вынести в отдельное решение при необходимости, 
-					// здесь нужен только контроль текущего состояния пропорций элементов
-					
-					if (tilesLoaded != tiles.length && rules.dontWait && tiles[i].getAttribute('data-rowItem-rendered')) continue;
-					if (!tilesLoadState[i]) break;
-					
-					var tileMainEl = this.getBoundElement(tiles[i]);
-					var alternativeBounds = false;
-					
-					if (!tileMainEl) {
-						
+					if (!tileMainEl) {							
 						alternativeBounds = onBadBounds({error_code : 1, error : 'updateTileGrid getBoundElement fail', tile : tiles[i], mainElement : false});						
 						if (!alternativeBounds){						
 							continue;
 						}
 					}
 					
-                    if (tileMainEl.getAttribute('error')) {
+					if (tileMainEl.getAttribute('error')) {
 					
 						alternativeBounds = onBadBounds({error_code : 2, error : 'updateTileGrid error during load image', tile : tiles[i], mainElement : tileMainEl});						
 						if (!alternativeBounds) {						
 							continue;
 						}
-                    }
-                    
-                    var imageInfo = {
-                        portrait : false,
-                        image : this.getResizableElement(tiles[i]),
-                        width : 0,
-                        height : 0,
-						tile : tiles[i],
-                    };
+					}
 					
-					imageInfo.width = tileMainEl.getAttribute('data-width');
-					imageInfo.height = tileMainEl.getAttribute('data-height');
+					imageInfo.width = parseInt(tileMainEl.getAttribute('data-width'));
+					imageInfo.height = parseInt(tileMainEl.getAttribute('data-height'));
 					
 					if (!imageInfo.width) {
 					
@@ -371,7 +380,7 @@ function kellyTileGrid(cfg) {
 						} 
 					}    
 					
-                    if (!imageInfo.width || imageInfo.width < 0) {
+					if (!imageInfo.width || imageInfo.width < 0) {
 					
 						alternativeBounds = onBadBounds({error_code : 3, error : 'no width \ height', tile : tiles[i],	mainElement : tileMainEl});						
 						if (!alternativeBounds) {
@@ -383,74 +392,115 @@ function kellyTileGrid(cfg) {
 							imageInfo.width = alternativeBounds.width;
 							if (alternativeBounds.height) imageInfo.height = alternativeBounds.height;
 						}
-                    }
-                    
-					if (!imageInfo.height) imageInfo.height = imageInfo.width;
+					} 
+				
 					
-                    if (imageInfo.width < imageInfo.height) imageInfo.portrait = true;   
-                   
-                    if (imageInfo.portrait) portrait++;
-                    else landscape++;
-                    
-                    tiles[i].style.display = 'inline-block';
-                    currentTileRow.push(imageInfo);
-                    
+				} else {
 					
-					if (!rules.fixed) {
-						
-						if (i + rules.min >= tiles.length) continue; // dont keep last one alone
-						
-						var currentRowResultHeight = getExpectHeight();
-						
-						// если текущий ряд не масштабируеся под требуемую высоту с определенным допуском, продолжаем сбор изображений
-						
-						if (currentRowResultHeight > rowHeight + ( (rowHeight / 100) * rules.heightDiff )) continue;
-						
-                    } else {
-					
-						if (currentTileRow.length < rules.fixed) continue;
+					if (tiles[i].className.indexOf(tileClass + '-tmp-bounds') == -1) {
+						tiles[i].className += ' ' + tileClass + '-tmp-bounds';
 					}
 					
-					markRowAsRendered();
-                    resizeImagesRow();
-                }
-                               
-				if (currentTileRow.length) {
+					imageInfo.width = rules.tmpBounds.width;
+					imageInfo.height = rules.tmpBounds.height;
+				}
 				
-					if (getExpectHeight() > rowHeight + ( (rowHeight / 100) * rules.heightDiffLast )) {
-						
-						if (hideUnfited) {
-							
-							for (var i=0; i <= currentTileRow.length-1; ++i){ 
-								currentTileRow[i].image.style.display = 'none';
-							}
-							
-						} else {
-							
-							
-							var showAsUnfited = currentTileRow.length >= rules.unfitedExtendMin ? false : true;
-							if (rules.fixed) showAsUnfited = false;
-							
-							resizeImagesRow(showAsUnfited);
-						}
+				
+				if (!imageInfo.height) imageInfo.height = imageInfo.width;
+				
+				var ratio = Math.min(imageInfo.width, imageInfo.height) / Math.max(imageInfo.height, imageInfo.width);
+				var oversized = false;
+				
+				if (imageInfo.height > imageInfo.width && ratio <= rules.oversizedHeightRatio) oversized = true; 
+				
+				if (oversized) {
+					
+					imageInfo.width = 0;
+					imageInfo.height = 0;
+					
+					alternativeBounds = onBadBounds({error_code : 4, error : 'oversized', tile : tiles[i],	mainElement : tileMainEl});						
+					if (!alternativeBounds) {
+					
+						continue;
 						
 					} else {
 					
-						resizeImagesRow();
+						imageInfo.width = alternativeBounds.width;
+						if (alternativeBounds.height) imageInfo.height = alternativeBounds.height;
+						else imageInfo.height = imageInfo.width;
+						
+						if (tiles[i].className.indexOf(tileClass + '-oversized-bounds') == -1) {
+							tiles[i].className += ' ' + tileClass + '-oversized-bounds';
+						}
 					}
+					
+					
+			    }				
+					
+				if (imageInfo.width < imageInfo.height) imageInfo.portrait = true;   
+				imageInfo.portrait ? portrait++ : landscape++;
+				
+				tiles[i].style.display = 'inline-block';
+				currentTileRow.push(imageInfo);
+				
+				if (!rules.fixed) {
+					
+					if (i + rules.min >= tiles.length) continue; // dont keep last one alone
+					
+					var currentRowResultHeight = getExpectHeight();
+					
+					// если текущий ряд не масштабируеся под требуемую высоту с определенным допуском, продолжаем сбор изображений
+					
+					if (currentRowResultHeight > rowHeight + ( (rowHeight / 100) * rules.heightDiff )) continue;
+					
+				} else {
+				
+					if (currentTileRow.length < rules.fixed) continue;
 				}
+				
+				// console.log(imageInfo);
+				// console.log(currentTileRow);
+				
+				markRowAsRendered();
+				resizeImagesRow();
+			}
+						   
+			if (currentTileRow.length) {
+			
+				if (getExpectHeight() > rowHeight + ( (rowHeight / 100) * rules.heightDiffLast )) {
+					
+					if (hideUnfited) {
+						
+						for (var i=0; i <= currentTileRow.length-1; ++i){ 
+							currentTileRow[i].image.style.display = 'none';
+						}
+						
+					} else {
+						
+						
+						var showAsUnfited = currentTileRow.length >= rules.unfitedExtendMin ? false : true;
+						if (rules.fixed) showAsUnfited = false;
+						
+						resizeImagesRow(showAsUnfited);
+					}
+					
+				} else {
+				
+					resizeImagesRow();
+				}
+			}
 
-                var clear = tilesBlock.getElementsByClassName('kelly-clear-both');
-                if (clear.length) clear[0].parentNode.appendChild(clear[0]);
-                else {
-                    clear = document.createElement('div');
-                    clear.className = 'kelly-clear-both';
-                    clear.setAttribute('style', 'clear : both;');
-                    tilesBlock.appendChild(clear);                        
-                }
+			var clear = tilesBlock.getElementsByClassName('kelly-clear-both');
+			if (clear.length) clear[0].parentNode.appendChild(clear[0]);
+			else {
+				clear = document.createElement('div');
+				clear.className = 'kelly-clear-both';
+				clear.setAttribute('style', 'clear : both;');
+				tilesBlock.appendChild(clear);                        
+			}
 
-                if (events.onGridUpdated) events.onGridUpdated(handler);
-                
+			if (events.onGridUpdated) events.onGridUpdated(handler);
+			
         } 
     }
     
@@ -472,6 +522,8 @@ function kellyTileGrid(cfg) {
         return getResizedInfo(requiredWidth, {width : getCurrentRowWidth(), 'height' : rowHeight}, 'width').height; // подгоняем к треуемой ширине
     }
     
+	// if some of the items info contain zero values, can return NaN for all row items
+	
     function resizeImagesRow(unfited) {
     
         if (!currentTileRow.length) return false;
@@ -480,7 +532,8 @@ function kellyTileGrid(cfg) {
                
         // count total width of row, and resize by required row height
         for (var i=0; i <= currentTileRow.length-1; ++i){ 
-        
+			currentTileRow[i].origWidth = currentTileRow[i].width;
+			currentTileRow[i].origHeight = currentTileRow[i].hight;
             currentTileRow[i] = getResizedInfo(rowHeight, currentTileRow[i], 'height');
             width += parseInt(currentTileRow[i].width); 
             
@@ -519,12 +572,18 @@ function kellyTileGrid(cfg) {
             if (i == currentTileRow.length-1 && currentTileRow[i].image.className.indexOf(tileClass + '-grid-last') == -1 ) {            
                 currentTileRow[i].image.className += ' ' + tileClass + '-grid-last';                
             }
-            
-            currentTileRow[i].image.style.width = currentTileRow[i].width + 'px';
-            currentTileRow[i].image.style.height = currentTileRow[i].height + 'px'; 
-            currentTileRow[i].image.style.float = 'left';
+            		
+			if (events.onResizeImage && events.onResizeImage(handler, currentTileRow[i])) {
+				
+			} else {
+		
+				currentTileRow[i].image.style.width = currentTileRow[i].width + 'px';
+				currentTileRow[i].image.style.height = currentTileRow[i].height + 'px'; 
+				currentTileRow[i].image.style.float = 'left';
+			}
         }
-
+		
+		
         portrait = 0;
         landscape = 0;
         currentTileRow = new Array();

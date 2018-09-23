@@ -1,10 +1,22 @@
 @echo off
 pushd "%~1"
 SET frontend=khelper.user.js
-SET background=khelper.bg.js
+SET background=\khelper.bg.js
+SET defaultProfile=env\profiles\joyreactor.js
 echo.>%frontend%
 :: for \r 
-for %%x in ("%~dp0\widget\kellyTooltip.js" "%~dp0\lib\KellyStorageManager.js" "%~dp0\widget\kellyTileGrid.js" "%~dp0\widget\kellyImageView.js"  "%~dp0\lib\kellyFavItemsHelper.js" "%~dp0\lib\kellyThreadWork.js" "%~dp0\lib\kellyGrabber.js" "%~dp0\lib\kellyTools.js" "%~dp0\init.js"  ) do (
+for %%x in (
+	"%~dp0\widget\kellyTooltip.js"  
+	"%~dp0\widget\kellyTileGrid.js" 
+	"%~dp0\widget\kellyImageView.js" 
+	"%~dp0\lib\KellyStorageManager.js"	 
+	"%~dp0\lib\kellyThreadWork.js" 
+	"%~dp0\lib\kellyGrabber.js" 
+	"%~dp0\lib\kellyTools.js"	
+	"%~dp0\lib\kellyFavItemsHelper.js"
+	"%~dp0\%defaultProfile%"
+	"%~dp0\init.js"  
+) do (
 
     @echo.>> %frontend%
     @echo.>> %frontend%

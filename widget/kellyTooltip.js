@@ -3,18 +3,22 @@ function kellyTooltip(cfg) {
 	var handler = this;
 	
 	this.message = '';
-	this.target = false;
+	this.target = false; // target or 'screen'
 	this.hideWidth = false;
-	this.offset = {left : 0, top : -20};
 	this.minWidth = false;
 	
 	this.closeByBody = false;
 	
 	this.self = false;
-	this.baseClass = '';
+	this.classGroup = 'tooltipster'; // prefix for all classes in tooltip container
+	this.selfClass = '';
 	
-	this.position = 'top';
-	this.positionCenter = true;
+	this.positionY = 'top';	
+	this.positionX = 'center';
+	this.ptypeX = '';
+	this.ptypeY = 'outside';
+	
+	this.offset = {left : 0, top : -20};
 	
 	this.removeOnClose = false;
 	this.closeButton = true;
@@ -28,11 +32,33 @@ function kellyTooltip(cfg) {
 	
 	this.updateCfg = function(cfg) {
 	
-		if (cfg.position && ['left', 'right', 'top', 'bottom'].indexOf(cfg.position) != -1) {
-			handler.position = cfg.position;
+		var updateContainerClass = false;
+		
+		if (cfg.positionY && ['top', 'bottom', 'center'].indexOf(cfg.positionY) != -1) {
+			handler.positionY = cfg.positionY;
+			updateContainerClass = true;
 		}
 		
-		var settings = ['target', 'hideWidth', 'offset', 'minWidth', 'closeByBody', 'baseClass', 'zIndex', 'positionCenter', 'closeButton'];
+		if (cfg.positionX && ['left', 'right', 'center'].indexOf(cfg.positionX) != -1) {
+			handler.positionX = cfg.positionX;
+			updateContainerClass = true;
+		}
+		
+		if (cfg.ptypeX && ['inside', 'outside'].indexOf(cfg.ptypeX) != -1) {
+			handler.ptypeX = cfg.ptypeX;
+			updateContainerClass = true;
+		}
+
+		if (cfg.ptypeY && ['inside', 'outside'].indexOf(cfg.ptypeY) != -1) {
+			handler.ptypeY = cfg.ptypeY;
+			updateContainerClass = true;
+		}
+		
+		if (handler.self && updateContainerClass) {
+			handler.self.className = getSelfClass();
+		}
+		
+		var settings = ['target', 'message', 'hideWidth', 'offset', 'minWidth', 'closeByBody', 'classGroup', 'selfClass', 'zIndex', 'closeButton', 'removeOnClose'];
 		
 		for (var i=0; i < settings.length; i++) {
 			var key = settings[i];
@@ -62,25 +88,35 @@ function kellyTooltip(cfg) {
         if (cfg.events && cfg.events.onMouseIn) {
             handler.userEvents.onMouseIn = cfg.events.onMouseIn;
         }
+		
+		return handler;
+	}
+	
+	function getSelfClass() {
+			
+		var className = handler.classGroup + '-wrap';
+			className += ' ' + handler.classGroup + '-y-' + handler.positionY;
+			className += ' ' + handler.classGroup + '-x-' + handler.positionX;
+		
+		if (handler.ptypeX) className += ' ' + handler.classGroup + '-' + handler.ptypeX;
+		if (handler.ptypeY) className += ' ' + handler.classGroup + '-' + handler.ptypeY;
+		if (handler.selfClass) className += ' ' + handler.selfClass;
+		
+		return className;
 	}
 	
 	function constructor(cfg) {		
 		
-		if (kellyTooltip.autoloadCss) kellyTooltip.loadDefaultCss();
+		if (kellyTooltip.autoloadCss) kellyTooltip.loadDefaultCss(kellyTooltip.autoloadCss);
 
 		if (handler.self) return;
 
 		handler.updateCfg(cfg);
 		
-		var className = 'tooltipster-base ';
-			className += 'tooltipster-' + handler.position;
-		
-		if (handler.baseClass) className += ' ' + handler.baseClass + '-base';
-			
 		handler.self = document.createElement('div');
-		handler.self.className = 'tooltipster-wrap ' + (handler.baseClass ? handler.baseClass : '');			
-		handler.self.innerHTML =  '<div class="' + className + '"><div class="tooltipster-content">' + handler.message;
-		handler.self.innerHTML += '<span class="tooltipster-close" style="cursor : pointer; display:' + (handler.closeButton ? 'block' : 'none') +'">+</span></div>';
+		handler.self.className = getSelfClass();			
+		handler.self.innerHTML =  '<div class="' + handler.classGroup + '-container"><div class="' + handler.classGroup + '-content">' + handler.message;
+		handler.self.innerHTML += '<span class="' + handler.classGroup + '-close" style="cursor : pointer; display:' + (handler.closeButton ? 'block' : 'none') +'">+</span></div>';
 		handler.self.innerHTML += '</div>';	
 		
 		handler.self.onmouseover = function (e) { 
@@ -93,7 +129,7 @@ function kellyTooltip(cfg) {
 		
 		document.body.appendChild(handler.self);	
 		
-		var closeButton = handler.self.getElementsByClassName('tooltipster-close')[0];
+		var closeButton = handler.self.getElementsByClassName(handler.classGroup + '-close')[0];
 			closeButton.onclick = function() {
 				
 				 handler.show(false); 
@@ -134,6 +170,7 @@ function kellyTooltip(cfg) {
 		
 		window.addEventListener('resize', events.onResize);
 		
+		return handler;
 	}
 	
 	function checkRequierdWidth() {
@@ -141,28 +178,38 @@ function kellyTooltip(cfg) {
 		else return true;
 	}
 			
-	this.setMessage = function(mess) {		
-		this.getContentContainer().innerHTML = handler.message;			
+	this.setMessage = function(mess) {	
+		
+		if (!handler.self) return;
+		
+		handler.message = mess;
+		this.getContent().innerHTML = mess;	
+
+		return handler;
 	}
 	
 	this.getCloseButton = function() {
-		return handler.self.getElementsByClassName('tooltipster-close')[0];
+		return handler.self.getElementsByClassName(handler.classGroup + '-close')[0];
+	}
+
+	this.getContent = function() {
+		return handler.self.getElementsByClassName(handler.classGroup + '-content')[0];
 	}
 	
 	this.getContentContainer = function() {
-		return handler.self.getElementsByClassName('tooltipster-content')[0];
+		return handler.self.getElementsByClassName(handler.classGroup + '-container')[0];
 	}
 	
 	this.show = function(show, contentId) {
 		if (!handler.self) return;
 		
-		handler.self.className = handler.self.className.replace('tooltipster-show', '').trim();
+		handler.self.className = handler.self.className.replace(handler.classGroup + '-show', '').trim();
 	
 		if (show) {			
 		
 			if (!checkRequierdWidth()) return;
 			
-			handler.self.className += ' tooltipster-show';
+			handler.self.className += ' ' + handler.classGroup + '-show';
 			if (handler.zIndex) handler.self.style.zIndex = handler.zIndex;
 			
 			handler.updatePosition();
@@ -182,7 +229,7 @@ function kellyTooltip(cfg) {
 	}
 	
 	this.isShown = function() {
-		return (handler.self && handler.self.className.indexOf('tooltipster-show') !== -1) ? handler.contentId : false;
+		return (handler.self && handler.self.className.indexOf(handler.classGroup + '-show') !== -1) ? handler.contentId : false;
 	}
 	
 	this.remove = function() {
@@ -196,10 +243,12 @@ function kellyTooltip(cfg) {
 		}
 	}
 
-	this.isChild = function(target) {
+	this.isChild = function(target, searchParent) {
 		var parent = target;
- 
-		while (parent && parent != handler.self) {
+		
+		if (!searchParent) searchParent = handler.self;
+		
+		while (parent && parent != searchParent) {
 			parent = parent.parentElement;
 		} 
 
@@ -207,8 +256,8 @@ function kellyTooltip(cfg) {
 	}
 	
 	this.getTarget = function() {
-	
-		if (!handler.target) return false;
+				
+		if (!handler.target || handler.target == 'screen') return false;
 		
 		if (typeof handler.target == 'string') {
 			var target = document.getElementById(handler.target);
@@ -221,36 +270,57 @@ function kellyTooltip(cfg) {
 	}
 	
 	this.updatePosition = function() {
+	
+		if (!handler.self) return false;
 		
 		var scrollTop = (window.pageYOffset || document.documentElement.scrollTop) - (document.documentElement.clientTop || 0);
+		var scrollLeft = (window.pageXOffset || document.documentElement.scrollLeft) - (document.documentElement.clientLeft || 0);
 		
-		// maybe some position modes will be added in future
-		// 
-		// var screenBoundEl = (document.compatMode === "CSS1Compat") ? document.documentElement : document.body; // clientHeight \ clientWidth
+		if (handler.getTarget()) {			
+			var pos = handler.getTarget().getBoundingClientRect();	
+		} else if (handler.target == 'screen') {
 		
-		if (!handler.getTarget()) {
-			
-			return;
-		}
+			var screenBoundEl = (document.compatMode === "CSS1Compat") ? document.documentElement : document.body;
+			var pos = {left : 0, top : 0, width : screenBoundEl.clientWidth, height : screenBoundEl.clientHeight};
+		
+		} else return false;
+		
+
 								
 		var toolTip = handler.self;
 		if (handler.minWidth) toolTip.style.minWidth = handler.minWidth + 'px';	
+				 
+		var toolTipBounds = toolTip.getBoundingClientRect();		
+		
+		var left = pos.left + handler.offset.left + scrollLeft;
+		var top = pos.top + handler.offset.top + scrollTop;
 				
-		var pos = handler.getTarget().getBoundingClientRect(); 
-		var toolTipBounds = toolTip.getBoundingClientRect();
-		
-		
-		var left = pos.left + handler.offset.left;
-		
-		if (handler.positionCenter) left += pos.width / 2 - toolTipBounds.width / 2;
-		
-		toolTip.style.left = left + 'px';
-		
-		if (handler.position == 'top') {
-			toolTip.style.top = (pos.top - toolTipBounds.height + scrollTop + handler.offset.top) + 'px';			
-		} else { // bottom
-			toolTip.style.top = (pos.top + pos.height + scrollTop - handler.offset.top) + 'px';			
+		if (handler.positionY == 'top' && handler.ptypeY == 'outside') {		
+			top = top - toolTipBounds.height; //  + handler.offset.top				
+		} else if (handler.positionY == 'top' && handler.ptypeY == 'inside') {		
+						
+		} else if (handler.positionY == 'bottom' && handler.ptypeY == 'outside') { 
+			top = top + pos.height; // - handler.offset.top
+		} else if (handler.positionY == 'bottom' && handler.ptypeY == 'inside') { 
+			top = top + pos.height - toolTipBounds.height; 
+		} else if (handler.positionY == 'center') {
+			top += pos.height / 2 - toolTipBounds.height / 2;
 		}
+		
+		if (handler.positionX == 'left' && handler.ptypeX == 'outside') {
+			left = left - toolTipBounds.width;			
+		} else if (handler.positionX == 'left' && handler.ptypeX == 'inside') {
+				
+		} else if (handler.positionX == 'right' && handler.ptypeX == 'outside' ) {
+			left = left + pos.width;			
+		} else if (handler.positionX == 'right' && handler.ptypeX == 'inside' ) {
+			left = left + pos.width - toolTipBounds.width;	
+		} else if (handler.positionX == 'center') {
+			left += pos.width / 2 - toolTipBounds.width / 2;
+		}
+		
+		toolTip.style.top = top + 'px';
+		toolTip.style.left = left + 'px';
 	}
 		
 	constructor(cfg);
@@ -258,24 +328,24 @@ function kellyTooltip(cfg) {
 
 /* static methods */
 
-kellyTooltip.autoloadCss = false;
+kellyTooltip.autoloadCss = false; // className
 kellyTooltip.defaultStyle = false;
 
-kellyTooltip.loadDefaultCss = function() {
+kellyTooltip.loadDefaultCss = function(className) {
 	
 	if (this.defaultStyle) return true;
 	
+	if (!className || className === true) className = 'tooltipster';
 	var border = 0;
 	
 	var css = '\
-		.tooltipster-wrap {\
+		.' + className + '-wrap {\
 			position : absolute;\
-			padding-top : 6px;\
 			opacity : 0;\
 			z-index : 60;\
 			pointer-events: none;\
 		}\
-		.tooltipster-base {\
+		.' + className + '-container {\
 			min-width: 210px;\
 			min-height: 52px;\
 			margin : 0;\
@@ -286,7 +356,7 @@ kellyTooltip.loadDefaultCss = function() {
 			border-radius : 4px;\
 			padding : 12px;\
 		}\
-		.tooltipster-close {\
+		.' + className + '-close {\
 			left: 0px;\
 			right: auto;\
 			position: absolute;\
@@ -299,11 +369,11 @@ kellyTooltip.loadDefaultCss = function() {
 			height: 25px;\
 			line-height: 25px;\
 		}\
-		.tooltipster-content {\
+		.' + className + '-content {\
 			text-align: left;\
 			font-size: 16px;\
 		}\
-		.tooltipster-show {\
+		.' + className + '-show {\
 			opacity : 1;\
 			pointer-events: auto;\
 		}\
