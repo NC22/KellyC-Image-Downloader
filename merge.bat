@@ -9,12 +9,12 @@ for %%x in (
 	"%~dp0\widget\kellyTooltip.js"  
 	"%~dp0\widget\kellyTileGrid.js" 
 	"%~dp0\widget\kellyImageView.js" 
-	"%~dp0\lib\kellyLocalization.js"	
+	"%~dp0\lib\kellyLoc.js"	
 	"%~dp0\lib\kellyStorageManager.js"	 
 	"%~dp0\lib\kellyThreadWork.js" 
 	"%~dp0\lib\kellyGrabber.js" 
 	"%~dp0\lib\kellyTools.js"	
-	"%~dp0\lib\kellyFavItemsHelper.js"
+	"%~dp0\lib\KellyFavItems.js"
 	"%~dp0\%defaultProfile%"
 	"%~dp0\init.js"  
 ) do (
@@ -31,7 +31,11 @@ for %%x in (
 )
 
 echo.>%background%
-for %%x in ( "%~dp0\lib\kellyTools.js" "%~dp0\lib\KellyDispetcher.js" "%~dp0\init_bg.js" ) do (
+for %%x in ( 
+    "%~dp0\lib\kellyTools.js" 
+    "%~dp0\lib\KellyDispetcher.js" 
+    "%~dp0\init.bg.js" 
+) do (
     
     @echo.>> %background%
     @echo.>> %background%

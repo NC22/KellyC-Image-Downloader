@@ -1,10 +1,8 @@
-// kellyTileGrid version 1.0.6 | 26.08.18 | Rubchuk Vladimir
+// kellyTileGrid version 1.0.7 | 20.09.18 | Rubchuk Vladimir
+// todo docs and examples
 
 function kellyTileGrid(cfg) {
     
-	// todo hide unloaded elements and resize that already added
-	// show last and fit by empty space 
-	
     var tilesBlock = false;
     var tileClass = 'image';
     var loadTimer = false;
@@ -28,22 +26,23 @@ function kellyTileGrid(cfg) {
 		fixed : false,
 		tmpBounds : false,
 		oversizedHeightRatio : 0.2,
+        
 		// внимание к длинным картинкам -oversized
 	};
     
     var handler = this;
     var events = { 
-		onGridUpdated : false, // after updateTileGrid method
+		onGridUpdated : false, // (handler) after updateTileGrid method
 		
-		getResizableElement : false, // элемент к которому в тайле будет применены атрибуты width \ height, по умолчанию сам тайл
-		getBoundElement : false, // элемент из которого можно получить данные о пропорция тайла (свойства data-width \ data-height) , по умолчанию сам тайл
+		getResizableElement : false, // (handler, tile) если метод задан - возвращать элемент к которому в тайле будет применены атрибуты width \ height, по умолчанию сам тайл
+		getBoundElement : false, // (handler, tile) если метод задан - возвращать элемент из которого можно получить данные о пропорция тайла (свойства data-width \ data-height) , по умолчанию сам тайл
 		
-		isBoundsLoaded : false, // is element loaded
+		isBoundsLoaded : false, // (handler, tile, boundEl) is element loaded
 		// getScaleElement
-		onBadBounds : false, // element is loaded, but bounds is unsetted or loaded with error 
-		onResize : false, // window resize
-		onLoadBounds : false, // some of unknown bounds element is ready
-		onResizeImage : false,
+		onBadBounds : false, // (handler, data[errorCode, error, tile, boundEl]) element is loaded, but bounds is unsetted or loaded with error 
+		onResize : false, // (handler) window resize
+		onLoadBounds : false, // (handler, boundEl, errorTriger) some of unknown bounds element is ready
+		onResizeImage : false, // (handler, tileResizedInfo[origHeight, origWidth, width, height])
 	};
 	
 	var imgEvents = {
@@ -62,13 +61,14 @@ function kellyTileGrid(cfg) {
     this.updateConfig = function(cfg) {
         
         if (!cfg) return false;
-        
-        if (cfg.tilesBlock) {
+                
+        if (typeof cfg.tilesBlock != 'undefined') {
         
             tilesBlock = cfg.tilesBlock;
             
             if (typeof tilesBlock == 'string') {
-                tilesBlock = document.getElementById(tilesBlock.trim());
+                var el = document.getElementById(tilesBlock.trim());
+                if (el) tilesBlock = document.getElementById(tilesBlock.trim());
             }
         }
         
@@ -109,7 +109,8 @@ function kellyTileGrid(cfg) {
     }
     
 	function onResize() {
-				
+		if (!tilesBlock) return;
+		
 		if (events.onResize && events.onResize(handler)) {
 			return true;
 		} 
@@ -119,23 +120,23 @@ function kellyTileGrid(cfg) {
 	
    function isBoundsLoaded(tile) {
    
-		var tileMainEl = handler.getBoundElement(tile);
-		if (!tileMainEl) return true;
+		var boundEl = handler.getBoundElement(tile);
+		if (!boundEl) return true;
 				
-		if (events.isBoundsLoaded && events.isBoundsLoaded(handler, tile, tileMainEl)) {
+		if (events.isBoundsLoaded && events.isBoundsLoaded(handler, tile, boundEl)) {
 			return true;
 		} 
 		
-   		if (tileMainEl.tagName != 'IMG') return true;  // text previews without image or some thing like that
-        if (tileMainEl.getAttribute('error')) return true;
-        if (tileMainEl.getAttribute('data-width')) return true;
+   		if (boundEl.tagName != 'IMG') return true;  // text previews without image or some thing like that
+        if (boundEl.getAttribute('error')) return true;
+        if (boundEl.getAttribute('data-width')) return true;
         
-        if (!tileMainEl.src) {
-            tileMainEl.setAttribute('error', '1');
+        if (!boundEl.src) {
+            boundEl.setAttribute('error', '1');
             return true;
         }
     
-        var loaded = tileMainEl.complete && tileMainEl.naturalHeight !== 0;
+        var loaded = boundEl.complete && boundEl.naturalHeight !== 0;
         return loaded;
     }
 	
@@ -156,18 +157,18 @@ function kellyTileGrid(cfg) {
 			
 	}
 	
-	function onLoadBounds(el, state) {
+	function onLoadBounds(boundEl, state) {
 		
-		if (el.tagName != 'IMG' && (!el.naturalWidth || !el.naturalHeight)) {
+		if (boundEl.tagName != 'IMG' && (!boundEl.naturalWidth || !boundEl.naturalHeight)) {
 			state = 'error';
 		}
 		
-		if (events.onLoadBounds && events.onLoadBounds(handler, el, state)) {
+		if (events.onLoadBounds && events.onLoadBounds(handler, boundEl, state)) {
 			return true;
 		} 
 		
 		if (state == 'error') {
-			el.setAttribute('error', '1');
+			boundEl.setAttribute('error', '1');
 		} else {
 			
 		}
@@ -219,8 +220,7 @@ function kellyTileGrid(cfg) {
 			if (boundEl.tagName == 'IMG' && tiles[i].getAttribute('data-load-eventInit')) {
 				
 				boundEl.removeEventListener('error', imgEvents.onError);
-				boundEl.removeEventListener('load',  imgEvents.onSuccess);
-				
+				boundEl.removeEventListener('load',  imgEvents.onSuccess);				
 				tiles[i].setAttribute('data-load-eventInit', '0');
 			}
 		}
@@ -228,7 +228,7 @@ function kellyTileGrid(cfg) {
 		
 	this.stopLoad = function() {
 	
-		// обрываем загрузку если что то не успело загрузится. При сценариях - смена страницы \ закрытие блока с тайлами и т.п.
+		// останавливаем загрузку если что-то не успело загрузится. При сценариях - смена страницы \ закрытие блока с тайлами и т.п.
    
         if (!tilesBlock) return false;
         for (var i = 0; i < tiles.length; i++) {
@@ -315,7 +315,7 @@ function kellyTileGrid(cfg) {
 		
 			landscape = 0;
 			portrait = 0;
-			currentTileRow = new Array();        
+			currentTileRow = [];        
 			
 			var screenSize = tilesBlock.getBoundingClientRect().width; 
 			
@@ -323,7 +323,7 @@ function kellyTileGrid(cfg) {
 			if (screenSize < requiredWidth) requiredWidth = screenSize;
 
 			if (!requiredWidth) {
-				console.log('fail to get required width by block');
+				console.log('fail to get required width by block. Possible block is hidden');
 				console.log(tilesBlock);
 				return false;
 			}
@@ -354,7 +354,7 @@ function kellyTileGrid(cfg) {
 					}
 					
 					if (!tileMainEl) {							
-						alternativeBounds = onBadBounds({error_code : 1, error : 'updateTileGrid getBoundElement fail', tile : tiles[i], mainElement : false});						
+						alternativeBounds = onBadBounds({errorCode : 1, error : 'updateTileGrid getBoundElement fail', tile : tiles[i], boundEl : false});						
 						if (!alternativeBounds){						
 							continue;
 						}
@@ -362,7 +362,7 @@ function kellyTileGrid(cfg) {
 					
 					if (tileMainEl.getAttribute('error')) {
 					
-						alternativeBounds = onBadBounds({error_code : 2, error : 'updateTileGrid error during load image', tile : tiles[i], mainElement : tileMainEl});						
+						alternativeBounds = onBadBounds({errorCode : 2, error : 'updateTileGrid error during load image', tile : tiles[i], boundEl : tileMainEl});						
 						if (!alternativeBounds) {						
 							continue;
 						}
@@ -382,7 +382,7 @@ function kellyTileGrid(cfg) {
 					
 					if (!imageInfo.width || imageInfo.width < 0) {
 					
-						alternativeBounds = onBadBounds({error_code : 3, error : 'no width \ height', tile : tiles[i],	mainElement : tileMainEl});						
+						alternativeBounds = onBadBounds({errorCode : 3, error : 'no width \ height', tile : tiles[i],	boundEl : tileMainEl});						
 						if (!alternativeBounds) {
 						
 							continue;
@@ -418,7 +418,7 @@ function kellyTileGrid(cfg) {
 					imageInfo.width = 0;
 					imageInfo.height = 0;
 					
-					alternativeBounds = onBadBounds({error_code : 4, error : 'oversized', tile : tiles[i],	mainElement : tileMainEl});						
+					alternativeBounds = onBadBounds({errorCode : 4, error : 'oversized', tile : tiles[i],	boundEl : tileMainEl});						
 					if (!alternativeBounds) {
 					
 						continue;
@@ -444,8 +444,8 @@ function kellyTileGrid(cfg) {
 				currentTileRow.push(imageInfo);
 				
 				if (!rules.fixed) {
-					
-					if (i + rules.min >= tiles.length) continue; // dont keep last one alone
+                    if (currentTileRow.length < rules.min ) continue;
+					// if (i + rules.min >= tiles.length) continue; // keep collect last elements
 					
 					var currentRowResultHeight = getExpectHeight();
 					
@@ -479,7 +479,7 @@ function kellyTileGrid(cfg) {
 						
 						
 						var showAsUnfited = currentTileRow.length >= rules.unfitedExtendMin ? false : true;
-						if (rules.fixed) showAsUnfited = false;
+						// if (rules.fixed) showAsUnfited = false;
 						
 						resizeImagesRow(showAsUnfited);
 					}
@@ -490,11 +490,11 @@ function kellyTileGrid(cfg) {
 				}
 			}
 
-			var clear = tilesBlock.getElementsByClassName('kelly-clear-both');
+			var clear = tilesBlock.getElementsByClassName(tileClass + '-clear-both');
 			if (clear.length) clear[0].parentNode.appendChild(clear[0]);
 			else {
 				clear = document.createElement('div');
-				clear.className = 'kelly-clear-both';
+				clear.className = tileClass + '-clear-both';
 				clear.setAttribute('style', 'clear : both;');
 				tilesBlock.appendChild(clear);                        
 			}
@@ -511,7 +511,7 @@ function kellyTileGrid(cfg) {
             
 			// масштабируем до нужной высоты весь набор изображений и смотрим сколько получилось по ширине в сумме
             
-			width += parseInt(getResizedInfo(rowHeight, {width : currentTileRow[i].width, 'height' : currentTileRow[i].height}, 'height').width);            
+			width += parseInt(getResizedInfo(rowHeight, {width : currentTileRow[i].width, height : currentTileRow[i].height}, 'height').width);            
         }
 		
 		return width;
@@ -519,7 +519,7 @@ function kellyTileGrid(cfg) {
 	
     function getExpectHeight() {
         
-        return getResizedInfo(requiredWidth, {width : getCurrentRowWidth(), 'height' : rowHeight}, 'width').height; // подгоняем к треуемой ширине
+        return getResizedInfo(requiredWidth, {width : getCurrentRowWidth(), height : rowHeight}, 'width').height; // подгоняем к треуемой ширине
     }
     
 	// if some of the items info contain zero values, can return NaN for all row items

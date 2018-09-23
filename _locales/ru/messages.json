@@ -14,8 +14,14 @@
     "apply":{  
         "message":"Применить изменения"
     },
+    "close":{  
+        "message":"Закрыть"
+    },
     "cancel":{  
         "message":"Отменить"
+    },    
+    "create":{  
+        "message":"Создать"
     },
     "cat_add":{  
         "message":"Добавить категорию"
@@ -39,7 +45,7 @@
         "message":"Название новой категории"
     },
     "cat_new_cat_name":{  
-        "message":"Название новой категории"
+        "message":"Новая категория"
     },
     "cat_no_cat":{  
         "message":"Без категории"
@@ -70,9 +76,18 @@
     },
     "cgrid_tiles_header":{  
         "message":"Настройки сетки элементов"
+    },   
+    "cgrid_type":{  
+        "message":"Режим отображения публикаций"
+    },
+    "cgrid_type_dynamic":{  
+        "message":"Динамическое количество в строке"
+    },
+    "cgrid_type_fixed":{  
+        "message":"Фиксированое количество в строке"
     },
     "change":{  
-        "message":"Изменить"
+        "message":"Применить"
     },
     "comments":{  
         "message":"Комменты"
@@ -128,17 +143,137 @@
     "download_tag_filter":{  
         "message":"Фильтровать публикации по списку тегов"
     },
-    "extDescription":{  
+    "download_createc_1":{  
+        "message":"Если публикация содержит один из перечисленных в поле тегов, то к публикации будет добавлена соответствующая категория"
+    },
+    "download_createc_by_tag":{  
+        "message":"Автоматически создавать категории для тегов"
+    },
+    "download_started_cancel":{  
+        "message":"Загрузка... (Отменить)"
+    },
+    "ext_description":{  
         "message":"Сохраняйте понравившиеся публикации на ресурсах локально."
     },
-    "extName":{  
-        "message":"KellyC Favourites"
+    "ext_name":{  
+        "message":"KellyC Favorites"
+    },     
+    "ext_ver":{  
+        "message":"Версия"
+    }, 
+    "folder":{  
+        "message":"Директория"
+    },
+    "fast_save_enabled":{  
+        "message":"Показывать кнопку быстрого сохранения для публикаций"
+    }, 
+    "fast_download":{  
+        "message":"Быстрое сохранение"
+    },    
+    "fast_save_uniq":{  
+        "message":"Сохранять с другим названием"
+    },   
+    "fast_save_overwrite":{  
+        "message":"Перезаписывать при совпадении имен"
+    }, 
+    "fast_save_to":{  
+        "message":"Сохранять в папку"
+    }, 
+    "fast_save_check":{  
+        "message":"Проверять, был ли уже скачан файл"
+    }, 
+    "fast_save_check_notice":{  
+        "message":"Если файл уже скачан ранее, к кнопке сохранения будет добавлен зеленый маркер (если к посту будут добавлены теги, индикация пропадет)"
     },
     "go_to_comment":{  
         "message":"Показать комментарий"
     },
     "go_to_publication":{  
         "message":"Показать пост"
+    },
+	"grabber_common_folder":{  
+        "message":"Основная директория"
+    },
+	"grabber_selected_items":{  
+        "message":"Элементы"
+    },
+	"grabber_source":{  
+        "message":"Оригинал"
+    },
+	"grabber_preview":{  
+        "message":"Превью"
+    },
+	"grabber_hide_extended":{  
+        "message":"Скрыть расширенные настройки"
+    },	
+	"grabber_show_extended":{  
+        "message":"Показать расширенные настройки"
+    },
+	"grabber_name_template":{  
+        "message":"Шаблон названия"
+    },
+	"grabber_threads_num":{  
+        "message":"Количество потоков"
+    },	
+	"grabber_interval":{  
+        "message":"Интервал загрузки (сек)"
+    },	
+	"grabber_start":{  
+        "message":"Начать выгрузку"
+    },	
+	"grabber_stop":{  
+        "message":"Остановить загрузку"
+    },	
+	"grabber_canceling":{  
+        "message":"Остановка..."
+    },
+	"grabber_timeout":{  
+        "message":"Таймаут при долгом выполнении запроса (сек)"
+    },	
+	"grabber_exclude_lowres":{  
+        "message":"Исключать изображения с низким разрешением"
+    },
+	"grabber_save_as_json":{  
+        "message":"Скачать файл данных"
+    },	
+	"grabber_save_as":{  
+        "message":"Сохранить как"
+    },	
+	"grabber_save_log":{  
+        "message":"Скачать лог"
+    },	
+	"grabber_state_ready":{  
+        "message":"Загрузка завершена"
+    },
+	"grabber_state_loading":{  
+        "message":"Загрузка..."
+    },
+	"grabber_state_wait":{  
+        "message":"Ожидает в очереди"
+    },
+	"grabber_state_inlist":{  
+        "message":"В списке"
+    },	
+	"grabber_state_error":{  
+        "message":"Ошибка загрузки"
+    },
+	"grabber_name_template_help":{  
+        "message":"Укажите шаблон названия файла включая путь относительно основной директории в <b>Загрузках</b> браузера<br><br>Можно использовать переменные :<br>"
+    },
+	"grabber_name_template_help_1":{  
+        "message":"<b>#category_1#</b>, <b>#category_2#</b>, <b>#category_N#</b> - название 1, 2 и N категории элемента избранного (по приоритету)<br>"
+    },
+	"grabber_name_template_help_2":{  
+        "message":"<b>#filename#</b> - оригинальное название файла<br><b>#id#</b> - уникальный идентификатор в текущем хранилище<br>"
+    },
+	"grabber_name_template_help_3":{  
+        "message":"<b>#name#</b> - подпись<br>Примеры<br>\"<i>#filename#</i>\" - скачать файл в директорию загрузки с исходным названием  (например <b>Загрузки</b>/dog.jpg)<br>"
+    },
+	"grabber_name_template_help_4":{  
+        "message":"\"<i>#category_1#/#filename#</i>\" - скачать файл с исходным названием поместив его в дерикторию с названием его основной категории (например <b>Загрузки</b>/Dogs/dog.jpg)<br><br>"
+    },    
+    "hide_soc":{  
+        "message":"Скрывать кнопки соц. сетей из публикаций"
     },
     "ignore_comments":{  
         "message":"Игнорировать комментарии"
@@ -179,8 +314,17 @@
     "items":{  
         "message":"Публикации"
     },
+    "item_preview_hide":{  
+        "message":"Скрыть превью"
+    },
+    "item_preview_show":{  
+        "message":"Показать превью"
+    },
     "fav_list_empty":{  
         "message":"Список избранных публикаций пуст"
+    },
+    "loading":{  
+        "message":"Загрузка"
     },
     "language":{  
         "message":"Язык"
@@ -206,6 +350,9 @@
     "options_main":{  
         "message":"Основные настройки"
     },
+    "options_fav_add":{  
+        "message":"Добавление в избранное"
+    },     
     "options_saved":{  
         "message":"Настройки сохранены"
     },
@@ -229,6 +376,9 @@
     },
     "removed_cat":{  
         "message":"Удаленная категория"
+    },    
+    "reset":{  
+        "message":"Сбросить"
     },
     "save":{  
         "message":"Сохранить"
@@ -236,10 +386,70 @@
     "selection_empty":{  
         "message":"Выборка пуста"
     },
+    "select":{  
+        "message":"Выбрать"
+    },
     "source":{  
         "message":"оригинал"
     },
     "storage":{  
         "message":"Данные"
+    },
+    "storage_selected":{  
+        "message":"База данных выбрана"
+    },   
+    "storage_add_new":{  
+        "message":"Добавить новую базу"
+    },
+    "storage_load_from_file":{  
+        "message":"Загрузить из файла"
+    },    
+    "storage_name":{  
+        "message":"Идентификатор базы (только символы A-Z, 1-9, _)"
+    },
+    "storage_create_cancel_if_exist":{  
+        "message":"Отменить если уже существует"
+    },
+    "storage_manager_total":{  
+        "message":"Общий размер данных"
+    },
+    "storage_type_notice":{  
+        "message":"<b>Тип хранения менять только при необходимости</b>. При изменении типа хранения данных данные будут считываться из другого места, соответственно текущий список данных перестанет быть доступен"
+    },    
+    "storage_type":{  
+        "message":"Тип хранения данных"
+    },  
+    "storage_manage":{  
+        "message":"Управление данными"
+    },   
+    "storage_delete":{  
+        "message":"Удалить базу данных"
+    },    
+    "storage_empty_name":{  
+        "message":"Введите название базы данных"
+    },     
+    "storage_beasy":{  
+        "message":"Дождитесь загрузки списка баз данных"
+    },    
+    "storage_create_already_exist":{  
+        "message":"Базы данных уже существует"
+    },     
+    "storage_create_ok":{  
+        "message":"База данных добавлена"
+    },     
+    "storage_create_e":{  
+        "message":"Ошибка добавления базы данных"
+    },   
+    "storage_create_e2":{  
+        "message":"Ошибка парсинга структурированных данных"
+    },  
+    "sync_by_add":{  
+        "message":"Дублировать в основное избранное пользователя, если авторизован"
+    },        
+    "tip":{  
+        "message":"подсказка"
+    },  
+    "kb":{  
+        "message":"кб"
     }
 }

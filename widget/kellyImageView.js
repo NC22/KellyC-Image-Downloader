@@ -1,5 +1,8 @@
-// v 1.0.5 26.08.18
+// v 1.0.6 22.09.18
 // data-ignore-click
+// todo include pixel ratio detection
+// https://stackoverflow.com/questions/1713771/how-to-detect-page-zoom-level-in-all-modern-browsers
+// add user event onButtonsShow
 
 function KellyImgView(cfg) {
     
@@ -8,12 +11,12 @@ function KellyImgView(cfg) {
     
     var beasy = false;
     
-    var image = false; // current loaded image, false if not show (getCurrentImage().image)
+    var image = false; // current loaded image, false if not shown (getCurrentImage().image)
     var imageBounds = false; 
 	
     var selectedGallery = 'default'; // inherit by opened source
    
-    var idGroup = 'kellyImgView'; // DOM viewer class base name
+    var commClassName = false; // DOM viewer class \ id base name
    
     var block = false;
     var fadeTime = 500; // not synced with css
@@ -47,17 +50,31 @@ function KellyImgView(cfg) {
     var swipe = false;	
 	var bodyLockCss = false;
 	var lockMoveMethod = 'lockMove'; // hideScroll (position : fixed элементы все равно сдвигаются если привязаны к правой стороне) | lockMove (блокирует движение но скроллбар остается)
- 
-	// transition opacity глючит в некоторых браузерах, дать возможность отключить
-    // todo при переинициализации базовых кнопок добавить возможность их отключать и выводить только конкретные
-    // метод для удаления кнопок
-    
+   
     function constructor(cfg) {
         handler.updateConfig(cfg);
     }
     
+    function getBlock() {
+    
+        if (typeof block == 'string') {
+            var el = document.getElementById(block.trim());
+            if (el) block = el;
+        }
+        
+        return block ? block : false;
+    }
+    
     this.updateConfig = function(cfg) {
-        if (cfg.idGroup) idGroup = cfg.idGroup;
+        
+        if (cfg.className) {
+            commClassName = cfg.className;
+        }
+        
+        if (cfg.viewerBlock) {
+            block = cfg.viewerBlock;            
+        }
+        
         if (cfg.userEvents) {
          
             if (cfg.userEvents.onBeforeGalleryOpen) {
@@ -96,8 +113,8 @@ function KellyImgView(cfg) {
 	function showBodyScroll(show) {
 		var body = document.body;
 		
-		body.className = body.className.replace(idGroup + '-margin', '').trim();
-		body.className = body.className.replace(idGroup + '-lock', '').trim();
+		body.className = body.className.replace(commClassName + '-margin', '').trim();
+		body.className = body.className.replace(commClassName + '-lock', '').trim();
 		
 		if (show) {
 
@@ -121,7 +138,7 @@ function KellyImgView(cfg) {
 			
 			head.appendChild(bodyLockCss);
 			
-			css = '.' + idGroup + '-margin {';
+			css = '.' + commClassName + '-margin {';
 			css += 'margin-right : ' + diff + 'px;';
 			css += '}';
 			
@@ -131,7 +148,7 @@ function KellyImgView(cfg) {
 			  bodyLockCss.appendChild(document.createTextNode(css));
 			}
 			
-			body.className += ' ' + idGroup + '-lock ' + idGroup + '-margin';
+			body.className += ' ' + commClassName + '-lock ' + commClassName + '-margin';
 		}
 
 		return true;
@@ -157,6 +174,7 @@ function KellyImgView(cfg) {
     this.getCurrentState = function() {	
 		
         return { 
+            block : getBlock(),
 			image : image, 
 			gallery : selectedGallery, 
 			index : cursor,
@@ -171,13 +189,13 @@ function KellyImgView(cfg) {
         for (var k in buttons){
             if (typeof buttons[k] !== 'function') {
 			
-            	buttons[k].className = buttons[k].className.replace(idGroup + '-btn-hidden', '').trim();
+            	buttons[k].className = buttons[k].className.replace(commClassName + '-btn-hidden', '').trim();
 				
 				if ((k == 'prev' || k == 'next') && (!images[selectedGallery] || images[selectedGallery].length <= 1)) {
-					buttons[k].className += ' ' + idGroup + '-btn-hidden';
+					buttons[k].className += ' ' + commClassName + '-btn-hidden';
 					continue;
 				} else if (hide) {
-					buttons[k].className += ' ' + idGroup + '-btn-hidden';
+					buttons[k].className += ' ' + commClassName + '-btn-hidden';
                 }
             }
         }        
@@ -187,21 +205,21 @@ function KellyImgView(cfg) {
     
     this.hideLoader = function(hide) {
                 
-        var loader = document.getElementById(idGroup + '-loader');
+        var loader = getEl('loader');
         if (loader) {
-            if (hide) loader.style.display = 'none'; 
-            else loader.style.display = 'block';   
+            if (hide) addClass(loader, 'loader-hidden');
+            else deleteClass(loader, 'loader-hidden');
         }
     }
     
     this.addButton = function(innerHTML, index, onclick, addition) {
-        block = document.getElementById(idGroup);
-        if (!block) {        
+        
+        if (!getBlock()) {        
             console.log('cant create buttons, main block not ready');
             return false;
         }
         
-        var w,h,additionStyle,className;
+        var w, h, additionStyle, className;
         
         if (addition) {
             if (addition.w) w = parseInt(addition.w);
@@ -211,7 +229,7 @@ function KellyImgView(cfg) {
         }
         
         if (!additionStyle) additionStyle = '';
-        if (!className) className = idGroup + '-btn ' + idGroup + '-btn-' + index ;
+        if (!className) className = commClassName + '-btn ' + commClassName + '-btn-' + index ;
         
 		if (w) additionStyle += 'width : ' + w + 'px;';
         if (h) additionStyle += 'height : ' + h + 'px;';
@@ -240,7 +258,7 @@ function KellyImgView(cfg) {
     }
 
     this.updateButtonsPos = function(pos) {
-    
+        
         if (!image) return false;
 		// console.log(window.getComputedStyle(image));
 		
@@ -294,6 +312,25 @@ function KellyImgView(cfg) {
         }
     }
     
+    function deleteClass(el, name) {        
+        if (el && el.className.indexOf(commClassName + '-' + name) != -1) {
+            el.className = el.className.replace(commClassName + '-' + name, '').trim();
+        }
+    }
+    
+    function addClass(el, name) {
+        if (el && el.className.indexOf(commClassName + '-' + name) == -1) {
+            el.className += ' ' + commClassName + '-' + name;
+        }
+    }
+    
+    function getEl(name) {
+        if (!getBlock()) return false;
+        var pool = block.getElementsByClassName(commClassName + '-' + name);        
+        if (pool && pool.length) return pool[0];
+        else return false;
+    }
+    
     function showMainBlock(show) {
            
 		if (show && blockShown) return;
@@ -319,8 +356,7 @@ function KellyImgView(cfg) {
                 handler.removeEventListener(window, 'wheel', '_scroll');
             }
             
-        }
-            
+        }            
         
         if (show) {
         
@@ -331,9 +367,14 @@ function KellyImgView(cfg) {
 			}
 			
             blockShown = true;
-            block = document.getElementById(idGroup);        
-            block.style.opacity = '1';
-            block.style.visibility = 'visible';        
+            
+            if (!getBlock()) {
+                return;
+            }
+            
+            addClass(block, 'active');
+            deleteClass(block, 'fade');
+            
             block.onclick = function(e) { 
             
                 if (e.target != this) return false;
@@ -386,16 +427,17 @@ function KellyImgView(cfg) {
 					disableMoveContainer(false);
 				} 
 				
-                block.style.visibility = 'hidden';                 
+                deleteClass(block, 'active');
+                deleteClass(block, 'fade');              
                 handler.removeEventListener(window, "scroll", 'img_view_');
 				blockShown = false;
 				
             }, fadeTime);  
             
             
+            addClass(block, 'fade');
             handler.removeEventListener(window, "resize", 'image_update_');
             handler.removeEventListener(document.body, "keyup", 'next_image_key');
-            block.style.opacity = '0';
         }     
     }
     
@@ -413,7 +455,7 @@ function KellyImgView(cfg) {
         
         beasy = true;
         scale = 1;
-        console.log('load image');
+        // console.log('load image');
 		
 		if (userEvents.onBeforeGalleryOpen) {
             userEvents.onBeforeGalleryOpen(handler, galleryItemPointer, galleryData);
@@ -452,9 +494,7 @@ function KellyImgView(cfg) {
         image.src = getImageUrlFromPointer(galleryItemPointer);  
         
         if (isImgLoaded(image)) handler.imageShow();
-        else image.onload = function() { handler.imageShow(); return false; }
-		
-		
+        else image.onload = function() { handler.imageShow(); return false; }	
     }
 	
     this.getClientBounds = function() {
@@ -669,15 +709,10 @@ function KellyImgView(cfg) {
     this.imageShow = function() {
     
         beasy = false;
-        var imgContainer = document.getElementById(idGroup + '-img');
-            
-        var loader = document.getElementById(idGroup + 'loader');
         
-        if (loader)
-            loader.style.display = 'none';
-      
-       
-        
+        var imgContainer = getEl('img'); 
+
+        handler.hideLoader(true);
         handler.updateSize(false);
         
         if (userEvents.onBeforeShow) {
@@ -685,9 +720,7 @@ function KellyImgView(cfg) {
         }
         
         imgContainer.innerHTML = '';
-        
         imgContainer.appendChild(image);
-        
   
         image.onmousedown = function(e) {
         
@@ -771,7 +804,7 @@ function KellyImgView(cfg) {
                 if (image.parentNode) image.parentNode.removeChild(image);
             }
            
-            var imgContainer = document.getElementById(idGroup+ '-img'); 
+            var imgContainer = getEl('img'); 
                 imgContainer.innerHTML = '';
             
 			if (userEvents.onClose) {
@@ -789,10 +822,8 @@ function KellyImgView(cfg) {
             
             imageBounds = false;
             beasy = true; 
-                   
-            var loader = document.getElementById(idGroup + '-loader');
-            if (loader)
-                loader.style.display = 'none';
+            
+            handler.hideLoader(true);
             
             setTimeout(function() { handler.cancelLoad(2);}, fadeTime);  
         }
@@ -802,9 +833,9 @@ function KellyImgView(cfg) {
     // update image gallery viewer block position 
     
     this.updateBlockPosition = function() {
-         if (window.getComputedStyle(block).position !== 'fixed') {
+        if (blockShown && window.getComputedStyle(block).position !== 'fixed') {
             block.style.top = (window.pageYOffset || document.documentElement.scrollTop) - (document.documentElement.clientTop || 0) + 'px'; // getScrollTop
-         }
+        }
     }
 
     
@@ -995,10 +1026,6 @@ function KellyImgView(cfg) {
     }
     
     this.addEventListner = function(object, event, callback, prefix) {
-        if (typeof object !== 'object') {
-            object = document.getElementById(object);
-        }
-
         if (!object)
             return false;
         if (!prefix)
@@ -1016,10 +1043,6 @@ function KellyImgView(cfg) {
     }
 
     this.removeEventListener = function(object, event, prefix) {
-        if (typeof object !== 'object') {
-            object = document.getElementById(object);
-        }
-
         if (!object)
             return false;
         if (!prefix)

@@ -1,5 +1,4 @@
-	// !@ - not required by FavItemsHelper object methods
-	
+	// !@ - not required by FavItems object methods	
 	// default profile object, move to separate file in future
 	// todo move formatcomment \ formatpost
 	
@@ -11,19 +10,32 @@
         profile : 'joyreactor',
         mainDomain : 'joyreactor.cc',
         favPage : '/user/__USERNAME__/favorite/__PAGENUMBER__',
-        mainContentContainer : 'contentinner',
-        mainContainer : 'container',
-		sideBlock : 'sidebar',
+		
 		publication : 'postContainer',
 		menu : 'submenu',
+		
 		hostClass : window.location.host.split(".").join("_"),
 		
 		actionVar : 'dkl_pp', 
+		containers : false,
 
 		isNSFW : function() {
 			var sfw = KellyTools.getElementByClass(document, 'sswither');
 			if (sfw && sfw.className.indexOf('active') != -1) return false;
 			else return true;
+		},
+		
+		getMainContainers : function() {
+			
+			if (!this.containers) {
+				this.containers = {
+					body : document.getElementById('container'),
+					content : document.getElementById('contentinner'),
+					sideBlock : document.getElementById('sidebar'),
+				};
+			}
+			
+			return this.containers;
 		},
        
         /* @! */        
@@ -106,6 +118,8 @@
 				
 				if (image) data.push(image);
 				
+                // todo test assoc main image with gifs
+                
 				if (data.length == 1 && image && mainImage && image.indexOf(this.getImageDownloadLink(mainImage.url, false, true)) != -1) {
 					this.fav.setSelectionInfo('dimensions', mainImage);
 				} else if (data.length == 1 && image && mainImage) {
@@ -146,8 +160,8 @@
 			}
 			
 			try {
-				var schemaOrg = KellyTools.getElementByTag(publication, 'SCRIPT');
-			
+				var schemaOrg = publication.querySelector('script[type="application/ld+json"]');
+                
 				if (schemaOrg) schemaOrg = schemaOrg.textContent.trim();
 				if (schemaOrg) schemaOrg = validateTextContent(schemaOrg);
 				
@@ -247,33 +261,66 @@
 			
 			if (!sideBarWrap || sideBarWrap.className.indexOf('hidden') !== -1) return false;
         
-			var sideBlock = document.getElementById(this.sideBlock);
+			var sideBlock = this.getMainContainers().sideBlock;
 			var minTop = 0;
 			
 			if (sideBlock) {
 				minTop = sideBlock.getBoundingClientRect().top;
 			}
-			
-			// screen.height / 2  - (sideBarWrap.getBoundingClientRect().height / 2) - 24
+                        
 			var modalBoxTop = 24;
+			
+            var filters = KellyTools.getElementByClass(sideBarWrap, this.className + '-FiltersMenu'); 
+            var filtersBlock = KellyTools.getElementByClass(sideBarWrap, this.className + '-FiltersMenu-container');
+                        
+            if (filters && filters.offsetHeight > 440 && filters.className.indexOf('calculated') == -1) {
+                
+                filtersBlock.style.maxHeight = '0';
+				filtersBlock.style.overflow = 'hidden';
+                
+                var modalBox = KellyTools.getElementByClass(document, this.className + '-ModalBox-main');						
+                    modalBox.style.minHeight = '0';
+
+                var modalBoxHeight = modalBox.getBoundingClientRect().height;       
+                
+                var viewport = KellyTools.getViewport();
+                if (viewport.screenHeight < modalBoxHeight + filters.offsetHeight + modalBoxTop) {
+                    filtersBlock.style.maxHeight = (viewport.screenHeight - modalBoxHeight - modalBoxTop - 44 - modalBoxTop) + 'px';
+                    filtersBlock.style.overflowY = 'scroll';
+
+                } else {
+                        
+                    filtersBlock.style.maxHeight = 'none';
+                    filtersBlock.style.overflow = 'auto';
+                }
+                
+                filters.className += ' calculated';
+            }
+            
+			// screen.height / 2  - (sideBarWrap.getBoundingClientRect().height / 2) - 24
 			
 			if (lock || modalBoxTop < minTop) modalBoxTop = minTop;
 			
-			var scrollTop = (window.pageYOffset || document.documentElement.scrollTop)  - (document.documentElement.clientTop || 0);
-			
+			var scrollTop = KellyTools.getScrollTop();
+			var scrollLeft = KellyTools.getScrollLeft();
+            
 			sideBarWrap.style.top = modalBoxTop + scrollTop  + 'px';
 			
-			var offsetLeft = 0;
+			var widthBase = 0;
 			
 			if (window.location.host.indexOf('old.') == -1) {
-				offsetLeft = 24;
+				widthBase = 24;
 			}
 			
 			if (sideBlock) {
 				sideBarWrap.style.right = 'auto';
-				sideBarWrap.style.left = Math.round(sideBlock.getBoundingClientRect().left) + 'px';
-				sideBarWrap.style.width = Math.round(sideBlock.getBoundingClientRect().width) + offsetLeft + 'px';
-			}		
+				sideBarWrap.style.left = Math.round(sideBlock.getBoundingClientRect().left + scrollLeft) + 'px';
+				sideBarWrap.style.width = Math.round(sideBlock.getBoundingClientRect().width + widthBase) + 'px';
+			} else {
+                sideBarWrap.right = '0px';
+            }		
+            
+            // tagList
 		},
 		
 		getStaticImage : function(source) {
@@ -387,7 +434,7 @@
 		},
         
         /* @! */
-        onInitCss : function() {
+        onExtensionReady : function() {
                      
 			if (window.location.host == this.mainDomain || window.location.host.indexOf('old.') == -1) {
 
@@ -435,9 +482,26 @@
             
 			this.fav.showNativeFavoritePageInfo();
         },
+        
+        syncFav : function(publication, inFav) {
+        
+            var body = this.getMainContainers().body;            
+            if (!body) return;
+            
+            var item = publication.querySelector('.favorite_link');
+            if (!item) return;
+            
+            
+            if (inFav && item.className.indexOf(' favorite') == -1) {                
+                KellyTools.dispatchEvent(item);
+            } else if (!inFav && item.className.indexOf(' favorite') != -1) {                
+                KellyTools.dispatchEvent(item);
+            }
+        },
 		
         /* @! */
 		onPageReady : function() {
+			
 			return false;
 		},
 		

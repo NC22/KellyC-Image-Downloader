@@ -14,8 +14,14 @@
     "apply":{  
         "message":"Apply"
     },
+    "close":{  
+        "message":"Close"
+    },
     "cancel":{  
         "message":"Cancel"
+    },
+    "create":{  
+        "message":"Create"
     },
     "cat_add":{  
         "message":"Add category"
@@ -54,7 +60,7 @@
         "message":"Fixed amount of elements per row"
     },
     "cgrid_max_diff":{  
-        "message":"Max row height difference (percent)"
+        "message":"Max row height difference"
     },
     "cgrid_max_row_height":{  
         "message":"Max row height"
@@ -70,6 +76,15 @@
     },
     "cgrid_tiles_header":{  
         "message":"Image grid options"
+    },
+    "cgrid_type":{  
+        "message":"Grid show mode"
+    },
+    "cgrid_type_dynamic":{  
+        "message":"Dynamic number of elements per row"
+    },
+    "cgrid_type_fixed":{  
+        "message":"Fixed number of elements per row"
     },
     "change":{  
         "message":"Change"
@@ -128,17 +143,137 @@
     "download_tag_filter":{  
         "message":"Tag filter"
     },
-    "extDescription":{  
+    "download_createc_1":{  
+        "message":"If publication contain one of the described tags, catagory will be automaticly added"
+    },
+    "download_createc_by_tag":{  
+        "message":"Automaticly create category by tag name"
+    },
+    "download_started_cancel":{  
+        "message":"Downloading...(Cancel)"
+    },
+    "ext_description":{  
         "message":"Save favourite publications to your local browser storage. "
     },
-    "extName":{  
-        "message":"KellyC Favourites"
+    "ext_name":{  
+        "message":"KellyC Favorites"
+    },
+    "ext_ver":{  
+        "message":"Version"
+    },
+    "folder":{  
+        "message":"Folder"
+    },
+    "fast_save_enabled":{  
+        "message":"Display fast save button"
+    },     
+    "fast_download":{  
+        "message":"Fast save"
+    },    
+    "fast_save_uniq":{  
+        "message":"Uniquify name if file already exist"
+    },   
+    "fast_save_overwrite":{  
+        "message":"Overwrite file if file with same name already exist"
+    }, 
+    "fast_save_to":{  
+        "message":"Save to"
+    },
+    "fast_save_check":{  
+        "message":"Check file already downloaded"
+    }, 
+    "fast_save_check_notice":{  
+        "message":"If file already downloaded, then green marker will be adedd to download button"
     },
     "go_to_comment":{  
         "message":"Show comment"
     },
     "go_to_publication":{  
         "message":"Show publication"
+    },
+	"grabber_common_folder":{  
+        "message":"Base folder"
+    },
+	"grabber_selected_items":{  
+        "message":"Items"
+    },
+	"grabber_source":{  
+        "message":"High quality"
+    },
+	"grabber_preview":{  
+        "message":"Preview"
+    },
+	"grabber_hide_extended":{  
+        "message":"Hide extended options"
+    },	
+	"grabber_show_extended":{  
+        "message":"Show extended options"
+    },
+	"grabber_name_template":{  
+        "message":"Name template"
+    },
+	"grabber_threads_num":{  
+        "message":"Threads num"
+    },	
+	"grabber_interval":{  
+        "message":"Interval (sec.)"
+    },	
+	"grabber_start":{  
+        "message":"Start downloading"
+    },	
+	"grabber_stop":{  
+        "message":"Stop"
+    },	
+	"grabber_canceling":{  
+        "message":"Canceling..."
+    },
+	"grabber_timeout":{  
+        "message":"Long query timeout (sec.)"
+    },	
+	"grabber_exclude_lowres":{  
+        "message":"Exclude low resolution images"
+    },
+	"grabber_save_as_json":{  
+        "message":"Save as database file"
+    },	
+	"grabber_save_as":{  
+        "message":"Save as"
+    },	
+	"grabber_save_log":{  
+        "message":"Download log"
+    },	
+	"grabber_state_ready":{  
+        "message":"Download finished"
+    },
+	"grabber_state_loading":{  
+        "message":"Downloading..."
+    },
+	"grabber_state_wait":{  
+        "message":"Waiting"
+    },
+	"grabber_state_inlist":{  
+        "message":"In list"
+    },	
+	"grabber_state_error":{  
+        "message":"Downloading error"
+    },
+	"grabber_name_template_help":{  
+        "message":"Please select file name template, with include relative patch from base folder in browser <b>Downloads</b> folder<br><br>Allowed variables :<br>"
+    },
+	"grabber_name_template_help_1":{  
+        "message":"<b>#category_1#</b>, <b>#category_2#</b>, <b>#category_N#</b> - names of 1, 2 and N categorys of downloaded item (by priority)<br>"
+    },
+	"grabber_name_template_help_2":{  
+        "message":"<b>#filename#</b> - original file name<br><b>#id#</b> - unique id in current selected local storage<br>"
+    },
+	"grabber_name_template_help_3":{  
+        "message":"<b>#name#</b> - sign<br>Usage <br>\"<i>#filename#</i>\" - download file with original name (ex. <b>Downloads</b>/dog.jpg)<br>"
+    },
+	"grabber_name_template_help_4":{  
+        "message":"\"<i>#category_1#/#filename#</i>\" - download file with original name and put it to subdirectory with name of first category (ex. <b>Downloads</b>/Dogs/dog.jpg)<br><br>"
+    },
+    "hide_soc":{  
+        "message":"Hide social networks markers from publication block"
     },
     "ignore_comments":{  
         "message":"Ignore comments"
@@ -179,8 +314,17 @@
     "items":{  
         "message":"Publications"
     },
+    "item_preview_hide":{  
+        "message":"Preview hide"
+    },
+    "item_preview_show":{  
+        "message":"Preview show"
+    },
     "fav_list_empty":{  
         "message":"List of favourite items is empty"
+    },
+    "loading":{  
+        "message":"Loading"
     },
     "language":{  
         "message":"Language"
@@ -209,6 +353,9 @@
     "options_saved":{  
         "message":"Options changed"
     },
+    "options_fav_add":{  
+        "message":"Add to Favourites"
+    },    
     "other":{  
         "message":"Other"
     },
@@ -223,6 +370,9 @@
     },
     "preview":{  
         "message":"preview"
+    },   
+    "reset":{  
+        "message":"Reset"
     },
     "remove_from_fav":{  
         "message":"Remove from favourite"
@@ -235,11 +385,71 @@
     },
     "selection_empty":{  
         "message":"Selection empty"
+    },   
+    "select":{  
+        "message":"Select"
     },
     "source":{  
         "message":"source"
     },
     "storage":{  
         "message":"Storage"
+    },    
+    "storage_selected":{  
+        "message":"Storage selected"
+    },
+    "storage_add_new":{  
+        "message":"Add new"
+    },
+    "storage_load_from_file":{  
+        "message":"Load from file"
+    },    
+    "storage_name":{  
+        "message":"Storage id (only ch. A-Z, 1-9, _)"
+    },
+    "storage_create_cancel_if_exist":{  
+        "message":"Cancel if already exist with same id"
+    },
+    "storage_manager_total":{  
+        "message":"Storage total"
+    },
+    "storage_type":{  
+        "message":"Storage type"
+    },   
+    "storage_type_notice":{  
+        "message":"<b>Change storage type only if needed</b>. After change, your old data will be hidden, until switch back to previouse storage type"
+    }, 
+    "storage_manage":{  
+        "message":"Storage manager"
+    }, 
+    "storage_delete":{  
+        "message":"Storage delete"
+    },   
+    "storage_empty_name":{  
+        "message":"Please enter database name"
+    },     
+    "storage_beasy":{  
+        "message":"Wait until full load"
+    },    
+    "storage_create_already_exist":{  
+        "message":"Database already exist"
+    },     
+    "storage_create_ok":{  
+        "message":"Database added"
+    },     
+    "storage_create_e":{  
+        "message":"Error while adding database (turn on debug mode an watch F12 console)"
+    },   
+    "storage_create_e2":{  
+        "message":"Bad database format"
+    }, 
+    "sync_by_add":{  
+        "message":"If user is logged in, dublicates publication to main favourites storage"
+    },  
+    "tip":{  
+        "message":"notice"
+    },    
+    "kb":{  
+        "message":"kb"
     }
 }
