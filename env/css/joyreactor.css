@@ -47,11 +47,11 @@
 }
 
 .old_reactor_cc .__BASECLASS__-FiltersMenu > li {
-	margin-top : 3px;
+    margin-top : 3px;
 }
 
 .old_reactor_cc .__BASECLASS__-FiltersMenu {
-	margin-top : 12px;
+    margin-top : 12px;
 }
 
 .old_reactor_cc .__BASECLASS__-FiltersMenu > li > a {
@@ -117,14 +117,14 @@
 }
 
 .__BASECLASS__-filters-AdditionButtons table .__BASECLASS__-FavFilter {
-	margin : 0px;
+    margin : 0px;
 }
 
 #submenu .old_reactor_cc.__BASECLASS__-MainMenuItem-fav .__BASECLASS__-icon {
     width: 26px;
     height: 26px;
-	border-radius: 0px;
-	background-size: 16px;
+    border-radius: 0px;
+    background-size: 16px;
 }
 
 #submenu .old_reactor_cc.__BASECLASS__-MainMenuItem-fav a {
@@ -132,10 +132,10 @@
 }
 
 #submenu .old_reactor_cc.__BASECLASS__-MainMenuItem-fav a:hover {
-	padding-right : 0px;
+    padding-right : 0px;
 }
 #submenu .old_reactor_cc.__BASECLASS__-MainMenuItem-fav:hover {
-	margin-right : 0px;
+    margin-right : 0px;
     z-index : 68;
 }
 
@@ -147,24 +147,24 @@
 
     margin-right: 0px;
     margin-left: 0px;
-	
+    
 }
 
 #submenu .__BASECLASS__-MainMenuItem-fav a {
-	text-decoration : none;
-	margin : 0px;
-	padding : 0px;
-	display : block;
-	width: 100%;
+    text-decoration : none;
+    margin : 0px;
+    padding : 0px;
+    display : block;
+    width: 100%;
     height: 100%;
 }
 
 #submenu div.submenuitem.active.__BASECLASS__-MainMenuItem-fav a {
-	background : transparent;
+    background : transparent;
 }
 
 #submenu div div.__BASECLASS__-FavItemsCount {
-	position: absolute;
+    position: absolute;
     top: -8px;
     font-size: 12px;
     line-height: 1.2;
@@ -177,8 +177,8 @@
     right: -18px;
     z-index: 3;
     
-	opacity : 0;
-	transition : opacity 0.3s;
+    opacity : 0;
+    transition : opacity 0.3s;
 }
 
 #submenu div div.__BASECLASS__-FavItemsCount.__BASECLASS__-FavItemsCount-1 {
@@ -202,10 +202,10 @@
 
 
 #submenu .old_reactor_cc div div.__BASECLASS__-FavItemsCount {
-	right : -8px;
+    right : -8px;
 }
 
 #submenu div.submenuitem.__BASECLASS__-MainMenuItem-fav:hover .__BASECLASS__-FavItemsCount {
-	opacity : 1;
+    opacity : 1;
 }
 

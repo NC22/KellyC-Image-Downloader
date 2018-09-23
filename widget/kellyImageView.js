@@ -1,8 +1,19 @@
-// v 1.0.6 22.09.18
-// data-ignore-click
-// todo include pixel ratio detection
-// https://stackoverflow.com/questions/1713771/how-to-detect-page-zoom-level-in-all-modern-browsers
-// add user event onButtonsShow
+/*
+   @encoding utf-8
+   @name           KellyImgView
+   @namespace      Kelly
+   @description    image view widget
+   @author         Rubchuk Vladimir <torrenttvi@gmail.com>
+   @license        GPLv3
+   @version        v 1.0.6 22.09.18
+   
+   ToDo : 
+   
+   data-ignore-click - ok
+   include pixel ratio detection - https://stackoverflow.com/questions/1713771/how-to-detect-page-zoom-level-in-all-modern-browsers
+   add user event onButtonsShow
+   
+*/
 
 function KellyImgView(cfg) {
     
@@ -13,7 +24,7 @@ function KellyImgView(cfg) {
     
     var image = false; // current loaded image, false if not shown (getCurrentImage().image)
     var imageBounds = false; 
-	
+    
     var selectedGallery = 'default'; // inherit by opened source
    
     var commClassName = false; // DOM viewer class \ id base name
@@ -21,7 +32,7 @@ function KellyImgView(cfg) {
     var block = false;
     var fadeTime = 500; // not synced with css
     var buttonsMargin = 6;
-	var blockShown = false;
+    var blockShown = false;
     
     var cursor = 0;
     
@@ -38,18 +49,18 @@ function KellyImgView(cfg) {
     var buttons = {};
     
     var images = {}; // gallery_prefix - array of images ( string \ a \ img \ element with data-src attribute )
-	var imagesData = {};
-	
+    var imagesData = {};
+    
     var userEvents = { 
-		onBeforeGalleryOpen : false, // 
-		onBeforeShow : false, // изображение загружено но не показано, переменные окружения обновлены
-		onClose : false, //
-	}; 
+        onBeforeGalleryOpen : false, // 
+        onBeforeShow : false, // изображение загружено но не показано, переменные окружения обновлены
+        onClose : false, //
+    }; 
  
     var moveable = true;
     var swipe = false;	
-	var bodyLockCss = false;
-	var lockMoveMethod = 'lockMove'; // hideScroll (position : fixed элементы все равно сдвигаются если привязаны к правой стороне) | lockMove (блокирует движение но скроллбар остается)
+    var bodyLockCss = false;
+    var lockMoveMethod = 'lockMove'; // hideScroll (position : fixed элементы все равно сдвигаются если привязаны к правой стороне) | lockMove (блокирует движение но скроллбар остается)
    
     function constructor(cfg) {
         handler.updateConfig(cfg);
@@ -84,8 +95,8 @@ function KellyImgView(cfg) {
             if (cfg.userEvents.onBeforeShow) {
                 userEvents.onBeforeShow = cfg.userEvents.onBeforeShow;
             }
-			
-			if (cfg.userEvents.onClose) {
+            
+            if (cfg.userEvents.onClose) {
                 userEvents.onClose = cfg.userEvents.onClose;
             }
         }
@@ -109,50 +120,50 @@ function KellyImgView(cfg) {
     
         return imgElement.complete && imgElement.naturalHeight !== 0;
     }
-	
-	function showBodyScroll(show) {
-		var body = document.body;
-		
-		body.className = body.className.replace(commClassName + '-margin', '').trim();
-		body.className = body.className.replace(commClassName + '-lock', '').trim();
-		
-		if (show) {
+    
+    function showBodyScroll(show) {
+        var body = document.body;
+        
+        body.className = body.className.replace(commClassName + '-margin', '').trim();
+        body.className = body.className.replace(commClassName + '-lock', '').trim();
+        
+        if (show) {
 
-			return;
-			
-		} else {
-		
-			if (!body || !body.clientWidth) return false;
-		
-			var diff = screen.width - body.clientWidth;
-			if (!diff || diff <= 0) return false;
-			
-			if (bodyLockCss !== false) {
-				bodyLockCss.innerHTML = '';
-			}
-	
-			var head = document.head || document.getElementsByTagName('head')[0];
-			
-			bodyLockCss = document.createElement('style');
-			bodyLockCss.type = 'text/css';
-			
-			head.appendChild(bodyLockCss);
-			
-			css = '.' + commClassName + '-margin {';
-			css += 'margin-right : ' + diff + 'px;';
-			css += '}';
-			
-			if (bodyLockCss.styleSheet){
-			  bodyLockCss.styleSheet.cssText = css;
-			} else {
-			  bodyLockCss.appendChild(document.createTextNode(css));
-			}
-			
-			body.className += ' ' + commClassName + '-lock ' + commClassName + '-margin';
-		}
+            return;
+            
+        } else {
+        
+            if (!body || !body.clientWidth) return false;
+        
+            var diff = screen.width - body.clientWidth;
+            if (!diff || diff <= 0) return false;
+            
+            if (bodyLockCss !== false) {
+                bodyLockCss.innerHTML = '';
+            }
+    
+            var head = document.head || document.getElementsByTagName('head')[0];
+            
+            bodyLockCss = document.createElement('style');
+            bodyLockCss.type = 'text/css';
+            
+            head.appendChild(bodyLockCss);
+            
+            css = '.' + commClassName + '-margin {';
+            css += 'margin-right : ' + diff + 'px;';
+            css += '}';
+            
+            if (bodyLockCss.styleSheet){
+              bodyLockCss.styleSheet.cssText = css;
+            } else {
+              bodyLockCss.appendChild(document.createTextNode(css));
+            }
+            
+            body.className += ' ' + commClassName + '-lock ' + commClassName + '-margin';
+        }
 
-		return true;
-	}
+        return true;
+    }
     
     this.getButton = function(index) {
     
@@ -166,36 +177,36 @@ function KellyImgView(cfg) {
     this.getButtons = function() {
         return buttons;
     }
-	
+    
     this.getImages = function() {
         return images;
     }
            
     this.getCurrentState = function() {	
-		
+        
         return { 
             block : getBlock(),
-			image : image, 
-			gallery : selectedGallery, 
-			index : cursor,
-			cursor : cursor,
-			shown : blockShown,
-			blockShown : blockShown,
-			imageData : imagesData[selectedGallery] ? imagesData[selectedGallery] : false,
-		};
+            image : image, 
+            gallery : selectedGallery, 
+            index : cursor,
+            cursor : cursor,
+            shown : blockShown,
+            blockShown : blockShown,
+            imageData : imagesData[selectedGallery] ? imagesData[selectedGallery] : false,
+        };
     }
     
     this.hideButtons = function(hide) {
         for (var k in buttons){
             if (typeof buttons[k] !== 'function') {
-			
-            	buttons[k].className = buttons[k].className.replace(commClassName + '-btn-hidden', '').trim();
-				
-				if ((k == 'prev' || k == 'next') && (!images[selectedGallery] || images[selectedGallery].length <= 1)) {
-					buttons[k].className += ' ' + commClassName + '-btn-hidden';
-					continue;
-				} else if (hide) {
-					buttons[k].className += ' ' + commClassName + '-btn-hidden';
+            
+                buttons[k].className = buttons[k].className.replace(commClassName + '-btn-hidden', '').trim();
+                
+                if ((k == 'prev' || k == 'next') && (!images[selectedGallery] || images[selectedGallery].length <= 1)) {
+                    buttons[k].className += ' ' + commClassName + '-btn-hidden';
+                    continue;
+                } else if (hide) {
+                    buttons[k].className += ' ' + commClassName + '-btn-hidden';
                 }
             }
         }        
@@ -231,7 +242,7 @@ function KellyImgView(cfg) {
         if (!additionStyle) additionStyle = '';
         if (!className) className = commClassName + '-btn ' + commClassName + '-btn-' + index ;
         
-		if (w) additionStyle += 'width : ' + w + 'px;';
+        if (w) additionStyle += 'width : ' + w + 'px;';
         if (h) additionStyle += 'height : ' + h + 'px;';
         
         var button = document.createElement('div');
@@ -239,7 +250,7 @@ function KellyImgView(cfg) {
             button.onclick = onclick;
             button.className = className;
             button.innerHTML = innerHTML;
-			
+            
         buttons[index] = button;
         block.appendChild(buttons[index]);
         
@@ -260,20 +271,20 @@ function KellyImgView(cfg) {
     this.updateButtonsPos = function(pos) {
         
         if (!image) return false;
-		// console.log(window.getComputedStyle(image));
-		
-		if (!pos) {
-			pos = {						
-				left : parseInt(image.style.left),
-				top : parseInt(image.style.top),
-			}
-		}
+        // console.log(window.getComputedStyle(image));
+        
+        if (!pos) {
+            pos = {						
+                left : parseInt(image.style.left),
+                top : parseInt(image.style.top),
+            }
+        }
     
         var clientBounds = handler.getClientBounds();
         
         var item = 0;
         var horizontal = false;        
-		
+        
         var left = pos.left + parseInt(image.style.width) + 12;
         var top = pos.top;
         
@@ -333,8 +344,8 @@ function KellyImgView(cfg) {
     
     function showMainBlock(show) {
            
-		if (show && blockShown) return;
-		
+        if (show && blockShown) return;
+        
         // will be extended if something from this events will be used for some thing else
         
         var disableMoveContainer = function(disable) {
@@ -360,12 +371,12 @@ function KellyImgView(cfg) {
         
         if (show) {
         
-			if (lockMoveMethod == 'hideScroll') {
-				showBodyScroll(false);
-			} else {				
-				disableMoveContainer(true);
-			}
-			
+            if (lockMoveMethod == 'hideScroll') {
+                showBodyScroll(false);
+            } else {				
+                disableMoveContainer(true);
+            }
+            
             blockShown = true;
             
             if (!getBlock()) {
@@ -418,20 +429,20 @@ function KellyImgView(cfg) {
                 
             }, 'next_image_key');    
         } else {       
-			
+            
             setTimeout(function() { 
             
-				if (lockMoveMethod == 'hideScroll') {
-					showBodyScroll(true);
-				} else {				
-					disableMoveContainer(false);
-				} 
-				
+                if (lockMoveMethod == 'hideScroll') {
+                    showBodyScroll(true);
+                } else {				
+                    disableMoveContainer(false);
+                } 
+                
                 deleteClass(block, 'active');
                 deleteClass(block, 'fade');              
                 handler.removeEventListener(window, "scroll", 'img_view_');
-				blockShown = false;
-				
+                blockShown = false;
+                
             }, fadeTime);  
             
             
@@ -444,7 +455,7 @@ function KellyImgView(cfg) {
     // initialize image viewer from gallery pointer with start cursor \ gallery and image src, or go to nextimage in selected gallery
     
     // galleryItemPointer - dom element with kellyGallery and kellyGalleryIndex attributes, if false, go to next \ prev in current gallery
-	// initial image must be setted in href \ src \ or in data-image attribute, else - set kellyGalleryIndex to -1 to start from begining of gallery array
+    // initial image must be setted in href \ src \ or in data-image attribute, else - set kellyGalleryIndex to -1 to start from begining of gallery array
     // next - bool  (true \ false, if false go to previuse) 
     
     // for navigation use nextImage method instead if gallery already opened
@@ -456,77 +467,77 @@ function KellyImgView(cfg) {
         beasy = true;
         scale = 1;
         // console.log('load image');
-		
-		if (userEvents.onBeforeGalleryOpen) {
+        
+        if (userEvents.onBeforeGalleryOpen) {
             userEvents.onBeforeGalleryOpen(handler, galleryItemPointer, galleryData);
         }
-		
+        
         if (!blockShown) showMainBlock(true);
-		
-		if (!galleryItemPointer && !galleryData) {
-		
-			galleryItemPointer = images[selectedGallery][cursor];
-			
-		} else if (galleryData) {
-			
-			if (galleryData.gallery) {
-				selectedGallery = galleryData.gallery;
-			}
-			
-			if (typeof galleryData.cursor != 'undefined') {
-				if (galleryData.cursor == 'next') {
-					galleryItemPointer = getNextImage(true, true);
-				} else if (galleryData.cursor == 'prev') {
-					galleryItemPointer = getNextImage(false, true);
-				} else {
-					cursor = galleryData.cursor;
-					galleryItemPointer = images[selectedGallery][cursor];
-				}
-			}
+        
+        if (!galleryItemPointer && !galleryData) {
+        
+            galleryItemPointer = images[selectedGallery][cursor];
+            
+        } else if (galleryData) {
+            
+            if (galleryData.gallery) {
+                selectedGallery = galleryData.gallery;
+            }
+            
+            if (typeof galleryData.cursor != 'undefined') {
+                if (galleryData.cursor == 'next') {
+                    galleryItemPointer = getNextImage(true, true);
+                } else if (galleryData.cursor == 'prev') {
+                    galleryItemPointer = getNextImage(false, true);
+                } else {
+                    cursor = galleryData.cursor;
+                    galleryItemPointer = images[selectedGallery][cursor];
+                }
+            }
         }
                 
-		
+        
         handler.hideButtons(true);
         handler.hideLoader(false);
         handler.updateBlockPosition();    
         
-  		image = document.createElement("img");
+          image = document.createElement("img");
         image.src = getImageUrlFromPointer(galleryItemPointer);  
         
         if (isImgLoaded(image)) handler.imageShow();
         else image.onload = function() { handler.imageShow(); return false; }	
     }
-	
+    
     this.getClientBounds = function() {
     
-		var elem = (document.compatMode === "CSS1Compat") ? 
-			document.documentElement :
-			document.body;
+        var elem = (document.compatMode === "CSS1Compat") ? 
+            document.documentElement :
+            document.body;
 
         return {
             screenHeight: elem.clientHeight,
-			screenWidth: elem.clientWidth,
+            screenWidth: elem.clientWidth,
         };
     }
     
     this.getScale = function() { return scale; }
     
     this.scale = function(plus) {
-		
-		var newScale = scale;
-		var step = 0.1;
+        
+        var newScale = scale;
+        var step = 0.1;
         if (!plus) step = step * -1;
-		
-		newScale += step;
+        
+        newScale += step;
         
         if (newScale < 0.5) return;
-		scale = newScale;
-		
+        scale = newScale;
+        
         var rHeight = imageBounds.resizedHeight; // resized variables
         var rWidth = imageBounds.resizedWidth;
         
         var newHeight = Math.round(rHeight * scale);
-		
+        
         var k = newHeight / rHeight;
         
         rHeight = k * rHeight;
@@ -540,42 +551,42 @@ function KellyImgView(cfg) {
         
         image.style.left = Math.floor(posCenter.left - (rWidth / 2)) + 'px';
         image.style.top = Math.floor(posCenter.top - (rHeight / 2)) + 'px';
-		
-		
+        
+        
         handler.updateButtonsPos();
     }
     
-	// get local coordinats event pos
-	
+    // get local coordinats event pos
+    
     function getEventDot(e) {
         e = e || window.event;
         var x, y;
-		
-		// 
+        
+        // 
         var scrollX = 0; // document.body.scrollLeft + document.documentElement.scrollLeft;
         var scrollY = 0; // document.body.scrollTop + document.documentElement.scrollTop;
-		
-		var touches = [];
-		if (e.touches && e.touches.length > 0) {
-			
-			for (var i = 0; i < e.touches.length; i++) {
-				touches[i] = {
-					x : e.touches[i].clientX + scrollX,
-					y : e.touches[i].clientY + scrollY,
-				}
-				
-				if (i == 0) {
-					x = touches[0].x;
-					y = touches[0].y;
-				}
-			}
-			
-		} else {
+        
+        var touches = [];
+        if (e.touches && e.touches.length > 0) {
+            
+            for (var i = 0; i < e.touches.length; i++) {
+                touches[i] = {
+                    x : e.touches[i].clientX + scrollX,
+                    y : e.touches[i].clientY + scrollY,
+                }
+                
+                if (i == 0) {
+                    x = touches[0].x;
+                    y = touches[0].y;
+                }
+            }
+            
+        } else {
             // e.pageX e.pageY e.x e.y bad for cross-browser
             x = e.clientX + scrollX;
             y = e.clientY + scrollY;		
-		}
-		
+        }
+        
         //var rect = canvas.getBoundingClientRect();
 
         return {x: x, y: y, touches : touches};
@@ -585,39 +596,39 @@ function KellyImgView(cfg) {
     
         console.log(getEventDot(e));
     }
-	
-	function calcDistance(pointA, pointB) {
-		var a = pointA.x - pointB.x;
-		var b = pointA.y - pointB.y;
+    
+    function calcDistance(pointA, pointB) {
+        var a = pointA.x - pointB.x;
+        var b = pointA.y - pointB.y;
 
-		return Math.sqrt( a*a + b*b );
-	}
+        return Math.sqrt( a*a + b*b );
+    }
 
     this.drag = function(e) {
-		
-		var prevTouches = lastPos ? lastPos.touches : false;
-		
+        
+        var prevTouches = lastPos ? lastPos.touches : false;
+        
         lastPos = getEventDot(e);
         if (lastPos.touches && lastPos.touches.length > 2){
-			return;
-		}
-		
-		/*
-		if (!animationFrame) return false;
-		
-		window.requestAnimationFrame(function() {
-			animationFrame = true;
-		})
-		
-		animationFrame = false;
-		*/
-		
-		if (prevTouches && prevTouches.length > 1 && lastPos.touches.length > 1) {
-		
-			var zoomIn = calcDistance(prevTouches[0], prevTouches[1]) < calcDistance(lastPos.touches[0], lastPos.touches[1]) ? true : false;
-			handler.scale(zoomIn);
-			
-		} else if (moveable || scale != 1) {
+            return;
+        }
+        
+        /*
+        if (!animationFrame) return false;
+        
+        window.requestAnimationFrame(function() {
+            animationFrame = true;
+        })
+        
+        animationFrame = false;
+        */
+        
+        if (prevTouches && prevTouches.length > 1 && lastPos.touches.length > 1) {
+        
+            var zoomIn = calcDistance(prevTouches[0], prevTouches[1]) < calcDistance(lastPos.touches[0], lastPos.touches[1]) ? true : false;
+            handler.scale(zoomIn);
+            
+        } else if (moveable || scale != 1) {
         
             var newPos = {left : move.left + lastPos.x - move.x, top : move.top + lastPos.y - move.y}
             
@@ -642,8 +653,8 @@ function KellyImgView(cfg) {
         handler.removeEventListener(document.body, "touchmove", 'image_drag_');
         handler.removeEventListener(document.body, "touchend", 'image_drag_');
         
-		if (!lastPos) return;
-		
+        if (!lastPos) return;
+        
         if (scale == 1 && swipe) { // lastPos && lastPos.touches.length == 1
             
             //image.style.transition = 'left 0.3s';
@@ -660,14 +671,14 @@ function KellyImgView(cfg) {
                 handler.nextImage(next);
                 
             } else {
-			
-				if (image) {
-				
-					var newPos = {left : move.left, top : move.top}
-				
-					image.style.left = newPos.left + 'px';                
-					handler.updateButtonsPos(newPos);
-				}
+            
+                if (image) {
+                
+                    var newPos = {left : move.left, top : move.top}
+                
+                    image.style.left = newPos.left + 'px';                
+                    handler.updateButtonsPos(newPos);
+                }
             }
             
         }     
@@ -774,7 +785,7 @@ function KellyImgView(cfg) {
         image.style.position = 'absolute';
         
         // console.log('maxWidth : ' + maxWidth + ' image Width' + image.width + ' maxHeight : ' + maxHeight + ' image Height ' + image.height);
-		
+        
         var newPos = {left : Math.round((bounds.screenWidth - imageBounds.resizedWidth) / 2), top : Math.round((bounds.screenHeight - imageBounds.resizedHeight) / 2 )};
         
         // todo check this values after scale
@@ -792,7 +803,7 @@ function KellyImgView(cfg) {
     
     this.cancelLoad = function(stage) {
 
-	   
+       
         if (stage == 2) {
             beasy = false; 
             isMoved = false;
@@ -807,9 +818,9 @@ function KellyImgView(cfg) {
             var imgContainer = getEl('img'); 
                 imgContainer.innerHTML = '';
             
-			if (userEvents.onClose) {
-				userEvents.onClose(handler);
-			}				
+            if (userEvents.onClose) {
+                userEvents.onClose(handler);
+            }				
             return;
             
         } else {
@@ -840,24 +851,24 @@ function KellyImgView(cfg) {
 
     
     // get image url from source string or element
-	// if source is member of exist gallery - move cursor to source index and switch to source gallery
-	
+    // if source is member of exist gallery - move cursor to source index and switch to source gallery
+    
     function getImageUrlFromPointer(source) {
-	
+    
         var sourceImg = '';
-		
-		// change gallery by source - affects on next image functions and buttons
-		
-		if (typeof source !== 'string' && source.getAttribute('kellyGallery') && source.getAttribute('kellyGalleryIndex')) {
-		
-			selectedGallery = source.getAttribute('kellyGallery');
-			cursor = parseInt(source.getAttribute('kellyGalleryIndex'));
-			sourceImg = getUrlFromGalleryItem(images[selectedGallery][cursor]);
-			
-		} else {
-		
-			sourceImg = getUrlFromGalleryItem(source);
-		}
+        
+        // change gallery by source - affects on next image functions and buttons
+        
+        if (typeof source !== 'string' && source.getAttribute('kellyGallery') && source.getAttribute('kellyGalleryIndex')) {
+        
+            selectedGallery = source.getAttribute('kellyGallery');
+            cursor = parseInt(source.getAttribute('kellyGalleryIndex'));
+            sourceImg = getUrlFromGalleryItem(images[selectedGallery][cursor]);
+            
+        } else {
+        
+            sourceImg = getUrlFromGalleryItem(source);
+        }
         
         if (!sourceImg) {
             console.log('image not found for element');
@@ -866,61 +877,61 @@ function KellyImgView(cfg) {
         
         return validateUrl(sourceImg);
     }
-	
-	function getUrlFromGalleryItem(item) {
-	
-		var url = '';
-		if (typeof item == 'string') {
-		
-			url  = item;
-			
-		} else {
-		
-			url = item.getAttribute('data-image');
-			if (!url) {
-			
-					 if (item.tagName == 'A') url = item.href;
-				else if (item.tagName == 'IMG') url = item.src;
-			}
-		}
-		
-		return validateUrl(url);
-	}
+    
+    function getUrlFromGalleryItem(item) {
+    
+        var url = '';
+        if (typeof item == 'string') {
+        
+            url  = item;
+            
+        } else {
+        
+            url = item.getAttribute('data-image');
+            if (!url) {
+            
+                     if (item.tagName == 'A') url = item.href;
+                else if (item.tagName == 'IMG') url = item.src;
+            }
+        }
+        
+        return validateUrl(url);
+    }
     
     function validateUrl(source) {
         if (!source) return '';	
         return source.trim();
     }
-	
-	function getSvgIcon(name, color) {
-	
-		if (!color) color = '#000';
-		
-		var icon = '';
-		var bounds = '170 170';
-		
-		if (name == 'close') {
-		
-			icon = '<g>\
-					<title>' + name + '</title>\
-					<line x1="27.5" x2="145.5" y1="24.9" y2="131.9" fill="none" stroke="' + color + '" stroke-linecap="round" stroke-linejoin="undefined" stroke-width="19"/>\
-					<line x1="144" x2="28" y1="24.9" y2="131.9" fill="none" stroke="' + color + '" stroke-linecap="round" stroke-linejoin="undefined" stroke-width="19"/>\
-					</g>';
-					
-		} else if (name == 'left' || name == 'right') {
-		
-			bounds = '120 120';
-			icon = '<g>\
-					 <title>' + name + '</title>\
-				     <path transform="rotate(' + (name == 'right' ? '90' : '-90') + ' 61.24249267578127,65.71360778808595) " id="svg_1" \
-					 d="m12.242498,108.588584l48.999996,-85.74996l48.999996,85.74996l-97.999992,0z" \
-					 stroke-width="1.5" stroke="' + color + '" fill="' + color + '"/>\
-				     </g>';
-		} 
-		
-		return '<?xml version="1.0" encoding="UTF-8"?>\
-					<svg viewBox="0 0 ' + bounds + '" xmlns="http://www.w3.org/2000/svg">' + icon + '</svg>'; 
-	}
+    
+    function getSvgIcon(name, color) {
+    
+        if (!color) color = '#000';
+        
+        var icon = '';
+        var bounds = '170 170';
+        
+        if (name == 'close') {
+        
+            icon = '<g>\
+                    <title>' + name + '</title>\
+                    <line x1="27.5" x2="145.5" y1="24.9" y2="131.9" fill="none" stroke="' + color + '" stroke-linecap="round" stroke-linejoin="undefined" stroke-width="19"/>\
+                    <line x1="144" x2="28" y1="24.9" y2="131.9" fill="none" stroke="' + color + '" stroke-linecap="round" stroke-linejoin="undefined" stroke-width="19"/>\
+                    </g>';
+                    
+        } else if (name == 'left' || name == 'right') {
+        
+            bounds = '120 120';
+            icon = '<g>\
+                     <title>' + name + '</title>\
+                     <path transform="rotate(' + (name == 'right' ? '90' : '-90') + ' 61.24249267578127,65.71360778808595) " id="svg_1" \
+                     d="m12.242498,108.588584l48.999996,-85.74996l48.999996,85.74996l-97.999992,0z" \
+                     stroke-width="1.5" stroke="' + color + '" fill="' + color + '"/>\
+                     </g>';
+        } 
+        
+        return '<?xml version="1.0" encoding="UTF-8"?>\
+                    <svg viewBox="0 0 ' + bounds + '" xmlns="http://www.w3.org/2000/svg">' + icon + '</svg>'; 
+    }
     
     function getNextImage(next, updateCursor) {
 
@@ -980,34 +991,34 @@ function KellyImgView(cfg) {
     this.addToGallery = function(galleryItems, galleryName, data) {
         
         if (!galleryName) galleryName = 'default';
-		
-		// accept by class name
-		
+        
+        // accept by class name
+        
         if (typeof galleryItems === 'string') {
             var className = galleryItems;
             images[galleryName] = document.getElementsByClassName(className);
-			
-		// accept by list of urls
-		
+            
+        // accept by list of urls
+        
         } else if (galleryItems.length) {
             images[galleryName] = galleryItems;
-			
+            
         } else return false;
-		
-		// addition data for gallery elements
-		
-		if (typeof data == 'object') {
-			imagesData[galleryName] = data;
-		}
+        
+        // addition data for gallery elements
+        
+        if (typeof data == 'object') {
+            imagesData[galleryName] = data;
+        }
         
         if (images[galleryName].length && typeof images[galleryName][0] === 'string') {
-		
-			// image gallery contain only urls
         
-		} else {
+            // image gallery contain only urls
         
-			// image gallery contain elements associated with gallery items
-			
+        } else {
+        
+            // image gallery contain elements associated with gallery items
+            
             for (var i = 0, l = images[galleryName].length; i < l; i++)  {
                 images[galleryName][i].setAttribute('kellyGallery', galleryName);
                 images[galleryName][i].setAttribute('kellyGalleryIndex', i);
@@ -1021,7 +1032,7 @@ function KellyImgView(cfg) {
                 }
             }	
         }
-		
+        
         return true;    
     }
     

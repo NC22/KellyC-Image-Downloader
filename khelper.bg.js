@@ -6,27 +6,24 @@
 
 
 
-// todo move helpfullcommon functions from main class FavItemsHelper to here
-
 KellyTools = new Object();
-
 
 // Get screen width \ height
 
 KellyTools.getViewport = function() {
 
-	var elem = (document.compatMode === "CSS1Compat") ? 
-		document.documentElement :
-		document.body;
+    var elem = (document.compatMode === "CSS1Compat") ? 
+        document.documentElement :
+        document.body;
 
-	var height = elem.clientHeight;
-	var width = elem.clientWidth;	
+    var height = elem.clientHeight;
+    var width = elem.clientWidth;	
 
-	return {
-		scrollBottom: KellyTools.getScrollTop() + height, // scroll + viewport height
-		screenHeight: height,
-		screenWidth: width,
-	};
+    return {
+        scrollBottom: KellyTools.getScrollTop() + height, // scroll + viewport height
+        screenHeight: height,
+        screenWidth: width,
+    };
 }
 
 KellyTools.replaceAll = function(str, search, replacement) {
@@ -35,14 +32,14 @@ KellyTools.replaceAll = function(str, search, replacement) {
 
 KellyTools.getScrollTop = function() {
 
-	var scrollTop = (window.pageYOffset || document.documentElement.scrollTop) - (document.documentElement.clientTop || 0);
-	return scrollTop;
+    var scrollTop = (window.pageYOffset || document.documentElement.scrollTop) - (document.documentElement.clientTop || 0);
+    return scrollTop;
 }
 
 KellyTools.getScrollLeft = function() {
 
-	var scrollLeft = (window.pageXOffset || document.documentElement.scrollLeft) - (document.documentElement.clientLeft || 0);
-	return scrollLeft;
+    var scrollLeft = (window.pageXOffset || document.documentElement.scrollLeft) - (document.documentElement.clientLeft || 0);
+    return scrollLeft;
 }
 
 // validate input string
@@ -115,39 +112,37 @@ KellyTools.fitText = function(parent, textEl, noExtHeight) {
 }
 
 KellyTools.getChildByTag = function(el, tag) {
-	if (!el) return false;
-	
-	var childNodes = el.getElementsByTagName(tag);
-	
-	if (!childNodes || !childNodes.length) return false;
-	
-	return childNodes[0];
+    if (!el) return false;
+    
+    var childNodes = el.getElementsByTagName(tag);
+    
+    if (!childNodes || !childNodes.length) return false;
+    
+    return childNodes[0];
 }
 
 KellyTools.getElementByTag = function (el, tag) {
-	return KellyTools.getChildByTag(el, tag);
+    return KellyTools.getChildByTag(el, tag);
 }
 
-// unsused
-
 KellyTools.getParentByTag = function(el, tagName) {
-	var parent = el;
-	if (!tagName) return false;
-	
-	tagName = tagName.toLowerCase();
-	
-	while (parent && parent.tagName.toLowerCase() != tagName) {
-		parent = parent.parentElement;
-	}  
-	
-	return parent;
+    var parent = el;
+    if (!tagName) return false;
+    
+    tagName = tagName.toLowerCase();
+    
+    while (parent && parent.tagName.toLowerCase() != tagName) {
+        parent = parent.parentElement;
+    }  
+    
+    return parent;
 }
 
 KellyTools.getUrlFileName = function(url, excludeExt) {
     if (!url) return '';
     
-	url = url.split("?");
-	url = url[0];
+    url = url.split("?");
+    url = url[0];
     
     if (!url) return '';
     
@@ -165,83 +160,83 @@ KellyTools.getUrlFileName = function(url, excludeExt) {
 }
 
 KellyTools.getUrlExtension = function(url) {
-			 
-	url = url.split("?");
-	url = url[0];
+             
+    url = url.split("?");
+    url = url[0];
 
-	var ext = url.substr(url.length - 5).split(".");
-	if (ext.length < 2) return '';
+    var ext = url.substr(url.length - 5).split(".");
+    if (ext.length < 2) return '';
 
-	ext = ext[1];
-	return ext;        
+    ext = ext[1];
+    return ext;        
 }
     
 // unused end
 
 KellyTools.getUrlParam = function(param, url) {
-	if (!url) url = location.search;
-	
-	var paramIndex = url.indexOf(param + "=");
-	var paramValue = '';
-	if (paramIndex != -1) {
-		paramValue = url.substr(paramIndex).split('=');
-		if (paramValue.length >= 2) {
-			paramValue = paramValue[1].split('&')[0];
-		}
-	}
-	
-	return paramValue.trim();
+    if (!url) url = location.search;
+    
+    var paramIndex = url.indexOf(param + "=");
+    var paramValue = '';
+    if (paramIndex != -1) {
+        paramValue = url.substr(paramIndex).split('=');
+        if (paramValue.length >= 2) {
+            paramValue = paramValue[1].split('&')[0];
+        }
+    }
+    
+    return paramValue.trim();
 }
 
 // turn this - '2, 4, 66-99, 44, 78, 8-9, 29-77' to an array of all values [2, 4, 66, 67, 68 ... etc] in range
 
 KellyTools.getPrintValues = function(print, reverse) {
 
-	var itemsToSelect = [];
-	var options = print.split(',');
-	
-	for (var i = 0; i < options.length; i++) {
+    var itemsToSelect = [];
+    var options = print.split(',');
+    
+    for (var i = 0; i < options.length; i++) {
 
-		var option = options[i].trim().split('-');
-		if (!option.length || !option[0]) continue;
-		if (option.length <= 1) option[1] = -1;
-		
+        var option = options[i].trim().split('-');
+        if (!option.length || !option[0]) continue;
+        if (option.length <= 1) option[1] = -1;
+        
 
-		option[0] = parseInt(option[0]);
-		if (option[1]) option[1] = parseInt(option[1]);
+        option[0] = parseInt(option[0]);
+        if (option[1]) option[1] = parseInt(option[1]);
 
-		if (option[0] == option[1]) option[1] = -1;
+        if (option[0] == option[1]) option[1] = -1;
 
-		if (option[1] !== -1) {
+        if (option[1] !== -1) {
 
-			if (option[1] < option[0]) {
+            if (option[1] < option[0]) {
                 var switchOp = option[0];
                 option[0] = option[1];
                 option[1] = switchOp;
             }
 
-			for (var b = option[0]; b <= option[1]; b++) {
-				if (itemsToSelect.indexOf(b) == -1) itemsToSelect[itemsToSelect.length] =b;
-			}
+            for (var b = option[0]; b <= option[1]; b++) {
+                if (itemsToSelect.indexOf(b) == -1) itemsToSelect[itemsToSelect.length] =b;
+            }
 
-		} else {
+        } else {
 
-			if (itemsToSelect.indexOf(option[0]) == -1) itemsToSelect[itemsToSelect.length] = option[0];
-		}
+            if (itemsToSelect.indexOf(option[0]) == -1) itemsToSelect[itemsToSelect.length] = option[0];
+        }
 
-	}
-	
-	if (!reverse) {
-		itemsToSelect.sort(function(a, b) {
-		  return a - b;
-		});
-	} else {
-		itemsToSelect.sort(function(a, b) {
-		  return b - a;
-		});
-	}
-	
-	return itemsToSelect;
+    }
+    
+    if (!reverse) {
+        itemsToSelect.sort(function(a, b) {
+          return a - b;
+        });
+    } else {
+        itemsToSelect.sort(function(a, b) {
+          return b - a;
+        });
+    }
+    
+    return itemsToSelect;
 }
 
 
@@ -352,19 +347,19 @@ KellyTools.folderPatchToRegularExpression = function(folder) {
     folder = folder.trim();
     
     if (!folder) return '';
-	// [\\(] [\\)]
+    // [\\(] [\\)]
 
-	folder = KellyTools.replaceAll(folder, '\\(', '__CCCC__');    
+    folder = KellyTools.replaceAll(folder, '\\(', '__CCCC__');    
     folder = KellyTools.replaceAll(folder, '\\)', '__DDDD__');
-	folder = KellyTools.replaceAll(folder, '\\\\', '/');
+    folder = KellyTools.replaceAll(folder, '\\\\', '/');
     folder = KellyTools.replaceAll(folder, '\\\\', '(\\\\\\\\|/)');
     folder = KellyTools.replaceAll(folder, '/', '(\\\\\\\\|/)');
-	folder = KellyTools.replaceAll(folder, '__CCCC__', '[\(]');    
+    folder = KellyTools.replaceAll(folder, '__CCCC__', '[\(]');    
     folder = KellyTools.replaceAll(folder, '__DDDD__', '[\)]');
     
     // todo check special characters 
     
-	return folder;
+    return folder;
 }
 
 // input - any string that suppose to be file path or directory -> output - dir/dir2/dir3/file.ext, dir/dir2, dir/dir2/dir3 ...
@@ -438,27 +433,31 @@ KellyTools.getExt = function(str, limit) {
 }
 
 KellyTools.log = function(info, module) {
-	
-	if (!module) module = 'Kelly';
-	
-	if (typeof info == 'object' || typeof info == 'function') {
-		console.log('[' + KellyTools.getTime() + '] ' + module + ' :  var output :');
-		console.log(info);
-	} else {
-		console.log('[' + KellyTools.getTime() + '] ' + module + ' : '+ info);
-	}
+    
+    if (!module) module = 'Kelly';
+    
+    if (typeof info == 'object' || typeof info == 'function') {
+        console.log('[' + KellyTools.getTime() + '] ' + module + ' :  var output :');
+        console.log(info);
+    } else {
+        console.log('[' + KellyTools.getTime() + '] ' + module + ' : '+ info);
+    }
 }
 
+// 01:12
+
 KellyTools.getTime = function() {
-	var currentTime = new Date();
-	var hours = currentTime.getHours();
-	var minutes = currentTime.getMinutes();
-	
-	if (minutes < 10){
-		minutes = "0" + minutes;
-	}
-	return hours + ":" + minutes;
+    var currentTime = new Date();
+    var hours = currentTime.getHours();
+    var minutes = currentTime.getMinutes();
+    
+    if (minutes < 10){
+        minutes = "0" + minutes;
+    }
+    return hours + ":" + minutes;
 }
+
+// 2018_09_09__085827
 
 KellyTools.getTimeStamp = function() {
     date = new Date();
@@ -473,166 +472,171 @@ KellyTools.getTimeStamp = function() {
 }
 
 // 2018-09-09 08:58:27
+
 KellyTools.getGMTDate = function() {
-	return new Date().toJSON().slice(0, 19).replace('T', ' ');
+    return new Date().toJSON().slice(0, 19).replace('T', ' ');
 }
 
 KellyTools.createAndDownloadFile = function(data, filename, mimetype) {
 
-	if (!data) return false;
-	if (!KellyTools.getBrowser()) return false;
-	
-	var ext = KellyTools.getExt(filename);
-	if (!ext) ext = 'txt';
-	
-	if (!mimetype) {
-		mimetype = 'application/x-' + ext;
-		
-		// MIME type list http://webdesign.about.com/od/multimedia/a/mime-types-by-content-type.htm
-		
-			 if (ext == 'jpg' || ext == 'jpeg') mimetype = 'image/jpeg';
-		else if (ext == 'png' ) mimetype = 'image/png';
-		else if (ext == 'gif' ) mimetype = 'image/gif';
-		else if (ext == 'zip' ) mimetype = 'application/zip';
-		else if (ext == 'txt' ) mimetype = 'text/plain';
-		else if (ext == 'json' ) mimetype = 'application/json';
-	}
-	
-	if (filename.indexOf('.') == -1) filename += '.' + ext;
-	
+    if (!data) return false;
+    if (!KellyTools.getBrowser()) return false;
+    
+    var ext = KellyTools.getExt(filename);
+    if (!ext) ext = 'txt';
+    
+    if (!mimetype) {
+        mimetype = 'application/x-' + ext;
+        
+        // MIME type list http://webdesign.about.com/od/multimedia/a/mime-types-by-content-type.htm
+        
+             if (ext == 'jpg' || ext == 'jpeg') mimetype = 'image/jpeg';
+        else if (ext == 'png' ) mimetype = 'image/png';
+        else if (ext == 'gif' ) mimetype = 'image/gif';
+        else if (ext == 'zip' ) mimetype = 'application/zip';
+        else if (ext == 'txt' ) mimetype = 'text/plain';
+        else if (ext == 'json' ) mimetype = 'application/json';
+    }
+    
+    if (filename.indexOf('.') == -1) filename += '.' + ext;
+    
 
-	var blobData = new Blob([data], {type : mimetype});
-	
-	var downloadOptions = {
-		filename : filename, 
-		conflictAction : 'uniquify',
-		method : 'GET',
-	}
+    var blobData = new Blob([data], {type : mimetype});
+    
+    var downloadOptions = {
+        filename : filename, 
+        conflictAction : 'uniquify',
+        method : 'GET',
+    }
 
-	downloadOptions.url = URL.createObjectURL(blobData);  
-	
-	KellyTools.getBrowser().runtime.sendMessage({method: "downloads.download", blob : true, download : downloadOptions}, function(response){});             
+    downloadOptions.url = URL.createObjectURL(blobData);  
+    
+    KellyTools.getBrowser().runtime.sendMessage({method: "downloads.download", blob : true, download : downloadOptions}, function(response){});             
 
-	return true;
+    return true;
 }
 
 KellyTools.getParentByClass = function(el, className) {
-	var parent = el;
+    var parent = el;
  
-	while (parent && parent.className != className) {
-		parent = parent.parentElement;
-	}  
-	
-	return parent;
+    while (parent && parent.className != className) {
+        parent = parent.parentElement;
+    }  
+    
+    return parent;
 }
 
 // read local file
+// untested in dataurl mode - suppose get binary data - such as png image
+// try - btoa(unescape(encodeURIComponent(rawData))) to store local as base64:image
 
 KellyTools.readFile = function(input, onRead, readAs) {
-	
-	if (!input) return false;
-	
- 	var file = input.files[0];
+    
+    if (!input) return false;
+    
+     var file = input.files[0];
  
-	if (file) {
-	
+    if (file) {
+    
       var fileReader = new FileReader();
           fileReader.onloadend = function (e) {
-				if (onRead) onRead(input, e.target.result);
+                if (onRead) onRead(input, e.target.result);
           };
           
-		if (readAs == 'dataurl') {
-			
-			fileReader.readAsDataURL(file);
-		} else {
-			fileReader.readAsText(file)
-		}
-		return true;
+        if (readAs == 'dataurl') {
+            
+            fileReader.readAsDataURL(file);
+        } else {
+            fileReader.readAsText(file)
+        }
+        return true;
     } else return false;
 }	
 
+// return onLoad only on succesful load data, onFail - any problems during load, or bad response status (only 200 - OK accepted)
+
 KellyTools.readUrl = function(url, onLoad, onFail, method, async) {
 
-	if (!method) method = 'GET';
-	if (typeof async == 'undefined') async = true;
+    if (!method) method = 'GET';
+    if (typeof async == 'undefined') async = true;
 
-	var request = new XMLHttpRequest();
-		request.open(method, url, async);
+    var request = new XMLHttpRequest();
+        request.open(method, url, async);
 
-		request.onload = function() {
-		  if (this.status == 200) {
-			 onLoad(this.response, url);
-		  } else {
-			 onFail(url, this.status, this.statusText);
-		  }
-		};
+        request.onload = function() {
+          if (this.status == 200) {
+             onLoad(this.response, url);
+          } else {
+             onFail(url, this.status, this.statusText);
+          }
+        };
 
-		request.onerror = function() {
-		   onFail(url, -1);
-		};
+        request.onerror = function() {
+           onFail(url, -1);
+        };
 
-		request.send();
+        request.send();
 }
 
 KellyTools.getRelativeUrl = function(str) {
     
-	if ( typeof str !== 'string') return '/';
+    if ( typeof str !== 'string') return '/';
 
-	str = str.trim();
-	
-	if (!str.length) return '/';
-	
-	if (str[str.length-1] != '/') str += '/';
-	
-	if (str.indexOf('http') != -1 || str.substring(0, 2) == '//') {
-		str = str.replace(/^(?:\/\/|[^\/]+)*\//, "");
-	}
+    str = str.trim();
+    
+    if (!str.length) return '/';
+    
+    if (str[str.length-1] != '/') str += '/';
+    
+    if (str.indexOf('http') != -1 || str.substring(0, 2) == '//') {
+        str = str.replace(/^(?:\/\/|[^\/]+)*\//, "");
+    }
 
-	if (!str.length) str = '/';
+    if (!str.length) str = '/';
 
-	if (str[0] != '/') {
-		str = '/' + str;
-	}
-	
-	return str;
+    if (str[0] != '/') {
+        str = '/' + str;
+    }
+    
+    return str;
 }
     
 KellyTools.getElementByClass = function(parent, className) {
-		
-	if (parent === false) parent = document.body;
-	
-	if (typeof parent !== 'object') {
-	 
-		
-		console.log('unexpected type - ' + typeof parent);
-		console.log(parent);
-		return false;
-	}
-	
-	if (!parent) return false;
-	
-	var childNodes = parent.getElementsByClassName(className);
-	
-	if (!childNodes || !childNodes.length) return false;
-	
-	return childNodes[0];
+        
+    if (parent === false) parent = document.body;
+    
+    if (typeof parent !== 'object') {
+     
+        
+        console.log('unexpected type - ' + typeof parent);
+        console.log(parent);
+        return false;
+    }
+    
+    if (!parent) return false;
+    
+    var childNodes = parent.getElementsByClassName(className);
+    
+    if (!childNodes || !childNodes.length) return false;
+    
+    return childNodes[0];
 }
 
 KellyTools.parseJSON = function(json) {
-	
-	var data = false;
-	
-	if (json) {
-		try {
-			data = window.JSON && window.JSON.parse ? JSON.parse(json) : eval('(' + json + ')');
-		} catch (E) {
-			KellyTools.log('fail to load json data : ' + json, 'KellyTools');            
-		}
-	} else {
-		KellyTools.log('empty json', 'KellyTools');
-	} 
+    
+    var data = false;
+    
+    if (json) {
+        try {
+            data = window.JSON && window.JSON.parse ? JSON.parse(json) : eval('(' + json + ')');
+        } catch (E) {
+            KellyTools.log('fail to load json data : ' + json, 'KellyTools');            
+        }
+    } else {
+        KellyTools.log('empty json', 'KellyTools');
+    } 
 
-	return data;
+    return data;
 }
 
 // https://stackoverflow.com/questions/1144783/how-to-replace-all-occurrences-of-a-string-in-javascript
@@ -642,149 +646,149 @@ KellyTools.replaceAll = function(text, search, replace) {
 }
 
 KellyTools.dispatchEvent = function(target, name) {
-	
+    
     if (!target) return;
-	if (!name) name = 'click';
-	if(typeof(Event) === 'function') {
-		
-		var event = false;
-		
-		try {
-			
-			event = new Event(name, {bubbles: true, cancelable: true});
-		  
+    if (!name) name = 'click';
+    if(typeof(Event) === 'function') {
+        
+        var event = false;
+        
+        try {
+            
+            event = new Event(name, {bubbles: true, cancelable: true});
+          
         } catch(e){
 
-			event = document.createEvent('Event');
-			event.initEvent(name, true, false);
+            event = document.createEvent('Event');
+            event.initEvent(name, true, false);
         }
-				
-	} else {
-		
-		var event = document.createEvent('Event');
-		event.initEvent(name, true, true);
-	}
+                
+    } else {
+        
+        var event = document.createEvent('Event');
+        event.initEvent(name, true, true);
+    }
 
-	var bn = target.getBoundingClientRect();
+    var bn = target.getBoundingClientRect();
 
-	event.clientX = Math.round(bn.left + KellyTools.getScrollLeft() + bn.width / 2);
-	event.clientY = Math.round(bn.top + KellyTools.getScrollTop() + bn.height / 2);
+    event.clientX = Math.round(bn.left + KellyTools.getScrollLeft() + bn.width / 2);
+    event.clientY = Math.round(bn.top + KellyTools.getScrollTop() + bn.height / 2);
 
-	target.dispatchEvent(event);
+    target.dispatchEvent(event);
 }
 
 // params - paginationContainer, curPage, onGoTo, classPrefix, pageItemsNum, itemsNum, perPage
 
 KellyTools.showPagination = function(params) {
-	
-	if (!params) {
-		return false;	
-	}
-		
-	if (!params.container) return false;
-	if (!params.classPrefix) {
-		params.classPrefix = 'KellyTools';
-	}
-	
-	if (!params.itemsNum) params.itemsNum = 0;
-	if (!params.perPage) params.perPage = 50;
-	
-	params.container.innerHTML = '';
-	
-	if (!params.itemsNum) return;
-	
-	var totalPages = Math.ceil(params.itemsNum / params.perPage);
+    
+    if (!params) {
+        return false;	
+    }
+        
+    if (!params.container) return false;
+    if (!params.classPrefix) {
+        params.classPrefix = 'KellyTools';
+    }
+    
+    if (!params.itemsNum) params.itemsNum = 0;
+    if (!params.perPage) params.perPage = 50;
+    
+    params.container.innerHTML = '';
+    
+    if (!params.itemsNum) return;
+    
+    var totalPages = Math.ceil(params.itemsNum / params.perPage);
 
-	if (totalPages <= 1) return;
-	
-	var page = params.curPage ? params.curPage : 1;
-	var pageListItemsNum = params.pageItemsNum ? params.pageItemsNum : 4; // maximum number of page buttons
-	var pageStart = 1; // rendered button start
+    if (totalPages <= 1) return;
+    
+    var page = params.curPage ? params.curPage : 1;
+    var pageListItemsNum = params.pageItemsNum ? params.pageItemsNum : 4; // maximum number of page buttons
+    var pageStart = 1; // rendered button start
 
-	pageStart = page - Math.ceil(pageListItemsNum / 2);       
-	if (pageStart < 1) pageStart = 1; 
-	
-	var pageEnd = pageStart + pageListItemsNum - 1; // rendered button end
-	if (pageListItemsNum > totalPages) pageEnd = totalPages;
-	
-	if (pageEnd <= 1) pageEnd = totalPages;
-	if (pageEnd > totalPages) pageEnd = totalPages;
-	
-	if (page > totalPages) page = totalPages;
-	if (page < 1) page = 1;
-	
-	var goToFunction = function() {
-		if (params.onGoTo) params.onGoTo(this.getAttribute('pageNum'));
-		return false;
-	}
-	
-	var goToPreviuse = document.createElement('a');
-		goToPreviuse.href = '#';
-		goToPreviuse.setAttribute('pageNum', 'previuse');
-		goToPreviuse.innerHTML = '<';
-		goToPreviuse.className = params.classPrefix + '-item';
-		goToPreviuse.onclick = goToFunction;
-			 
-	if (pageStart > 1) {
-		var goToBegin = goToPreviuse.cloneNode(true);
-		goToBegin.setAttribute('pageNum', '1');
-		goToBegin.onclick = goToFunction;
-		goToBegin.innerHTML = '<<';
-		
-		params.container.appendChild(goToBegin); 
-	}
-	
-	if (pageStart > 1) { 
-		params.container.appendChild(goToPreviuse); 
-	}
-		  
-	for (var pageNum = pageStart; pageNum <= pageEnd; pageNum++) {
-		 var pageEl = document.createElement('a');
-			 pageEl.href = '#';
-			 pageEl.innerHTML = pageNum;
-			 pageEl.className = params.classPrefix + '-item';
-			 if (pageNum >= 100) pageEl.className += ' ' + params.classPrefix + '-item-100';
-			 
-			 pageEl.setAttribute('pageNum', pageNum);
-			 
-		if (page == pageNum) pageEl.className += ' active';
-			
-			pageEl.onclick = goToFunction;                
-			params.container.appendChild(pageEl);
-	}
+    pageStart = page - Math.ceil(pageListItemsNum / 2);       
+    if (pageStart < 1) pageStart = 1; 
+    
+    var pageEnd = pageStart + pageListItemsNum - 1; // rendered button end
+    if (pageListItemsNum > totalPages) pageEnd = totalPages;
+    
+    if (pageEnd <= 1) pageEnd = totalPages;
+    if (pageEnd > totalPages) pageEnd = totalPages;
+    
+    if (page > totalPages) page = totalPages;
+    if (page < 1) page = 1;
+    
+    var goToFunction = function() {
+        if (params.onGoTo) params.onGoTo(this.getAttribute('pageNum'));
+        return false;
+    }
+    
+    var goToPreviuse = document.createElement('a');
+        goToPreviuse.href = '#';
+        goToPreviuse.setAttribute('pageNum', 'previuse');
+        goToPreviuse.innerHTML = '<';
+        goToPreviuse.className = params.classPrefix + '-item';
+        goToPreviuse.onclick = goToFunction;
+             
+    if (pageStart > 1) {
+        var goToBegin = goToPreviuse.cloneNode(true);
+        goToBegin.setAttribute('pageNum', '1');
+        goToBegin.onclick = goToFunction;
+        goToBegin.innerHTML = '<<';
+        
+        params.container.appendChild(goToBegin); 
+    }
+    
+    if (pageStart > 1) { 
+        params.container.appendChild(goToPreviuse); 
+    }
+          
+    for (var pageNum = pageStart; pageNum <= pageEnd; pageNum++) {
+         var pageEl = document.createElement('a');
+             pageEl.href = '#';
+             pageEl.innerHTML = pageNum;
+             pageEl.className = params.classPrefix + '-item';
+             if (pageNum >= 100) pageEl.className += ' ' + params.classPrefix + '-item-100';
+             
+             pageEl.setAttribute('pageNum', pageNum);
+             
+        if (page == pageNum) pageEl.className += ' active';
+            
+            pageEl.onclick = goToFunction;                
+            params.container.appendChild(pageEl);
+    }
 
-	var goToNext = document.createElement('a');
-		goToNext.href = '#';
-		goToNext.setAttribute('pageNum', 'next');
-		goToNext.className = params.classPrefix + '-item';
-		goToNext.innerHTML = '>';
-		goToNext.onclick = goToFunction;
-		
-	if (pageEnd < totalPages) { 
-		params.container.appendChild(goToNext);
-	}
-	
-	if (pageEnd < totalPages) {
-		var goToEnd = goToPreviuse.cloneNode(true);
-		goToEnd.setAttribute('pageNum', totalPages);            
-		goToEnd.onclick = goToFunction;
-		goToEnd.innerHTML = '>>';
-		
-		params.container.appendChild(goToEnd); 
-	}
-	
-	if (totalPages > pageListItemsNum) {
-	
-		if (page < totalPages - 1) {
-			// go to end
-		}
-		
-		if (page > 1) {
-			// go to begin
-		}
-	}
-	
-	return params.container;
+    var goToNext = document.createElement('a');
+        goToNext.href = '#';
+        goToNext.setAttribute('pageNum', 'next');
+        goToNext.className = params.classPrefix + '-item';
+        goToNext.innerHTML = '>';
+        goToNext.onclick = goToFunction;
+        
+    if (pageEnd < totalPages) { 
+        params.container.appendChild(goToNext);
+    }
+    
+    if (pageEnd < totalPages) {
+        var goToEnd = goToPreviuse.cloneNode(true);
+        goToEnd.setAttribute('pageNum', totalPages);            
+        goToEnd.onclick = goToFunction;
+        goToEnd.innerHTML = '>>';
+        
+        params.container.appendChild(goToEnd); 
+    }
+    
+    if (totalPages > pageListItemsNum) {
+    
+        if (page < totalPages - 1) {
+            // go to end
+        }
+        
+        if (page > 1) {
+            // go to begin
+        }
+    }
+    
+    return params.container;
 }
     
 
@@ -799,13 +803,13 @@ KellyTools.showPagination = function(params) {
 // KellyTools.getBrowser().downloads - не поддерживается Edge
 
 var KellyEDispetcher = new Object;
-	KellyEDispetcher.tabEvents = {};
-	KellyEDispetcher.tabList = []; // all active tabs that request resources at list once
-	
-	KellyEDispetcher.eventsAccepted = false;
+    KellyEDispetcher.tabEvents = {};
+    KellyEDispetcher.tabList = []; // all active tabs that request resources at list once
+    
+    KellyEDispetcher.eventsAccepted = false;
     KellyEDispetcher.debug = false;
-	KellyEDispetcher.envDir = 'env/';
-	KellyEDispetcher.api = KellyTools.getBrowser();
+    KellyEDispetcher.envDir = 'env/';
+    KellyEDispetcher.api = KellyTools.getBrowser();
     
     // bg subscriptions to API
     KellyEDispetcher.initEvents = {
@@ -821,27 +825,27 @@ var KellyEDispetcher = new Object;
         return true;
     }
     
-	KellyEDispetcher.subscribeTab = function (tabId, event) {
+    KellyEDispetcher.subscribeTab = function (tabId, event) {
 
-		if (typeof this.tabEvents[event] == 'undefined') this.tabEvents[event] = [];
+        if (typeof this.tabEvents[event] == 'undefined') this.tabEvents[event] = [];
 
-		if (this.tabEvents[event].indexOf(tabId) == -1) this.tabEvents[event].push(tabId);
-		
-		return tabId;
-	}
+        if (this.tabEvents[event].indexOf(tabId) == -1) this.tabEvents[event].push(tabId);
+        
+        return tabId;
+    }
     
-	KellyEDispetcher.init = function() {
-	
-		if (this.eventsAccepted) return true;
-		
-		KellyTools.getBrowser().runtime.onMessage.addListener(this.onMessage);
-		this.eventsAccepted = true;
-		
-		return true;
-	}
-	
-	KellyEDispetcher.onMessage = function(request, sender, callback) {
-			
+    KellyEDispetcher.init = function() {
+    
+        if (this.eventsAccepted) return true;
+        
+        KellyTools.getBrowser().runtime.onMessage.addListener(this.onMessage);
+        this.eventsAccepted = true;
+        
+        return true;
+    }
+    
+    KellyEDispetcher.onMessage = function(request, sender, callback) {
+            
         if (KellyEDispetcher.debug) {
             console.log(request);    
             console.log(sender.tab ?
@@ -849,21 +853,21 @@ var KellyEDispetcher = new Object;
                         "from the extension");
         }
         
-		var response = {
-			
-			senderId : 'dispetcher',
-			error : '',
-			method : request.method,
-			
-		}
-			
-		if (request.method == 'downloads.cancel') {        
-					
-			KellyTools.getBrowser().downloads.cancel(request.downloadId);
-					
-		} else if (request.method == 'downloads.download') {
-			
-			response.downloadId = -1;
+        var response = {
+            
+            senderId : 'dispetcher',
+            error : '',
+            method : request.method,
+            
+        }
+            
+        if (request.method == 'downloads.cancel') {        
+                    
+            KellyTools.getBrowser().downloads.cancel(request.downloadId);
+                    
+        } else if (request.method == 'downloads.download') {
+            
+            response.downloadId = -1;
         
             KellyTools.getBrowser().downloads.download(request.download, function (downloadId) {
                 
@@ -928,7 +932,7 @@ var KellyEDispetcher = new Object;
                 }
 
                 for (var i = 0; i < request.filenames.length; i++) {
-                	                    
+                                        
                     var badExpression = false;
                     
                     // really can naebnutsya here
@@ -952,13 +956,13 @@ var KellyEDispetcher = new Object;
                 }
             }
                
-		} else if (request.method == "onChanged.keepAliveListener") {
-		
-			KellyEDispetcher.subscribeTab(sender.tab.id, 'onChanged');
-			
-			// alternative way if this will be bad
-			// chrome.downloads.search({id : downloadId}, function(array of DownloadItem results) {...})
-			
+        } else if (request.method == "onChanged.keepAliveListener") {
+        
+            KellyEDispetcher.subscribeTab(sender.tab.id, 'onChanged');
+            
+            // alternative way if this will be bad
+            // chrome.downloads.search({id : downloadId}, function(array of DownloadItem results) {...})
+            
             if (!KellyEDispetcher.initEvents.onChanged) {
             
                 KellyEDispetcher.initEvents.onChanged = function(downloadDelta) {
@@ -973,16 +977,16 @@ var KellyEDispetcher = new Object;
                 
                 KellyEDispetcher.api.downloads.onChanged.addListener(KellyEDispetcher.initEvents.onChanged );
             }
-			
-		} else if (request.method == "getLocalStorageList") {
-			
-			var prefix = request.prefix;
-			var keepPrefix = request.keepPrefix;
-			var slist = [];
-			
-			if (typeof localStorage == 'undefined' || !localStorage.length) {
-		
-			} else {
+            
+        } else if (request.method == "getLocalStorageList") {
+            
+            var prefix = request.prefix;
+            var keepPrefix = request.keepPrefix;
+            var slist = [];
+            
+            if (typeof localStorage == 'undefined' || !localStorage.length) {
+        
+            } else {
             
                 for (var i = 0; i < localStorage.length; i++) {
                     if (localStorage.key(i).indexOf(prefix) !== -1) {
@@ -992,144 +996,144 @@ var KellyEDispetcher = new Object;
                 }
             }
             
-			response.slist = slist;
-		
-		} else if (request.method == "getLocalStorageItem") {
-			
-			if (request.dbName) {
-				response.item = localStorage.getItem(request.dbName);
-			} else response.item = false;
-		
-		} else if (request.method == "removeLocalStorageItem") {
-			
-			if (request.dbName) {
-				localStorage.removeItem(request.dbName);
-			}
-		
-		} else if (request.method == "setLocalStorageItem") {
-			
-			if (request.dbName && request.data) {
-				try {
-					
-					localStorage.setItem(request.dbName, JSON.stringify(request.data));
-					
-				} catch (E) {
-					
-					response.error = E;
-					
-				}
-			}
-		
-		} else if (request.method == "setApiStorageItem") {
-			
-			if (!request.data) {
-			
-				response.error = 'setApiStorageItem : Data is empty';
-				if (callback) callback(response);
-				
-			} else {
-			
-				KellyEDispetcher.api.storage.local.set(request.data, function() {
-				
-					if (KellyEDispetcher.api.runtime.lastError) {
-						response.error = KellyEDispetcher.api.runtime.lastError.message;
-					} else response.error = false;
-					
-					if (callback) callback(response);
-				});
-				
-				return true; // async mode
-			}
-			
-		} else if (request.method == "removeApiStorageItem") {
-			
-			if (!request.dbName) {
-			
-				response.error = 'removeApiStorageItem : dbName is empty';
-				if (callback) callback(response);
-				
-			} else {
-			
-				KellyEDispetcher.api.storage.local.remove(request.dbName, function() {
-				
-					response.error = false;
-					
-					if (KellyEDispetcher.api.runtime.lastError) {
-						
-						response.error = KellyEDispetcher.api.runtime.lastError.message;
-					}
-					
-					if (callback) callback(response);
-				});
-				
-				return true; // async mode
-			
-			}
-			
-		} else if (request.method == "getApiStorageItem") {
-		
-			if (!request.dbName) {
-			
-				response.error = 'loadApiStorageItem : dbName is empty';
-				if (callback) callback(response);
-				
-			} else {
-			
-				KellyEDispetcher.api.storage.local.get(request.dbName, function(item) {
-					
-					response.item = item;
-					
-					if (callback) callback(response);
-				});	
-				
-				return true; // async mode
-			
-			}
-			
-		} else if (request.method == "getApiStorageItemBytesInUse") {
-			
-			response.bytes = 0;
-			if (!request.dbName) {
-			
-				response.error = 'getApiStorageItemBytesInUse : dbName is empty';
-				if (callback) callback(response);
-				
-			} else {
-			
-				KellyEDispetcher.api.storage.local.getBytesInUse(request.dbName, function(bytes){
-					
-					response.bytes = bytes;
-					if (callback) callback(response);
-				});
-				
-				return true; // async mode
-			}
-						
-		} else if (request.method == "getApiStorageList") {
-			
-			KellyEDispetcher.api.storage.local.get(null, function(dbs) {
-				
-				response.slist = [];
-				if (dbs) {
-					var names = Object.keys(dbs);
+            response.slist = slist;
+        
+        } else if (request.method == "getLocalStorageItem") {
+            
+            if (request.dbName) {
+                response.item = localStorage.getItem(request.dbName);
+            } else response.item = false;
+        
+        } else if (request.method == "removeLocalStorageItem") {
+            
+            if (request.dbName) {
+                localStorage.removeItem(request.dbName);
+            }
+        
+        } else if (request.method == "setLocalStorageItem") {
+            
+            if (request.dbName && request.data) {
+                try {
+                    
+                    localStorage.setItem(request.dbName, JSON.stringify(request.data));
+                    
+                } catch (E) {
+                    
+                    response.error = E;
+                    
+                }
+            }
+        
+        } else if (request.method == "setApiStorageItem") {
+            
+            if (!request.data) {
+            
+                response.error = 'setApiStorageItem : Data is empty';
+                if (callback) callback(response);
+                
+            } else {
+            
+                KellyEDispetcher.api.storage.local.set(request.data, function() {
+                
+                    if (KellyEDispetcher.api.runtime.lastError) {
+                        response.error = KellyEDispetcher.api.runtime.lastError.message;
+                    } else response.error = false;
+                    
+                    if (callback) callback(response);
+                });
+                
+                return true; // async mode
+            }
+            
+        } else if (request.method == "removeApiStorageItem") {
+            
+            if (!request.dbName) {
+            
+                response.error = 'removeApiStorageItem : dbName is empty';
+                if (callback) callback(response);
+                
+            } else {
+            
+                KellyEDispetcher.api.storage.local.remove(request.dbName, function() {
+                
+                    response.error = false;
+                    
+                    if (KellyEDispetcher.api.runtime.lastError) {
+                        
+                        response.error = KellyEDispetcher.api.runtime.lastError.message;
+                    }
+                    
+                    if (callback) callback(response);
+                });
+                
+                return true; // async mode
+            
+            }
+            
+        } else if (request.method == "getApiStorageItem") {
+        
+            if (!request.dbName) {
+            
+                response.error = 'loadApiStorageItem : dbName is empty';
+                if (callback) callback(response);
+                
+            } else {
+            
+                KellyEDispetcher.api.storage.local.get(request.dbName, function(item) {
+                    
+                    response.item = item;
+                    
+                    if (callback) callback(response);
+                });	
+                
+                return true; // async mode
+            
+            }
+            
+        } else if (request.method == "getApiStorageItemBytesInUse") {
+            
+            response.bytes = 0;
+            if (!request.dbName) {
+            
+                response.error = 'getApiStorageItemBytesInUse : dbName is empty';
+                if (callback) callback(response);
+                
+            } else {
+            
+                KellyEDispetcher.api.storage.local.getBytesInUse(request.dbName, function(bytes){
+                    
+                    response.bytes = bytes;
+                    if (callback) callback(response);
+                });
+                
+                return true; // async mode
+            }
+                        
+        } else if (request.method == "getApiStorageList") {
+            
+            KellyEDispetcher.api.storage.local.get(null, function(dbs) {
+                
+                response.slist = [];
+                if (dbs) {
+                    var names = Object.keys(dbs);
 
-					for (var i = 0; i < names.length; i++) {
-						if (names[i].indexOf(request.prefix) !== -1) {
-							if (request.keepPrefix) response.slist.push(names[i]);
-							else response.slist.push(names[i].replace(request.prefix, '')); 
-						}
-					}
-				}
-				
-				if (callback) callback(response);
-			});
-			
-			return true; // async mode
-		 
+                    for (var i = 0; i < names.length; i++) {
+                        if (names[i].indexOf(request.prefix) !== -1) {
+                            if (request.keepPrefix) response.slist.push(names[i]);
+                            else response.slist.push(names[i].replace(request.prefix, '')); 
+                        }
+                    }
+                }
+                
+                if (callback) callback(response);
+            });
+            
+            return true; // async mode
+         
         // loads selected css items and send an init dispetcher env data
         
-		} else if (request.method == 'getCss') {
-			
+        } else if (request.method == 'getCss') {
+            
             var loaded = 0;
             
             var answerData = {
@@ -1148,7 +1152,7 @@ var KellyEDispetcher = new Object;
                 }
                 
                 if (data && data !== false) {
-                    	
+                        
                     answerData.css += "\n\r\n\r\n\r" + '/* ' +  url + ' */' + "\n\r\n\r\n\r";
                     answerData.css += data;
                     answerData.css += "\n\r\n\r\n\r" + '/* ' +  url + ' end */' + "\n\r\n\r\n\r";
@@ -1170,13 +1174,13 @@ var KellyEDispetcher = new Object;
                 }
             }
              
-			var	onFail = function(url, errorCode, errorText) {
+            var	onFail = function(url, errorCode, errorText) {
                 onGetResource(url, false, 'code : ' + errorCode + ' | ' +errorText); // perhaps bad idea combine different types \ need to check errorCode typeof
-			}
-			
-			var onSuccess = function(data, url) {
+            }
+            
+            var onSuccess = function(data, url) {
                 onGetResource(url, data, false);
-			}
+            }
             
             for (var i = 0; i < request.items.length; i++) {
                 
@@ -1195,85 +1199,85 @@ var KellyEDispetcher = new Object;
             }
             
            
-			// identify requester, save for future notifications
+            // identify requester, save for future notifications
             if (KellyEDispetcher.tabList.indexOf(sender.tab.id) == -1) {
                 KellyEDispetcher.tabList.push(sender.tab.id);
             }
             
-			return true; // async mode
-			
-		} else if (request.method == 'getProfile') {
-			
-			var	onFail = function(url, errorCode, errorText) {
-			
-				if (callback) {
-					
-					callback({
-						envText : false, 
-						profile : request.profile, 
-						error : 'load error',
-					});
-				}
-			}
-			
-			var onSuccess = function(data, url) {
-				
-				var environment = false;
-				var error = '';
-				
-				if (callback) { 
-				
+            return true; // async mode
+            
+        } else if (request.method == 'getProfile') {
+            
+            var	onFail = function(url, errorCode, errorText) {
+            
+                if (callback) {
+                    
+                    callback({
+                        envText : false, 
+                        profile : request.profile, 
+                        error : 'load error',
+                    });
+                }
+            }
+            
+            var onSuccess = function(data, url) {
+                
+                var environment = false;
+                var error = '';
+                
+                if (callback) { 
+                
 
-					callback({
-						envText : data, 
-						profile : request.profile, 
-						error : error,
-					});
-				}
-			}
-			
-			var profile = KellyTools.getBrowser().runtime.getURL(KellyEDispetcher.envDir + 'profiles/' + request.profile + '.js');
-			KellyTools.readUrl(profile, onSuccess, onFail); 
-			
-			return true; // async mode
+                    callback({
+                        envText : data, 
+                        profile : request.profile, 
+                        error : error,
+                    });
+                }
+            }
+            
+            var profile = KellyTools.getBrowser().runtime.getURL(KellyEDispetcher.envDir + 'profiles/' + request.profile + '.js');
+            KellyTools.readUrl(profile, onSuccess, onFail); 
+            
+            return true; // async mode
          
         /* deprecated */
-		} else if (request.method == 'getLanguage') {
-						
-			var	onFail = function(url, errorCode, errorText) {
-				if (callback) {
-					
-					callback({
-						languageData : false, 
-						language : request.language, 
-						error : 'load error',
-					});
-				}
-			}
-			
-			var onSuccess = function(data, url) {
-				var error = '';
-				
-				if (callback) { 
-				
-					callback({
-						languageData : data, 
-						language : request.language, 
-						error : error,
-					});
-				}
-			}
-			
-			var language = KellyTools.getBrowser().runtime.getURL(KellyEDispetcher.envDir + 'loc/' + request.language + '.js');
-			
-			KellyTools.readUrl(language, onSuccess, onFail); 
-			
-			return true; // async mode
-		}
+        } else if (request.method == 'getLanguage') {
+                        
+            var	onFail = function(url, errorCode, errorText) {
+                if (callback) {
+                    
+                    callback({
+                        languageData : false, 
+                        language : request.language, 
+                        error : 'load error',
+                    });
+                }
+            }
+            
+            var onSuccess = function(data, url) {
+                var error = '';
+                
+                if (callback) { 
+                
+                    callback({
+                        languageData : data, 
+                        language : request.language, 
+                        error : error,
+                    });
+                }
+            }
+            
+            var language = KellyTools.getBrowser().runtime.getURL(KellyEDispetcher.envDir + 'loc/' + request.language + '.js');
+            
+            KellyTools.readUrl(language, onSuccess, onFail); 
+            
+            return true; // async mode
+        }
         
-		if (callback) callback(response);
-		
-	}
+        if (callback) callback(response);
+        
+    }
 
 
 //D:\Dropbox\Private\l scripts\jfav\release\Extension\\init.bg.js

@@ -191,85 +191,85 @@
     "go_to_publication":{  
         "message":"Показать пост"
     },
-	"grabber_common_folder":{  
+    "grabber_common_folder":{  
         "message":"Основная директория"
     },
-	"grabber_selected_items":{  
+    "grabber_selected_items":{  
         "message":"Элементы"
     },
-	"grabber_source":{  
+    "grabber_source":{  
         "message":"Оригинал"
     },
-	"grabber_preview":{  
+    "grabber_preview":{  
         "message":"Превью"
     },
-	"grabber_hide_extended":{  
+    "grabber_hide_extended":{  
         "message":"Скрыть расширенные настройки"
     },	
-	"grabber_show_extended":{  
+    "grabber_show_extended":{  
         "message":"Показать расширенные настройки"
     },
-	"grabber_name_template":{  
+    "grabber_name_template":{  
         "message":"Шаблон названия"
     },
-	"grabber_threads_num":{  
+    "grabber_threads_num":{  
         "message":"Количество потоков"
     },	
-	"grabber_interval":{  
+    "grabber_interval":{  
         "message":"Интервал загрузки (сек)"
     },	
-	"grabber_start":{  
+    "grabber_start":{  
         "message":"Начать выгрузку"
     },	
-	"grabber_stop":{  
+    "grabber_stop":{  
         "message":"Остановить загрузку"
     },	
-	"grabber_canceling":{  
+    "grabber_canceling":{  
         "message":"Остановка..."
     },
-	"grabber_timeout":{  
+    "grabber_timeout":{  
         "message":"Таймаут при долгом выполнении запроса (сек)"
     },	
-	"grabber_exclude_lowres":{  
+    "grabber_exclude_lowres":{  
         "message":"Исключать изображения с низким разрешением"
     },
-	"grabber_save_as_json":{  
+    "grabber_save_as_json":{  
         "message":"Скачать файл данных"
     },	
-	"grabber_save_as":{  
+    "grabber_save_as":{  
         "message":"Сохранить как"
     },	
-	"grabber_save_log":{  
+    "grabber_save_log":{  
         "message":"Скачать лог"
     },	
-	"grabber_state_ready":{  
+    "grabber_state_ready":{  
         "message":"Загрузка завершена"
     },
-	"grabber_state_loading":{  
+    "grabber_state_loading":{  
         "message":"Загрузка..."
     },
-	"grabber_state_wait":{  
+    "grabber_state_wait":{  
         "message":"Ожидает в очереди"
     },
-	"grabber_state_inlist":{  
+    "grabber_state_inlist":{  
         "message":"В списке"
     },	
-	"grabber_state_error":{  
+    "grabber_state_error":{  
         "message":"Ошибка загрузки"
     },
-	"grabber_name_template_help":{  
+    "grabber_name_template_help":{  
         "message":"Укажите шаблон названия файла включая путь относительно основной директории в <b>Загрузках</b> браузера<br><br>Можно использовать переменные :<br>"
     },
-	"grabber_name_template_help_1":{  
+    "grabber_name_template_help_1":{  
         "message":"<b>#category_1#</b>, <b>#category_2#</b>, <b>#category_N#</b> - название 1, 2 и N категории элемента избранного (по приоритету)<br>"
     },
-	"grabber_name_template_help_2":{  
+    "grabber_name_template_help_2":{  
         "message":"<b>#filename#</b> - оригинальное название файла<br><b>#id#</b> - уникальный идентификатор в текущем хранилище<br>"
     },
-	"grabber_name_template_help_3":{  
+    "grabber_name_template_help_3":{  
         "message":"<b>#name#</b> - подпись<br>Примеры<br>\"<i>#filename#</i>\" - скачать файл в директорию загрузки с исходным названием  (например <b>Загрузки</b>/dog.jpg)<br>"
     },
-	"grabber_name_template_help_4":{  
+    "grabber_name_template_help_4":{  
         "message":"\"<i>#category_1#/#filename#</i>\" - скачать файл с исходным названием поместив его в дерикторию с названием его основной категории (например <b>Загрузки</b>/Dogs/dog.jpg)<br><br>"
     },    
     "hide_soc":{  
