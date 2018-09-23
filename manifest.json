@@ -1,22 +1,26 @@
 {
    "content_scripts": [ {
       "exclude_globs": [  "*://img1.joyreactor.cc/*", "*://img0.joyreactor.cc/*"],
-      "include_globs": [ 
+      "include_globs": [],
+      "js": [ "khelper.user.js" ],
+      "matches": [ 
 			"*://joyreactor.cc/*",
 			"*://*.joyreactor.cc/*", 
 			"*://*.reactor.cc/*", 
 			"*://joyreactor.com/*",
-			"*://pornreactor.cc/*",			
-			"file://*/favourites_localview.html"
-		],
-      "js": [ "khelper.user.js" ],
-      "matches": [ "http://*/*", "https://*/*", "file://*/favourites_localview.html" ]
+			"*://pornreactor.cc/*"
+	  ]
    } ],
    "converted_from_user_script": true,
    "manifest_version" : 2,
    "version": "1.0.0.0",
-   "name": "KellyFavItemsHelper",
+   "name": "__MSG_extName__",
+   "description": "__MSG_extDescription__",
+   "icons": { "32": "env/img/icon32x32.png",
+			  "44": "env/img/icon44x44.png",
+			  "128": "env/img/icon128x128.png" },
    "author" : "nradiowave",
+   "default_locale" : "en",
    "permissions": [
        "downloads",
 	   "storage",
