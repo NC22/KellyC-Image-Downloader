@@ -282,6 +282,12 @@
 	 height : 22px;
 }
 
+.__BASECLASS__-FavEditButton-download {
+    float: right;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
 .__BASECLASS__-FavEditButton-reset {
      float : right;
      background : #fff;

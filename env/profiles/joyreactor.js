@@ -10,6 +10,7 @@
         className : 'kellyJRFav', 
         profile : 'joyreactor',
         mainDomain : 'joyreactor.cc',
+        favPage : '/user/__USERNAME__/favorite/__PAGENUMBER__',
         mainContentContainer : 'contentinner',
         mainContainer : 'container',
 		sideBlock : 'sidebar',
@@ -27,13 +28,15 @@
        
         /* @! */        
         getPostTags : function(publication, limitTags) {
-        
+            
+            if (!limitTags) limitTags = false;
+            
             var tags = [];
             var nativeTags = KellyTools.getElementByClass(publication, 'taglist');
             if (!nativeTags) return tags;
             
             var nativeTags = nativeTags.getElementsByTagName('A');
-            if (!nativeTags || nativeTags.length) return tags;
+            if (!nativeTags || !nativeTags.length) return tags;
         
             for (var i = 0; i < nativeTags.length; i++) {
                var tagName = nativeTags[i].innerHTML.trim(); 
@@ -314,37 +317,57 @@
 					break;
 				}
 			}
+            
+            if (!info.userName) return false;
+            
+            info.url = '';
+            
+            if (window.origin.indexOf('https') != -1) {
+                info.url = 'https://';
+            } else {
+                info.url = 'http://';
+            }
+
+            // основной домен предоставляет больше метаинфы в отличии от old.
+            info.url += this.mainDomain + this.favPage;
+            info.url = info.url.replace('__USERNAME__', info.userName);
 			
 			var posts = document.getElementsByClassName('postContainer');
 			if (posts) info.items = posts.length;
 			
 			//(window.location.href.substr(window.location.href.length - 8) == 'favourite')
 			
-			var pagination = KellyTools.getElementByClass(document, 'pagination_expanded');
-
+            if (window.location.host.indexOf('old.') != -1) {
+                var pagination = document.getElementById('Pagination');
+            } else {
+                var pagination = KellyTools.getElementByClass(document, 'pagination_expanded'); 
+            }  
+            
 			if (pagination) {
-				info.page = parseInt(KellyTools.getElementByClass(pagination, 'current').innerHTML);
+				var current = pagination.getElementsByClassName('current');
+                
+                if (current) {
+                    for (var i = 0; i < current.length; i++) {
+                        if (parseInt(current[i].innerHTML)) {
+                            info.page = parseInt(current[i].innerHTML);
+                            break;
+                        }
+                    }
+                }
+                
 				if (info.page > info.pages) info.pages = info.page;
 				
 				var pages = pagination.getElementsByTagName('A');
 				for (var i = 0; i < pages.length; i++) {
+                
 					var pageNum = parseInt(pages[i].innerHTML);
 					if (info.pages < pageNum) info.pages = pageNum;   
 					
-					if (!info.url) {
-						info.url = pages[i].href;   
-						
-						if (info.url.substr(info.url.length - 8) != 'favorite') {
-							info.url = info.url.substring(0, info.url.length - (String(pageNum).length + 1));
-						}
-						
-						info.url += '/';                    
-						info.url = info.url.replace(window.location.origin, "")
-					}
 				}
 				
 				info.items += (info.pages - 1) * 10;
 			}
+            
 			
 			info.container = KellyTools.getElementByClass(document, this.className + '-FavNativeInfo'); 
 			if (!info.container) {
@@ -409,12 +432,12 @@
                 
                 this.fav.addCss(css);
             }
-        
+            
+			this.fav.showNativeFavoritePageInfo();
         },
 		
         /* @! */
 		onPageReady : function() {
-			this.fav.showNativeFavoritePageInfo();
 			return false;
 		},
 		
