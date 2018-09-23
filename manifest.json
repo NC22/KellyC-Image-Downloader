@@ -1,0 +1,20 @@
+{
+   "content_scripts": [ {
+      "exclude_globs": [  "http://img1.joyreactor.cc/*", "http://img0.joyreactor.cc/*"],
+      "include_globs": [ "http://joyreactor.cc/*", "http://joyreactor.cc/*", "http://*.joyreactor.cc/*", "http://*.reactor.cc/*", "http://reactor.cc/*" ],
+      "js": [ "jhelper.user.js" ],
+      "matches": [ "http://*/*", "https://*/*" ]
+   } ],
+   "converted_from_user_script": true,
+   "manifest_version" : 2,
+   "version": "1",
+   "name": "KellyFavItemsHelper",
+   "permissions": [
+       "downloads"
+    ],
+   "options_page": "options.html",
+   "background": {
+    "scripts": ["background/dispetcher.js"],
+    "persistent": false
+   }
+}
