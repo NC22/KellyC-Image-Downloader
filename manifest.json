@@ -5,6 +5,8 @@
 			"*://joyreactor.cc/*",
 			"*://*.joyreactor.cc/*", 
 			"*://*.reactor.cc/*", 
+			"*://joyreactor.com/*",
+			"*://pornreactor.cc/*",			
 			"file://*/favourites_localview.html"
 		],
       "js": [ "khelper.user.js" ],
@@ -12,7 +14,7 @@
    } ],
    "converted_from_user_script": true,
    "manifest_version" : 2,
-   "version": "1",
+   "version": "1.0.0.0",
    "name": "KellyFavItemsHelper",
    "author" : "nradiowave",
    "permissions": [
@@ -26,6 +28,7 @@
    },
    "web_accessible_resources": [
 		"env/css/*.css",
-		"env/profile/*.js"
+		"env/profile/*.js",
+		"env/loc/*.js"
 	]
 }

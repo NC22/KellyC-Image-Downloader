@@ -1,6 +1,7 @@
 	// !@ - not required by FavItemsHelper object methods
 	
 	// default profile object, move to separate file in future
+	// todo move formatcomment \ formatpost
 	
     var K_ENVIRONMENT = {
 		
@@ -19,7 +20,7 @@
 		
 		actionVar : 'dkl_pp', // deprecated
 		
-		cleanNative : false, // ускоряет загрузку страниц при выгрузки данных с сайта, НО не нужно т.к. сайт банит за быстрый спам запросами
+		cleanNative : false, // ускоряет загрузку страниц при выгрузке данных с сайта, НО не нужно т.к. сайт банит за быстрый спам запросами
 		
 		isNSFW : function() {
 			var sfw = KellyTools.getElementByClass(document, 'sswither');
@@ -252,6 +253,20 @@
 				modalBox.style.left = Math.round(sideBar.getBoundingClientRect().left) + 'px';
 				modalBox.style.width = Math.round(sideBar.getBoundingClientRect().width) + offsetLeft + 'px';
 			}		
+		},
+		
+		getStaticImage : function(source) {
+
+			if (source.indexOf('reactor') != -1) {
+			
+				if (source.indexOf('static') !== -1 || source.indexOf('.gif') == -1) return source;
+				
+				source = source.replace('pics/comment/', 'pics/comment/static/');
+				source = source.replace('post/', 'post/static/');
+				source = source.replace('.gif', '.jpeg');
+			}
+			
+			return source;
 		},
 		
 		getFavPageInfo : function() {

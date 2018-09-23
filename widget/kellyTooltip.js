@@ -394,3 +394,70 @@ kellyTooltip.loadDefaultCss = function(className) {
 	
 	return true;
 }
+
+kellyTooltip.addTipToEl = function(el, message, cfg, delay) {
+	
+	if (!delay) delay = 50;
+	
+	if (!cfg) {
+	
+		cfg = {
+			offset : {left : -20, top : 0}, 
+			positionY : 'top',
+			positionX : 'right',
+			ptypeX : 'outside',
+			ptypeY : 'inside',
+			closeButton : false,
+			selfClass : 'kellyTooltip-ItemTip-tooltipster',
+			classGroup : 'kellyTooltip-tooltipster',
+			removeOnClose : true,
+		};
+	}
+	
+	cfg.target = el;
+
+	el.onmouseover = function (e) { 
+			
+		var tipTimer = setTimeout(function() {
+			
+			var text = false;
+			
+			if (typeof message == 'function') {
+				text = message(el, e);
+				
+				if (!text) return;
+			} else text = message;			
+			
+			var tooltip = new kellyTooltip(cfg);
+
+				tooltip.setMessage(text);			
+				tooltip.show(true);
+				tooltip.updatePosition();
+				
+			el.onmouseout = function(e) {
+				var related = e.toElement || e.relatedTarget;
+				if (tooltip.isChild(related)) return;
+				
+				tooltip.show(false);
+				delete tooltip;
+			}
+			
+			tooltip.self.onmouseout = function(e) {					
+				var related = e.toElement || e.relatedTarget;
+				
+				if (tooltip.isChild(related) ) return;
+				
+				tooltip.show(false);
+				delete tooltip;
+			}
+			
+		}, delay);
+		
+		el.onmouseout = function(e) {
+			console.log(tipTimer);
+			if (tipTimer) {
+				clearTimeout(tipTimer);
+			}
+		}
+	}		
+}

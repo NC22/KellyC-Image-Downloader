@@ -11,11 +11,52 @@
     overflow: hidden;
 }
 
-#submenu .old_reactor_cc.__BASECLASS__-MainMenuItem-fav .kellyJRFav-icon {
+.old_reactor_cc .kellyJRFav-FiltersMenu > li {
+	margin-top : 3px;
+}
+
+.old_reactor_cc .kellyJRFav-FiltersMenu {
+	margin-top : 12px;
+}
+
+.old_reactor_cc .kellyJRFav-FiltersMenu > li > a {
+    text-decoration: none;
+    text-align: center;
+    background: #ffc78e;
+    display: inline-block;
+    border: 1px solid #fab728;
+    background-color: white;
+    font-size: 11px;
+    font-weight: bold;
+    height: 25px;
+    line-height: 25px;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 3px;
+    margin-right: 4px;
+    float: left;
+}
+
+.old_reactor_cc .__BASECLASS__-pagination-item {
+    line-height: 26px;
+    width: 16px;
+    height: 26px;
+    font-size: 12px;
+}
+
+#__BASECLASS__-ModalBox.old_reactor_cc a {
+    color: #000;
+}
+
+.__BASECLASS__-filters-AdditionButtons table .__BASECLASS__-FavFilter {
+	margin : 0px;
+}
+
+#submenu .old_reactor_cc.__BASECLASS__-MainMenuItem-fav .__BASECLASS__-icon {
     width: 26px;
     height: 26px;
 	border-radius: 0px;
-	background-size: auto;
+	background-size: 16px;
 }
 
 #submenu .old_reactor_cc.__BASECLASS__-MainMenuItem-fav a:hover {
@@ -25,7 +66,7 @@
 	margin-right : 0px;
 }
 
-#submenu .old_reactor_cc.kellyJRFav-MainMenuItem-fav.active .kellyJRFav-icon {
+#submenu .old_reactor_cc.__BASECLASS__-MainMenuItem-fav.active .__BASECLASS__-icon {
     background-color: rgba(186, 186, 186, 0.5215);
 }
 
