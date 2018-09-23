@@ -1,6 +1,9 @@
 # KellyCFavourites
 Store you personal favourite publications localy
 
+ <br>
+# RU <br>
+
 Для сборки расширения достаточно выполнить файл <b>merge.bat</b> либо собрать в один файл нижеперечисленные файлы любым доступным способом.
 После сборки расширение можно добавить в режиме разработчика в любой браузер поддерживающий chrome API 
 
@@ -8,25 +11,24 @@ Store you personal favourite publications localy
 
 FireFox, Opera, Chrome, Edge (с существеными ограничениями, на 23.09.18 отсутсвуют методы скачивания файлов)
 
->	\widget\kellyTooltip.js (виджет вывода подсказок и всплывающих окон)
->	\widget\kellyTileGrid.js (виджет тайловой сетки изображений)
->	\widget\kellyImageView.js (виджет вывода изображений)
->	\lib\kellyLoc.js (вывод локализованых строк)
->	\lib\kellyStorageManager.js (контроллер управления локальными данными)
->	\lib\kellyThreadWork.js (контроллер потоковой загрузки данных)
->	\lib\kellyGrabber.js (контроллер пакетной выгрузки элементов избранного)
->	\lib\kellyTools.js	(набор дополнительных методов используемых всеми библиотеками из каталога lib)
->	\lib\KellyFavItems.js (файл окружения расширения)
->	\env\profiles\joyreactor.js (файл профиля домена)
->	\init.js" (инициализация клиентской части)
-
-Объединить в файл khelper.user.js
-
->   \lib\kellyTools.js (набор дополнительных методов используемых всеми библиотеками из каталога lib
->   \lib\KellyDispetcher.js (шлюз для обработки любых методов требующих участия Browser API)
->   \init.bg.js" (инициализация фонового процесса)
-
--RU 
+>	\widget\kellyTooltip.js (виджет вывода подсказок и всплывающих окон)<br>
+>	\widget\kellyTileGrid.js (виджет тайловой сетки изображений)<br>
+>	\widget\kellyImageView.js (виджет вывода изображений)<br>
+>	\lib\kellyLoc.js (вывод локализованых строк)<br>
+>	\lib\kellyStorageManager.js (контроллер управления локальными данными)<br>
+>	\lib\kellyThreadWork.js (контроллер потоковой загрузки данных)<br>
+>	\lib\kellyGrabber.js (контроллер пакетной выгрузки элементов избранного)<br>
+>	\lib\kellyTools.js	(набор дополнительных методов используемых всеми библиотеками из каталога lib)<br>
+>	\lib\KellyFavItems.js (файл окружения расширения)<br>
+>	\env\profiles\joyreactor.js (файл профиля домена)<br>
+>	\init.js" (инициализация клиентской части)<br>
+<br>
+Объединить в файл khelper.user.js<br>
+<br>
+>   \lib\kellyTools.js (набор дополнительных методов используемых всеми библиотеками из каталога lib<br>
+>   \lib\KellyDispetcher.js (шлюз для обработки любых методов требующих участия Browser API)<br>
+>   \init.bg.js" (инициализация фонового процесса)<br>
+<br>
 
 Поддерживаются все фендомы и основные страницы сайта joyreactor.cc, old.reactor.cc
 
