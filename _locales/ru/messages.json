@@ -1,8 +1,245 @@
-{
-	"extName" : {
-		"message" : "KellyC Favourites"
-	},
-	"extDescription" : {
-		"message" : "Сохраняйте понравившиеся публикации на ресурсах локально."
-	}		
+{  
+    "add_selected_cats":{  
+        "message":"Добавить отмеченые категории"
+    },
+    "add_to_fav":{  
+        "message":"Добавить в избранное"
+    },
+    "add_to_item":{  
+        "message":"Добавить к изображению"
+    },
+    "animate_gifs":{  
+        "message":"Анимация GIF"
+    },
+    "apply":{  
+        "message":"Применить изменения"
+    },
+    "cancel":{  
+        "message":"Отменить"
+    },
+    "cat_add":{  
+        "message":"Добавить категорию"
+    },
+    "cat_add_success":{  
+        "message":"Категория добавлена"
+    },
+    "cat_create":{  
+        "message":"Создать категорию"
+    },
+    "cat_order":{  
+        "message":"Приоритет"
+    },
+    "cat_error_name":{  
+        "message":"Введите название категории"
+    },
+    "cat_error_name_exist":{  
+        "message":"Категория с указаным именем уже существует"
+    },
+    "cat_name":{  
+        "message":"Название новой категории"
+    },
+    "cat_new_cat_name":{  
+        "message":"Название новой категории"
+    },
+    "cat_no_cat":{  
+        "message":"Без категории"
+    },
+    "cats":{  
+        "message":"Категории"
+    },
+    "cgrid_default_rowst":{  
+        "message":"Стиль по умолчанию для элемента строки"
+    },
+    "cgrid_fixed":{  
+        "message":"Фиксированное кол-во элементов на строку"
+    },
+    "cgrid_max_diff":{  
+        "message":"Допустимая погрешность высоты строки"
+    },
+    "cgrid_max_row_height":{  
+        "message":"Максимальная высота одной строки"
+    },
+    "cgrid_min_number":{  
+        "message":"Минимальное кол-во элементов в строке"
+    },
+    "cgrid_new_to_begin":{  
+        "message":"Новые в начало"
+    },
+    "cgrid_per_page":{  
+        "message":"Элементов на страницу"
+    },
+    "cgrid_tiles_header":{  
+        "message":"Настройки сетки элементов"
+    },
+    "change":{  
+        "message":"Изменить"
+    },
+    "comments":{  
+        "message":"Комменты"
+    },
+    "debug":{  
+        "message":"Режим отладки"
+    },  
+    "delete":{  
+        "message":"Удалить"
+    },
+    "delete_all_items":{  
+        "message":"Удалить всю подборку"
+    },
+    "delete_confirm":{  
+        "message":"Подтвердите удаление"
+    },
+    "delete_rcat_items":{  
+        "message":"Удалить все связанные изображения"
+    },
+    "download":{  
+        "message":"Скачать"
+    },
+    "download_example":{  
+        "message":"Укажите список страниц выборки, которые необходимо скачать. Например 2, 4, 66-99, 44, 78, 8-9, 29-77 и т.п.,"
+    },
+    "download_log":{  
+        "message":"Показать лог"
+    },
+    "download_manager":{  
+        "message":"Загрузки"
+    },
+    "download_pages_left":{  
+        "message":"Страниц в очереди __PAGESN__"
+    },
+    "download_skip_empty":{  
+        "message":"Пропускать публикации не имеющие медиа данных (текст, заблокировано цензурой)"
+    },
+    "download_start":{  
+        "message":"Запустить скачивание страниц"
+    },
+    "download_tip":{  
+        "message":"Если нужно захватить все страницы оставьте не заполненным"
+    },
+    "download_title":{  
+        "message":"Сделать локальную копию"
+    },
+    "download_tag_filter_1":{  
+        "message":"Укажите теги, посты которых необходимо сохранять. Например \"art девушка, art\". Если необходимо исключить определенные теги, то они должны начинаться с символ \"-\" в названии. Например \"-политика, -изврат, -гуро\"."
+    },
+    "download_tag_filter_empty":{  
+        "message":"Если теги не определены, выполняется сохранение всех публикаций"
+    },
+    "download_tag_filter":{  
+        "message":"Фильтровать публикации по списку тегов"
+    },
+    "extDescription":{  
+        "message":"Сохраняйте понравившиеся публикации на ресурсах локально."
+    },
+    "extName":{  
+        "message":"KellyC Favourites"
+    },
+    "go_to_comment":{  
+        "message":"Показать комментарий"
+    },
+    "go_to_publication":{  
+        "message":"Показать пост"
+    },
+    "ignore_comments":{  
+        "message":"Игнорировать комментарии"
+    },
+    "ignore_publications":{  
+        "message":"Игнорировать посты"
+    },
+    "image":{  
+        "message":"Изображение __IMAGEN__"
+    },
+    "image_main":{  
+        "message":"Основное изображение"
+    },
+    "image_total":{  
+        "message":"Изображений : __IMAGEN__"
+    },
+    "init_css_error":{  
+        "message":"Ошибка инициализации таблиц оформления"
+    },
+    "item_added":{  
+        "message":"Публикация добавлена в избранное"
+    },
+    "item_bad_url":{  
+        "message":"Публикация не имеет ссылки"
+    },
+    "item_notice":{  
+        "message":"Подпись"
+    },
+    "item_number":{  
+        "message":"Запись №__ITEMN__"
+    },
+    "item_sign":{  
+        "message":"Подпись : "
+    },
+    "item_upd":{  
+        "message":"Избранная публикация обновлена"
+    },
+    "items":{  
+        "message":"Публикации"
+    },
+    "fav_list_empty":{  
+        "message":"Список избранных публикаций пуст"
+    },
+    "language":{  
+        "message":"Язык"
+    },
+    "logic_and":{  
+        "message":"Логика И"
+    },
+    "logic_or":{  
+        "message":"Логика ИЛИ"
+    },
+    "new_name":{  
+        "message":"Новое название"
+    },
+    "next":{  
+        "message":"Следующее"
+    },
+    "no_image":{  
+        "message":"Без изображения"
+    },
+    "options":{  
+        "message":"Настройки"
+    },
+    "options_main":{  
+        "message":"Основные настройки"
+    },
+    "options_saved":{  
+        "message":"Настройки сохранены"
+    },
+    "other":{  
+        "message":"Остальное"
+    },   
+    "pages":{  
+        "message":"Страницы"
+    },
+    "pages_n":{  
+        "message":"Страниц"
+    },
+    "prev":{  
+        "message":"Предыдущее"
+    },
+    "preview":{  
+        "message":"превью"
+    },
+    "remove_from_fav":{  
+        "message":"Удалить из избранного"
+    },
+    "removed_cat":{  
+        "message":"Удаленная категория"
+    },
+    "save":{  
+        "message":"Сохранить"
+    },
+    "selection_empty":{  
+        "message":"Выборка пуста"
+    },
+    "source":{  
+        "message":"оригинал"
+    },
+    "storage":{  
+        "message":"Данные"
+    }
 }

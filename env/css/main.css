@@ -56,7 +56,8 @@
 	padding-left : 40px;
 }
 
-.__BASECLASS__-tooltipster-wrap.__BASECLASS__-Default-tooltipster, .__BASECLASS__-tooltipster-wrap.__BASECLASS__-ItemTip-tooltipster  {
+.__BASECLASS__-tooltipster-wrap.__BASECLASS__-Default-tooltipster, 
+.__BASECLASS__-tooltipster-wrap.__BASECLASS__-ItemTip-tooltipster  {
      z-index : 1010;
 }
 
@@ -90,6 +91,7 @@
 	opacity : 0;
 	z-index : 60;
 	pointer-events: none;
+	transition: opacity 0.3s;
 }
 
 .__BASECLASS__-tooltipster-container {
@@ -98,7 +100,6 @@
 	margin : 0;
 	background : rgba(96, 102, 126, 0.9490);
 	border : 0px dashed #c5c5c5;
-	transition: opacity 0.1s;
 	color : #fff;
 	border-radius : 4px;
 	padding : 12px;
@@ -158,6 +159,18 @@
 
 /* image grid */
 
+.__BASECLASS__-imagesBlock-container {
+    transition : opacity 0.2s;
+}
+
+.__BASECLASS__-imagesBlock-container-active {
+    opacity : 1;
+}
+
+.__BASECLASS__-imagesBlock-container-hidden {
+    opacity : 0;
+}
+
 .__BASECLASS__-preview-text {
      width : 100%;
      line-height : 14px;
@@ -170,6 +183,8 @@
 .__BASECLASS__-preview {
     overflow : hidden;
     height : 250px;
+    border-radius : 4px;
+    cursor: pointer;
 }
 
 .__BASECLASS__-FavItem-grid-resized .__BASECLASS__-preview {
@@ -201,7 +216,7 @@
 	 line-height : 0px;
 }
 
-.__BASECLASS__-FavItem .kellyFavListItem-additions {
+.__BASECLASS__-FavItem .__BASECLASS__-FavItem-additions {
      position: absolute;
      padding: 0px;
      left: auto;
@@ -213,7 +228,7 @@
      top: 6px;
 }
 
-.kellyFavListItem-overlay-button {
+.__BASECLASS__-FavItem-overlay-button {
      display : none;
      line-height : 32px;
      height : 32px;
@@ -232,24 +247,28 @@
      top : 6px;
 }
 
-.kellyFavListItem-overlay-button-bottom {
+.__BASECLASS__-FavItem-overlay-button-bottom {
      top : auto;
 	 
      left : 6px;
      bottom : 6px;
 }
 
-.__BASECLASS__-FavItem a.kellyFavListItem-collection {
+.__BASECLASS__-FavItem a.__BASECLASS__-FavItem-collection {
      display: block;
-     border: 1px solid #000;
      padding: 0px;
      margin-left: 6px;
      width: 32px;
      height: 32px;
      text-align: center;
      line-height: 32px;
-     background: #d5d5d5;
+     background-color: rgba(213, 213, 213, 0.81);
      text-decoration: none;
+     border-radius : 3px;
+}
+
+.__BASECLASS__-FavItem a.__BASECLASS__-FavItem-collection:hover {
+    background-color : #ffb04e;
 }
 
 .__BASECLASS__-FavItem:hover > a {
@@ -280,8 +299,8 @@
      display : inline-block;
      height : 32px;
      line-height : 32px;
-     padding-left : 12px;
-     padding-right : 12px;
+     padding-left : 6px;
+     padding-right : 6px;
      text-decoration : none;
      margin-right : 6px;
 }
@@ -314,17 +333,16 @@
 }
  
 .__BASECLASS__-FiltersMenu > li > a {
-     border-radius : 16px;
+     border-radius : 6px;
      text-decoration : none;
      display : inline-block;
      margin-right : 6px;
-     line-height : 28px;
+     line-height : 24px;
      text-align : center;
-     height : 32px;
+     height : 24px;
      font-size : 14px;
      background : #ffc78e;
      display : inline-block;
-     line-height : 32px;
      padding-left : 4px;
      padding-right : 4px;
 	 min-width : 32px;
@@ -346,25 +364,77 @@
      background : #ea8080; /* #ff002f; */
 }
 
-.__BASECLASS__-ModalBox {
-     display : none;
-     position:absolute;
-     z-index:990;
-     margin : 0 auto;
-     width : 300px;
-     background : #fff;
-     min-height : 255px;
-     border : 1px solid #e1e1e1;
-     border-radius : 4px;
-     top: 244px;
-    /*left : 50%;
-    */
-     right : 4px;
-    /*margin-left : -400px;
-    */
+.__BASECLASS__-sidebar-wrap {
+     position: absolute;
+     z-index: 990;
+     
+     transition : opacity 0.3s;
 }
 
-.__BASECLASS__-ModalBox > div:first-child {
+.__BASECLASS__-sidebar-wrap-hidden {
+     pointer-events: none;
+     opacity : 0;
+}
+
+.__BASECLASS__-sidebar-wrap-active {
+     pointer-events: auto;
+     opacity : 1;
+}
+
+.__BASECLASS__-ModalBox.hidden {
+    opacity : 0;
+}
+
+.__BASECLASS__-ModalBox {
+
+     margin : 0 auto; 
+     background : #fff;     
+     min-height : 255px;     
+     border : 1px solid #e1e1e1;
+     border-radius : 4px;
+     
+     opacity : 1;
+     transition : opacity 0.3s;
+     
+     pointer-events: auto;
+}
+
+.__BASECLASS__-ModalBox-controll-buttons a {
+    padding-left : 6px;
+    padding-right : 6px;
+}
+
+.__BASECLASS__-ModalBox-downloader {
+    margin-top: 16px;
+}
+
+.__BASECLASS__-ModalBox-downloader .__BASECLASS__-ModalBox-content {
+    background : #fff;
+}
+
+.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a {
+
+    background : #ffebc2;
+    display : block ;
+    width : 80%;
+    margin : 0 auto;
+    margin-top : 12px;
+    margin-bottom : 12px;
+}
+
+.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll table {
+    display : block;
+}
+
+.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll tr, .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll td  {
+    display : block;
+}
+
+.__BASECLASS__-downloader-controll .__BASECLASS__-downloader-controll-extended.hidden {
+    display : none;
+}
+
+.__BASECLASS__-ModalBox-header {
      min-height : 32px;
      text-align : right;
      padding : 0px;
@@ -373,18 +443,16 @@
      text-decoration : none;
      background-color : #f5f5f5;
 }
- .__BASECLASS__-ModalBox > div:first-child a {
+
+.__BASECLASS__-ModalBox-header a {
      text-decoration : none;
      color : #555;
      font-size : 16px;
      line-height : 32px;
 }
- .__BASECLASS__-ModalBox .__BASECLASS__-ModalBox-content {
+
+.__BASECLASS__-ModalBox .__BASECLASS__-ModalBox-content {
      padding : 12px;
-}
- .__BASECLASS__-ModalBox .__BASECLASS__-ModalBox-content a {
-     padding-left : 6px;
-     padding-right : 6px;
 }
 
  .kellyPreviewImage-container {
@@ -495,7 +563,7 @@
 	color : #000;
 	position : absolute; 
 	display : block;
-	opacity : 0;
+	opacity : 1;
 	width : 32px;
 	height : 32px;
 	font-weight : bold;
@@ -521,6 +589,11 @@
 
 .__BASECLASS__-ImgView-btn-prev  {
 	padding-left: 7px;
+}
+
+.__BASECLASS__-ImgView-btn-hidden {
+	opacity : 0;
+    pointer-events: none;
 }
 
 .__BASECLASS__-ImgView-btn svg  {
@@ -698,11 +771,11 @@
 	margin-bottom : 24px;
 }
 
-.__BASECLASS__-download-container {
+.__BASECLASS__-exporter-container {
 	margin-bottom : 24px;
 }
 
-.__BASECLASS__-download-log {
+.__BASECLASS__-exporter-log {
 	width : 400px;
 	height : 200px;
 	overflow-y : auto;
@@ -712,9 +785,96 @@
     border-radius: 3px;
 }
 
+.__BASECLASS__-exporter-tag-filter {
+	width : 400px;
+	height : 200px;
+}
+
 
 .__BASECLASS__-filters-AdditionButtons td {
 	text-align: center;
     width: 33%;
     white-space: nowrap;
+}
+
+/* Download manager */
+
+.__BASECLASS__-downloader-item { 
+    margin-bottom : 12px; 
+    display : block; 
+    line-height : 1; 
+    height : 16px;
+    font-size : 12px; 
+}
+
+.__BASECLASS__-downloader-item-state-holder { 
+    display : inline-block; 
+}
+
+.__BASECLASS__-downloader-item-state { 
+    display : inline-block; 
+    margin-left : 12px;
+    margin-right : 12px;
+    width : 16px; 
+    height : 16px;
+    background : #2bff4f;
+    border-radius: 8px;
+    border : 1px solid 1px solid rgba(0,0,0,0.3); 
+    
+    position : absolute;
+    right : 16px;
+    bottom : 16px;
+}
+
+.__BASECLASS__-downloader-controll {
+    line-height: normal;
+}
+
+.__BASECLASS__-downloader-controll div {
+    line-height: normal;
+}
+
+.__BASECLASS__-downloader-item-state-err {
+    background : #ff2b2b; 
+    border : 1px solid 1px solid rgba(0,0,0,0.3); 
+}
+
+.__BASECLASS__-downloader-item-state-wait {
+    background : #ffe52b;  
+}
+
+
+.__BASECLASS__-downloader-item-state-loading { 
+    width : 16px; 
+    height : 16px;
+    background : #ff972b; 
+    border : 1px solid 1px solid rgba(0,0,0,0.3);
+}
+
+.__BASECLASS__-downloader-controll { 
+
+}
+
+.__BASECLASS__-FavItem-download-number {
+    display: block;
+    /* width: 30px; */
+    height: 30px;
+    background: #ffa560;
+    line-height: 30px;
+    vertical-align: middle;
+    text-align: center;
+    font-size: 22px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    color : #000;
+}
+
+.__BASECLASS__-FavItem-download-state-holder {
+    position: absolute;
+    top: 0;
+    right: 0px;
+    padding: 6px;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
 }

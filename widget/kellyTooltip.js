@@ -429,32 +429,42 @@ kellyTooltip.addTipToEl = function(el, message, cfg, delay) {
 			} else text = message;			
 			
 			var tooltip = new kellyTooltip(cfg);
-
-				tooltip.setMessage(text);			
-				tooltip.show(true);
-				tooltip.updatePosition();
-				
-			el.onmouseout = function(e) {
-				var related = e.toElement || e.relatedTarget;
-				if (tooltip.isChild(related)) return;
-				
-				tooltip.show(false);
-				delete tooltip;
-			}
-			
-			tooltip.self.onmouseout = function(e) {					
-				var related = e.toElement || e.relatedTarget;
-				
-				if (tooltip.isChild(related) ) return;
-				
-				tooltip.show(false);
-				delete tooltip;
-			}
+            
+            var onmouseOver = el.onmouseover;
+            
+            el.onmouseout = function(e) {}
+            el.onmouseover = function(e) {}
+            
+            setTimeout(function() {
+            
+                tooltip.setMessage(text);			
+                tooltip.show(true);
+                tooltip.updatePosition();
+                
+                el.onmouseover = onmouseOver;
+                
+                el.onmouseout = function(e) {
+                    var related = e.toElement || e.relatedTarget;
+                    if (tooltip.isChild(related)) return;
+                    
+                    tooltip.show(false);
+                    delete tooltip;
+                }
+                
+                tooltip.self.onmouseout = function(e) {					
+                    var related = e.toElement || e.relatedTarget;
+                    
+                    if (tooltip.isChild(related) ) return;
+                    
+                    tooltip.show(false);
+                    delete tooltip;
+                }
+			}, 100);           
+            
 			
 		}, delay);
 		
 		el.onmouseout = function(e) {
-			console.log(tipTimer);
 			if (tipTimer) {
 				clearTimeout(tipTimer);
 			}

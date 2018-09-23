@@ -1,8 +1,245 @@
-{
-	"extName" : {
-		"message" : "KellyC Favourites"
-	},
-	"extDescription" : {
-		"message" : "Save favourite publications to your local browser storage. "
-	}
+{  
+    "add_selected_cats":{  
+        "message":"Add selected categories"
+    },
+    "add_to_fav":{  
+        "message":"Add to favourite"
+    },
+    "add_to_item":{  
+        "message":"Add to item"
+    },
+    "animate_gifs":{  
+        "message":"Animate GIFs"
+    },
+    "apply":{  
+        "message":"Apply"
+    },
+    "cancel":{  
+        "message":"Cancel"
+    },
+    "cat_add":{  
+        "message":"Add category"
+    },
+    "cat_add_success":{  
+        "message":"Category added"
+    },
+    "cat_create":{  
+        "message":"Create category"
+    },
+    "cat_order":{  
+        "message":"Order"
+    },
+    "cat_error_name":{  
+        "message":"Please enter category name"
+    },
+    "cat_error_name_exist":{  
+        "message":"Category with that name already exist"
+    },
+    "cat_name":{  
+        "message":"Category name"
+    },
+    "cat_new_cat_name":{  
+        "message":"New category name"
+    },
+    "cat_no_cat":{  
+        "message":"Without category"
+    },
+    "cats":{  
+        "message":"Categories"
+    },
+    "cgrid_default_rowst":{  
+        "message":"Default row style"
+    },
+    "cgrid_fixed":{  
+        "message":"Fixed amount of elements per row"
+    },
+    "cgrid_max_diff":{  
+        "message":"Max row height difference (percent)"
+    },
+    "cgrid_max_row_height":{  
+        "message":"Max row height"
+    },
+    "cgrid_min_number":{  
+        "message":"Min items number"
+    },
+    "cgrid_new_to_begin":{  
+        "message":"New to begining"
+    },
+    "cgrid_per_page":{  
+        "message":"Items per page"
+    },
+    "cgrid_tiles_header":{  
+        "message":"Image grid options"
+    },
+    "change":{  
+        "message":"Change"
+    },
+    "comments":{  
+        "message":"Comments"
+    },  
+    "debug":{  
+        "message":"Debug mode"
+    },    
+    "delete":{  
+        "message":"Delete"
+    },
+    "delete_all_items":{  
+        "message":"Delete all items and publication"
+    },
+    "delete_confirm":{  
+        "message":"Confirm remove item"
+    },
+    "delete_rcat_items":{  
+        "message":"Delete all publications in category"
+    },
+    "download":{  
+        "message":"Download"
+    },
+    "download_example":{  
+        "message":"Please enter pages, that need to be downloaded (ex. 2, 4, 66-99, 44, 78, 8-9, 29-77 etc."
+    },
+    "download_log":{  
+        "message":"Log"
+    },
+    "download_manager":{  
+        "message":"Download manager"
+    },
+    "download_pages_left":{  
+        "message":"Pages left : __PAGESN__"
+    },
+    "download_skip_empty":{  
+        "message":"Skip publication without media data (plain text, censored, etc.)"
+    },
+    "download_start":{  
+        "message":"Run import"
+    },
+    "download_tip":{  
+        "message":"If you want download all pages, just keep field empty"
+    },
+    "download_title":{  
+        "message":"Make local copy"
+    },
+    "download_tag_filter_1":{  
+        "message":"Select tags, post that includes that tags will be saved. For example \"art девушка, art\". If you want to exclude some publications with specifed tags, then type tags with sybmbol \"-\" before tag name. For example \"-политика, -изврат, -гуро\""
+    },    
+    "download_tag_filter_empty":{  
+        "message":"If tag filter list empty, all publications will be included"
+    },
+    "download_tag_filter":{  
+        "message":"Tag filter"
+    },
+    "extDescription":{  
+        "message":"Save favourite publications to your local browser storage. "
+    },
+    "extName":{  
+        "message":"KellyC Favourites"
+    },
+    "go_to_comment":{  
+        "message":"Show comment"
+    },
+    "go_to_publication":{  
+        "message":"Show publication"
+    },
+    "ignore_comments":{  
+        "message":"Ignore comments"
+    },
+    "ignore_publications":{  
+        "message":"Ignore publications"
+    },
+    "image":{  
+        "message":"Image №__IMAGEN__"
+    },
+    "image_main":{  
+        "message":"Main image"
+    },
+    "image_total":{  
+        "message":"Images total : __IMAGEN__"
+    },
+    "init_css_error":{  
+        "message":"Initialization error (unable to load CSS files)"
+    },
+    "item_added":{  
+        "message":"Publication added"
+    },
+    "item_bad_url":{  
+        "message":"Publication link empty"
+    },
+    "item_notice":{  
+        "message":"Notice"
+    },
+    "item_number":{  
+        "message":"Item №__ITEMN__"
+    },
+    "item_sign":{  
+        "message":"Sign : "
+    },
+    "item_upd":{  
+        "message":"Publication updated"
+    },
+    "items":{  
+        "message":"Publications"
+    },
+    "fav_list_empty":{  
+        "message":"List of favourite items is empty"
+    },
+    "language":{  
+        "message":"Language"
+    },
+    "logic_and":{  
+        "message":"Logic AND"
+    },
+    "logic_or":{  
+        "message":"Logic OR"
+    },
+    "new_name":{  
+        "message":"New name"
+    },
+    "next":{  
+        "message":"Next"
+    },
+    "no_image":{  
+        "message":"Without image"
+    },
+    "options":{  
+        "message":"Options"
+    },
+    "options_main":{  
+        "message":"Main options"
+    },
+    "options_saved":{  
+        "message":"Options changed"
+    },
+    "other":{  
+        "message":"Other"
+    },
+    "pages":{  
+        "message":"Pages"
+    },
+    "pages_n":{  
+        "message":"Pages"
+    },
+    "prev":{  
+        "message":"Previouse"
+    },
+    "preview":{  
+        "message":"preview"
+    },
+    "remove_from_fav":{  
+        "message":"Remove from favourite"
+    },
+    "removed_cat":{  
+        "message":"Removed category"
+    },
+    "save":{  
+        "message":"Save"
+    },
+    "selection_empty":{  
+        "message":"Selection empty"
+    },
+    "source":{  
+        "message":"source"
+    },
+    "storage":{  
+        "message":"Storage"
+    }
 }

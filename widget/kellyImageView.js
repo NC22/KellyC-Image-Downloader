@@ -171,20 +171,18 @@ function KellyImgView(cfg) {
         for (var k in buttons){
             if (typeof buttons[k] !== 'function') {
 			
-            	buttons[k].className = buttons[k].className.replace(idGroup + '-hidden', '').trim();
+            	buttons[k].className = buttons[k].className.replace(idGroup + '-btn-hidden', '').trim();
 				
 				if ((k == 'prev' || k == 'next') && (!images[selectedGallery] || images[selectedGallery].length <= 1)) {
-					buttons[k].className += ' ' + idGroup + '-hidden';
-					buttons[k].style.opacity = '0';
+					buttons[k].className += ' ' + idGroup + '-btn-hidden';
 					continue;
-				}
-            
-                if (hide) {
-					buttons[k].className += ' ' + idGroup + '-hidden';
-					buttons[k].style.opacity = '0';
-                } else buttons[k].style.opacity = '1';
+				} else if (hide) {
+					buttons[k].className += ' ' + idGroup + '-btn-hidden';
+                }
             }
-        }
+        }        
+        
+        handler.updateButtonsPos();
     }
     
     this.hideLoader = function(hide) {
@@ -234,13 +232,14 @@ function KellyImgView(cfg) {
         if (buttons['close']) return true;
         
         handler.addButton(getSvgIcon('close', '#000'), 'close', function() { handler.cancelLoad(); });
+        
         handler.addButton(getSvgIcon('left', '#000'), 'prev', function() { handler.nextImage(false); });
         handler.addButton(getSvgIcon('right', '#000'), 'next', function() { handler.nextImage(true); });
         
         return true;
     }
 
-    this.onUpdateImagePos = function(pos) {
+    this.updateButtonsPos = function(pos) {
     
         if (!image) return false;
 		// console.log(window.getComputedStyle(image));
@@ -255,45 +254,42 @@ function KellyImgView(cfg) {
         var clientBounds = handler.getClientBounds();
         
         var item = 0;
-        var horizontal = false;
-        
+        var horizontal = false;        
 		
         var left = pos.left + parseInt(image.style.width) + 12;
         var top = pos.top;
         
-        for (var k in buttons){
-            if (typeof buttons[k] !== 'function') {
-				//console.log(buttons[k].style.opacity)
-				//if (buttons[k].className.indexOf('hidden') != -1) continue;
-				
-                item++;                
-                var buttonBounds = buttons[k].getBoundingClientRect();
-                
-                if (item == 1) {
-                    // console.log(top - buttonBounds.height)
-                    if (left + buttonBounds.width > clientBounds.screenWidth - 12) {
-                        horizontal = true;
-                        left = pos.left;
-                        top -= buttonBounds.height +  12;                    
-                    }
-
-                    if (horizontal && top - buttonBounds.height <= 0) {
-                        top = pos.top;
-                    }
-                    
-                    if (!horizontal && top <= 0) {
-                        top = 0;
-                    }
-                } 
-                
-                buttons[k].style.left = left + 'px';
-                buttons[k].style.top = top + 'px'; 
-                
-                if (horizontal) { 
-                    left += buttonBounds.width + buttonsMargin;
-                } else {
-                    top += buttonBounds.height + buttonsMargin;
+        for (var k in buttons) {
+            
+            if (buttons[k].className.indexOf('hidden') != -1) continue;
+            
+            item++;                
+            var buttonBounds = buttons[k].getBoundingClientRect();
+            
+            if (item == 1) {
+                // console.log(top - buttonBounds.height)
+                if (left + buttonBounds.width > clientBounds.screenWidth - 12) {
+                    horizontal = true;
+                    left = pos.left;
+                    top -= buttonBounds.height +  12;                    
                 }
+
+                if (horizontal && top - buttonBounds.height <= 0) {
+                    top = pos.top;
+                }
+                
+                if (!horizontal && top <= 0) {
+                    top = 0;
+                }
+            } 
+            
+            buttons[k].style.left = left + 'px';
+            buttons[k].style.top = top + 'px'; 
+            
+            if (horizontal) { 
+                left += buttonBounds.width + buttonsMargin;
+            } else {
+                top += buttonBounds.height + buttonsMargin;
             }
         }
     }
@@ -506,7 +502,7 @@ function KellyImgView(cfg) {
         image.style.top = Math.floor(posCenter.top - (rHeight / 2)) + 'px';
 		
 		
-        handler.onUpdateImagePos();
+        handler.updateButtonsPos();
     }
     
 	// get local coordinats event pos
@@ -595,7 +591,7 @@ function KellyImgView(cfg) {
             
         } else return;
         
-        handler.onUpdateImagePos(newPos);
+        handler.updateButtonsPos(newPos);
     }
     
     this.dragEnd = function(e) {
@@ -630,7 +626,7 @@ function KellyImgView(cfg) {
 					var newPos = {left : move.left, top : move.top}
 				
 					image.style.left = newPos.left + 'px';                
-					handler.onUpdateImagePos(newPos);
+					handler.updateButtonsPos(newPos);
 				}
             }
             
@@ -755,7 +751,7 @@ function KellyImgView(cfg) {
         image.style.left =  newPos.left + 'px';
         image.style.top = newPos.top + 'px';
         
-        handler.onUpdateImagePos(newPos);
+        handler.updateButtonsPos(newPos);
         return true;
     }
     
