@@ -457,7 +457,7 @@ function KellyTileGrid(cfg) {
                 
                 if (!rules.fixed) {
                     if (currentTileRow.length < rules.min ) continue;
-                    // if (i + rules.min >= tiles.length) continue; // keep collect last elements
+                    if (i + rules.min >= tiles.length) continue; // collect last elements, todo set as option
                     
                     var currentRowResultHeight = getExpectHeight();
                     

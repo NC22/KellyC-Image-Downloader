@@ -12,7 +12,6 @@ var K_ENVIRONMENT = {
     favPage : '/user/__USERNAME__/favorite/__PAGENUMBER__',
     
     publication : 'postContainer',
-    menu : 'submenu',
     
     hostClass : window.location.host.split(".").join("_"),
     
@@ -32,6 +31,7 @@ var K_ENVIRONMENT = {
                 body : document.getElementById('container'),
                 content : document.getElementById('contentinner'),
                 sideBlock : document.getElementById('sidebar'),
+                menu : document.getElementById('submenu'),
             };
         }
         
@@ -270,11 +270,11 @@ var K_ENVIRONMENT = {
                     
         var modalBoxTop = 24;
         
-        var filters = KellyTools.getElementByClass(sideBarWrap, this.className + '-FiltersMenu'); 
-        var filtersBlock = KellyTools.getElementByClass(sideBarWrap, this.className + '-FiltersMenu-container');
-                    
+        var filters = KellyTools.getElementByClass(sideBarWrap, this.className + '-FiltersMenu');     
         if (filters && filters.offsetHeight > 440 && filters.className.indexOf('calculated') == -1) {
             
+            var filtersBlock = KellyTools.getElementByClass(sideBarWrap, this.className + '-FiltersMenu-container');
+                
             filtersBlock.style.maxHeight = '0';
             filtersBlock.style.overflow = 'hidden';
             
@@ -376,6 +376,8 @@ var K_ENVIRONMENT = {
         }
 
         // основной домен предоставляет больше метаинфы в отличии от old.
+        // если основной домен перестанет отдавать Access-Control-Allow-Origin для поддоменов, то нужно будет всегда использовать текущий домен
+        
         info.url += this.mainDomain + this.favPage;
         info.url = info.url.replace('__USERNAME__', info.userName);
         
@@ -483,11 +485,7 @@ var K_ENVIRONMENT = {
         this.fav.showNativeFavoritePageInfo();
     },
     
-    syncFav : function(publication, inFav) {
-    
-        var body = this.getMainContainers().body;            
-        if (!body) return;
-        
+    syncFav : function(publication, inFav) {        
         var item = publication.querySelector('.favorite_link');
         if (!item) return;
         

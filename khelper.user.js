@@ -959,7 +959,7 @@ function KellyTileGrid(cfg) {
                 
                 if (!rules.fixed) {
                     if (currentTileRow.length < rules.min ) continue;
-                    // if (i + rules.min >= tiles.length) continue; // keep collect last elements
+                    if (i + rules.min >= tiles.length) continue; // collect last elements, todo set as option
                     
                     var currentRowResultHeight = getExpectHeight();
                     
@@ -4335,7 +4335,7 @@ function KellyGrabber(cfg) {
         var xhr = new XMLHttpRequest();
             xhr.responseType = 'blob';
 
-              xhr.onload = function(e) {
+            xhr.onload = function(e) {
                 if (this.status == 200) {
                     callback(urlOrig, this.response);
                 } else {
@@ -5384,7 +5384,7 @@ KellyTools.showPagination = function(params) {
     
 
 
-//D:\Dropbox\Private\l scripts\jfav\release\Extension\\lib\KellyFavItems.js
+//D:\Dropbox\Private\l scripts\jfav\release\Extension\\lib\kellyFavItems.js
 
 
 
@@ -5828,6 +5828,7 @@ function KellyFavItems()
                     syncByAdd : false,
                     newFirst : true,
                     hideSoc : true,
+                    optionsSide : false,
                 };
             }
             
@@ -6209,20 +6210,22 @@ function KellyFavItems()
             handler.updateFavCounter();
         }
         
-        var optionsButton = createMainMenuButton(lng.s('Настройки', 'options'), function() { 
+        if (!fav.coptions.optionsSide) {
+            var optionsButton = createMainMenuButton(lng.s('Настройки', 'options'), function() { 
 
-            if (mode == 'ctoptions') {
-                handler.hideFavoritesBlock();
-            } else {					
-                handler.showOptionsDialog();
-            }
+                if (mode == 'ctoptions') {
+                    handler.hideFavoritesBlock();
+                } else {					
+                    handler.showOptionsDialog();
+                }
+                
+                return false; 
             
-            return false; 
-        
-        });
-        
-        if (optionsButton) {
-            menuButtons['ctoptions'] = optionsButton.parentNode;
+            }, 'options');
+            
+            if (optionsButton) {
+                menuButtons['ctoptions'] = optionsButton.parentNode;
+            }
         }
         
         // add fav container
@@ -6270,7 +6273,7 @@ function KellyFavItems()
     
     function createMainMenuButton(name, onclick, index) {
         
-        var submenu = document.getElementById(env.menu);
+        var submenu = env.getMainContainers().menu;
         
         if (!submenu) {
             log('bad submenu identifer');
@@ -6731,7 +6734,37 @@ function KellyFavItems()
         if (KellyTools.getElementByClass(favContent, env.className + 'SyncByAdd').checked) {
             fav.coptions.syncByAdd = true;
         }
+        
+        fav.coptions.optionsSide = false;
+        if (KellyTools.getElementByClass(favContent, env.className + 'OptionsSide').checked) {
+            fav.coptions.optionsSide = true;
+        }
+        
+        var menuButton = KellyTools.getElementByClass(document, env.className + '-MainMenuItem-options');
+        if (fav.coptions.optionsSide && menuButton) {            
+            menuButton.parentElement.removeChild(menuButton);
+            delete menuButtons['ctoptions'];
+        } else if (!fav.coptions.optionsSide && !menuButton) {
+            
+            var optionsButton = createMainMenuButton(lng.s('Настройки', 'options'), function() { 
+
+                if (mode == 'ctoptions') {
+                    handler.hideFavoritesBlock();
+                } else {					
+                    handler.showOptionsDialog();
+                }
                 
+                return false; 
+            
+            }, 'options');
+            
+            if (optionsButton) {
+                menuButtons['ctoptions'] = optionsButton.parentNode;
+            }  
+            
+        }
+        
+           
         var iconFile = KellyTools.getElementByClass(favContent, 'kellyAutoScroll');
         
         if (iconFile.value) {
@@ -6796,8 +6829,20 @@ function KellyFavItems()
             }
         }
         
-        handler.closeSidebar();
-        
+        if (fav.coptions.optionsSide) {
+           
+            var backActionButtons = sideBarWrap.getElementsByTagName('A');
+            for (var i = 0; i < backActionButtons.length; i++) {
+                backActionButtons[i].onclick = function() {
+                    handler.showFavouriteImages();
+                    return false;
+                }                
+            }
+            
+        } else {            
+            
+            handler.closeSidebar();
+        }
                 
         // currently only one type of storage
         favContent.innerHTML = '';
@@ -6976,6 +7021,10 @@ function KellyFavItems()
         output = '';  
             
         output += '<table>';
+        
+        output += '<tr><td colspan="2"><label><input type="checkbox" value="1" class="' + env.className + 'OptionsSide" ' + (fav.coptions.optionsSide ? 'checked' : '') + '> \
+               ' + lng.s('Перенести кнопку настроек из основного в боковое меню фильтров', 'options_side') + '</label></td></tr>';
+       
         output += '<tr><td>' + lng.s('Игнорировать комментарии', 'ignore_comments') + ' :</td>\
                         <td><input type="text" class="kellyBlockcomments" value="' + KellyTools.varListToStr(fav.coptions.comments_blacklist) + '"></td>\
                    </tr>';
@@ -7978,6 +8027,7 @@ function KellyFavItems()
         var editButton = document.createElement('a');
             editButton.href = '#';
             editButton.innerHTML = '';
+            editButton.title = lng.s('Режим редактирования', 'edit_mode');
             editButton.onclick = function() {
                 
                 var filterAdd = KellyTools.getElementByClass(controllsContainer, env.className + '-filters-CatCreate');
@@ -7998,7 +8048,27 @@ function KellyFavItems()
             
             editButton.className  = env.className + '-FavEditButton-edit ' + env.className + '-iconset1 ';
             editButton.className += env.className + '-iconset1-lock ' + env.className + '-iconset1-lock-' + (readOnly ? 'closed' : 'open');
-                    
+       
+        var optionsButton = false;
+        
+        if (fav.coptions.optionsSide) {
+            optionsButton = editButton.cloneNode();
+            optionsButton.className = env.className + '-FavEditButton-options ' + env.className + '-iconset1 ' + env.className + '-icon-gear closed';
+            optionsButton.title = lng.s('Настройки', 'options');
+            optionsButton.onclick = function() {
+                
+                if (mode == 'ctoptions') {
+                    handler.hideFavoritesBlock();                    
+                    this.className = this.className.replace('closed', 'open');
+                } else {					
+                    handler.showOptionsDialog();                    
+                    this.className = this.className.replace('open', 'closed');
+                }
+                
+                return false;
+            }
+        }   
+        
         var resetButton = editButton.cloneNode();
             resetButton.innerHTML = lng.s('Сбросить', 'reset');
             resetButton.onclick = function() {
@@ -8024,6 +8094,7 @@ function KellyFavItems()
             if (!excludeFavComments) filterComments.className += ' active';
             
         filterComments.onclick = function() {
+            
             if (!checkSafeUpdateData()) return false;
             page = 1;
             
@@ -8170,8 +8241,13 @@ function KellyFavItems()
             
         var additionButtons = document.createElement('div');
             additionButtons.className = env.className + '-filters-AdditionButtons';
+            
             additionButtons.appendChild(resetButton);
             additionButtons.appendChild(editButton);
+        
+        if (optionsButton) {
+            additionButtons.appendChild(optionsButton);
+        }
         
         if (handler.isDownloadSupported) {   
         
@@ -8242,6 +8318,11 @@ function KellyFavItems()
         }
             
         additionButtons.appendChild(cOptions);
+        
+        var clearDiv = document.createElement('div');
+            clearDiv.style.clear = 'both';
+            
+        additionButtons.appendChild(clearDiv);
             
         controllsContainer.appendChild(additionButtons);
         controllsContainer.appendChild(typeFiltersContainer);
@@ -9875,7 +9956,6 @@ var K_ENVIRONMENT = {
     favPage : '/user/__USERNAME__/favorite/__PAGENUMBER__',
     
     publication : 'postContainer',
-    menu : 'submenu',
     
     hostClass : window.location.host.split(".").join("_"),
     
@@ -9895,6 +9975,7 @@ var K_ENVIRONMENT = {
                 body : document.getElementById('container'),
                 content : document.getElementById('contentinner'),
                 sideBlock : document.getElementById('sidebar'),
+                menu : document.getElementById('submenu'),
             };
         }
         
@@ -10133,11 +10214,11 @@ var K_ENVIRONMENT = {
                     
         var modalBoxTop = 24;
         
-        var filters = KellyTools.getElementByClass(sideBarWrap, this.className + '-FiltersMenu'); 
-        var filtersBlock = KellyTools.getElementByClass(sideBarWrap, this.className + '-FiltersMenu-container');
-                    
+        var filters = KellyTools.getElementByClass(sideBarWrap, this.className + '-FiltersMenu');     
         if (filters && filters.offsetHeight > 440 && filters.className.indexOf('calculated') == -1) {
             
+            var filtersBlock = KellyTools.getElementByClass(sideBarWrap, this.className + '-FiltersMenu-container');
+                
             filtersBlock.style.maxHeight = '0';
             filtersBlock.style.overflow = 'hidden';
             
@@ -10239,6 +10320,8 @@ var K_ENVIRONMENT = {
         }
 
         // основной домен предоставляет больше метаинфы в отличии от old.
+        // если основной домен перестанет отдавать Access-Control-Allow-Origin для поддоменов, то нужно будет всегда использовать текущий домен
+        
         info.url += this.mainDomain + this.favPage;
         info.url = info.url.replace('__USERNAME__', info.userName);
         
@@ -10346,11 +10429,7 @@ var K_ENVIRONMENT = {
         this.fav.showNativeFavoritePageInfo();
     },
     
-    syncFav : function(publication, inFav) {
-    
-        var body = this.getMainContainers().body;            
-        if (!body) return;
-        
+    syncFav : function(publication, inFav) {        
         var item = publication.querySelector('.favorite_link');
         if (!item) return;
         

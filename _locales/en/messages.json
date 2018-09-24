@@ -152,6 +152,9 @@
     "download_started_cancel":{  
         "message":"Downloading...(Cancel)"
     },
+    "edit_mode":{  
+        "message":"Edit mode"
+    },
     "ext_description":{  
         "message":"Save favourite publications to your local browser storage. "
     },
@@ -355,6 +358,9 @@
     },
     "options_fav_add":{  
         "message":"Add to Favourites"
+    },
+    "options_side":{  
+        "message":"Move extension options button to sidebar"
     },    
     "other":{  
         "message":"Other"

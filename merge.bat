@@ -14,7 +14,7 @@ for %%x in (
 	"%~dp0\lib\kellyThreadWork.js" 
 	"%~dp0\lib\kellyGrabber.js" 
 	"%~dp0\lib\kellyTools.js"	
-	"%~dp0\lib\KellyFavItems.js"
+	"%~dp0\lib\kellyFavItems.js"
 	"%~dp0\%defaultProfile%"
 	"%~dp0\init.js"  
 ) do (
@@ -33,7 +33,7 @@ for %%x in (
 echo.>%background%
 for %%x in ( 
     "%~dp0\lib\kellyTools.js" 
-    "%~dp0\lib\KellyDispetcher.js" 
+    "%~dp0\lib\kellyDispetcher.js" 
     "%~dp0\init.bg.js" 
 ) do (
     
