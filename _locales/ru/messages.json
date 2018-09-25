@@ -92,6 +92,9 @@
     "comments":{  
         "message":"Комменты"
     },
+    "comment":{  
+        "message":"Комментарий"
+    },
     "debug":{  
         "message":"Режим отладки"
     },  
@@ -206,6 +209,15 @@
     "grabber_preview":{  
         "message":"Превью"
     },
+    "grabber_range":{  
+        "message":"Диапазон"
+    },
+    "grabber_range_from":{  
+        "message":"С"
+    },
+    "grabber_range_to":{  
+        "message":"По"
+    },       
     "grabber_hide_extended":{  
         "message":"Скрыть расширенные настройки"
     },	
@@ -376,6 +388,9 @@
     },
     "preview":{  
         "message":"превью"
+    },
+    "publication":{  
+        "message":"Публикация"
     },
     "remove_from_fav":{  
         "message":"Удалить из избранного"

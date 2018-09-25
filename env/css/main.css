@@ -205,13 +205,23 @@
 }
 
 .__BASECLASS__-preview-text {
-     width : 100%;
-     line-height : 14px;
-     height : 100%;
-     padding : 16px;
-     background : #f2f2f2;
-     border : 2px dashed #c5c5c5;
+    width : 100%;
+    line-height : 14px;
+    height : 100%;
+    padding : 16px;
+    background : #f2f2f2;
+    border : 2px dashed #c5c5c5;
+    font-size : 12px;
+    overflow: hidden;
+    box-shadow : inset 0px -14px 22px -3px rgba(0, 0, 0, 0.15);
+    cursor: auto;
 }
+
+.__BASECLASS__-preview-text div {
+    
+    margin-bottom : 12px;
+}
+
 
 .__BASECLASS__-preview {
     overflow : hidden;
@@ -221,9 +231,9 @@
 }
 
 .__BASECLASS__-FavItem-grid-resized .__BASECLASS__-preview {
-     width : 100%;
-     height : 100%;
-     background : rgba(229, 229, 229, 0.77);
+    width : 100%;
+    height : 100%;
+    background : rgba(229, 229, 229, 0.77);
 }
 
 .__BASECLASS__-FavItem-tmp-bounds, .__BASECLASS__-FavItem-oversized-bounds   {
@@ -454,52 +464,6 @@
 .__BASECLASS__-ModalBox-controll-buttons a {
     padding-left : 6px;
     padding-right : 6px;
-}
-
-.__BASECLASS__-ModalBox-downloader {
-    margin-top: 16px;
-}
-
-.__BASECLASS__-ModalBox-downloader .__BASECLASS__-ModalBox-content {
-    background : #fff;
-}
-
-.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll input[type="radio"] {
-    margin-right : 16px;
-}
-
-.__BASECLASS__-downloader-controll .__BASECLASS__-downloader-extended-show-row td {
-    padding-top : 6px;
-    padding-bottom : 6px;
-}
-
-.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a {
-
-    background: rgb(253, 178, 1);
-    display: block;
-    width: 80%;
-    margin: 0 auto;
-    margin-top: 12px;
-    margin-bottom: 12px;
-    height: 32px;
-    line-height: 32px;
-    text-align: center;
-}
-
-.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a:hover {
-   background-color : rgb(253, 117, 1);
-}
-
-.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll table {
-    display : block;
-}
-
-.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll tr, .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll td  {
-    display : block;
-}
-
-.__BASECLASS__-downloader-controll .__BASECLASS__-downloader-controll-extended.hidden {
-    display : none;
 }
 
 .__BASECLASS__-ModalBox-header {
@@ -789,7 +753,7 @@
     width: 60%;
 }
 
-.__BASECLASS__-options-table  input[type=text] {
+.__BASECLASS__-options-table input[type=text] {
     min-width: 280px;
     margin-left: 16px;
     padding-left: 6px;
@@ -1065,7 +1029,7 @@
     margin-right : 16px;
 }
 
-.__BASECLASS__-ModalBox-content .__BASECLASS__-downloader-controll input[type=text] {
+.__BASECLASS__-downloader-controll input[type=text] {
     width : 100%;
 }
 
@@ -1091,9 +1055,61 @@
     border : 1px solid 1px solid rgba(0,0,0,0.3);
 }
 
-.__BASECLASS__-downloader-controll { 
 
+.__BASECLASS__-ModalBox-downloader {
+    margin-top: 16px;
 }
+
+.__BASECLASS__-ModalBox-downloader .__BASECLASS__-ModalBox-content {
+    background : #fff;
+}
+
+.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll input[type="radio"] {
+    margin-right : 16px;
+}
+
+.__BASECLASS__-downloader-controll .__BASECLASS__-downloader-extended-show-row td {
+    padding-top : 6px;
+    padding-bottom : 6px;
+}
+
+.__BASECLASS__-downloader-controll .__BASECLASS__-downloader-range-tr input[type=text]  {
+    
+    width : 45%;
+    float : left;
+    margin-right : 6px;
+}
+
+.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a {
+
+    background: rgb(253, 178, 1);
+    display: block;
+    width: 80%;
+    margin: 0 auto;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    height: 32px;
+    line-height: 32px;
+    text-align: center;
+}
+
+.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a:hover {
+   background-color : rgb(253, 117, 1);
+}
+
+.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll table {
+    display : block;
+}
+
+.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll tr, .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll td  {
+    display : block;
+}
+
+.__BASECLASS__-downloader-controll .__BASECLASS__-downloader-controll-extended.hidden {
+    display : none;
+}
+
+/* Fav items importer, todo replace class, cause collisions */
 
 .__BASECLASS__-FavItem-download-number {
     display: block;

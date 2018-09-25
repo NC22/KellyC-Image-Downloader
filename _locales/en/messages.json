@@ -92,6 +92,9 @@
     "comments":{  
         "message":"Comments"
     },  
+    "comment":{  
+        "message":"Comment"
+    },
     "debug":{  
         "message":"Debug mode"
     },    
@@ -260,6 +263,15 @@
     "grabber_state_error":{  
         "message":"Downloading error"
     },
+    "grabber_range":{  
+        "message":"Range"
+    },
+    "grabber_range_from":{  
+        "message":"From"
+    },
+    "grabber_range_to":{  
+        "message":"To"
+    },  
     "grabber_name_template_help":{  
         "message":"Please select file name template, with include relative patch from base folder in browser <b>Downloads</b> folder<br><br>Allowed variables :<br>"
     },
@@ -376,7 +388,10 @@
     },
     "preview":{  
         "message":"preview"
-    },   
+    },
+    "publication":{  
+        "message":"Publication"
+    },    
     "reset":{  
         "message":"Reset"
     },
