@@ -190,7 +190,7 @@ KellyTools.getUrlParam = function(param, url) {
 
 // turn this - '2, 4, 66-99, 44, 78, 8-9, 29-77' to an array of all values [2, 4, 66, 67, 68 ... etc] in range
 
-KellyTools.getPrintValues = function(print, reverse) {
+KellyTools.getPrintValues = function(print, reverse, limit) {
 
     var itemsToSelect = [];
     var options = print.split(',');
@@ -216,11 +216,12 @@ KellyTools.getPrintValues = function(print, reverse) {
             }
 
             for (var b = option[0]; b <= option[1]; b++) {
-                if (itemsToSelect.indexOf(b) == -1) itemsToSelect[itemsToSelect.length] =b;
+                if (limit && b > limit) continue;
+                if (itemsToSelect.indexOf(b) == -1) itemsToSelect[itemsToSelect.length] = b;
             }
 
         } else {
-
+            if (limit && option[0] > limit) continue;     
             if (itemsToSelect.indexOf(option[0]) == -1) itemsToSelect[itemsToSelect.length] = option[0];
         }
 
@@ -807,7 +808,7 @@ var KellyEDispetcher = new Object;
     KellyEDispetcher.tabList = []; // all active tabs that request resources at list once
     
     KellyEDispetcher.eventsAccepted = false;
-    KellyEDispetcher.debug = false;
+    KellyEDispetcher.debug = true;
     KellyEDispetcher.envDir = 'env/';
     KellyEDispetcher.api = KellyTools.getBrowser();
     
@@ -862,8 +863,16 @@ var KellyEDispetcher = new Object;
         }
             
         if (request.method == 'downloads.cancel') {        
-                    
-            KellyTools.getBrowser().downloads.cancel(request.downloadId);
+            
+            if (request.downloadId) {
+                KellyTools.getBrowser().downloads.cancel(request.downloadId);
+            } else {
+                
+                if (KellyEDispetcher.log) {
+                    console.log('bad request');
+                    console.log(request);
+                }
+            }
                     
         } else if (request.method == 'downloads.download') {
             
