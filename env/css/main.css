@@ -1040,7 +1040,11 @@
 
 .__BASECLASS__-downloader-item-state-err {
     background : #ff2b2b; 
-    border : 1px solid 1px solid rgba(0,0,0,0.3); 
+    border : 1px solid rgba(0,0,0,0.3); 
+}
+
+.__BASECLASS__-downloader-item-state-skip {
+    background : rgba(205, 205, 205, 0.501); 
 }
 
 .__BASECLASS__-downloader-item-state-wait {

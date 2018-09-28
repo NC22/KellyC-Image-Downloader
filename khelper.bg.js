@@ -190,7 +190,7 @@ KellyTools.getUrlParam = function(param, url) {
 
 // turn this - '2, 4, 66-99, 44, 78, 8-9, 29-77' to an array of all values [2, 4, 66, 67, 68 ... etc] in range
 
-KellyTools.getPrintValues = function(print, reverse, limit) {
+KellyTools.getPrintValues = function(print, reverse, limitFrom, limitTo) {
 
     var itemsToSelect = [];
     var options = print.split(',');
@@ -203,7 +203,12 @@ KellyTools.getPrintValues = function(print, reverse, limit) {
         
 
         option[0] = parseInt(option[0]);
-        if (option[1]) option[1] = parseInt(option[1]);
+        if (!option[0]) option[0] = 0;
+        
+        if (option[1]) {
+            option[1] = parseInt(option[1]);
+            if (!option[1]) option[1] = option[0];
+        }
 
         if (option[0] == option[1]) option[1] = -1;
 
@@ -216,12 +221,14 @@ KellyTools.getPrintValues = function(print, reverse, limit) {
             }
 
             for (var b = option[0]; b <= option[1]; b++) {
-                if (limit && b > limit) continue;
+                if (typeof limitTo != 'undefined' && b > limitTo) continue;
+                if (typeof limitFrom != 'undefined' && b < limitFrom) continue;
                 if (itemsToSelect.indexOf(b) == -1) itemsToSelect[itemsToSelect.length] = b;
             }
 
         } else {
-            if (limit && option[0] > limit) continue;     
+            if (typeof limitTo != 'undefined' && option[0] > limitTo) continue; 
+            if (typeof limitFrom != 'undefined' && option[0] < limitFrom) continue;            
             if (itemsToSelect.indexOf(option[0]) == -1) itemsToSelect[itemsToSelect.length] = option[0];
         }
 

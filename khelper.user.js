@@ -3363,15 +3363,18 @@ function KellyGrabber(cfg) {
     
     downloads = []; 
     
+    var DOWNLOADID_GET_PROCESS = -1;
+    var DOWNLOADID_INACTIVE = false;
+    
     // array of current selected download items
     // 
     // Download item object params :
-    // 
-    // .downloadId - -1    - request to API sended, waiting 
+    //     
     // .downloadId > 0     - accepted by API, downloading 
-    // .downloadId = false - inactive 
+    // .downloadId = DOWNLOADID_GET_PROCESS    - request to API sended, waiting 
+    // .downloadId = DOWNLOADID_INACTIVE - inactive 
     //
-    // .ready              - true if element already downloaded (check .error \ .downloadDelta for result)
+    // .workedout          - true if element already processed (check .error \ .downloadDelta for result)
     // 
     // .item               - reference to fav.item object
     // .subItem            - index of fav.item.pImage if object has more then one image
@@ -3560,13 +3563,21 @@ function KellyGrabber(cfg) {
             
         var baseFolderInput = KellyTools.getElementByClass(handler.container, className + '-controll-baseFolder');
             baseFolderInput.onchange = function() {
+                
                 handler.setBaseFolder(this.value);
                 
                 this.value = options.baseFolder;
                 return;
             }        
             
-           var nameTemplateHelp = KellyTools.getElementByClass(handler.container, className + '-nameTemplate-help');
+        var itemsList = KellyTools.getElementByClass(handler.container, className + '-itemsList');
+            itemsList.onchange = function() {
+                
+                updateContinue(true);
+                return;
+            }                    
+            
+        var nameTemplateHelp = KellyTools.getElementByClass(handler.container, className + '-nameTemplate-help');
             nameTemplateHelp.onclick = function() {
                                 
                 var envVars = fav.getGlobal('env');
@@ -3602,7 +3613,7 @@ function KellyGrabber(cfg) {
                 return false;
             }
         
-           var nameTemplate = KellyTools.getElementByClass(handler.container, className + '-nameTemplate');
+        var nameTemplate = KellyTools.getElementByClass(handler.container, className + '-nameTemplate');
             nameTemplate.onchange = function() {
                 
                 options.nameTemplate = KellyTools.validateFolderPath(this.value);                
@@ -3653,9 +3664,7 @@ function KellyGrabber(cfg) {
         var intervalInput = KellyTools.getElementByClass(handler.container, className + '-interval');
             intervalInput.onchange = function() {
                                 
-                options.interval = KellyTools.validateFloatSting(this.value)
-                
-                options.interval = options.interval;
+                options.interval = KellyTools.validateFloatSting(this.value)                
                 if (!options.interval || options.interval < 0.1) options.interval = 0.1;
                
                 this.value = options.interval;
@@ -3666,11 +3675,8 @@ function KellyGrabber(cfg) {
         var cancelInput = KellyTools.getElementByClass(handler.container, className + '-timeout');
             cancelInput.onchange = function() {
                                 
-                options.cancelTimer = KellyTools.validateFloatSting(this.value)
-                
-                options.cancelTimer = options.cancelTimer;
-                if (!options.cancelTimer || options.cancelTimer < 2) options.cancelTimer = 5 * 60;
-                
+                options.cancelTimer = KellyTools.validateFloatSting(this.value)                
+                if (!options.cancelTimer || options.cancelTimer < 2) options.cancelTimer = 5 * 60;                
                 
                 this.value = options.cancelTimer;
                 
@@ -3730,7 +3736,7 @@ function KellyGrabber(cfg) {
             total = acceptItems.length;
         }
         
-        var current = handler.countCurrent('ready');
+        var current = handler.countCurrent('complete');
         if (current > total) {
             toTxtLog('CHECK COUNTER ' + current + ' / ' + total);
             current = total;
@@ -3750,6 +3756,18 @@ function KellyGrabber(cfg) {
         
     }
     
+    function optionsFormDisable(disable) {
+        
+        var inputs = handler.container.getElementsByTagName('input');
+        
+        if (!inputs || !inputs.length) return;
+        
+        for (var i = 0; i < inputs.length; i++) {
+            
+            inputs[i].disabled = disable;
+        }
+    }
+    
     function showState(state) {
         
         if (!state) state = 'undefined';
@@ -3762,10 +3780,10 @@ function KellyGrabber(cfg) {
             html += '<div class="' + className + '-item-state ' + className + '-item-state-loading" data-notice="' + lng.s('Загрузка...', 'grabber_state_loading') + '" ></div>';
         } else if (state == 'wait') {
             html += '<div class="' + className + '-item-state ' + className + '-item-state-wait" data-notice="' + lng.s('Ожидает в очереди', 'grabber_state_wait') + '"></div>';
-        }  else if (state == 'in_list') {
-            html += '<div class="' + className + '-item-state ' + className + '-item-state-wait" data-notice="' + lng.s('В списке', 'grabber_state_inlist') + '"></div>';
-        } else if (state != 'undefined') {
+        } else if (state == 'error') {
             html += '<div class="' + className + '-item-state ' + className + '-item-state-err" data-notice="' + lng.s('Ошибка загрузки', 'grabber_state_error') + '"></div>'; // todo вывод деталей ошибки, сохраняется в lastError?
+        } else if (state == 'skip') {
+            html += '<div class="' + className + '-item-state ' + className + '-item-state-skip" data-notice=""></div>'; 
         }  else {
             html += '<div class="' + className + '-item-state ' + className + '-item-state-undefined" data-notice=""></div>';
         }
@@ -3909,6 +3927,7 @@ function KellyGrabber(cfg) {
                         complete : 0,
                         in_progress : 0,
                         error : 0,
+                        skip : 0,
                     }
                     
                     for (var b = 0; b < subItems[downloads[i].item.id].length; b++) {    
@@ -3920,7 +3939,6 @@ function KellyGrabber(cfg) {
                         }
                     }
                     
-                    // console.log(subItemsStat);
                     if (!html) html = showState('in_progress');
                 }
             
@@ -3939,19 +3957,30 @@ function KellyGrabber(cfg) {
         }, 100);
     }  
     
-    function getItemState(item) {
+    function getItemState(ditem) {
         
-        if (item.blobRequest) {
-            
-           return 'in_progress';
-            
-        } else if (item.downloadId && item.downloadId > 0) {
-                
-            return item.downloadDelta ? 'complete' : 'in_progress';
+        if (!ditem.item) return 'skip';
         
-        } else if (item.error) {
+        var itemIndex = downloads.indexOf(ditem);        
+        if (itemIndex == -1) return 'skip';
+        
+        if (acceptItems && acceptItems.indexOf(itemIndex+1) == -1) return 'skip';
+        
+        if (ditem.downloadDelta) {
+            
+            return 'complete';
+            
+        } else if (ditem.error) {
                              
             return 'error';
+            
+        } else if (ditem.canceling) {
+            
+            return 'cenceling';
+            
+        } else if ((ditem.blobRequest) || (ditem.downloadId && ditem.downloadId > 0)) {
+            
+           return 'in_progress';
             
         } else {
             
@@ -4018,24 +4047,18 @@ function KellyGrabber(cfg) {
                 }
                  
                 downloadItem.downloadDelta = downloadDelta;
-                downloadItem.ready = true;
+                downloadItem.workedout = true;
                 
                 if (events.onDownloadFile) {
                     // downloadDelta.id, filename, totalBytes
                     events.onDownloadFile(handler, downloadItem);                    
                 }
+
+                if (waitingNum) {
                 
-                // if no one stop current work, check if need to add some new work
-                if (mode == 'download') {
-                
-                    if (!options.interval) options.interval = 0.1;
-                    
-                    if (waitingNum) {
-                    
-                        setTimeout(function() {                        
-                            handler.addDownloadWork();
-                        }, options.interval * 1000);
-                    }
+                    setTimeout(function() {                        
+                        handler.addDownloadWork();
+                    }, options.interval * 1000);
                 }
                
                 updateProgressBar();
@@ -4047,7 +4070,7 @@ function KellyGrabber(cfg) {
             } 
             
             // check if that was last current active work, bring back start button
-            if (!waitingNum && !handler.countCurrentThreads()) {
+            if (!waitingNum && !handler.countCurrent('in_progress')) {
                                 
                 if (events.onDownloadAllEnd) {
                     events.onDownloadAllEnd(handler);
@@ -4058,7 +4081,7 @@ function KellyGrabber(cfg) {
             }
         }
         
-        console.log('current in progress ' + handler.countCurrentThreads() + ' | wait ' + waitingNum)
+        console.log('current in progress ' + handler.countCurrent('in_progress') + ' | wait ' + waitingNum)
         
         handler.updateStateForImageGrid();
     }
@@ -4244,6 +4267,7 @@ function KellyGrabber(cfg) {
 
         if (state == 'start') {
             
+            optionsFormDisable(false);
             mode = 'wait';
             buttons['init'].innerHTML = lng.s('Начать выгрузку', 'grabber_start');
             buttons['init'].onclick = function() { 
@@ -4255,6 +4279,8 @@ function KellyGrabber(cfg) {
         
         } else {
             
+            
+            optionsFormDisable(true);
             mode = 'download';
             buttons['init'].innerHTML = lng.s('Остановить загрузку', 'grabber_stop');
             buttons['init'].onclick = function() {
@@ -4279,13 +4305,10 @@ function KellyGrabber(cfg) {
         
         var lastReadyIndex = 0;
         for (var i = options.from; i <= downloads.length-1; i++) {
-            if (acceptItems && acceptItems.indexOf(i+1) == -1) continue;
-            
-            
-            if (!downloads[i].ready) {
+            var state = getItemState(downloads[i]);            
+            if (state != 'complete' && state != 'skip') {
                 break;
-            } else {
-               
+            } else {               
                lastReadyIndex = i;
             }
         }
@@ -4310,62 +4333,55 @@ function KellyGrabber(cfg) {
         
         // that shold call from event OnStateChanged
                 
-        var untilStop = 0;
-      
+        var untilStop = 0;      
  
-        var allCanceled = function() {            
-    
-            updateContinue();
-
-            handler.resetStates(true);
-            handler.updateStartButtonState('start');
+        var checkAllCanceled = function() {            
             
-            if (onCancel) onCancel();
+            if (untilStop <= 0) {
+                updateContinue();
+
+                handler.resetStates(true);
+                handler.updateStartButtonState('start');
+                
+                if (onCancel) onCancel();
+            }
         }
         
         var cancelDownloadItem = function(downloadItem) {
+            
+            downloadItem.canceling = true;
+            
             KellyTools.getBrowser().runtime.sendMessage({method: "downloads.cancel", downloadId : downloadItem.downloadId}, function(response) {
                 
                 untilStop--;
                 
-                downloadItem.downloadId = false;
-                downloadItem.ready = false;
-                
-                if (!untilStop) {
-                    allCanceled();
-                }
+                resetItem(downloadItem);                
+                checkAllCanceled();
             });    
         }
         
         for (var i=0; i < downloads.length; i++) {
             
-            if (!downloads[i]) continue;
+            if (getItemState(downloads[i]) == 'in_progress') {
+                                
+                if (downloads[i].blobRequest) {                
+                    downloads[i].blobRequest.abort();  
+                    downloads[i].blobRequest = false;
+                }
             
-            if (downloads[i].blobRequest) {                
-                downloads[i].blobRequest.abort();  
-                downloads[i].blobRequest = false;
-            }
-            
-            if (downloads[i].cancelTimer) {
-                clearTimeout(downloads[i].cancelTimer);
-                downloads[i].cancelTimer = false;
-            } else {
-                // currently stopping by timer
-                continue;
-            }
-            
-            if (!downloads[i].ready && downloads[i].downloadId && downloads[i].downloadId > 0) {
-            
-                untilStop++;
-                cancelDownloadItem(downloads[i]);         
-               
-                // canceling.then(onCanceled, onError);
+                if (downloads[i].cancelTimer) {
+                    clearTimeout(downloads[i].cancelTimer);
+                    downloads[i].cancelTimer = false;
+                }
+                
+                if (downloads[i].downloadId && downloads[i].downloadId > 0) {
+                    untilStop++;
+                    cancelDownloadItem(downloads[i]);         
+                }
             } 
         }
-        
-        if (!untilStop) {                
-            allCanceled();
-        }
+                      
+        checkAllCanceled();    
     }
     
     
@@ -4470,8 +4486,7 @@ function KellyGrabber(cfg) {
         // design from https://stackoverflow.com/questions/20579112/send-referrer-header-with-chrome-downloads-api
         // key is to save original headers
     
-        var baseFileFolder = options.baseFolder;
-        
+        var baseFileFolder = options.baseFolder;        
         if (!baseFileFolder) baseFileFolder = '';
         
         baseFileFolder += '/';
@@ -4493,8 +4508,8 @@ function KellyGrabber(cfg) {
                 toTxtLog('download REJECTED by browser API : ' + downloadOptions.filename);
                 toTxtLog('error : ' + response.error + "\n\r");
                 
-                download.ready = true;
-                download.downloadId = -1;
+                download.workedout = true;
+                download.downloadId = DOWNLOADID_INACTIVE;
                 download.error = response.error;
                 
             } else {            
@@ -4548,27 +4563,14 @@ function KellyGrabber(cfg) {
         
         download.blobRequest = handler.createBlobFromUrl(urlOrig, onLoadFileAsBlob);
     }
-    
-    // get current runnig threads num
-    
-    this.countCurrentThreads = function() {
-    
-        var count = 0;
-        for (var i = options.from; i <= downloads.length-1; ++i) {            
-            if (acceptItems && acceptItems.indexOf(i+1) == -1) continue;
-            if (downloads[i].downloadId && !downloads[i].ready) count++; // downloads[i].downloadId = -1 or N that setted by browser API           
-        }
-        
-        return count;
-    }
-    
+       
     // count elements
-    // type = 'ready' - count ready downloaded items
+    // type = 'complete' - count ready downloaded items
     // type = 'wait'  - count in order to download items (elements at work not included)
     
     this.countCurrent = function(type) {
         
-        if (!type || type != 'ready') {
+        if (!type) {
             type = 'wait';
         } 
         
@@ -4576,10 +4578,8 @@ function KellyGrabber(cfg) {
         
         for (var i = 0; i <= downloads.length-1; ++i) { 
         
-            if (acceptItems && acceptItems.indexOf(i+1) == -1) continue;
-            
-                 if (type == 'wait' && downloads[i].downloadId === false) count++;  
-            else if (type == 'ready' && downloads[i].ready) count++;            
+            if (getItemState(downloads[i]) != type) continue;
+            count++;            
         }
         
         return count;
@@ -4589,7 +4589,7 @@ function KellyGrabber(cfg) {
         
         if (mode != 'download') return false;
         
-        var currentWork = handler.countCurrentThreads();        
+        var currentWork = handler.countCurrent('in_progress');        
         if (currentWork >= options.maxDownloadsAtTime) return false;
         
         var newWorkNum = options.maxDownloadsAtTime - currentWork;
@@ -4600,15 +4600,18 @@ function KellyGrabber(cfg) {
                 
                 if (!downloadItem) return;
                 
+                resetItem(downloadItem);
+                
                 downloadItem.cancelTimer = false;            
-                downloadItem.error = 'Canceled by timeout';		
-                downloadItem.ready = true;
+                downloadItem.error = 'Canceled by timeout';	
+                downloadItem.canceling = true;
                 
-                if (!downloadItem.downloadId) return;
-                
-                KellyTools.getBrowser().runtime.sendMessage({method: "downloads.cancel", downloadId : downloadItem.downloadId}, function(response) {   
-                                          
-                });
+                if (downloadItem.downloadId > 0) {                    
+                    KellyTools.getBrowser().runtime.sendMessage({method: "downloads.cancel", downloadId : downloadItem.downloadId}, function(response) {   
+                        downloadItem.canceling = false;	
+                        downloadItem.workedout = true;                        
+                    });                
+                }
                 
                 toTxtLog('CANCELED BY TIMEOUT ' + downloadItem.url + ', ' + downloadItem.filename);
                 
@@ -4617,13 +4620,12 @@ function KellyGrabber(cfg) {
         
         for (var i = options.from; i <= downloads.length - 1; i++) {
             
-            if (downloads[i].downloadId) continue;
-            if (acceptItems && acceptItems.indexOf(i+1) == -1) continue;
+            if (getItemState(downloads[i]) != 'wait') continue;
             
             var downloadItem = downloads[i];
             
-            downloadItem.downloadId = -1;
-            downloadItem.ready = false;
+            downloadItem.downloadId = DOWNLOADID_GET_PROCESS;
+            downloadItem.workedout = false;
             
             if (options.cancelTimer) {
                 addCancelTimer(downloadItem);
@@ -4656,24 +4658,28 @@ function KellyGrabber(cfg) {
         }               
     }
     
+    function resetItem(downloadItem) {
+        
+        downloadItem.workedout = false;
+        downloadItem.canceling = false;
+        
+        if (downloadItem.error) downloadItem.error = false;			
+        if (downloadItem.downloadDelta) downloadItem.downloadDelta = false;
+        
+        downloadItem.downloadId = DOWNLOADID_INACTIVE;        
+    }
+    
     this.resetStates = function(keepReady) {
         
         if (!downloads.length) return false;
         
         for (var i=0; i <= downloads.length-1; ++i) {
             
-            if (keepReady && downloads[i].downloadDelta) {
+            if (keepReady && getItemState(downloads[i]) == 'complete') {
                 continue;
             } 
             
-            downloads[i].ready = false;
-            
-            if (downloads[i].error) downloads.error = false;			
-            if (downloads[i].downloadDelta) downloads[i].downloadDelta = false;
-            
-            downloads[i].downloadId = false;
-            
-            downloads[i].error = false;
+            resetItem(downloads[i]);
         }
         
     }
@@ -4693,7 +4699,7 @@ function KellyGrabber(cfg) {
         var itemsListInput = KellyTools.getElementByClass(handler.container, className + '-itemsList');
         
         if (itemsListInput && itemsListInput.value) {
-           acceptItems = KellyTools.getPrintValues(itemsListInput.value, false, downloads.length);
+           acceptItems = KellyTools.getPrintValues(itemsListInput.value, false, 1, downloads.length);
            if (!acceptItems.length) {
                 acceptItems = false;
            }
@@ -4706,7 +4712,9 @@ function KellyGrabber(cfg) {
         } else if (options.from > downloads.length-1) {
             options.from = downloads.length-1;            
         }
-        
+                
+        if (!options.interval) options.interval = 0.1;
+               
         /*
         options.from = KellyTools.inputVal(className + '-from', 'int', handler.container) - 1;
         options.to = KellyTools.inputVal(className + '-to', 'int', handler.container) - 1;
@@ -4731,8 +4739,9 @@ function KellyGrabber(cfg) {
         
         handler.addDownloadWork();
         
-        if (!handler.countCurrentThreads()) {
+        if (!handler.countCurrent('in_progress')) {
             
+            mode = 'wait';
             handler.updateStartButtonState('start');            
             KellyTools.getBrowser().runtime.sendMessage({method: "onChanged.keepAliveListener"}, function(response) {});                
         }
@@ -4938,7 +4947,7 @@ KellyTools.getUrlParam = function(param, url) {
 
 // turn this - '2, 4, 66-99, 44, 78, 8-9, 29-77' to an array of all values [2, 4, 66, 67, 68 ... etc] in range
 
-KellyTools.getPrintValues = function(print, reverse, limit) {
+KellyTools.getPrintValues = function(print, reverse, limitFrom, limitTo) {
 
     var itemsToSelect = [];
     var options = print.split(',');
@@ -4951,7 +4960,12 @@ KellyTools.getPrintValues = function(print, reverse, limit) {
         
 
         option[0] = parseInt(option[0]);
-        if (option[1]) option[1] = parseInt(option[1]);
+        if (!option[0]) option[0] = 0;
+        
+        if (option[1]) {
+            option[1] = parseInt(option[1]);
+            if (!option[1]) option[1] = option[0];
+        }
 
         if (option[0] == option[1]) option[1] = -1;
 
@@ -4964,12 +4978,14 @@ KellyTools.getPrintValues = function(print, reverse, limit) {
             }
 
             for (var b = option[0]; b <= option[1]; b++) {
-                if (limit && b > limit) continue;
+                if (typeof limitTo != 'undefined' && b > limitTo) continue;
+                if (typeof limitFrom != 'undefined' && b < limitFrom) continue;
                 if (itemsToSelect.indexOf(b) == -1) itemsToSelect[itemsToSelect.length] = b;
             }
 
         } else {
-            if (limit && option[0] > limit) continue;     
+            if (typeof limitTo != 'undefined' && option[0] > limitTo) continue; 
+            if (typeof limitFrom != 'undefined' && option[0] < limitFrom) continue;            
             if (itemsToSelect.indexOf(option[0]) == -1) itemsToSelect[itemsToSelect.length] = option[0];
         }
 
@@ -8468,7 +8484,9 @@ function KellyFavItems()
                         this.className = this.className.replace('hidden', 'active');                
                         
                         handler.getDownloadManager().setDownloadTasks(displayedItems);                        
-                        showDownloadManagerForm(true);
+                        setTimeout(function() {
+                            showDownloadManagerForm(true);
+                        }, 100);
                     }
                     
                     handler.updateImagesBlock();                
