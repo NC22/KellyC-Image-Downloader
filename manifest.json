@@ -8,6 +8,7 @@
 			"*://*.joyreactor.cc/*", 
 			"*://*.reactor.cc/*", 
 			"*://joyreactor.com/*",
+            "*://safereactor.cc/*",            
 			"*://pornreactor.cc/*"
 	  ]
    } ],

@@ -1,6 +1,9 @@
+// JoyReactor environment driver
+
 // !@ - not required by FavItems object methods	
-// default profile object, move to separate file in future
-// todo move formatcomment \ formatpost
+
+// default profile driver must be assign to K_DEFAULT_ENVIRONMENT variable
+// todo move formatcomment \ formatpost methods from FavItems to keep core without "environment only" / driver methods
 
 var K_ENVIRONMENT = {
     
@@ -323,6 +326,8 @@ var K_ENVIRONMENT = {
         // tagList
     },
     
+    // return same url if not supported
+    
     getStaticImage : function(source) {
 
         if (source.indexOf('reactor') != -1) {
@@ -336,6 +341,8 @@ var K_ENVIRONMENT = {
         
         return source;
     },
+    
+    // return false if not supported for page \ site
     
     getFavPageInfo : function() {
     

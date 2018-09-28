@@ -3358,15 +3358,8 @@ function KellyGrabber(cfg) {
     var handler = this;   
     
     var downloadingIds = []; // ids from chrome API that returned for each download process
-    
-    // operationId - id of an KellyGrabber.addFile item, that store in downloads[]
-    
-    downloads = []; 
-    
-    var DOWNLOADID_GET_PROCESS = -1;
-    var DOWNLOADID_INACTIVE = false;
-    
-    // array of current selected download items
+  
+    // array of current added throw method addDownloadItem download items
     // 
     // Download item object params :
     //     
@@ -3376,9 +3369,16 @@ function KellyGrabber(cfg) {
     //
     // .workedout          - true if element already processed (check .error \ .downloadDelta for result)
     // 
-    // .item               - reference to fav.item object
+    // .item               - reference to fav.item[n] object
     // .subItem            - index of fav.item.pImage if object has more then one image
-    //
+    
+    downloads = []; 
+        
+    // .downloadId values constants
+    
+    var DOWNLOADID_GET_PROCESS = -1;
+    var DOWNLOADID_INACTIVE = false;
+  
     
     var ids = 0; // counter for downloads
     
@@ -3799,6 +3799,8 @@ function KellyGrabber(cfg) {
         
         if (!downloads[downloadIndex]) return;
         
+        if (!handler.initDownloadItemFile(downloads[downloadIndex])) return;
+        
         var item = downloads[downloadIndex].item;
         var tooltipEl = fav.getTooltip();
             tooltipEl.updateCfg({
@@ -3815,7 +3817,7 @@ function KellyGrabber(cfg) {
         var itemInfo = document.createElement('div');
             itemInfo.className = baseClass;
             itemInfo.id = baseClass + '-' + downloadIndex;
-            itemInfo.innerHTML = lng.s('Сохранить как', 'grabber_save_as') + ' : <br>' + downloads[downloadIndex].filename + '<br><br>' + fav.showItemInfo(item); 		
+            itemInfo.innerHTML = lng.s('Сохранить как', 'grabber_save_as') + ' : <br>' + downloads[downloadIndex].filename + '.' + downloads[downloadIndex].ext + '<br><br>' + fav.showItemInfo(item); 		
     
         var tcontainer = tooltipEl.getContent();
             tcontainer.innerHTML = '';
@@ -3829,6 +3831,7 @@ function KellyGrabber(cfg) {
         if (events.onUpdateState && events.onUpdateState(handler)) return;
         
         var subItems = {};
+        // var gridItems = this.imageGrid.getTiles();
         
         for (var i = 0; i <= downloads.length-1; i++) {
                 
@@ -3918,7 +3921,7 @@ function KellyGrabber(cfg) {
                 
                 if (downloads[i].subItem === false) {
                     
-                    html = showState(getItemState(downloads[i]));
+                    html = showState(getDownloadItemState(downloads[i]));
                 } else {
                     
                     // console.log(subItems[downloads[i].item.id]);
@@ -3931,7 +3934,7 @@ function KellyGrabber(cfg) {
                     }
                     
                     for (var b = 0; b < subItems[downloads[i].item.id].length; b++) {    
-                        var subItemState = getItemState(downloads[subItems[downloads[i].item.id][b]]);
+                        var subItemState = getDownloadItemState(downloads[subItems[downloads[i].item.id][b]]);
                         subItemsStat[subItemState]++;                        
                         
                         if ( subItemsStat[subItemState] == subItems[downloads[i].item.id].length ) {
@@ -3957,7 +3960,7 @@ function KellyGrabber(cfg) {
         }, 100);
     }  
     
-    function getItemState(ditem) {
+    function getDownloadItemState(ditem) {
         
         if (!ditem.item) return 'skip';
         
@@ -3976,7 +3979,7 @@ function KellyGrabber(cfg) {
             
         } else if (ditem.canceling) {
             
-            return 'cenceling';
+            return 'canceling';
             
         } else if ((ditem.blobRequest) || (ditem.downloadId && ditem.downloadId > 0)) {
             
@@ -4122,6 +4125,7 @@ function KellyGrabber(cfg) {
     }
     
     function getNameTemplate() {
+        
         if (!options.nameTemplate) {
             options.nameTemplate = '#category_1#/#id#_#category_1#_#category_2#_#category_3#';
         }
@@ -4129,19 +4133,41 @@ function KellyGrabber(cfg) {
         return options.nameTemplate;
     }
     
-    this.itemGenerateFileName = function(item, b) {
+    this.initDownloadItemFile = function(ditem) {
         
-        // todo #filename# 
-        // return validatePath
-        // todo take fav.items[index].link - postId as name, to get unique index always constant      
+        if (ditem.filename !== false) {
+            return ditem;
+        }
         
+        var item = ditem.item;
+        
+        if (typeof item.pImage !== 'string') {                           
+            ditem.url = fav.getGlobal('env').getImageDownloadLink(item.pImage[ditem.subItem], options.quality == 'hd');            
+        } else {        
+            ditem.url = fav.getGlobal('env').getImageDownloadLink(item.pImage, options.quality == 'hd');
+        }        
+               
+        if (!ditem.url || ditem.url.length < 6) {
+            
+            return false;
+            
+        } else {
+            
+            ditem.ext = KellyTools.getExt(ditem.url);
+            
+            if (!ditem.ext) {            
+                 return false;
+            }
+        }
+                
         var fileName = getNameTemplate();       
         if (item.categoryId) {            
+        
             var categories = fav.getGlobal('fav').categories;
             var sm = fav.getStorageManager();
                 sm.sortCategories(categories);
                
-                var itemCatN = 0;
+            var itemCatN = 0;
               
             for (var i = 0; i < categories.length; i++) {            
                 if (item.categoryId.indexOf(categories[i].id) != -1) {
@@ -4164,30 +4190,44 @@ function KellyGrabber(cfg) {
             fileName = KellyTools.replaceAll(fileName, '#id#', '');
         }    
         
-        if (typeof item.pImage !== 'string') {
-                
-            b = parseInt(b);
-            if (!b) b = 0;            
-            pImageName = item.pImage[b];
+        var originalName = false;
+        
+        if (fileName.indexOf('#filename#') != -1) {
             
-        } else {
-        
-            pImageName = item.pImage;
+            var fullSize = options.quality == 'hd';     
+            originalName = true;
+            
+            var fileUrlName = KellyTools.getUrlFileName(ditem.url, true);
+            
+            if (!fileUrlName) {
+                
+                console.log('cant find filename for ' + item.id);
+                console.log(item);
+                console.log(getNameTemplate());
+                
+                return false;
+            }
+            
+            fileName = KellyTools.replaceAll(fileName, '#filename#', fileUrlName);
         }
         
-        var fileUrlName = KellyTools.getUrlFileName(pImageName, true);
-        
-        if (!fileUrlName) {
-            console.log('cant find filename for ' + item.id);
-            console.log(item);
-            console.log(getNameTemplate());
-            return '';
+        if (fileName.indexOf('#number#') != -1) {
+            
+            fileName = KellyTools.replaceAll(fileName, '#number#', downloads.indexOf(ditem) + 1); 
         }
         
-        fileName = KellyTools.replaceAll(fileName, '#filename#', fileUrlName); 
-        fileName = KellyTools.replaceAll(fileName, /#category_[1-9]+#/, '');
+        fileName = KellyTools.replaceAll(fileName, /#category_[1-9]+#/, '');        
+        fileName = KellyTools.validateFolderPath(fileName);
         
-        return KellyTools.validateFolderPath(fileName);
+        if (!fileName) return false;
+        
+        if (!originalName && ditem.subItem > 0) {
+            fileName += '_' + ditem.subItem;
+        }
+        
+        ditem.filename = fileName;
+        
+        return ditem;
     }
     
     // переинициализировать список задач
@@ -4204,36 +4244,22 @@ function KellyGrabber(cfg) {
             availableItemsIndexes = indexes;
         }
         
-        var fullSize = false;
-       
+        var items = fav.getGlobal('fav').items;
+            
         for (var i = 0; i < availableItemsIndexes.length; i++) {
         
-            var item = fav.getGlobal('fav').items[availableItemsIndexes[i]];
-            
-            if (!item.pImage) continue;    
-            var fname = handler.itemGenerateFileName(item);   
-
-            if (!fname) continue; // bad template
-            
-            var separateTemplate = getNameTemplate().indexOf('#filename#') != -1 ? true : false;
+            var item = items[availableItemsIndexes[i]]
+            if (!item.pImage) continue; 
             
             if (typeof item.pImage !== 'string') {
             
                 for (var b = 0; b <= item.pImage.length-1; b++) {
-
-                    var bfname = fname;
-                    if (separateTemplate && b > 0) {
-                        bfname = handler.itemGenerateFileName(item, b);
-                    } else {
-                        bfname += '_' + b;
-                    }               
-                    
-                    handler.addFile(bfname, fav.getGlobal('env').getImageDownloadLink(item.pImage[b], fullSize), item, b);
+                    handler.addDownloadItem(item, b);
                 }
                 
             } else {
             
-                handler.addFile(fname,  fav.getGlobal('env').getImageDownloadLink(item.pImage, fullSize), item);
+                handler.addDownloadItem(item);
             }
         }  
                 
@@ -4305,7 +4331,7 @@ function KellyGrabber(cfg) {
         
         var lastReadyIndex = 0;
         for (var i = options.from; i <= downloads.length-1; i++) {
-            var state = getItemState(downloads[i]);            
+            var state = getDownloadItemState(downloads[i]);            
             if (state != 'complete' && state != 'skip') {
                 break;
             } else {               
@@ -4362,7 +4388,7 @@ function KellyGrabber(cfg) {
         
         for (var i=0; i < downloads.length; i++) {
             
-            if (getItemState(downloads[i]) == 'in_progress') {
+            if (getDownloadItemState(downloads[i]) == 'in_progress') {
                                 
                 if (downloads[i].blobRequest) {                
                     downloads[i].blobRequest.abort();  
@@ -4384,21 +4410,9 @@ function KellyGrabber(cfg) {
         checkAllCanceled();    
     }
     
-    
-    this.addFile = function(filename, url, item, subItem) {
+    this.addDownloadItem = function(item, subItem) {
         
-        if (!filename) return false;
-        if (!url) return false;
-        
-        if (url.length < 6) return false;
-                
-        var ext = KellyTools.getExt(url);
-        if (!ext) return false;
-        
-        filename = filename.trim();   
-        if (filename.indexOf('.') == -1) {
-            filename += '.' + ext;
-        }
+        if (!item) return false;
         
         ids++;
 
@@ -4410,10 +4424,10 @@ function KellyGrabber(cfg) {
         downloads.push({
             
             id : ids, 
-            filename : filename, 
-            url : url, 
+            filename : false, 
+            url : false, 
             conflictAction : 'overwrite', 
-            ext : ext,
+            ext : false,
             
             downloadId : false,
             
@@ -4490,11 +4504,18 @@ function KellyGrabber(cfg) {
         if (!baseFileFolder) baseFileFolder = '';
         
         baseFileFolder += '/';
-    
-        var urlOrig = download.url;
         
+        var pImageUrl = '';
+        if (typeof download.item.pImage == 'string') {
+            pImageUrl = download.item.pImage;
+        } else {
+            pImageUrl = download.item.pImage[download.item.subItem];
+        }
+        
+        if (!handler.initDownloadItemFile(download)) return false;
+                
         var downloadOptions = {
-            filename : baseFileFolder + download.filename, 
+            filename : baseFileFolder + download.filename + '.' + download.ext, 
             conflictAction : download.conflictAction,
             method : 'GET',
         }
@@ -4546,22 +4567,24 @@ function KellyGrabber(cfg) {
                 // try again, but use default Browser API shitty method (headers from original domain will be fucked up)
                 // newer catch this scenario throw, so may be this dont needed
                 
-                toTxtLog('file NOT LOADED as BLOB ' + urlOrig + ', attempt to download by download api without blob - BAD HEADERS : ' + downloadOptions.filename);
+                toTxtLog('file NOT LOADED as BLOB ' + download.url + ', attempt to download by download api without blob - BAD HEADERS : ' + downloadOptions.filename);
                 toTxtLog('LOAD FAIL NOTICE error code ' + errorCode + ', message : ' + errorNotice);
                 
-                downloadOptions.url = urlOrig;
+                downloadOptions.url = download.url;
                 handler.downloadUrl(false, downloadOptions, onDownloadApiStart);
                 
             } else {
                 
-                toTxtLog('file LOADED as BLOB ' + urlOrig + ', send to browser API for save to folder : ' + downloadOptions.filename);
+                toTxtLog('file LOADED as BLOB ' + download.url + ', send to browser API for save to folder : ' + downloadOptions.filename);
                 downloadOptions.url = blobData;     
 
                 handler.downloadUrl(true, downloadOptions, onDownloadApiStart);
             }
         }
         
-        download.blobRequest = handler.createBlobFromUrl(urlOrig, onLoadFileAsBlob);
+        download.blobRequest = handler.createBlobFromUrl(download.url, onLoadFileAsBlob);
+        
+        return true;
     }
        
     // count elements
@@ -4578,7 +4601,7 @@ function KellyGrabber(cfg) {
         
         for (var i = 0; i <= downloads.length-1; ++i) { 
         
-            if (getItemState(downloads[i]) != type) continue;
+            if (getDownloadItemState(downloads[i]) != type) continue;
             count++;            
         }
         
@@ -4592,7 +4615,8 @@ function KellyGrabber(cfg) {
         var currentWork = handler.countCurrent('in_progress');        
         if (currentWork >= options.maxDownloadsAtTime) return false;
         
-        var newWorkNum = options.maxDownloadsAtTime - currentWork;
+        var newWorkNum = options.maxDownloadsAtTime - currentWork; 
+        var searchWorkErrorsLimit = 20;
         
         var addCancelTimer = function(downloadItem) {
             
@@ -4620,40 +4644,41 @@ function KellyGrabber(cfg) {
         
         for (var i = options.from; i <= downloads.length - 1; i++) {
             
-            if (getItemState(downloads[i]) != 'wait') continue;
+            if (getDownloadItemState(downloads[i]) != 'wait') continue;
             
             var downloadItem = downloads[i];
             
             downloadItem.downloadId = DOWNLOADID_GET_PROCESS;
             downloadItem.workedout = false;
-            
-            if (options.cancelTimer) {
-                addCancelTimer(downloadItem);
-            }
-           
-            newWorkNum--;
-            
-            handler.downloadByXMLHTTPRequest(downloads[i]);
-            
-            /*
-            KellyTools.getBrowser().runtime.sendMessage({method: "downloads.download", download : {
-            
-                filename : baseFileFolder + downloads[i].filename, 
-                url : downloads[i].url, 
-                conflictAction : downloads[i].conflictAction,
-                method : 'GET',
-                //// 
+                       
+            if (handler.downloadByXMLHTTPRequest(downloads[i])) {
                 
-                wasted :(
-                 - > Unchecked runtime.lastError while running downloads.download Unsafe request header name
-                 
-                headers : [
-                    {name : 'referer', value : 'http://URL'},
-                ],
-                /////
-            }}, function(response) {});
-            */
-            
+                if (options.cancelTimer) {
+                    addCancelTimer(downloadItem);
+                }
+                
+                newWorkNum--;
+            } else {
+                
+                // bad name template \ url \ extension - common for corrupted data
+                toTxtLog('CAND INIT Download item FILENAME for N ' +  i);
+                
+                try {
+                    
+                     toTxtLog('download item dump ' + JSON.stringify(downloads[i].item));
+                    
+                } catch (E) {
+                    
+                }
+                
+                resetItem(downloadItem);
+                downloadItem.workedout = true;
+                downloadItem.error = 'Initialize download data error';
+                
+                searchWorkErrorsLimit--;
+                if (searchWorkErrorsLimit <= 0) break;
+            }
+                        
             if (newWorkNum <= 0) break;
         }               
     }
@@ -4666,7 +4691,9 @@ function KellyGrabber(cfg) {
         if (downloadItem.error) downloadItem.error = false;			
         if (downloadItem.downloadDelta) downloadItem.downloadDelta = false;
         
-        downloadItem.downloadId = DOWNLOADID_INACTIVE;        
+        downloadItem.downloadId = DOWNLOADID_INACTIVE; 
+        downloadItem.url = false;
+        downloadItem.filename = false;
     }
     
     this.resetStates = function(keepReady) {
@@ -4675,7 +4702,7 @@ function KellyGrabber(cfg) {
         
         for (var i=0; i <= downloads.length-1; ++i) {
             
-            if (keepReady && getItemState(downloads[i]) == 'complete') {
+            if (keepReady && getDownloadItemState(downloads[i]) == 'complete') {
                 continue;
             } 
             
@@ -5597,7 +5624,7 @@ function KellyFavItems()
     // dynamicly created DOM elements
     
     var sideBarWrap = false;
-    var sideBarLock = false; // lock side bar position
+    var sideBarLock = false;
     var modalBox = false;
     var modalBoxContent = false;
     var modalBoxMessage = false;
@@ -5608,7 +5635,7 @@ function KellyFavItems()
     //    
     
     var siteContent = false; // main page container - setted by env
-    var favContent = false;
+    var favContent = false; // main extension container
     var imagesBlock = false;
     
     var publications = false;
@@ -6623,6 +6650,13 @@ function KellyFavItems()
 
         handler.closeSidebar();
         mode = 'main';
+        
+        if (downloaderBox) {
+            downloaderBox.modal.className = downloaderBox.modal.className.replace('active', 'hidden');
+            
+            imagesAsDownloadItems = false;
+            sideBarLock = false;
+        }
     }
     
     // вывести окно расширения и назначить режим отображения
@@ -8441,19 +8475,17 @@ function KellyFavItems()
         if (optionsButton) {
             additionButtons.appendChild(optionsButton);
         }
-        
+            
         if (handler.isDownloadSupported) {   
-        
+            
             var showDownloadManagerForm = function(show) {
                 
                 if (!show) {
                     
                     downloaderBox.modal.className = downloaderBox.modal.className.replace('active', 'hidden');  
-                    sideBarLock = false;
                     return;
                     
                 } else {
-                    sideBarLock = true;
                     var dm = handler.getDownloadManager();
                     
                     if (!dm.container) {
@@ -8477,16 +8509,15 @@ function KellyFavItems()
                     if (imagesAsDownloadItems) { // todo ask before cancel if something in progress
                         imagesAsDownloadItems = false;
                         this.className = this.className.replace('active', 'hidden');
-                        
+                        sideBarLock = false;
                         showDownloadManagerForm(false);
                     } else {
                         imagesAsDownloadItems = true;
                         this.className = this.className.replace('hidden', 'active');                
                         
+                        sideBarLock = true;
                         handler.getDownloadManager().setDownloadTasks(displayedItems);                        
-                        setTimeout(function() {
-                            showDownloadManagerForm(true);
-                        }, 100);
+                        showDownloadManagerForm(true);
                     }
                     
                     handler.updateImagesBlock();                
@@ -8623,9 +8654,7 @@ function KellyFavItems()
     }
     
     function updateSidebarPosition() {
-        
-        if (env.updateSidebarPosition && env.updateSidebarPosition(sideBarLock)) return;
-        
+        if (env.updateSidebarPosition && env.updateSidebarPosition(sideBarLock)) return;        
     }
     
     // preview dimensions, preview jpg for gif media 
@@ -10145,9 +10174,12 @@ function KellyFavItems()
 
 
 
+// JoyReactor environment driver
+
 // !@ - not required by FavItems object methods	
-// default profile object, move to separate file in future
-// todo move formatcomment \ formatpost
+
+// default profile driver must be assign to K_DEFAULT_ENVIRONMENT variable
+// todo move formatcomment \ formatpost methods from FavItems to keep core without "environment only" / driver methods
 
 var K_ENVIRONMENT = {
     
@@ -10470,6 +10502,8 @@ var K_ENVIRONMENT = {
         // tagList
     },
     
+    // return same url if not supported
+    
     getStaticImage : function(source) {
 
         if (source.indexOf('reactor') != -1) {
@@ -10483,6 +10517,8 @@ var K_ENVIRONMENT = {
         
         return source;
     },
+    
+    // return false if not supported for page \ site
     
     getFavPageInfo : function() {
     

@@ -240,7 +240,7 @@
         "message":"Exclude low resolution images"
     },
     "grabber_save_as_json":{  
-        "message":"Save as database file"
+        "message":"Save as profile"
     },	
     "grabber_save_as":{  
         "message":"Save as"
@@ -279,7 +279,7 @@
         "message":"<b>#category_1#</b>, <b>#category_2#</b>, <b>#category_N#</b> - names of 1, 2 and N categorys of downloaded item (by priority)<br>"
     },
     "grabber_name_template_help_2":{  
-        "message":"<b>#filename#</b> - original file name<br><b>#id#</b> - unique id in current selected local storage<br>"
+        "message":"<b>#filename#</b> - original file name<br><b>#id#</b> - unique id in current selected local storage<br><i>#number#</i> - item number in current order<br>"
     },
     "grabber_name_template_help_3":{  
         "message":"<b>#name#</b> - sign<br>Usage <br>\"<i>#filename#</i>\" - download file with original name (ex. <b>Downloads</b>/dog.jpg)<br>"
@@ -414,10 +414,10 @@
         "message":"source"
     },
     "storage":{  
-        "message":"Storage"
+        "message":"Profile"
     },    
     "storage_selected":{  
-        "message":"Storage selected"
+        "message":"Profile selected"
     },
     "storage_add_new":{  
         "message":"Add new"
@@ -426,43 +426,43 @@
         "message":"Load from file"
     },    
     "storage_name":{  
-        "message":"Storage id (only ch. A-Z, 1-9, _)"
+        "message":"Profile id (only ch. A-Z, 1-9, _)"
     },
     "storage_create_cancel_if_exist":{  
         "message":"Cancel if already exist with same id"
     },
     "storage_manager_total":{  
-        "message":"Storage total"
+        "message":"Disk space used"
     },
     "storage_type":{  
         "message":"Storage type"
     },   
     "storage_type_notice":{  
-        "message":"<b>Change storage type only if needed</b>. After change, your old data will be hidden, until switch back to previouse storage type"
+        "message":"<b>Change storage type only if needed</b>. After change, your current profile list will be hidden, until switch back to previouse storage type"
     }, 
     "storage_manage":{  
-        "message":"Storage manager"
+        "message":"Profile manager"
     }, 
     "storage_delete":{  
-        "message":"Storage delete"
+        "message":"Delete profile"
     },   
     "storage_empty_name":{  
-        "message":"Please enter database name"
+        "message":"Please enter profile name"
     },     
     "storage_beasy":{  
         "message":"Wait until full load"
     },    
     "storage_create_already_exist":{  
-        "message":"Database already exist"
+        "message":"Profile already exist"
     },     
     "storage_create_ok":{  
-        "message":"Database added"
+        "message":"Profile added"
     },     
     "storage_create_e":{  
-        "message":"Error while adding database (turn on debug mode an watch F12 console)"
+        "message":"Error while adding profile (turn on debug mode an watch F12 console)"
     },   
     "storage_create_e2":{  
-        "message":"Bad database format"
+        "message":"Bad profile file format (JSON parse fail)"
     }, 
     "sync_by_add":{  
         "message":"If user is logged in, dublicates publication to main favourites storage"
