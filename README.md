@@ -47,7 +47,7 @@ FireFox, Opera, Chrome, Edge (с существеными ограничения
 >	\lib\kellyThreadWork.js (контроллер потоковой загрузки данных)<br>
 >	\lib\kellyGrabber.js (контроллер пакетной выгрузки элементов избранного)<br>
 >	\lib\kellyTools.js	(набор дополнительных методов используемых всеми библиотеками из каталога lib)<br>
->	\lib\KellyFavItems.js (файл окружения расширения)<br>
+>	\lib\kellyFavItems.js (файл окружения расширения)<br>
 >	\env\profiles\joyreactor.js (файл профиля домена)<br>
 >	\init.js (инициализация клиентской части)<br>
 <br>
@@ -55,7 +55,7 @@ FireFox, Opera, Chrome, Edge (с существеными ограничения
 Объединить в файл khelper.user.js<br><br>
 
 > \lib\kellyTools.js (набор дополнительных методов используемых всеми библиотеками из каталога lib<br>
-> \lib\KellyDispetcher.js (шлюз для обработки любых методов требующих участия Browser API)<br>
+> \lib\kellyDispetcher.js (шлюз для обработки любых методов требующих участия Browser API)<br>
 > \init.bg.js (инициализация фонового процесса)<br>
 <br>
 

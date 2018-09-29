@@ -130,9 +130,11 @@ function KellyTooltip(cfg) {
         
         handler.self = document.createElement('div');
         handler.self.className = getSelfClass();			
-        handler.self.innerHTML =  '<div class="' + handler.classGroup + '-container"><div class="' + handler.classGroup + '-content">' + handler.message;
+        handler.self.innerHTML =  '<div class="' + handler.classGroup + '-container"><div class="' + handler.classGroup + '-content">';
         handler.self.innerHTML += '<span class="' + handler.classGroup + '-close" style="cursor : pointer; display:' + (handler.closeButton ? 'block' : 'none') +'">+</span></div>';
         handler.self.innerHTML += '</div>';	
+        
+        handler.setMessage(handler.message);
         
         handler.self.onmouseover = function (e) { 
             if (handler.userEvents.onMouseOver) handler.userEvents.onMouseOver(handler, e);
@@ -198,7 +200,13 @@ function KellyTooltip(cfg) {
         if (!handler.self) return;
         
         handler.message = mess;
-        this.getContent().innerHTML = mess;	
+            
+        if (typeof mess == 'string') {        
+            this.getContent().innerHTML = mess;	
+        } else {
+            this.getContent().innerHTML = '';
+            this.getContent().appendChild(mess);           
+        }
 
         return handler;
     }
@@ -410,7 +418,7 @@ KellyTooltip.loadDefaultCss = function(className) {
     return true;
 }
 
-KellyTooltip.addTipToEl = function(el, message, cfg, delay) {
+KellyTooltip.addTipToEl = function(el, message, cfg, delay, onShow) {
     
     if (!delay) delay = 50;
     
@@ -455,6 +463,8 @@ KellyTooltip.addTipToEl = function(el, message, cfg, delay) {
                 tooltip.setMessage(text);			
                 tooltip.show(true);
                 tooltip.updatePosition();
+                
+                if (onShow) onShow(el, e);
                 
                 el.onmouseover = onmouseOver;
                 

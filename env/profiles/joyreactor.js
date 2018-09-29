@@ -64,17 +64,111 @@ var K_ENVIRONMENT = {
         return tags;
     },
     
-    getPostLink : function(publication) {
+    // !@
+    getPostLinkEl : function(publication) {
         
         if (window.location.host.indexOf('old.') == -1) {
 
             var link = KellyTools.getElementByClass(publication, 'link_wr');
-            if (link) return KellyTools.getChildByTag(link, 'a');
+            if (link) link = KellyTools.getChildByTag(link, 'a');
         } else {
-            return publication.querySelector('[title="ссылка на пост"]');
-        }			
-    
+            var link = publication.querySelector('[title="ссылка на пост"]');
+        }		
+        
+        return link;
     },
+    
+    // get canonical url link
+    
+    getPostLink : function(publication, el) {
+        
+        if (!el) el = this.getPostLinkEl(publication);
+    
+        if (el) {
+            var link = el.href.match(/[A-Za-z.0-9]+\/post\/[0-9]+/g);
+            return link ? link[0] : false;
+        }
+        
+        return '';    
+    },  
+    
+    // get canonical comment url link
+    
+    getCommentLink : function(comment) {
+        
+        if (!comment) return '';
+        
+        var links = comment.getElementsByTagName('a');
+        
+        for (var b = 0; b < links.length; b++) {
+            if (links[b].href.length > 10 && links[b].href.indexOf('#comment') != -1) {
+                var link = links[b].href.match(/[A-Za-z.0-9]+\/post\/[0-9]+#comment[0-9]+/g);
+                return link ? link[0] : false;
+            }
+        }
+        
+        return '';
+    },    
+    
+    updatePostFavButton : function(publication) {
+        
+        var handler = this;
+        var link = handler.getPostLinkEl(publication);
+        
+        if (!link) {            
+            KellyTools.log('empty post link element', 'profile updatePostFavButton');
+            return false;        
+        }
+        
+        var linkUrl = handler.getPostLink(publication, link);
+        if (!linkUrl) {
+            KellyTools.log('bad post url', 'profile updatePostFavButton');
+            return false;  
+        }
+        
+        var inFav = handler.fav.getStorageManager().searchItem(handler.fav.getGlobal('fav'), {link : linkUrl, commentLink : false});
+        
+        var addToFav = KellyTools.getElementByClass(publication, handler.className + '-post-FavAdd');
+    
+        // create if not exist
+        
+        if (!addToFav) {
+            addToFav = document.createElement('a');
+            addToFav.className = handler.className + '-post-FavAdd';
+            
+            // keep same url as main button, to dont loose getPostLink method functional and keep similar environment
+            addToFav.href = link.href; 
+           
+            var parentNode = link.parentNode;
+                parentNode.insertBefore(addToFav, link);
+        }
+        
+        // update title
+        
+        if (inFav !== false) {
+            
+            addToFav.onclick = function() { 
+            
+                handler.fav.showRemoveFromFavDialog(inFav, function() {
+                    if (handler.fav.getGlobal('fav').coptions.syncByAdd) handler.syncFav(publication, false);
+                    
+                    handler.fav.closeSidebar(); 
+                }); 
+                
+                return false; 
+            };
+            
+            addToFav.innerHTML = KellyLoc.s('Удалить из избранного', 'remove_from_fav');
+            
+        } else {
+            
+            addToFav.onclick = function() { handler.fav.showAddToFavDialog(publication); return false; };
+            addToFav.innerHTML = KellyLoc.s('Добавить в избранное', 'add_to_fav');
+        }
+                
+        return true;            
+    },	
+       
     
     getAllMedia : function(publication) {
         
@@ -126,6 +220,7 @@ var K_ENVIRONMENT = {
             if (data.length == 1 && image && mainImage && image.indexOf(this.getImageDownloadLink(mainImage.url, false, true)) != -1) {
                 this.fav.setSelectionInfo('dimensions', mainImage);
             } else if (data.length == 1 && image && mainImage) {
+                KellyTools.log('Main image in schema org for publication is exist, but not mutched with detected first image in publication');    
                 KellyTools.log(image);
                 KellyTools.log(this.getImageDownloadLink(mainImage.url, false));
             }
@@ -239,21 +334,6 @@ var K_ENVIRONMENT = {
         
         
         return url;
-    },
-    
-    getCommentLink : function(comment) {
-        
-        if (!comment) return '#';
-        
-        var links = comment.getElementsByTagName('a');
-        
-        for (var b = 0; b < links.length; b++) {
-            if (links[b].href.indexOf('#comment') != -1) {
-                return links[b].href;                    
-            }
-        }
-        
-        return '#';
     },
     
     updateSidebarPosition : function(lock) {

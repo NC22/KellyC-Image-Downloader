@@ -138,9 +138,11 @@ function KellyTooltip(cfg) {
         
         handler.self = document.createElement('div');
         handler.self.className = getSelfClass();			
-        handler.self.innerHTML =  '<div class="' + handler.classGroup + '-container"><div class="' + handler.classGroup + '-content">' + handler.message;
+        handler.self.innerHTML =  '<div class="' + handler.classGroup + '-container"><div class="' + handler.classGroup + '-content">';
         handler.self.innerHTML += '<span class="' + handler.classGroup + '-close" style="cursor : pointer; display:' + (handler.closeButton ? 'block' : 'none') +'">+</span></div>';
         handler.self.innerHTML += '</div>';	
+        
+        handler.setMessage(handler.message);
         
         handler.self.onmouseover = function (e) { 
             if (handler.userEvents.onMouseOver) handler.userEvents.onMouseOver(handler, e);
@@ -206,7 +208,13 @@ function KellyTooltip(cfg) {
         if (!handler.self) return;
         
         handler.message = mess;
-        this.getContent().innerHTML = mess;	
+            
+        if (typeof mess == 'string') {        
+            this.getContent().innerHTML = mess;	
+        } else {
+            this.getContent().innerHTML = '';
+            this.getContent().appendChild(mess);           
+        }
 
         return handler;
     }
@@ -418,7 +426,7 @@ KellyTooltip.loadDefaultCss = function(className) {
     return true;
 }
 
-KellyTooltip.addTipToEl = function(el, message, cfg, delay) {
+KellyTooltip.addTipToEl = function(el, message, cfg, delay, onShow) {
     
     if (!delay) delay = 50;
     
@@ -463,6 +471,8 @@ KellyTooltip.addTipToEl = function(el, message, cfg, delay) {
                 tooltip.setMessage(text);			
                 tooltip.show(true);
                 tooltip.updatePosition();
+                
+                if (onShow) onShow(el, e);
                 
                 el.onmouseover = onmouseOver;
                 
@@ -1135,7 +1145,7 @@ function KellyImgView(cfg) {
     
     var beasy = false;
     
-    var image = false; // current loaded image, false if not shown (getCurrentImage().image)
+    var image = false; // dom el - current loaded image, false if not shown (getCurrentImage().image)
     var imageBounds = false; 
     
     var selectedGallery = 'default'; // inherit by opened source
@@ -1305,6 +1315,7 @@ function KellyImgView(cfg) {
             cursor : cursor,
             shown : blockShown,
             blockShown : blockShown,
+            imageBounds : imageBounds, // width, height, resizedWidth, resizedHeight
             imageData : imagesData[selectedGallery] ? imagesData[selectedGallery] : false,
         };
     }
@@ -2414,18 +2425,18 @@ function KellyFavStorageManager(cfg) {
                     <tr><td>' + lng.s('Тип хранения данных', 'storage_type') + ' :</td><td>\
                         <select class="' + handler.className + '-driver">\
                             <option value="localstorage" ' + (handler.driver == 'localstorage' ? 'selected' : '') + '>Localstorage</option>\
-                            <option value="api" ' + (handler.driver == 'api' ? 'selected' : '') + '>Browser API (testing)</option>\
+                            <option value="api" ' + (handler.driver == 'api' ? 'selected' : '') + '>Browser API (<b>beta</b>)</option>\
                         </select>\
                     </td></tr>\
                     <tr><td colspan="2">' + lng.s('', 'storage_type_notice') + '</td></tr>\
                     <tr><td colspan="2"><h3>' + lng.s('Добавить новую базу', 'storage_add_new') + '</h3></td></tr>\
                     <tr><td>' + lng.s('Загрузить из файла', 'storage_load_from_file') + '</td><td><input type="file" id="' + handler.className + '-db-file"></td></tr>\
                     <tr><td>' + lng.s('Идентификатор базы', 'storage_name') + '</td><td><input type="text" id="' + handler.className + '-create-name" placeholder="custom_data"></td></tr>\
-                    <tr style="display : none;"><td><label for="' + overwriteId + '-cancel">' + lng.s('Отмена если существует', 'storage_create_cancel_if_exist') + '</label></td>\
+                    <tr><td><label for="' + overwriteId + '-cancel">' + lng.s('Отмена если существует', 'storage_create_cancel_if_exist') + '</label></td>\
                         <td><input type="radio" name="' + overwriteId + '" id="' + overwriteId + '-cancel" value="cancel" checked></td></tr>\
                     <tr style="display : none;"><td><label for="' + overwriteId + '-overwrite">Перезаписать если существует</label></td>\
                         <td><input type="radio" name="' + overwriteId + '" id="' + overwriteId + '-overwrite" value="overwrite" ></td></tr>\
-                    <tr style="display : none;"><td><label for="' + overwriteId + '-add">Дополнить если существует</label></td>\
+                    <tr><td><label for="' + overwriteId + '-add">' + lng.s('', 'storage_create_add_if_exist') + '</label></td>\
                         <td><input type="radio" name="' + overwriteId + '" id="' + overwriteId + '-add" value="add"></td></tr>\
                     <tr><td colspan="2"><input type="submit" class="' + handler.className + '-create" value="' + lng.s('Создать', 'create') + '"></td></tr>\
                     <tr><td colspan="2"><div class="' + handler.className + '-message"></div></td></tr>\
@@ -2512,14 +2523,18 @@ function KellyFavStorageManager(cfg) {
                 var add = document.getElementById(overwriteId + '-add').checked ? true : false;
                 var cancel = document.getElementById(overwriteId + '-cancel').checked ? true : false;
                 
-                if (cancel && handler.slist === false) {
+                mode = 'cancel';
+                if (add) mode = 'add';
+                if (overwrite) mode = 'overwrite'; // dont needed - use delete instead, more safe and clear for user
+                
+                if (mode == 'cancel' && handler.slist === false) {
 
                     handler.showMessage(lng.s('Дождитесь загрузки списка баз данных', 'storage_beasy'), true);
                     return false;
                 }
                 
                 // check cached data before ask dispetcher
-                if (cancel && handler.slist.indexOf(dbName) != -1) {
+                if (mode == 'cancel' && handler.slist.indexOf(dbName) != -1) {
                     
                     handler.showMessage(lng.s('База данных уже существует', 'storage_create_already_exist'), true);
                     return false;					
@@ -2528,7 +2543,7 @@ function KellyFavStorageManager(cfg) {
                 // request if any bd already exist
                 handler.loadDB(dbName, function(db) {
                     
-                    if (db !== false) {
+                    if (db !== false && mode == 'cancel') {
                         handler.showMessage(lng.s('База данных уже существует', 'storage_create_already_exist'), true);
                         return false;							
                     }
@@ -2537,8 +2552,13 @@ function KellyFavStorageManager(cfg) {
                     
                         if (!error) {
                             
+                            var noticeName = 'storage_create_ok_mcancel';
+                            if (db && mode == 'add') {
+                                noticeName = 'storage_create_ok_madd';
+                            }
+                            
                             handler.getStorageList(handler.showStorageList);							
-                            handler.showMessage(lng.s('База данных добавлена', 'storage_create_ok'));
+                            handler.showMessage(lng.s('', noticeName));
                             
                         } else {
                         
@@ -2553,11 +2573,25 @@ function KellyFavStorageManager(cfg) {
                     if (fileInput.value) {
                     
                         KellyTools.readFile(fileInput, function(input, fileData) {
-                                                        
-                            var db = KellyTools.parseJSON(fileData.trim());
-                            if (db) {
-                                db = handler.validateDBItems(db);	
-                                handler.saveDB(dbName, db, onDBSave);
+                                              
+                            var newDBData = KellyTools.parseJSON(fileData.trim());
+                           
+                            if (newDBData) { 
+                            
+                                if (db && mode == 'add') {
+                                    
+                                    newDBData = handler.validateDBItems(newDBData);
+
+                                    var result = handler.addDataToDb(db, newDBData);
+                                    
+                                    handler.log(result);  
+                                    
+                                    newDBData = db;
+                                    handler.saveDB(dbName, newDBData, onDBSave);
+                                } else {
+                                    newDBData = handler.validateDBItems(newDBData);	
+                                    handler.saveDB(dbName, newDBData, onDBSave);
+                                }
                             } else {
                                 handler.showMessage(lng.s('Ошибка парсинга структурированных данных', 'storage_create_e2'), true);	
                             }
@@ -2578,6 +2612,8 @@ function KellyFavStorageManager(cfg) {
         
         handler.wrap.appendChild(handler.storageContainer);
     }
+    
+    /* IN DEV Not tested */
 
     this.mergeDB = function(dbsKeys) {
         
@@ -2767,53 +2803,108 @@ function KellyFavStorageManager(cfg) {
         }
     }
 
+    // assoc input data categories to db categories, add new to db if not exist
+    
+    function convertCategoriesForDataItem(db, data, item, stats) {
+        
+        var assocDataCats = [];
+        if (!item || !item.categoryId) return assocDataCats;
+        
+        var dataCats = item.categoryId;
+        
+        // console.log(data.categories);
+         
+        for (var c = 0; c < dataCats.length; c++) {
+            
+            var categoryId = dataCats[c];
+            var dataCat = handler.getCategoryById(data, categoryId);
+            
+            if (dataCat.id == -1) {                
+                handler.log('convertCategoriesForDataItem : skip unexist cat in data array - ' + categoryId);
+                continue;
+            }
+            
+            if (!dataCat.name) continue;
+            
+                dataCat.name = KellyTools.val(dataCat.name);
+                
+            if (!dataCat.name) continue;
+             
+            var existCatIndex = handler.searchCategoryBy(db, dataCat.name, 'name');
+            
+            if (existCatIndex !== false) {
+                
+                assocDataCats[assocDataCats.length] = db.categories[existCatIndex].id;
+                
+            } else {
+                
+                var newCatIndex = db.categories.length;
+                
+                db.categories[newCatIndex] = {};
+                handler.copyObjectValues(dataCat, db.categories[newCatIndex]);
+                
+                db.ids++;
+                db.categories[newCatIndex].id = db.ids;
+                
+                assocDataCats[assocDataCats.length] = db.categories[newCatIndex].id;
+                
+                if (stats) stats.newCategories++;
+                
+            }
+        }
+        
+        return assocDataCats;
+    }
+    
     /* IN DEV, not tested */
     
     this.addDataToDb = function(db, data) {
-
-        for (var i = 0; i < data.items.length; i++) {
+        
+        var limit = 0; // for tests
+        
+        if (!limit) {
+            
+            limit = data.items.length;
+        }
+        
+        var stats = {
+            
+            added : 0,
+            updated : 0,
+            newCategories : 0,
+        }
+        
+        for (var i = 0; i < limit; i++) {
             
             var existIndex = handler.searchItem(db, data.items[i]);
-            // todo update categories \ add new item with new id
-            
+     
             if (existIndex !== false) {
-            
-                // db.items[existIndex].categoryId = db.items[existIndex].categoryId.concat(data.items[i].categoryId);
-            
+                
+                // merge categories
+                
+                data.items[i].categoryId = convertCategoriesForDataItem(db, data, data.items[i], stats);
+                db.items[existIndex].categoryId = db.items[existIndex].categoryId.concat(data.items[i].categoryId);
+                
+                stats.updated++;
+                
             } else {
             
                 existIndex = db.items.length;
                 
                 db.items[existIndex] = {};
-                copyObjectValues(data.items[i], db.items[existIndex]);			
+                handler.copyObjectValues(data.items[i], db.items[existIndex]);			
                 
                 db.ids++;
                 db.items[existIndex].id = db.ids;
                 
-                var dataCats = data.items[i].categoryId;
-                var actualItemCats = [];
+                data.items[i].categoryId = convertCategoriesForDataItem(db, data, data.items[i], stats);
                 
-                for (var c = 0; c < dataCats.length; c++) {
-                
-                    var dataCat = data.categories[dataCats[c]];
-                    var existCatIndex = handler.searchCategoryBy(db, dataCat.name, 'name');
-                    
-                    if (existCatIndex !== false) {
-                        actualItemCats[actualItemCats.length] = db.categories[existCatIndex].id;
-                    } else {
-                        existCatIndex = db.categories.length;
-                        db.categories[existCatIndex] = {};
-                        copyObjectValues(dataCat, db.categories[existCatIndex]);
-                        
-                        db.ids++;
-                        db.categories[existCatIndex].id = db.ids;
-                        
-                        actualItemCats[actualItemCats.length] = db.categories[existCatIndex].id;
-                    }
-                }
+                stats.added++;
             }
             
         }
+        
+        return stats;
     }
             
     this.getStorageList = function(callback, keepPrefix) {
@@ -5378,12 +5469,8 @@ KellyTools.getRelativeUrl = function(str) {
     
     if (!str.length) return '/';
     
-    if (str[str.length-1] != '/') str += '/';
-    
-    if (str.indexOf('http') != -1 || str.substring(0, 2) == '//') {
-        str = str.replace(/^(?:\/\/|[^\/]+)*\//, "");
-    }
-
+    str = str.replace(/^(?:\/\/|[^\/]+)*\//, "");
+   
     if (!str.length) str = '/';
 
     if (str[0] != '/') {
@@ -6236,15 +6323,19 @@ function KellyFavItems()
             else text += ' (' + lng.s('превью', 'preview') + ')' + '<br>';
         }
         
+        text += '<div class="' + env.className + '-ItemTip-controll">';
+        
         if (item.link) {
-            text += '<a href="' + item.link + '" target="_blank">' + lng.s('Перейти к публикации', 'go_to_publication') + '</a>' + '<br>';
+            text += '<a href="' + item.link + '" target="_blank">' + lng.s('Показать пост', 'go_to_publication') + '</a>' + '<br>';
             
         }
         
         if (item.commentLink) {
-            text += '<a href="' + item.commentLink + '" target="_blank">' + lng.s('Перейти к комментарию', 'go_to_comment') + '</a>' + '<br>';
+            text += '<a href="' + item.commentLink + '" target="_blank">' + lng.s('Показать комментарий', 'go_to_comment') + '</a>' + '<br>';
             
         }
+        
+        text += '</div>';
         
         if (typeof item.pImage != 'string' && item.pImage.length > 1) {
             text += lng.s('Изображений : __IMAGEN__', 'image_total', {IMAGEN : item.pImage.length}) + '<br>';
@@ -6290,8 +6381,40 @@ function KellyFavItems()
             
             if (!item) return false;
         
-            
-            return handler.showItemInfo(item);
+            var message = document.createElement('div');
+                message.innerHTML = handler.showItemInfo(item);
+                
+            var itemTipControll = KellyTools.getElementByClass(message, env.className + '-ItemTip-controll');
+               
+            var fixProportions = document.createElement('a');
+                fixProportions.href = '#';
+                fixProportions.innerHTML = lng.s('Обновить пропорции', 'fix_proportions');
+                fixProportions.onclick = function() {
+                    
+                    var currentIndex = fav.items.indexOf(item);
+                    
+                    if (currentIndex == -1) return;
+                    
+                    removeDimensionsForItem(item);
+                    handler.saveWH(state.image, currentIndex);
+                            
+                    handler.updateImagesBlock();
+                    handler.updateImageGrid();
+                    
+                    // item.pw = state.imageBounds.width;
+                    // item.ph = state.imageBounds.height;
+                    
+                    this.innerHTML = lng.s('Пропорции обновлены', 'fix_proportions_ok');
+                    log('fix proportions to ' + item.pw + ' | ' + item.ph);
+                    
+                    return false;
+                }
+                
+                if (itemTipControll) {                    
+                    itemTipControll.appendChild(fixProportions);
+                }
+         
+            return message;
         }
         
         KellyTooltip.addTipToEl(el, getMessage, {
@@ -6561,7 +6684,7 @@ function KellyFavItems()
         
         var censored = postBlock.innerHTML.indexOf('/images/censorship') != -1 ? true : false;
         
-        if (!updatePostFavButton(postBlock)) return false;    
+        if (!env.updatePostFavButton(postBlock)) return false;    
         
         var toogleCommentsButton = postBlock.getElementsByClassName('toggleComments');
 
@@ -6689,60 +6812,6 @@ function KellyFavItems()
         return textContainer.textContent || textContainer.innerText || '';
     }
     
-    function updatePostFavButton(postBlock) {
-        
-        var link = env.getPostLink(postBlock);
-        
-        if (!link) {            
-            log('bad postcontainer');
-            return false;        
-        }
-        
-        var linkUrl = KellyTools.getRelativeUrl(link.href);
-        if (!linkUrl) {
-            log('bad postcontainer url');
-            return false;  
-        }
-                
-        var inFav = handler.getStorageManager().searchItem(fav, {link : linkUrl, commentLink : false});
-        
-        var addToFav = KellyTools.getElementByClass(postBlock, env.className + '-post-FavAdd');
-    
-        // create if not exist
-        
-        if (!addToFav) {
-            addToFav = document.createElement('a');
-            addToFav.className = env.className + '-post-FavAdd';
-            
-            // keep same url as main button, to dont loose getPostLink method functional and keep similar environment
-            addToFav.href = link.href; 
-           
-            var parentNode = link.parentNode;
-                parentNode.insertBefore(addToFav, link);
-        }
-        
-        // update title
-        
-        if (inFav !== false) {
-            addToFav.onclick = function() { 
-            
-                handler.showRemoveFromFavDialog(inFav, function() {
-                    if (fav.coptions.syncByAdd && env.syncFav) env.syncFav(postBlock, false);
-                    
-                    handler.closeSidebar(); 
-                }); 
-                
-                return false; 
-            };
-            addToFav.innerHTML = lng.s('Удалить из избранного', 'remove_from_fav');
-        } else {
-            addToFav.onclick = function() { handler.showAddToFavDialog(postBlock); return false; };
-            addToFav.innerHTML = lng.s('Добавить в избранное', 'add_to_fav');
-        }
-                
-        return true;            
-    }	
-       
     function formatComments(block) {
     
         var comments = getCommentsList(block);
@@ -6781,12 +6850,10 @@ function KellyFavItems()
             
             // searh comment by link
             var link = KellyTools.getRelativeUrl(env.getCommentLink(comments[i]));
-            var inFav = false;
+            if (!link) continue;
             
-            if (link != '#') {
-                inFav = handler.getStorageManager().searchItem(fav, {link : false, commentLink : link});
-            }
-                
+            var inFav = handler.getStorageManager().searchItem(fav, {link : false, commentLink : link});
+    
             if (inFav !== false) {
                 
                 addToFavButton.setAttribute('itemIndex', inFav);
@@ -8444,6 +8511,7 @@ function KellyFavItems()
             
         var nsfw = logicButton.cloneNode();		
             nsfw.className = env.className + '-FavFilter';
+            
             if (fav.coptions.ignoreNSFW) nsfw.innerHTML = '- NSFW';
             else nsfw.innerHTML = '+ NSFW';
             
@@ -8464,6 +8532,10 @@ function KellyFavItems()
                 page = 1;
                 handler.showFavouriteImages();
                 return false;
+            }
+            
+            if (!env.isNSFW()) {                
+                nsfw.style.display = 'none';
             }
             
         var additionButtons = document.createElement('div');
@@ -8665,12 +8737,11 @@ function KellyFavItems()
             log('setSelectionInfo : clean selected info');
             if (selectedInfo) selectedInfo = false;
             
-            return;
+        } else {
+        
+            if (!selectedInfo) selectedInfo = new Object();        
+            selectedInfo[type] = info;    
         }
-        
-        if (!selectedInfo) selectedInfo = new Object();
-        
-        selectedInfo[type] = info;    
     }
     
     // save preview image dimensions for fav.items[index], if not saved
@@ -9270,8 +9341,7 @@ function KellyFavItems()
             postItem.gifInfo = selectedInfo['gifInfo'];     
         }
         
-        var link = env.getPostLink(selectedPost);
-        if (link) postItem.link = link.href;           
+        postItem.link = env.getPostLink(selectedPost);           
         
         if (!postItem.link) {
             
@@ -9674,8 +9744,7 @@ function KellyFavItems()
             handler.setSelectionInfo(false);
             
             selectedImages = env.getAllMedia(posts[i]);
-            selectAutoCategories();
-                    
+                                
             if (skipEmpty && !selectedImages.length) {
                 log('onDownloadNativeFavPage : skip empty item');
                 log(selectedPost);
@@ -9687,6 +9756,7 @@ function KellyFavItems()
             }
             
             worker.collectedData.selected_cats_ids = [];
+            selectAutoCategories(worker.collectedData);
             
             if (env.getPostTags && worker.catByTagList) {
             
@@ -9817,6 +9887,8 @@ function KellyFavItems()
             return false;
         }
         
+        var maxPagesPerExport = 1000;
+        
         favNativeParser.collectedData = handler.getStorageManager().getDefaultData();
         
         var pages = KellyTools.getElementByClass(document, 'kelly-PageArray'); 
@@ -9825,10 +9897,18 @@ function KellyFavItems()
         var message = KellyTools.getElementByClass(document, env.className + '-exporter-process');
         
         if (pages && pages.value.length) {
-            pagesList = KellyTools.getPrintValues(pages.value, true);
+            
+            pagesList = KellyTools.getPrintValues(pages.value, true, 1, favInfo.pages);
         } else { 
+        
             pagesList = KellyTools.getPrintValues('1-' + favInfo.pages, true);
         }	
+        
+        if (favInfo.pages > maxPagesPerExport && pagesList.length > maxPagesPerExport) {
+            
+            message.innerHTML = lng.s('Выборка содержит превышающие лимиты значения. Ограничте выборку (не более __MAXPAGESPERIMPORT__ за одну операцию)', 'download_limitpages', {MAXPAGESPERIMPORT : maxPagesPerExport});
+            return; 
+        }
         
         if (!pagesList.length) {
             message.innerHTML = lng.s('Выборка пуста', 'selection_empty');
@@ -9932,7 +10012,11 @@ function KellyFavItems()
      
         if (favPageInfo && favPageInfo.items) {
         
-            var saveBlock = '<div class="kelly-Save" style="display : none;"><a href="#" class="kelly-SaveFavNew" >Скачать список элементов</a></div>';
+            var saveBlock = '\
+                <div class="kelly-Save" style="display : none;">\
+                    <p>' + lng.s('', 'download_save_notice') + '</p>\
+                    <a href="#" class="kelly-SaveFavNew" >' + lng.s('Скачать как файл профиля', 'download_save') + '</a>\
+                </div>';
             
             var items = favPageInfo.items;
             if (favPageInfo.pages > 2) { 
@@ -10240,17 +10324,111 @@ var K_ENVIRONMENT = {
         return tags;
     },
     
-    getPostLink : function(publication) {
+    // !@
+    getPostLinkEl : function(publication) {
         
         if (window.location.host.indexOf('old.') == -1) {
 
             var link = KellyTools.getElementByClass(publication, 'link_wr');
-            if (link) return KellyTools.getChildByTag(link, 'a');
+            if (link) link = KellyTools.getChildByTag(link, 'a');
         } else {
-            return publication.querySelector('[title="ссылка на пост"]');
-        }			
-    
+            var link = publication.querySelector('[title="ссылка на пост"]');
+        }		
+        
+        return link;
     },
+    
+    // get canonical url link
+    
+    getPostLink : function(publication, el) {
+        
+        if (!el) el = this.getPostLinkEl(publication);
+    
+        if (el) {
+            var link = el.href.match(/[A-Za-z.0-9]+\/post\/[0-9]+/g);
+            return link ? link[0] : false;
+        }
+        
+        return '';    
+    },  
+    
+    // get canonical comment url link
+    
+    getCommentLink : function(comment) {
+        
+        if (!comment) return '';
+        
+        var links = comment.getElementsByTagName('a');
+        
+        for (var b = 0; b < links.length; b++) {
+            if (links[b].href.length > 10 && links[b].href.indexOf('#comment') != -1) {
+                var link = links[b].href.match(/[A-Za-z.0-9]+\/post\/[0-9]+#comment[0-9]+/g);
+                return link ? link[0] : false;
+            }
+        }
+        
+        return '';
+    },    
+    
+    updatePostFavButton : function(publication) {
+        
+        var handler = this;
+        var link = handler.getPostLinkEl(publication);
+        
+        if (!link) {            
+            KellyTools.log('empty post link element', 'profile updatePostFavButton');
+            return false;        
+        }
+        
+        var linkUrl = handler.getPostLink(publication, link);
+        if (!linkUrl) {
+            KellyTools.log('bad post url', 'profile updatePostFavButton');
+            return false;  
+        }
+        
+        var inFav = handler.fav.getStorageManager().searchItem(handler.fav.getGlobal('fav'), {link : linkUrl, commentLink : false});
+        
+        var addToFav = KellyTools.getElementByClass(publication, handler.className + '-post-FavAdd');
+    
+        // create if not exist
+        
+        if (!addToFav) {
+            addToFav = document.createElement('a');
+            addToFav.className = handler.className + '-post-FavAdd';
+            
+            // keep same url as main button, to dont loose getPostLink method functional and keep similar environment
+            addToFav.href = link.href; 
+           
+            var parentNode = link.parentNode;
+                parentNode.insertBefore(addToFav, link);
+        }
+        
+        // update title
+        
+        if (inFav !== false) {
+            
+            addToFav.onclick = function() { 
+            
+                handler.fav.showRemoveFromFavDialog(inFav, function() {
+                    if (handler.fav.getGlobal('fav').coptions.syncByAdd) handler.syncFav(publication, false);
+                    
+                    handler.fav.closeSidebar(); 
+                }); 
+                
+                return false; 
+            };
+            
+            addToFav.innerHTML = KellyLoc.s('Удалить из избранного', 'remove_from_fav');
+            
+        } else {
+            
+            addToFav.onclick = function() { handler.fav.showAddToFavDialog(publication); return false; };
+            addToFav.innerHTML = KellyLoc.s('Добавить в избранное', 'add_to_fav');
+        }
+                
+        return true;            
+    },	
+       
     
     getAllMedia : function(publication) {
         
@@ -10302,6 +10480,7 @@ var K_ENVIRONMENT = {
             if (data.length == 1 && image && mainImage && image.indexOf(this.getImageDownloadLink(mainImage.url, false, true)) != -1) {
                 this.fav.setSelectionInfo('dimensions', mainImage);
             } else if (data.length == 1 && image && mainImage) {
+                KellyTools.log('Main image in schema org for publication is exist, but not mutched with detected first image in publication');    
                 KellyTools.log(image);
                 KellyTools.log(this.getImageDownloadLink(mainImage.url, false));
             }
@@ -10415,21 +10594,6 @@ var K_ENVIRONMENT = {
         
         
         return url;
-    },
-    
-    getCommentLink : function(comment) {
-        
-        if (!comment) return '#';
-        
-        var links = comment.getElementsByTagName('a');
-        
-        for (var b = 0; b < links.length; b++) {
-            if (links[b].href.indexOf('#comment') != -1) {
-                return links[b].href;                    
-            }
-        }
-        
-        return '#';
     },
     
     updateSidebarPosition : function(lock) {
@@ -10702,4 +10866,4 @@ var K_DEFAULT_ENVIRONMENT = K_ENVIRONMENT;
 
 if (!K_FAV) var K_FAV = new KellyFavItems();
 
-// keep empty space to prevent syntax errors if some symobls will added at end
+// keep empty space to prevent syntax errors if some symbols will added at end

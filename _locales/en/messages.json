@@ -138,7 +138,7 @@
         "message":"Make local copy"
     },
     "download_tag_filter_1":{  
-        "message":"Select tags, post that includes that tags will be saved. For example \"art девушка, art\". If you want to exclude some publications with specifed tags, then type tags with sybmbol \"-\" before tag name. For example \"-политика, -изврат, -гуро\""
+        "message":"Select tags, post that includes that tags will be saved. For example \"art, girl\". If you want to exclude some publications with specifed tags, then type tags with sybmbol \"-\" before tag name. For example \"-carrot, -dog, -minecraft\""
     },    
     "download_tag_filter_empty":{  
         "message":"If tag filter list empty, all publications will be included"
@@ -154,6 +154,15 @@
     },
     "download_started_cancel":{  
         "message":"Downloading...(Cancel)"
+    },    
+    "download_save":{  
+        "message":"Save as profile file"
+    },   
+    "download_save_notice":{  
+        "message":"Saved profile can be added to extension thow menu (Options -> Profiles -> Add new profile)"
+    },   
+    "download_limitpages":{  
+        "message":"Selection hit limit. Please set export pages manualy (not more then __MAXPAGESPERIMPORT__ pages per one operation)"
     },
     "edit_mode":{  
         "message":"Edit mode"
@@ -172,6 +181,12 @@
     },
     "fast_save_enabled":{  
         "message":"Display fast save button"
+    },  
+    "fix_proportions":{  
+        "message":"Update proportions"
+    },  
+    "fix_proportions_ok":{  
+        "message":"Proportions updated"
     },     
     "fast_download":{  
         "message":"Fast save"
@@ -427,6 +442,9 @@
     },    
     "storage_name":{  
         "message":"Profile id (only ch. A-Z, 1-9, _)"
+    },  
+    "storage_create_add_if_exist":{  
+        "message":"Add new items if profile already exits (<b>beta</b>)"
     },
     "storage_create_cancel_if_exist":{  
         "message":"Cancel if already exist with same id"
@@ -455,11 +473,14 @@
     "storage_create_already_exist":{  
         "message":"Profile already exist"
     },     
-    "storage_create_ok":{  
+    "storage_create_ok_mcancel":{  
         "message":"Profile added"
-    },     
-    "storage_create_e":{  
-        "message":"Error while adding profile (turn on debug mode an watch F12 console)"
+    },         
+    "storage_create_ok_moverwrite":{  
+        "message":"Profile updated"
+    },   
+    "storage_create_e1":{  
+        "message":"Error while save profile to localstorage (turn on debug mode an watch F12 console)"
     },   
     "storage_create_e2":{  
         "message":"Bad profile file format (JSON parse fail)"

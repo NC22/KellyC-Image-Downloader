@@ -594,12 +594,8 @@ KellyTools.getRelativeUrl = function(str) {
     
     if (!str.length) return '/';
     
-    if (str[str.length-1] != '/') str += '/';
-    
-    if (str.indexOf('http') != -1 || str.substring(0, 2) == '//') {
-        str = str.replace(/^(?:\/\/|[^\/]+)*\//, "");
-    }
-
+    str = str.replace(/^(?:\/\/|[^\/]+)*\//, "");
+   
     if (!str.length) str = '/';
 
     if (str[0] != '/') {
@@ -1302,4 +1298,4 @@ var KellyEDispetcher = new Object;
 
 KellyEDispetcher.init();
 
-// keep empty space to prevent syntax errors if some symobls will added at end
+// keep empty space to prevent syntax errors if some symbols will added at end

@@ -22,7 +22,7 @@ function KellyImgView(cfg) {
     
     var beasy = false;
     
-    var image = false; // current loaded image, false if not shown (getCurrentImage().image)
+    var image = false; // dom el - current loaded image, false if not shown (getCurrentImage().image)
     var imageBounds = false; 
     
     var selectedGallery = 'default'; // inherit by opened source
@@ -192,6 +192,7 @@ function KellyImgView(cfg) {
             cursor : cursor,
             shown : blockShown,
             blockShown : blockShown,
+            imageBounds : imageBounds, // width, height, resizedWidth, resizedHeight
             imageData : imagesData[selectedGallery] ? imagesData[selectedGallery] : false,
         };
     }
