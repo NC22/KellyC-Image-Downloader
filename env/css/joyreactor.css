@@ -131,9 +131,14 @@
     padding-right : 0px;
 }
 
+#submenu .old_reactor_cc.__BASECLASS__-MainMenuItem-fav.active a {
+    padding-right : 0px;
+}
+
 #submenu .old_reactor_cc.__BASECLASS__-MainMenuItem-fav a:hover {
     padding-right : 0px;
 }
+
 #submenu .old_reactor_cc.__BASECLASS__-MainMenuItem-fav:hover {
     margin-right : 0px;
     z-index : 68;

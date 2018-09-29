@@ -42,7 +42,7 @@ KellyTools.getScrollLeft = function() {
     return scrollLeft;
 }
 
-// validate input string
+// basic validation of input string
 
 KellyTools.val = function(value, type) {
     
@@ -55,10 +55,11 @@ KellyTools.val = function(value, type) {
         return value.substring(0, 255);
     } else if (type == 'int') {
         if (!value) return 0;
-        return parseInt(value);
+        value = parseInt(value);
+        if (!value) value = 0;
+        return value;
     } else if (type == 'float') {
-        if (!value) return 0.0;
-        return parseFloat(value);
+        return KellyTools.validateFloatSting(value);
     } else if (type == 'bool') {
         return value ? true : false;
     } else if (type == 'longtext') {
@@ -138,7 +139,7 @@ KellyTools.getParentByTag = function(el, tagName) {
     return parent;
 }
 
-KellyTools.getUrlFileName = function(url, excludeExt) {
+KellyTools.getUrlFileName = function(url, excludeExt, noDecode) {
     if (!url) return '';
     
     url = url.split("?");
@@ -148,7 +149,7 @@ KellyTools.getUrlFileName = function(url, excludeExt) {
     
     url = url.substring(url.lastIndexOf('/')+1);    
     
-    if (url.indexOf('%') != -1) {
+    if (!noDecode && url.indexOf('%') != -1) {
         url = decodeURIComponent(url);
     } 
     
@@ -440,6 +441,8 @@ KellyTools.getExt = function(str, limit) {
     return ext;
 }
 
+// todo console.trace, errorLevel
+
 KellyTools.log = function(info, module) {
     
     if (!module) module = 'Kelly';
@@ -536,9 +539,9 @@ KellyTools.getParentByClass = function(el, className) {
 
 // read local file
 // untested in dataurl mode - suppose get binary data - such as png image
-// try - btoa(unescape(encodeURIComponent(rawData))) to store local as base64:image
+// todo try - btoa(unescape(encodeURIComponent(rawData))) to store local as base64:image
 
-KellyTools.readFile = function(input, onRead, readAs) {
+KellyTools.readInputFile = function(input, onRead, readAs) {
     
     if (!input) return false;
     
@@ -561,7 +564,9 @@ KellyTools.readFile = function(input, onRead, readAs) {
     } else return false;
 }	
 
-// return onLoad only on succesful load data, onFail - any problems during load, or bad response status (only 200 - OK accepted)
+// simple read by XMLHttpRequest method any local "Access-Control-Allow-Origin" url
+// callback onLoad - executed only on succesful load data (response status = 200)
+// callback onFail - executed in any other case - any problems during load, or bad response status
 
 KellyTools.readUrl = function(url, onLoad, onFail, method, async) {
 

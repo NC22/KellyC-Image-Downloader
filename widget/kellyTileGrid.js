@@ -139,7 +139,7 @@ function KellyTileGrid(cfg) {
             return true;
         } 
         
-           if (boundEl.tagName != 'IMG') return true;  // text previews without image or some thing like that
+        if (boundEl.tagName != 'IMG') return true;  // text previews without image or some thing like that
         if (boundEl.getAttribute('error')) return true;
         if (boundEl.getAttribute('data-width')) return true;
         
@@ -315,6 +315,19 @@ function KellyTileGrid(cfg) {
         return true;
     }
     
+    function getBoundElementData(boundEl, type) {
+        
+        type = type != 'width' ? 'height' : 'width';
+        
+        var dataValue = boundEl.getAttribute('data-' + type);
+        
+        if (typeof dataValue == 'undefined') {
+            dataValue = boundEl.getAttribute(type); 
+        }
+        
+        return parseInt(dataValue);
+    }
+    
     this.updateTileGrid = function(resize) {		
         
         if (!handler.updateTileGridState()) return false;
@@ -380,8 +393,8 @@ function KellyTileGrid(cfg) {
                         }
                     }
                     
-                    imageInfo.width = parseInt(tileMainEl.getAttribute('data-width'));
-                    imageInfo.height = parseInt(tileMainEl.getAttribute('data-height'));
+                    imageInfo.width = getBoundElementData(tileMainEl, 'width');
+                    imageInfo.height = getBoundElementData(tileMainEl, 'height');
                     
                     if (!imageInfo.width) {
                     

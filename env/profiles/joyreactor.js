@@ -1,6 +1,6 @@
 // JoyReactor environment driver
 
-// !@ - not required by FavItems object methods	
+// !@ - not required by FavItems object methods
 
 // default profile driver must be assign to K_DEFAULT_ENVIRONMENT variable
 // todo move formatcomment \ formatpost methods from FavItems to keep core without "environment only" / driver methods
@@ -12,15 +12,17 @@ var K_ENVIRONMENT = {
     className : 'kellyJRFav', 
     profile : 'joyreactor',
     mainDomain : 'joyreactor.cc',
-    favPage : '/user/__USERNAME__/favorite/__PAGENUMBER__',
-    
-    publication : 'postContainer',
-    
+        
     hostClass : window.location.host.split(".").join("_"),
     
     actionVar : 'dkl_pp', 
     containers : false,
 
+    // !@ private 
+        
+    favPage : '/user/__USERNAME__/favorite/__PAGENUMBER__',  
+    publication : 'postContainer', 
+    
     isNSFW : function() {
         var sfw = KellyTools.getElementByClass(document, 'sswither');
         if (sfw && sfw.className.indexOf('active') != -1) return false;
@@ -31,14 +33,23 @@ var K_ENVIRONMENT = {
         
         if (!this.containers) {
             this.containers = {
-                body : document.getElementById('container'),
-                content : document.getElementById('contentinner'),
+                body : document.getElementById('container'), // place where to put all dynamic absolute position elements
+                content : document.getElementById('contentinner'), // place where to put main extension container
+                
+                // two bottom will be used only by profile js file in future
+                
                 sideBlock : document.getElementById('sidebar'),
                 menu : document.getElementById('submenu'),
             };
         }
         
         return this.containers;
+    },
+   
+    // will be replaced by formatPosts
+    
+    getPosts : function() {
+        return document.getElementsByClassName(this.publication);
     },
    
     /* @! */        
@@ -78,7 +89,7 @@ var K_ENVIRONMENT = {
         return link;
     },
     
-    // get canonical url link
+    // get canonical url link in format "//url"
     
     getPostLink : function(publication, el) {
         
@@ -86,13 +97,13 @@ var K_ENVIRONMENT = {
     
         if (el) {
             var link = el.href.match(/[A-Za-z.0-9]+\/post\/[0-9]+/g);
-            return link ? link[0] : false;
+            return link ? '//' + link[0] : false;
         }
         
         return '';    
     },  
     
-    // get canonical comment url link
+    // get canonical comment url link in format "//url"
     
     getCommentLink : function(comment) {
         
@@ -103,7 +114,7 @@ var K_ENVIRONMENT = {
         for (var b = 0; b < links.length; b++) {
             if (links[b].href.length > 10 && links[b].href.indexOf('#comment') != -1) {
                 var link = links[b].href.match(/[A-Za-z.0-9]+\/post\/[0-9]+#comment[0-9]+/g);
-                return link ? link[0] : false;
+                return link ? '//' + link[0] : false;
             }
         }
         
@@ -168,7 +179,9 @@ var K_ENVIRONMENT = {
                 
         return true;            
     },	
-       
+    
+    // src attribute for img elements can be stored in "k-loading-src" attribute while download native favourites
+    // to prevent loading process. Always check this attribute first
     
     getAllMedia : function(publication) {
         
@@ -209,7 +222,12 @@ var K_ENVIRONMENT = {
             
                 var imageEl = KellyTools.getElementByTag(imagesEl[i], 'img');
                 if (imageEl) {
-                    image = this.getImageDownloadLink(imageEl.getAttribute("src"), false);
+                    var src = imageEl.getAttribute("k-loading-src");
+                    if (!src) {
+                        src = imageEl.getAttribute("src");
+                    }
+                    
+                    image = this.getImageDownloadLink(src, false);
                 }     
             }
             
@@ -291,7 +309,7 @@ var K_ENVIRONMENT = {
     },
     
     // route format
-    // [image-server-subdomain].[domain].cc/pics/post/full/[title]-[image-id].[extension]
+    // [image-server-subdomain].[domain].cc/pics/[comment|post]/full/[title]-[image-id].[extension]
     
     getImageDownloadLink : function(url, full, relative) {
         
@@ -304,32 +322,13 @@ var K_ENVIRONMENT = {
         var imgServer = url.match(/img(\d+)/);
         if (imgServer &&  imgServer.length) {
             
+            // encoded original file name, decoded untested but may be work
+            var filename = KellyTools.getUrlFileName(url, false, true);
+            if (!filename) return url;
+            
             imgServer = imgServer[0];
-            
-            var relativeUrl = url.replace('http://', '');
-                relativeUrl = relativeUrl.replace('https://', '');
-                relativeUrl = relativeUrl.replace('//', '');
-                
-            var slash = relativeUrl.indexOf('/');
-            
-            if (slash > 0) { 
-                relativeUrl = relativeUrl.substr(slash + 1);
-            }
-            
-            if (full && relativeUrl.indexOf('post/full/') == -1) {
-                relativeUrl = relativeUrl.replace('post/', 'post/full/');        
-            }
-            
-            if (!full && relativeUrl.indexOf('post/full/') != -1) {
-                
-                relativeUrl = relativeUrl.replace('post/full/', 'post/');  
-            }
-
-            if (relative) return relativeUrl;
-
-            url = window.location.origin + '/' + relativeUrl;
-            url = url.replace('http://', 'http://' + imgServer + '.');                    
-            url = url.replace('https://', 'https://' + imgServer + '.');
+            var type = url.indexOf('comment') == -1 ? 'post' : 'comment';
+            url = window.location.protocol + '//' + imgServer + '.' + window.location.host + '/pics/' + type + '/' + (full ? 'full/' : '') + filename;
         }
         
         

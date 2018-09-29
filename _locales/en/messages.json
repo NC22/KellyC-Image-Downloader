@@ -294,7 +294,7 @@
         "message":"<b>#category_1#</b>, <b>#category_2#</b>, <b>#category_N#</b> - names of 1, 2 and N categorys of downloaded item (by priority)<br>"
     },
     "grabber_name_template_help_2":{  
-        "message":"<b>#filename#</b> - original file name<br><b>#id#</b> - unique id in current selected local storage<br><i>#number#</i> - item number in current order<br>"
+        "message":"<b>#filename#</b> - original file name<br><b>#id#</b> - unique id in current selected local storage<br><b>#number#</b> - item number in current order<br>"
     },
     "grabber_name_template_help_3":{  
         "message":"<b>#name#</b> - sign<br>Usage <br>\"<i>#filename#</i>\" - download file with original name (ex. <b>Downloads</b>/dog.jpg)<br>"
@@ -451,6 +451,18 @@
     },
     "storage_manager_total":{  
         "message":"Disk space used"
+    },   
+    "storage_manager_localstorage_notice":{  
+        "message":"For selected storage type (<b>localstorage</b>) max amount of space is limited and in common case can't be more then <b>4mb</b>. Please delete unused profiles if you near to this limit, or select another storage type"
+    },
+    "storage_manager_api_notice":{  
+        "message":"For selected storage type (<b>Browser API</b>) max amount of space is <b>unlimited</b>. Please controll used resources by yourself"
+    },    
+    "storage_manager_hit_limit_db":{  
+        "message":"Profile file can't be more than <b>__MAX_TOTAL_PER_DB__</b> mb"
+    },    
+    "storage_manager_hit_limit_env":{  
+        "message":"Reached max amount of data for current environment (more then <b>__MAX_ENV_SIZE__</b> mb)"
     },
     "storage_type":{  
         "message":"Storage type"

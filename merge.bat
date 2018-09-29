@@ -53,4 +53,4 @@ popd
 
 :: java -jar "D:\Dropbox\Private\l scripts\jfav\jsmin\closure.jar" --js %frontend% --js_output_file khelper.user.min.js
 
-pause
+:: pause

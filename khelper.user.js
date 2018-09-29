@@ -651,7 +651,7 @@ function KellyTileGrid(cfg) {
             return true;
         } 
         
-           if (boundEl.tagName != 'IMG') return true;  // text previews without image or some thing like that
+        if (boundEl.tagName != 'IMG') return true;  // text previews without image or some thing like that
         if (boundEl.getAttribute('error')) return true;
         if (boundEl.getAttribute('data-width')) return true;
         
@@ -827,6 +827,19 @@ function KellyTileGrid(cfg) {
         return true;
     }
     
+    function getBoundElementData(boundEl, type) {
+        
+        type = type != 'width' ? 'height' : 'width';
+        
+        var dataValue = boundEl.getAttribute('data-' + type);
+        
+        if (typeof dataValue == 'undefined') {
+            dataValue = boundEl.getAttribute(type); 
+        }
+        
+        return parseInt(dataValue);
+    }
+    
     this.updateTileGrid = function(resize) {		
         
         if (!handler.updateTileGridState()) return false;
@@ -892,8 +905,8 @@ function KellyTileGrid(cfg) {
                         }
                     }
                     
-                    imageInfo.width = parseInt(tileMainEl.getAttribute('data-width'));
-                    imageInfo.height = parseInt(tileMainEl.getAttribute('data-height'));
+                    imageInfo.width = getBoundElementData(tileMainEl, 'width');
+                    imageInfo.height = getBoundElementData(tileMainEl, 'height');
                     
                     if (!imageInfo.width) {
                     
@@ -2269,7 +2282,10 @@ function KellyFavStorageManager(cfg) {
     
     var handler = this;
     
-    // prefixes modified by environment on init, relative to current profile name
+    var MAX_ENV_SIZE = 300; // mb 
+    var MAX_TOTAL_PER_DB = 30; // mb ~60000 images
+    
+    // prefixes modified by environment on init, relative to current site environment file
     // todo add list all storages for extension
     
     this.prefix = 'kelly_db_';
@@ -2294,8 +2310,10 @@ function KellyFavStorageManager(cfg) {
     var lng = KellyLoc; // singleton
     
     this.format = 'json';
-        
     this.slist = false;
+    
+    // todo - add check total amount of data without prefix, it can differs in future, if more then one environment will supported
+    this.envTotalKb = 0;
     
     function constructor(cfg) {	}
             
@@ -2319,8 +2337,20 @@ function KellyFavStorageManager(cfg) {
         
         handler.slist = slist;
         
-        handler.storageList.innerHTML = '<div class="' + handler.className + '-DBItems-total">' + lng.s('Общий размер данных', 'storage_manager_total') + ' : <span>' + (!slist.length ? '0' +  lng.s('кб', 'kb') :  lng.s('Загрузка', 'loading') + '...') + '</span></div>' ;
-        var totalKb = 0;
+        handler.storageList.innerHTML = '\
+            <div class="' + handler.className + '-DBItems-total">\
+                ' + lng.s('Общий размер данных', 'storage_manager_total') + ' : <span>' + (!slist.length ? '0' +  lng.s('кб', 'kb') :  lng.s('Загрузка', 'loading') + '...') + '</span>\
+            </div>\
+            ';
+        
+    
+        handler.storageList.innerHTML += '\
+        <div class="' + handler.className + '-DBItems-notice">\
+            ' + lng.s('', 'storage_manager_' + handler.driver + '_notice') + '\
+        </div>\
+        ';  
+            
+        handler.envTotalKb = 0;
         var itemsLoaded = 0;
         
         for (var i=0; i < slist.length; i++) {
@@ -2346,11 +2376,11 @@ function KellyFavStorageManager(cfg) {
             handler.getDBSize(dbName, false, function(dbName, size) {
                 KellyTools.getElementByClass(handler.storageList, handler.className + '-' + dbName).innerHTML = parseFloat(size).toFixed(2) + 'кб';
                 
-                totalKb += size;
+                handler.envTotalKb += size;
                 itemsLoaded++;
                 if (itemsLoaded == slist.length) {
                     var totalEl = KellyTools.getElementByClass(handler.storageList, handler.className + '-DBItems-total');
-                    KellyTools.getElementByTag(totalEl, 'span').innerHTML = parseFloat(totalKb).toFixed(2) + lng.s('кб', 'kb');
+                    KellyTools.getElementByTag(totalEl, 'span').innerHTML = parseFloat(handler.envTotalKb).toFixed(2) + lng.s('кб', 'kb');
                 }
             });
             
@@ -2520,16 +2550,25 @@ function KellyFavStorageManager(cfg) {
                 }
                 
                 var overwrite = document.getElementById(overwriteId + '-overwrite').checked ? true : false;
-                var add = document.getElementById(overwriteId + '-add').checked ? true : false;
-                var cancel = document.getElementById(overwriteId + '-cancel').checked ? true : false;
+                var add       = document.getElementById(overwriteId + '-add').checked ? true : false;
+                var cancel    = document.getElementById(overwriteId + '-cancel').checked ? true : false;
                 
                 mode = 'cancel';
                 if (add) mode = 'add';
                 if (overwrite) mode = 'overwrite'; // dont needed - use delete instead, more safe and clear for user
                 
-                if (mode == 'cancel' && handler.slist === false) {
+                if (handler.slist === false) {
 
                     handler.showMessage(lng.s('Дождитесь загрузки списка баз данных', 'storage_beasy'), true);
+                    return false;
+                }
+                
+                var envMb = handler.envTotalKb / 1000;
+                    
+                if (envMb > MAX_ENV_SIZE) {
+                                        
+                    envMb = envMb.toFixed(2);
+                    handler.showMessage(lng.s('', 'storage_manager_hit_limit_env', { MAX_ENV_SIZE : MAX_ENV_SIZE, ENVSIZE : envMb}), true);	
                     return false;
                 }
                 
@@ -2572,10 +2611,18 @@ function KellyFavStorageManager(cfg) {
                     var fileInput = document.getElementById(handler.className + '-db-file');
                     if (fileInput.value) {
                     
-                        KellyTools.readFile(fileInput, function(input, fileData) {
-                                              
-                            var newDBData = KellyTools.parseJSON(fileData.trim());
-                           
+                        KellyTools.readInputFile(fileInput, function(input, fileData) {
+                            
+                            var fileSizeMb = fileData.length / 1000 / 1000;
+                            
+                            if (fileSizeMb > MAX_TOTAL_PER_DB) {
+                                
+                                fileSizeMb = fileSizeMb.toFixed(2);
+                                handler.showMessage(lng.s('', 'storage_manager_hit_limit_db', { MAX_TOTAL_PER_DB : MAX_TOTAL_PER_DB, FILESIZE : fileSizeMb}), true);	
+                                return;
+                            }
+                            
+                            var newDBData = KellyTools.parseJSON(fileData.trim());                          
                             if (newDBData) { 
                             
                                 if (db && mode == 'add') {
@@ -2856,8 +2903,6 @@ function KellyFavStorageManager(cfg) {
         return assocDataCats;
     }
     
-    /* IN DEV, not tested */
-    
     this.addDataToDb = function(db, data) {
         
         var limit = 0; // for tests
@@ -2883,21 +2928,29 @@ function KellyFavStorageManager(cfg) {
                 // merge categories
                 
                 data.items[i].categoryId = convertCategoriesForDataItem(db, data, data.items[i], stats);
-                db.items[existIndex].categoryId = db.items[existIndex].categoryId.concat(data.items[i].categoryId);
+                
+                for (var b = 0; b < data.items[i].categoryId.length; b++) {
+                    
+                    if (db.items[existIndex].categoryId.indexOf(data.items[i].categoryId[b]) == -1) {                        
+                        db.items[existIndex].categoryId[db.items[existIndex].categoryId.length] = data.items[i].categoryId[b];
+                    }                    
+                }
                 
                 stats.updated++;
                 
             } else {
             
+                // create new item 
+                
                 existIndex = db.items.length;
                 
                 db.items[existIndex] = {};
                 handler.copyObjectValues(data.items[i], db.items[existIndex]);			
                 
                 db.ids++;
-                db.items[existIndex].id = db.ids;
                 
-                data.items[i].categoryId = convertCategoriesForDataItem(db, data, data.items[i], stats);
+                db.items[existIndex].id = db.ids;                
+                db.items[existIndex].categoryId = convertCategoriesForDataItem(db, data, data.items[i], stats);
                 
                 stats.added++;
             }
@@ -2932,7 +2985,9 @@ function KellyFavStorageManager(cfg) {
             
         }
     }
-        
+    
+    // get database size in kb by default
+    
     this.getDBSize = function(name, inBytes, callback) {
     
         name = handler.validateDBName(name);
@@ -3755,7 +3810,7 @@ function KellyGrabber(cfg) {
         var intervalInput = KellyTools.getElementByClass(handler.container, className + '-interval');
             intervalInput.onchange = function() {
                                 
-                options.interval = KellyTools.validateFloatSting(this.value)                
+                options.interval = KellyTools.val(this.value, 'float');               
                 if (!options.interval || options.interval < 0.1) options.interval = 0.1;
                
                 this.value = options.interval;
@@ -3766,7 +3821,7 @@ function KellyGrabber(cfg) {
         var cancelInput = KellyTools.getElementByClass(handler.container, className + '-timeout');
             cancelInput.onchange = function() {
                                 
-                options.cancelTimer = KellyTools.validateFloatSting(this.value)                
+                options.cancelTimer = KellyTools.val(this.value, 'float');                
                 if (!options.cancelTimer || options.cancelTimer < 2) options.cancelTimer = 5 * 60;                
                 
                 this.value = options.cancelTimer;
@@ -4917,7 +4972,7 @@ KellyTools.getScrollLeft = function() {
     return scrollLeft;
 }
 
-// validate input string
+// basic validation of input string
 
 KellyTools.val = function(value, type) {
     
@@ -4930,10 +4985,11 @@ KellyTools.val = function(value, type) {
         return value.substring(0, 255);
     } else if (type == 'int') {
         if (!value) return 0;
-        return parseInt(value);
+        value = parseInt(value);
+        if (!value) value = 0;
+        return value;
     } else if (type == 'float') {
-        if (!value) return 0.0;
-        return parseFloat(value);
+        return KellyTools.validateFloatSting(value);
     } else if (type == 'bool') {
         return value ? true : false;
     } else if (type == 'longtext') {
@@ -5013,7 +5069,7 @@ KellyTools.getParentByTag = function(el, tagName) {
     return parent;
 }
 
-KellyTools.getUrlFileName = function(url, excludeExt) {
+KellyTools.getUrlFileName = function(url, excludeExt, noDecode) {
     if (!url) return '';
     
     url = url.split("?");
@@ -5023,7 +5079,7 @@ KellyTools.getUrlFileName = function(url, excludeExt) {
     
     url = url.substring(url.lastIndexOf('/')+1);    
     
-    if (url.indexOf('%') != -1) {
+    if (!noDecode && url.indexOf('%') != -1) {
         url = decodeURIComponent(url);
     } 
     
@@ -5315,6 +5371,8 @@ KellyTools.getExt = function(str, limit) {
     return ext;
 }
 
+// todo console.trace, errorLevel
+
 KellyTools.log = function(info, module) {
     
     if (!module) module = 'Kelly';
@@ -5411,9 +5469,9 @@ KellyTools.getParentByClass = function(el, className) {
 
 // read local file
 // untested in dataurl mode - suppose get binary data - such as png image
-// try - btoa(unescape(encodeURIComponent(rawData))) to store local as base64:image
+// todo try - btoa(unescape(encodeURIComponent(rawData))) to store local as base64:image
 
-KellyTools.readFile = function(input, onRead, readAs) {
+KellyTools.readInputFile = function(input, onRead, readAs) {
     
     if (!input) return false;
     
@@ -5436,7 +5494,9 @@ KellyTools.readFile = function(input, onRead, readAs) {
     } else return false;
 }	
 
-// return onLoad only on succesful load data, onFail - any problems during load, or bad response status (only 200 - OK accepted)
+// simple read by XMLHttpRequest method any local "Access-Control-Allow-Origin" url
+// callback onLoad - executed only on succesful load data (response status = 200)
+// callback onFail - executed in any other case - any problems during load, or bad response status
 
 KellyTools.readUrl = function(url, onLoad, onFail, method, async) {
 
@@ -5687,7 +5747,7 @@ KellyTools.showPagination = function(params) {
 
 function KellyFavItems() 
 {
-    this.PROGNAME = 'KellyFavItems v1.0b';
+    this.PROGNAME = 'KellyFavItems v1.1b';
     
     var handler = this;	
         
@@ -5766,9 +5826,124 @@ function KellyFavItems()
     var lng = KellyLoc;
     
     var imageGrid = false;
+    
+    /*  current loaded throw this.load method profile object
+    
+        Stores information about config, items, categories
+        
+        categories - array of objects [.name, .id] (see getStorageManager().categoryCreate method)
+        items      - array of objects [.categoryId (array), .link (string), .pImage (string|array of strings), .commentLink (undefined|text) (see itemAdd method for list of current available structured data vars)
+        coptions   - structured data (see this.load method for list of current available options)
+    */  
+    
     var fav = {};
     
     this.isDownloadSupported = false;
+   
+    // common actions for several controll elements
+
+    var commonActions = {
+        
+        onLoadPreviewImage : function() {
+        
+            var dimensions = {width : parseInt(this.naturalWidth), height : parseInt(this.naturalHeight)};
+            
+            // if (selectedInfo && selectedInfo['dimensions'] && selectedInfo['dimensions'].width && selectedInfo['dimensions'].schemaOrg) return false;
+                            
+            handler.setSelectionInfo('dimensions', dimensions);
+            
+            log('get width and height for ' + this.src);
+            log(dimensions);
+            
+            updateSidebarPosition(); 
+            return false; 
+        }
+    }
+    
+    function constructor(noexec) {
+        
+        if (noexec) return;
+        
+        if (typeof K_DEFAULT_ENVIRONMENT == 'undefined') {
+            
+            // for other services, currently none
+            
+            var profile = false; // check by window.location.host if some excludes will be in future		
+            
+            if (profile) {
+                KellyTools.getBrowser().runtime.sendMessage({method: "getProfile", profile : profile}, handler.exec);
+            } else {
+                log('Unknown servise or site, cant find profile for ' + window.location.host);
+            }
+            
+        } else {
+            handler.exec({env : K_DEFAULT_ENVIRONMENT});
+        }
+    }	
+    
+    this.exec = function(cfg) {
+
+        if (env) {
+            return;
+        }
+        
+        if (!cfg || (!cfg.envText && !cfg.env)) {
+            log('empty environment attribute or profile name');
+            log(cfg.error);
+            return;
+        }
+    
+        // todo catch error details for custom profile
+        
+        if (cfg.envText) {
+                
+            K_ENVIRONMENT = false;
+        
+            try {
+                eval(cfg.envText);
+            } catch (e) {
+                if (e) {
+                    log(e);
+                    return;
+                }
+            }
+            
+            if (typeof K_ENVIRONMENT != 'undefined') {
+                env = K_ENVIRONMENT;
+            }
+        
+        } else env = cfg.env;
+        
+        if (!env) {
+            log('init env error');
+            return;
+        }
+        
+        env.setFav(handler);		
+        
+        var action = getInitAction();        
+        if (action == 'main') {
+     
+            handler.load(false, function() {
+                
+                KellyLoc.debug = debug;
+                
+                if (env.getPosts()) { 
+                    handler.initOnPageReady();
+                } else {
+                    handler.addEventListner(window, "load", function (e) {
+                        handler.initOnPageReady();
+                        return false;
+                    }, 'init_');
+                }
+            });  
+            
+        } else if (action == 'disable') {
+        
+        }
+        
+        log(handler.PROGNAME + ' init | loaded in ' + action + ' mode | profile ' + env.profile);        
+    }
     
     function initImageGrid() {
         
@@ -5856,97 +6031,6 @@ function KellyFavItems()
             
         });
     }
-    
-    // categories - name \ id
-    
-    // items - categoryId \ post link \ previewImage \ is_comment . todo - addition pictures (show number)
-        
-    function constructor(noexec) {
-        
-        if (noexec) return;
-        
-        if (typeof K_DEFAULT_ENVIRONMENT == 'undefined') {
-            
-            // for other services, currently none
-            
-            var profile = false; // check by window.location.host if some excludes will be in future		
-            
-            if (profile) {
-                KellyTools.getBrowser().runtime.sendMessage({method: "getProfile", profile : profile}, handler.exec);
-            } else {
-                log('Unknown servise or site, cant find profile for ' + window.location.host);
-            }
-            
-        } else {
-            handler.exec({env : K_DEFAULT_ENVIRONMENT});
-        }
-    }	
-    
-    this.exec = function(cfg) {
-
-        if (env) {
-            return;
-        }
-        
-        if (!cfg || (!cfg.envText && !cfg.env)) {
-            log('empty environment attribute or profile name');
-            log(cfg.error);
-            return;
-        }
-    
-        // todo catch error details for custom profile
-        
-        if (cfg.envText) {
-                
-            K_ENVIRONMENT = false;
-        
-            try {
-                eval(cfg.envText);
-            } catch (e) {
-                if (e) {
-                    log(e);
-                    return;
-                }
-            }
-            
-            if (typeof K_ENVIRONMENT != 'undefined') {
-                env = K_ENVIRONMENT;
-            }
-        
-        } else env = cfg.env;
-        
-        if (!env) {
-            log('init env error');
-            return;
-        }
-        
-        env.setFav(handler);		
-        
-        var action = getInitAction();        
-        if (action == 'main') {
-     
-            handler.load(false, function() {
-                
-                KellyLoc.debug = debug;
-                
-                var posts = document.getElementsByClassName(env.publication);
-                if (posts) { 
-                    handler.initOnPageReady();
-                } else {
-                    handler.addEventListner(window, "load", function (e) {
-                        handler.initOnPageReady();
-                        return false;
-                    }, 'init_');
-                }
-            });  
-            
-        } else if (action == 'disable') {
-        
-        }
-        
-        log(handler.PROGNAME + ' init | loaded in ' + action + ' mode | profile ' + env.profile);        
-    }
-    
     
     this.updateFavCounter = function() {
     
@@ -7052,7 +7136,7 @@ function KellyFavItems()
                 log(icon);
             }
             
-            KellyTools.readFile(iconFile, saveIcon, 'dataurl');
+            KellyTools.readInputFile(iconFile, saveIcon, 'dataurl');
         } 
                 
         if (!fav.coptions.grid.rowHeight || fav.coptions.grid.rowHeight <= 0) fav.coptions.grid.rowHeight = 250;
@@ -7933,15 +8017,15 @@ function KellyFavItems()
         return true;
     }
               
-    function getSelectedPostMediaControlls() {
+    function getSelectedPostMediaControlls(loadDimensions) {
 
         var controlls = document.createElement('DIV');
             controlls.className = env.className + '-ModalBox-PreviewContainer active';
         
-        var img = '';
+        var html = '';
         
         if (selectedImages.length > 1) {
-            img += '<p>' + lng.s('Основное изображение', 'image_main') + '</p>' +
+            html += '<p>' + lng.s('Основное изображение', 'image_main') + '</p>' +
                    '<p class="' + env.className + '-ModalBox-controll-buttons">' + 
                    '<a href="#" class="' + env.className + '-PreviewImage-del">' + lng.s('Удалить', 'delete')  + '</a><a href="#" class="' + env.className + '-PreviewImage-prev">\
                     ' + lng.s('Предыдущее', 'prev') + '</a><a href="#" class="' + env.className + '-PreviewImage-next">' + lng.s('Следующее', 'next')  + '</a>' +
@@ -7950,31 +8034,17 @@ function KellyFavItems()
         
         if (selectedImages.length) {
             
-            img += '<div class="' + env.className + '-PreviewImage-container"><img src="' + env.getStaticImage(selectedImages[0]) + '" class="' + env.className + '-PreviewImage"></div>';
+            html += '<div class="' + env.className + '-PreviewImage-container"><img src="' + env.getStaticImage(selectedImages[0]) + '" class="' + env.className + '-PreviewImage"></div>';
         }
         
-        controlls.innerHTML = img;
+        controlls.innerHTML = html;
         
         KellyTools.getElementByClass(controlls, env.className + '-PreviewImage-prev').onclick = function() { handler.switchPreviewImage(-1); return false; }
         KellyTools.getElementByClass(controlls, env.className + '-PreviewImage-next').onclick = function() { handler.switchPreviewImage(1); return false; }
         KellyTools.getElementByClass(controlls, env.className + '-PreviewImage-del').onclick = function() { handler.switchPreviewImage(0); return false; }
         
-        
-        KellyTools.getElementByClass(controlls, env.className + '-PreviewImage').onload = function() {
-            
-            var dimensions = {width : parseInt(this.naturalWidth), height : parseInt(this.naturalHeight)};
-            
-            // dont overwrite trusted proportions
-            if (selectedInfo && selectedInfo['dimensions'] && selectedInfo['dimensions'].width && selectedInfo['dimensions'].schemaOrg) return false;
-                            
-            handler.setSelectionInfo('dimensions', dimensions);
-            
-            // console.log('get width and height for ' + this.src);
-            // console.log(dimensions);
-            
-            updateSidebarPosition(); 
-            /*handler.saveWH(this, false);*/ 
-            return false; 
+        if (loadDimensions) {
+            KellyTools.getElementByClass(controlls, env.className + '-PreviewImage').onload = commonActions.onLoadPreviewImage;
         }
         
         return controlls;
@@ -8287,6 +8357,7 @@ function KellyFavItems()
         imageGrid.close();		
         imageGrid.updateConfig({rowHeight : fav.coptions.grid.rowHeight, rules : fav.coptions.grid});
         
+        
         if (fav.coptions.grid.type != 'fixed') {
             imageGrid.updateConfig({rules : {fixed : false}});
         }
@@ -8304,7 +8375,9 @@ function KellyFavItems()
         
         var controllsContainer = modalBoxContent;
         
-        handler.showSidebarMessage(false);
+        handler.showSidebarMessage(false);        
+        clearSidebarLoadEvents();
+        
         controllsContainer.innerHTML = '';
                 
         if (!document.getElementById(env.className + '-mainCss')) {
@@ -8665,7 +8738,9 @@ function KellyFavItems()
     }
     
     this.closeSidebar = function() {
-        sideBarWrap.className = sideBarWrap.className.replace( env.className + '-sidebar-wrap-active',  env.className + '-sidebar-wrap-hidden');
+        
+        sideBarWrap.className = sideBarWrap.className.replace( env.className + '-sidebar-wrap-active',  env.className + '-sidebar-wrap-hidden');        
+        clearSidebarLoadEvents();
         
         var siteSideBlock = env.getMainContainers().sideBlock;
         if (siteSideBlock) {
@@ -8691,10 +8766,22 @@ function KellyFavItems()
         return sideBarWrap;
     }
     
-    this.showSidebar = function(hideHeader, onClose) {
-    
-        sideBarWrap.className = sideBarWrap.className.replace( env.className + '-sidebar-wrap-hidden',  env.className + '-sidebar-wrap-active');
+    function clearSidebarLoadEvents() {
         
+        if (modalBoxContent) {
+            
+            var previewImage = KellyTools.getElementByClass(modalBoxContent, env.className + '-PreviewImage');
+            if (previewImage) {
+                previewImage.src = '';
+                previewImage.onload = function() {}
+            }
+        }
+    }
+    
+    this.showSidebar = function(hideHeader, onClose) {
+        
+        sideBarWrap.className = sideBarWrap.className.replace( env.className + '-sidebar-wrap-hidden',  env.className + '-sidebar-wrap-active');
+               
         var header = KellyTools.getElementByClass(modalBox, env.className + '-ModalBox-header');
           
         var modalBoxBtnClose = KellyTools.getElementByClass(modalBox, env.className + '-ModalBox-close');
@@ -8790,13 +8877,19 @@ function KellyFavItems()
         else if (caret > selectedImages.length-1) caret = 0;
         
         previewImage.setAttribute('data-caret', caret);
-        //previewImage.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
         
-        previewImage.src = env.getStaticImage(selectedImages[caret]);
-        previewImage.onload = function() { return false; } // todo after change image src width \ height may be wrong, so we cant use them for dimensions detect | may be recreate DOM img element helps
+        previewImage.src = '';
+        previewImage.onload = function() { return false; } 
         
+        setTimeout(function() {
+            previewImage.src = env.getStaticImage(selectedImages[caret]);
+            previewImage.onload = commonActions.onLoadPreviewImage;
+        }, 100);
+        
+        // take dimensions from width \ height attributes ?
+        // todo need more tests - after change image src width \ height may be wrong, so we cant use them for dimensions detect | may be recreate DOM img element helps
+    
         handler.setSelectionInfo('dimensions', false);
-        //console.log( previewImage.src );
     }
     
     this.showRemoveCategoryDialog = function(itemIndex, onRemove, onCancel) {
@@ -8809,6 +8902,7 @@ function KellyFavItems()
         handler.getTooltip().show(false);
         
         handler.showSidebarMessage(false);
+        clearSidebarLoadEvents();
         
         var html = '<p>' + lng.s('Подтвердите удаление', 'delete_confirm') + '</p>';
             html += '<p><label><input type="checkbox" name="removeImages" class="' + env.className + 'RemoveImages">' + lng.s('Удалить все связанные изображения', 'delete_rcat_items')  +  '</label></p>'
@@ -8884,6 +8978,7 @@ function KellyFavItems()
         }
         
         handler.showSidebarMessage(false);
+        clearSidebarLoadEvents();
         
         var html = '<p>Подтвердите удаление</p>';
             html += '<p class="' + env.className + '-ModalBox-controll-buttons"><a href="#" class="' + env.className + 'Remove">' + lng.s('Удалить', 'delete')  +  '</a><a href="#" class="' + env.className + 'Apply">' + lng.s('Применить изменения', 'apply')  +  '</a>';
@@ -9136,7 +9231,7 @@ function KellyFavItems()
                     
                         downloadInitiated++;
                         if (response.downloadId && response.downloadId != -1) downloadIds.push(response.downloadId);
-                        console.log(downloadIds);
+                     
                         if (downloadInitiated == postMedia.length) {
                             if (onInit) onInit(downloadInitiated, response.downloadId);
                         }
@@ -9154,11 +9249,12 @@ function KellyFavItems()
         if (!postBlock) return false;
         
         handler.showSidebarMessage(false);
+        clearSidebarLoadEvents();
         
-        // selectedPostCats = [];
-        handler.setSelectionInfo(false);
+        handler.setSelectionInfo(false);        
         
         selectedPost = postBlock;
+        
         if (comment) {
             selectedComment = comment;
             selectedImages = env.getAllMedia(comment);
@@ -9166,8 +9262,11 @@ function KellyFavItems()
             selectedComment = false;
             selectedImages = env.getAllMedia(postBlock);
         }
+        
+        // dimensions can be already initialized throw getAllMedia method
+        var loadDimensions = selectedInfo && selectedInfo['dimensions'] ? false : true;
                 
-        var controlls = getSelectedPostMediaControlls();
+        var controlls = getSelectedPostMediaControlls(loadDimensions);
         
         var hidePreview = KellyTools.getElementByClass(modalBox, env.className + '-ModalBox-hide-preview');
         if (hidePreview) {
@@ -9352,31 +9451,15 @@ function KellyFavItems()
         
         if (noSave) return postItem;
         
-        /*
-            todo validate in storageManager
+        var inFav = handler.getStorageManager().searchItem(fav, {link : postItem.link, commentLink : postItem.commentLink ? postItem.commentLink : false});        
+        if (inFav !== false) {
             
-            postItem.link = postItem.link.replace('https://', '');
-            postItem.link = postItem.link.replace('http://', '');
-            
-            if (postItem.commentLink) {
-                postItem.commentLink = postItem.commentLink.replace('https://', '');
-                postItem.commentLink = postItem.commentLink.replace('http://', '');
-            }
-        */
-        
-        var selectedUrl = KellyTools.getRelativeUrl(selectedComment ? postItem.commentLink : postItem.link);
-        var selectedUrlTypeKey = selectedComment ? 'commentLink' : 'link';
-        
-        for (var i = 0; i < fav.items.length; i++) {
-            
-            if ( KellyTools.getRelativeUrl(fav.items[i][selectedUrlTypeKey]).indexOf(selectedUrl) != -1 ) {
-                fav.items[i] = postItem;
-                handler.showSidebarMessage(lng.s('Избранная публикация обновлена', 'item_upd'));
-                handler.save('items');
-                return false;
-            }
+            fav.items[inFav] = postItem;
+            handler.showSidebarMessage(lng.s('Избранная публикация обновлена', 'item_upd'));
+            handler.save('items');
+            return false;
         }
-                
+            
         fav.ids++;		
         postItem.id = fav.ids; 
 
@@ -9701,8 +9784,15 @@ function KellyFavItems()
             
         } else {
         
-            var loadDoc = document.createElement('DIV');
+            var loadDoc = document.createElement('DIV');            
+                loadDoc.style.display = 'none';
                 loadDoc.innerHTML = thread.response;
+                
+            var preventLoadImages = loadDoc.getElementsByTagName('img');
+            for (var i = 0; i < preventLoadImages.length; i++) {
+                preventLoadImages[i].setAttribute('k-loading-src', preventLoadImages[i].src);
+                preventLoadImages[i].src = '';
+            }
                 
             var posts = loadDoc.getElementsByClassName('postContainer');
             
@@ -9991,6 +10081,7 @@ function KellyFavItems()
         el.innerHTML = lng.s('Загрузка... (Отменить)', 'download_started_cancel');  
         
         log('download native page started');
+        log('Include Tag list :');
         log(favNativeParser.tagList);
         
         favNativeParser.exec();        
@@ -10105,7 +10196,7 @@ function KellyFavItems()
     
     this.formatPostContainers = function() {
         
-        publications = document.getElementsByClassName(env.publication);
+        publications = env.getPosts();
         for (var i = 0; i < publications.length; i++) {
             formatPostContainer(publications[i]);
         }
@@ -10260,7 +10351,7 @@ function KellyFavItems()
 
 // JoyReactor environment driver
 
-// !@ - not required by FavItems object methods	
+// !@ - not required by FavItems object methods
 
 // default profile driver must be assign to K_DEFAULT_ENVIRONMENT variable
 // todo move formatcomment \ formatpost methods from FavItems to keep core without "environment only" / driver methods
@@ -10272,15 +10363,17 @@ var K_ENVIRONMENT = {
     className : 'kellyJRFav', 
     profile : 'joyreactor',
     mainDomain : 'joyreactor.cc',
-    favPage : '/user/__USERNAME__/favorite/__PAGENUMBER__',
-    
-    publication : 'postContainer',
-    
+        
     hostClass : window.location.host.split(".").join("_"),
     
     actionVar : 'dkl_pp', 
     containers : false,
 
+    // !@ private 
+        
+    favPage : '/user/__USERNAME__/favorite/__PAGENUMBER__',  
+    publication : 'postContainer', 
+    
     isNSFW : function() {
         var sfw = KellyTools.getElementByClass(document, 'sswither');
         if (sfw && sfw.className.indexOf('active') != -1) return false;
@@ -10291,14 +10384,23 @@ var K_ENVIRONMENT = {
         
         if (!this.containers) {
             this.containers = {
-                body : document.getElementById('container'),
-                content : document.getElementById('contentinner'),
+                body : document.getElementById('container'), // place where to put all dynamic absolute position elements
+                content : document.getElementById('contentinner'), // place where to put main extension container
+                
+                // two bottom will be used only by profile js file in future
+                
                 sideBlock : document.getElementById('sidebar'),
                 menu : document.getElementById('submenu'),
             };
         }
         
         return this.containers;
+    },
+   
+    // will be replaced by formatPosts
+    
+    getPosts : function() {
+        return document.getElementsByClassName(this.publication);
     },
    
     /* @! */        
@@ -10338,7 +10440,7 @@ var K_ENVIRONMENT = {
         return link;
     },
     
-    // get canonical url link
+    // get canonical url link in format "//url"
     
     getPostLink : function(publication, el) {
         
@@ -10346,13 +10448,13 @@ var K_ENVIRONMENT = {
     
         if (el) {
             var link = el.href.match(/[A-Za-z.0-9]+\/post\/[0-9]+/g);
-            return link ? link[0] : false;
+            return link ? '//' + link[0] : false;
         }
         
         return '';    
     },  
     
-    // get canonical comment url link
+    // get canonical comment url link in format "//url"
     
     getCommentLink : function(comment) {
         
@@ -10363,7 +10465,7 @@ var K_ENVIRONMENT = {
         for (var b = 0; b < links.length; b++) {
             if (links[b].href.length > 10 && links[b].href.indexOf('#comment') != -1) {
                 var link = links[b].href.match(/[A-Za-z.0-9]+\/post\/[0-9]+#comment[0-9]+/g);
-                return link ? link[0] : false;
+                return link ? '//' + link[0] : false;
             }
         }
         
@@ -10428,7 +10530,9 @@ var K_ENVIRONMENT = {
                 
         return true;            
     },	
-       
+    
+    // src attribute for img elements can be stored in "k-loading-src" attribute while download native favourites
+    // to prevent loading process. Always check this attribute first
     
     getAllMedia : function(publication) {
         
@@ -10469,7 +10573,12 @@ var K_ENVIRONMENT = {
             
                 var imageEl = KellyTools.getElementByTag(imagesEl[i], 'img');
                 if (imageEl) {
-                    image = this.getImageDownloadLink(imageEl.getAttribute("src"), false);
+                    var src = imageEl.getAttribute("k-loading-src");
+                    if (!src) {
+                        src = imageEl.getAttribute("src");
+                    }
+                    
+                    image = this.getImageDownloadLink(src, false);
                 }     
             }
             
@@ -10551,7 +10660,7 @@ var K_ENVIRONMENT = {
     },
     
     // route format
-    // [image-server-subdomain].[domain].cc/pics/post/full/[title]-[image-id].[extension]
+    // [image-server-subdomain].[domain].cc/pics/[comment|post]/full/[title]-[image-id].[extension]
     
     getImageDownloadLink : function(url, full, relative) {
         
@@ -10564,32 +10673,13 @@ var K_ENVIRONMENT = {
         var imgServer = url.match(/img(\d+)/);
         if (imgServer &&  imgServer.length) {
             
+            // encoded original file name, decoded untested but may be work
+            var filename = KellyTools.getUrlFileName(url, false, true);
+            if (!filename) return url;
+            
             imgServer = imgServer[0];
-            
-            var relativeUrl = url.replace('http://', '');
-                relativeUrl = relativeUrl.replace('https://', '');
-                relativeUrl = relativeUrl.replace('//', '');
-                
-            var slash = relativeUrl.indexOf('/');
-            
-            if (slash > 0) { 
-                relativeUrl = relativeUrl.substr(slash + 1);
-            }
-            
-            if (full && relativeUrl.indexOf('post/full/') == -1) {
-                relativeUrl = relativeUrl.replace('post/', 'post/full/');        
-            }
-            
-            if (!full && relativeUrl.indexOf('post/full/') != -1) {
-                
-                relativeUrl = relativeUrl.replace('post/full/', 'post/');  
-            }
-
-            if (relative) return relativeUrl;
-
-            url = window.location.origin + '/' + relativeUrl;
-            url = url.replace('http://', 'http://' + imgServer + '.');                    
-            url = url.replace('https://', 'https://' + imgServer + '.');
+            var type = url.indexOf('comment') == -1 ? 'post' : 'comment';
+            url = window.location.protocol + '//' + imgServer + '.' + window.location.host + '/pics/' + type + '/' + (full ? 'full/' : '') + filename;
         }
         
         
