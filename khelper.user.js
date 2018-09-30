@@ -2350,14 +2350,13 @@ function KellyFavStorageManager(cfg) {
             
     this.showMessage = function(text, error, section) {
     
-        var	message = KellyTools.getElementByClass(handler.storageContainer, handler.className + '-message' + (section ? '-' + section : ''));
-            
+        var	message = KellyTools.getElementByClass(handler.storageContainer, handler.className + '-message' + (section ? '-' + section : ''));            
         if (!message) return;
         
         message.className = message.className.replace(handler.className + '-error', '').trim();
         
         if (error) message.className += ' ' + handler.className + '-error';
-        message.innerHTML = text;
+        KellyTools.setHTMLData(message, text);
         
         handler.inUse = false;
     }
@@ -2508,7 +2507,7 @@ function KellyFavStorageManager(cfg) {
         ';
         
         handler.storageContainer = document.createElement('DIV');
-        handler.storageContainer.innerHTML = html;
+        KellyTools.setHTMLData(handler.storageContainer, html);
         
         var driver = KellyTools.getElementByClass(handler.storageContainer, handler.className + '-driver');
             driver.onchange = function() {
@@ -3779,7 +3778,7 @@ function KellyGrabber(cfg) {
                 }
                    
                 var tcontainer = tooltip.getContent();
-                KellyTools.setHTMLData(tcontainer, html);
+                KellyTools.setHTMLData(tcontainer, '<div>' + html + '</div>');
                 
                 setTimeout(function() {
                     
@@ -5816,7 +5815,7 @@ KellyTools.showPagination = function(params) {
 
 function KellyFavItems() 
 {
-    this.PROGNAME = 'KellyFavItems v1.1b';
+    this.PROGNAME = 'KellyFavItems v1.1.0.2b';
     
     var handler = this;	
         
@@ -5883,6 +5882,7 @@ function KellyFavItems()
     var storageManager = false;
     var tooltip = false;
            
+    // todo replace all debug vriables to common global constant
     var debug = true;
     
     var page = 1;
@@ -6283,6 +6283,7 @@ function KellyFavItems()
             
             fav.coptions.debug = fav.coptions.debug ? true : false;
             debug = fav.coptions.debug;
+            env.debug = debug;
             
             fav.coptions.newFirst = fav.coptions.newFirst ? true : false;
             
@@ -7161,10 +7162,12 @@ function KellyFavItems()
         
         fav.coptions.debug = false;
         debug = false;
+        env.debug = false;
         
         if (KellyTools.getElementByClass(favContent, env.className + 'OptionsDebug').checked) {
             fav.coptions.debug = true;
             debug = true;
+            env.debug = false;
         }
         
         fav.coptions.newFirst = false;
