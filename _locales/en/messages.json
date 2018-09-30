@@ -29,6 +29,9 @@
     "cat_add_success":{  
         "message":"Category added"
     },
+    "cat_exclude":{  
+        "message":"Exclude __CATEGORYNAME__"
+    },
     "cat_create":{  
         "message":"Create category"
     },
@@ -135,7 +138,7 @@
         "message":"If you want download all pages, just keep field empty"
     },
     "download_title":{  
-        "message":"Make local copy"
+        "message":"Create data profile"
     },
     "download_tag_filter_1":{  
         "message":"Select tags, post that includes that tags will be saved. For example \"art, girl\". If you want to exclude some publications with specifed tags, then type tags with sybmbol \"-\" before tag name. For example \"-carrot, -dog, -minecraft\""

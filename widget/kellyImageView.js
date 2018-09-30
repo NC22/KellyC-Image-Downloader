@@ -250,12 +250,24 @@ function KellyImgView(cfg) {
             if (additionStyle) button.setAttribute('style', additionStyle);
             button.onclick = onclick;
             button.className = className;
-            button.innerHTML = innerHTML;
             
+        addHtml(button, innerHTML);
+        
         buttons[index] = button;
         block.appendChild(buttons[index]);
         
         return button;        
+    }
+    
+    function addHtml(el, html) {       
+        
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(html, 'text/html');        
+        var childs = doc.getElementsByTagName('body')[0].childNodes;
+        
+        while (childs.length > 0) {
+            el.appendChild(childs[0]);
+        }
     }
     
     this.addBaseButtons = function(){

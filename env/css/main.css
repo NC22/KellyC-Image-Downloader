@@ -973,10 +973,23 @@
 
 .__BASECLASS__-exporter-container {
 	margin-bottom : 24px;
+    border: 1px solid rgba(0, 0, 0, 0.35);
+    padding: 16px;
+    opacity : 0;
+    max-height : 0px;
+    transition : opacity 0.3s;
+    overflow : hidden;
+}
+
+.__BASECLASS__-exporter-container.active {
+    
+    opacity : 1;
+    max-height : none;
+   
 }
 
 .__BASECLASS__-exporter-log {
-	width : 400px;
+	width : 100%;
 	height : 200px;
 	overflow-y : auto;
 	max-height : 200px;

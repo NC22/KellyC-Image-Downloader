@@ -8,6 +8,7 @@
 var K_ENVIRONMENT = {
     
     fav : false, 
+    debug : false,
     
     className : 'kellyJRFav', 
     profile : 'joyreactor',
@@ -158,6 +159,8 @@ var K_ENVIRONMENT = {
         
         if (inFav !== false) {
             
+            
+            addToFav.innerText = KellyLoc.s('Удалить из избранного', 'remove_from_fav');
             addToFav.onclick = function() { 
             
                 handler.fav.showRemoveFromFavDialog(inFav, function() {
@@ -169,20 +172,20 @@ var K_ENVIRONMENT = {
                 return false; 
             };
             
-            addToFav.innerHTML = KellyLoc.s('Удалить из избранного', 'remove_from_fav');
-            
         } else {
             
-            addToFav.onclick = function() { handler.fav.showAddToFavDialog(publication); return false; };
-            addToFav.innerHTML = KellyLoc.s('Добавить в избранное', 'add_to_fav');
+            addToFav.innerText = KellyLoc.s('Добавить в избранное', 'add_to_fav');
+            addToFav.onclick = function() { 
+                
+                handler.fav.showAddToFavDialog(publication);
+                return false; 
+            };
+            
         }
                 
         return true;            
     },	
-    
-    // src attribute for img elements can be stored in "k-loading-src" attribute while download native favourites
-    // to prevent loading process. Always check this attribute first
-    
+  
     getAllMedia : function(publication) {
         
         var data = [];
@@ -222,12 +225,7 @@ var K_ENVIRONMENT = {
             
                 var imageEl = KellyTools.getElementByTag(imagesEl[i], 'img');
                 if (imageEl) {
-                    var src = imageEl.getAttribute("k-loading-src");
-                    if (!src) {
-                        src = imageEl.getAttribute("src");
-                    }
-                    
-                    image = this.getImageDownloadLink(src, false);
+                    image = this.getImageDownloadLink(imageEl.getAttribute("src"), false);
                 }     
             }
             
@@ -238,9 +236,12 @@ var K_ENVIRONMENT = {
             if (data.length == 1 && image && mainImage && image.indexOf(this.getImageDownloadLink(mainImage.url, false, true)) != -1) {
                 this.fav.setSelectionInfo('dimensions', mainImage);
             } else if (data.length == 1 && image && mainImage) {
-                KellyTools.log('Main image in schema org for publication is exist, but not mutched with detected first image in publication');    
-                KellyTools.log(image);
-                KellyTools.log(this.getImageDownloadLink(mainImage.url, false));
+                
+                if (this.debug) {
+                    KellyTools.log('Main image in schema org for publication is exist, but not mutched with detected first image in publication');    
+                    KellyTools.log(image);
+                    KellyTools.log(this.getImageDownloadLink(mainImage.url, false));
+                }                
             }
         }
 
@@ -275,32 +276,28 @@ var K_ENVIRONMENT = {
             return output;
         }
         
-        try {
-            var schemaOrg = publication.querySelector('script[type="application/ld+json"]');
-            
-            if (schemaOrg) schemaOrg = schemaOrg.textContent.trim();
-            if (schemaOrg) schemaOrg = validateTextContent(schemaOrg);
-            
-            if (schemaOrg && schemaOrg.indexOf('//schema.org') != -1) {
+        var schemaOrg = publication.querySelector('script[type="application/ld+json"]');
         
-                mainImage = JSON.parse(schemaOrg);
-                if (mainImage && mainImage.image) {
-                    mainImage = mainImage.image;
-                    mainImage.url = this.getImageDownloadLink(mainImage.url, false);
-                    if (!mainImage.url || !mainImage.width || !mainImage.height) {
-                        mainImage = false;
-                    }
-                } else mainImage = false;
-            }
-
-        } catch (e) {
-            mainImage = false;
-            KellyTools.log(e, 'profile getMainImage');
-            if (schemaOrg) {
-                KellyTools.log(schemaOrg, 'profile getMainImage json data');
+        if (schemaOrg) schemaOrg = schemaOrg.textContent.trim();
+        if (schemaOrg) schemaOrg = validateTextContent(schemaOrg);
+        
+        if (schemaOrg && schemaOrg.indexOf('//schema.org') != -1) {
+    
+            mainImage = KellyTools.parseJSON(schemaOrg);
+            if (mainImage && mainImage.image) {
+                mainImage = mainImage.image;
+                mainImage.url = this.getImageDownloadLink(mainImage.url, false);
+                if (!mainImage.url || !mainImage.width || !mainImage.height) {
+                    mainImage = false;
+                }
+            } else {
+                mainImage = false;
+                if (this.log) {
+                    KellyTools.log('parse json data fail : ' + schemaOrg, 'profile getMainImage');
+                }
             }
         }
-        
+
         if (mainImage) {					
             mainImage.schemaOrg = true;
         }
@@ -591,6 +588,7 @@ var K_ENVIRONMENT = {
     
     setFav : function(fav) {
         this.fav = fav;
+        this.debug = fav.getGlobal('debug');
     }
 }
 

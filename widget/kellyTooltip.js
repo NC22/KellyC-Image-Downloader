@@ -129,10 +129,26 @@ function KellyTooltip(cfg) {
         handler.updateCfg(cfg);
         
         handler.self = document.createElement('div');
-        handler.self.className = getSelfClass();			
-        handler.self.innerHTML =  '<div class="' + handler.classGroup + '-container"><div class="' + handler.classGroup + '-content">';
-        handler.self.innerHTML += '<span class="' + handler.classGroup + '-close" style="cursor : pointer; display:' + (handler.closeButton ? 'block' : 'none') +'">+</span></div>';
-        handler.self.innerHTML += '</div>';	
+        handler.self.className = getSelfClass();
+        
+        var container = document.createElement('div');
+            container.className = handler.classGroup + '-container';
+            
+        var content = document.createElement('div');
+            content.className = handler.classGroup + '-content'; 
+            
+        var closeBtn = document.createElement('div');
+            closeBtn.className = handler.classGroup + '-close'; 
+            closeBtn.setAttribute('style', 'cursor : pointer; display:' + (handler.closeButton ? 'block' : 'none'));
+            closeBtn.innerText = '+';
+            closeBtn.onclick = function() {
+                 handler.show(false); 
+            }
+            
+            content.appendChild(closeBtn);
+            container.appendChild(content);
+                           
+        handler.self.appendChild(container);
         
         handler.setMessage(handler.message);
         
@@ -145,13 +161,7 @@ function KellyTooltip(cfg) {
         };
         
         document.body.appendChild(handler.self);	
-        
-        var closeButton = handler.self.getElementsByClassName(handler.classGroup + '-close')[0];
-            closeButton.onclick = function() {
-                
-                 handler.show(false); 
-            }
-        
+     
         events.onBodyClick = function(e) {
             
             if (handler.closeByBody) {
@@ -194,20 +204,31 @@ function KellyTooltip(cfg) {
         if (handler.hideAfterWidth && document.body.clientWidth <= handler.hideAfterWidth) return false;
         else return true;
     }
-            
+    
+    function addHtml(el, html) {       
+        
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(html, 'text/html');        
+        var childs = doc.getElementsByTagName('body')[0].childNodes;
+        
+        while (childs.length > 0) {
+            el.appendChild(childs[0]);
+        }
+    }
+    
     this.setMessage = function(mess) {	
         
         if (!handler.self) return;
         
         handler.message = mess;
-            
-        if (typeof mess == 'string') {        
-            this.getContent().innerHTML = mess;	
+        this.getContent().innerHTML = '';
+        
+        if (typeof mess == 'string') { 
+            addHtml(this.getContent(), mess);
         } else {
-            this.getContent().innerHTML = '';
-            this.getContent().appendChild(mess);           
+            this.getContent().appendChild(mess); 
         }
-
+        
         return handler;
     }
     
@@ -308,8 +329,6 @@ function KellyTooltip(cfg) {
         
         } else return false;
         
-
-                                
         var toolTip = handler.self;
         if (handler.minWidth) toolTip.style.minWidth = handler.minWidth + 'px';	
                  
