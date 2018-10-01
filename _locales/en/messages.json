@@ -142,6 +142,9 @@
     },
     "download_tag_filter_1":{  
         "message":"Select tags, post that includes that tags will be saved. For example \"art, girl\". If you want to exclude some publications with specifed tags, then type tags with sybmbol \"-\" before tag name. For example \"-carrot, -dog, -minecraft\""
+    },
+    "download_tag_filter_show":{  
+        "message":"Apply tag filter"
     },    
     "download_tag_filter_empty":{  
         "message":"If tag filter list empty, all publications will be included"

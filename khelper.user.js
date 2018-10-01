@@ -2761,11 +2761,6 @@ function KellyFavStorageManager(cfg) {
         
         var switchIndex = up ? index - 1 : index + 1;
         var item = cats[index]; 
-        
-        console.log(switchIndex);
-        
-        
-        console.log(switchIndex);
                 
         var switchItem = cats[switchIndex]; 
         var switchOrder = switchItem.order;
@@ -3444,6 +3439,7 @@ function KellyThreadWork(cfg) {
             response : false,
             request : false,
             id : threadId,
+            error : '',
         }   
       
         var request = new XMLHttpRequest();
@@ -3454,13 +3450,17 @@ function KellyThreadWork(cfg) {
                 thread.response = validateResponse(this.response);
               } else {
                 thread.response = 0;
+                thread.error = 'XMLHttpRequest : bad response status ' + this.status;
               }
               
               handler.onJobEnd(thread);
             };
 
             request.onerror = function() {
+               
                thread.response = 0;
+               thread.error = 'XMLHttpRequest : error without exit status check Access-Control-Allow-Origin';
+               
                handler.onJobEnd(thread);
             };
             
@@ -3878,10 +3878,13 @@ function KellyGrabber(cfg) {
             
             if (mode != 'wait') return false;
             
-            options.from = parseInt(this.getAttribute('data-start-from'));            
-            handler.download();  
+            options.from = parseInt(this.getAttribute('data-start-from'));
             
-            updateContinue(true);            
+            KellyTools.getBrowser().runtime.sendMessage({method: "onChanged.keepAliveListener"}, function(response) {
+                handler.download();
+            });   
+            
+            updateContinue(true); 
             return false;
         });  
         
@@ -4180,7 +4183,8 @@ function KellyGrabber(cfg) {
         // sometimes runtime may be undefined after debug breakpoints
         // https://stackoverflow.com/questions/44234623/why-is-chrome-runtime-undefined-in-the-content-script
         
-        KellyTools.getBrowser().runtime.sendMessage({method: "onChanged.keepAliveListener"}, function(response) {});
+        // moved to refresh before download process
+        // KellyTools.getBrowser().runtime.sendMessage({method: "onChanged.keepAliveListener"}, function(response) {});
                 
         KellyTools.getBrowser().runtime.onMessage.addListener(
             function(request, sender, sendResponse) {
@@ -4481,7 +4485,11 @@ function KellyGrabber(cfg) {
             buttons['init'].onclick = function() { 
                 options.from = 0;
                 handler.resetStates(false);
-                handler.download();                
+                 
+                KellyTools.getBrowser().runtime.sendMessage({method: "onChanged.keepAliveListener"}, function(response) {
+                    handler.download();
+                }); 
+                
                 return false;
             }
         
@@ -4655,7 +4663,7 @@ function KellyGrabber(cfg) {
     // callback(url, data (false on fail), errorCode, errorNotice);
     
     this.createBlobFromUrl = function(urlOrig, callback) {
-    
+        
         var xhr = new XMLHttpRequest();
             xhr.responseType = 'blob';
 
@@ -4668,7 +4676,8 @@ function KellyGrabber(cfg) {
             };
 
             xhr.onerror = function(e) {
-                callback(urlOrig, false, -1, 'domain mismatch ? check Access-Control-Allow-Origin header');
+                
+                callback(urlOrig, false, -1, 'domain mismatch ? check Access-Control-Allow-Origin header | input url ' + urlOrig);
             };
 
             xhr.open('get', urlOrig, true);
@@ -4746,12 +4755,13 @@ function KellyGrabber(cfg) {
             
             if (!blobData) {
             
-                // try again, but use default Browser API shitty method (headers from original domain will be fucked up)
-                // newer catch this scenario throw, so may be this dont needed
-                
+                // get blob fail, download as url
+              
                 toTxtLog('file NOT LOADED as BLOB ' + download.url + ', attempt to download by download api without blob - BAD HEADERS : ' + downloadOptions.filename);
                 toTxtLog('LOAD FAIL NOTICE error code ' + errorCode + ', message : ' + errorNotice);
                 
+                console.log('onLoadFileAsBlob : bad blob data for download ' + download.url + '; error : ' + errorCode + ' | error message : ' + errorNotice);
+                        
                 downloadOptions.url = download.url;
                 handler.downloadUrl(false, downloadOptions, onDownloadApiStart);
                 
@@ -4952,7 +4962,7 @@ function KellyGrabber(cfg) {
             
             mode = 'wait';
             handler.updateStartButtonState('start');            
-            KellyTools.getBrowser().runtime.sendMessage({method: "onChanged.keepAliveListener"}, function(response) {});                
+                        
         }
         
         updateProgressBar();
@@ -5568,20 +5578,25 @@ KellyTools.readInputFile = function(input, onRead, readAs) {
 // callback onLoad - executed only on succesful load data (response status = 200)
 // callback onFail - executed in any other case - any problems during load, or bad response status
 
-KellyTools.readUrl = function(url, onLoad, onFail, method, async) {
+KellyTools.readUrl = function(url, onLoad, onFail, method, async, mimeType) {
 
     if (!method) method = 'GET';
     if (typeof async == 'undefined') async = true;
 
     var request = new XMLHttpRequest();
         request.open(method, url, async);
+        
+        if (mimeType) {
+            
+           request.overrideMimeType(mimeType);
+        }        
 
         request.onload = function() {
-          if (this.status == 200) {
-             onLoad(this.response, url);
-          } else {
-             onFail(url, this.status, this.statusText);
-          }
+            if (this.status == 200) {
+                onLoad(this.response, url);
+            } else {
+                onFail(url, this.status, this.statusText);
+            }
         };
 
         request.onerror = function() {
@@ -6124,6 +6139,7 @@ function KellyFavItems()
     }
     
     function getInitAction() { // if page included as Iframe, we use it just to restore local storage data on subdomain, or domain with other name
+    
         var mode = KellyTools.getUrlParam(env.actionVar);
         if (!mode) return 'main';
         
@@ -6592,12 +6608,10 @@ function KellyFavItems()
     function initWorktop() {
         
         // todo modal mode for fit to ANY site
-        var envContainers = env.getMainContainers();
-        if (!envContainers.body) {
-            debug = true;
-            log('initWorktop() main container is undefined ' + env.profile);
-        }
+                
+        initImageGrid(); 
         
+        var envContainers = env.getMainContainers();
         var modalClass = env.className + '-ModalBox';
         
         sideBarWrap = document.createElement('div');
@@ -6729,6 +6743,8 @@ function KellyFavItems()
         
         
         if (env.onInitWorktop) env.onInitWorktop();	
+        
+        return true;
     }
     
     function updateFastSaveButtonsState() {
@@ -6878,9 +6894,11 @@ function KellyFavItems()
                                           
                         fastSave.className = fastSave.className.replace('unchecked', 'checked');
                         this.className += ' ' + env.className + '-fast-save-loading';
-                        
-                        fastDownloadPostData(postBlock, false, function(success) {
-                            fastSave.className = fastSaveBaseClass + env.className + '-fast-save-' + (success ? '' : 'not') + 'downloaded';
+            
+                        KellyTools.getBrowser().runtime.sendMessage({method: "onChanged.keepAliveListener"}, function(response) {                           
+                            fastDownloadPostData(postBlock, false, function(success) {
+                                fastSave.className = fastSaveBaseClass + env.className + '-fast-save-' + (success ? '' : 'not') + 'downloaded';
+                            });
                         });
                         
                         return false;
@@ -8195,7 +8213,7 @@ function KellyFavItems()
                 ptypeY : 'outside',
             });
         
-        // Edit mode add to image check
+        // Selected for add to publication in "Edit mode" (readonly = false)
         var filterChecked = '';
         if (extendCats.indexOf(category.id) != -1) {
             filterChecked = 'checked';
@@ -8203,6 +8221,7 @@ function KellyFavItems()
         
         var isNSFWChecked = '';
         if (category.nsfw) isNSFWChecked = 'checked';
+        
         // todo показывать кол-во элементов
         
         var baseClass = env.className + '-FiltersMenu';
@@ -9066,7 +9085,7 @@ function KellyFavItems()
         handler.showSidebarMessage(false);
         clearSidebarLoadEvents();
         
-        var html = '<p>Подтвердите удаление</p>';
+        var html = '<p>' + lng.s('Подтвердите удаление', 'delete_confirm') + '</p>';
             html += '<p class="' + env.className + '-ModalBox-controll-buttons"><a href="#" class="' + env.className + 'Remove">' + lng.s('Удалить', 'delete')  +  '</a><a href="#" class="' + env.className + 'Apply">' + lng.s('Применить изменения', 'apply')  +  '</a>';
             html += '<a href="#" class="' + env.className + 'Cancel">' + lng.s('Отменить', 'cancel')  +  '</a></p>';       
         
@@ -9163,7 +9182,17 @@ function KellyFavItems()
         return false;
     }
     
+    // selectAutoCategories(db) - db - selected database - by default current profile db
+    // 
     // sets auto categories by current selected media
+    // currently only auto detects GIF category, no any associations with tags supported
+    // 
+    // variables that can be helpful for future develop
+    //
+    // selectedPost - current selected post
+    // var postTags = env.getPostTags(selectedPost); - current post taglist
+    //
+    // 
     
     function selectAutoCategories(db) {
         
@@ -9192,7 +9221,8 @@ function KellyFavItems()
         }
     }
     
-    // todo callback onDownload
+    // check is publication already downloaded by search first media file in downloads and update button element class name according to current state
+    
     function fastDownloadCheckState(postData, button) {
     
         if (!handler.isDownloadSupported || !fav.coptions.fastsave.enabled) {
@@ -9200,8 +9230,8 @@ function KellyFavItems()
         }
         
         button.className = button.className.replace('unchecked', 'checked');
-        var postMedia = env.getAllMedia(postData);
         
+        var postMedia = env.getAllMedia(postData);        
         if (postMedia && postMedia.length) {
             
             button.className += ' ' + env.className + '-fast-save-loading';
@@ -9210,8 +9240,6 @@ function KellyFavItems()
                 if (timeout) {
                     clearTimeout(timeout);
                     timeout = false;
-                    
-                    // todo show \ indicate error ?
                 }
                 
                 if (response && response.matchResults && response.matchResults[0].match) {
@@ -9220,8 +9248,7 @@ function KellyFavItems()
                     button.className = button.className.replace('checked', 'notdownloaded');
                 }
                 
-                button.className = button.className.replace(env.className + '-fast-save-loading', '').trim();
-        
+                button.className = button.className.replace(env.className + '-fast-save-loading', '').trim();       
             }
             
             var timeout = setTimeout(function() {
@@ -9252,8 +9279,6 @@ function KellyFavItems()
             var downloadDone = 0; 
             var downloadIds = [];
             
-            KellyTools.getBrowser().runtime.sendMessage({method: "onChanged.keepAliveListener"}, function(response) {});
-         
             var timeoutListener = setTimeout(function() {
                  KellyTools.getBrowser().runtime.onMessage.removeListener(onDownloadStateChanged);
                  timeoutListener = false;
@@ -9293,7 +9318,7 @@ function KellyFavItems()
 
                     if (!blobData) {
                         
-                        log('downloadPostData : bad blob data for fast download; error : ' + errorCode + ' | message ' + errorNotice);
+                        log('downloadPostData : bad blob data for fast download; error : ' + errorCode + ' | error message : ' + errorNotice);
                         
                         downloadInitiated++;
                         if (downloadInitiated == postMedia.length) {
@@ -9866,6 +9891,9 @@ function KellyFavItems()
         if (!thread.response) {
         
             error = 'Страница не доступна ' + thread.job.data.page + ' (ошибка загрузки или превышен интервал ожидания)'; // window.document null  
+            if (thread.error) {
+                error += ' | Ошибка воркера : [' + thread.error + ']';
+            }
             
             favNativeParser.addJob(
                 thread.job.url, 
@@ -10236,7 +10264,7 @@ function KellyFavItems()
             
                 tagFilterHtml = '\
                     <br><br>\
-                    <label><input type="checkbox" class="' + env.className + '-exporter-show-tag-filter">Применять фильтрацию по тегам</label>\
+                    <label><input type="checkbox" class="' + env.className + '-exporter-show-tag-filter">' + lng.s('Применять фильтрацию по тегам', 'download_tag_filter_show') + '</label>\
                     <br>\
                     <div class="' + env.className + '-exporter-tag-filter-container" style="display : none;">'
                         + lng.s('', 'download_tag_filter_1') + '<br>'
@@ -10332,7 +10360,13 @@ function KellyFavItems()
     function initExtensionResources() {
         
         if (init) return true;
-        init = true;        
+        init = true;   
+        
+        if (!env.getMainContainers().body) {
+            debug = true;
+            log('initExtensionResources() main container is undefined ' + env.profile);
+            return false;
+        }
         
         var onLoadCssResource = function(response) {
             
@@ -10356,8 +10390,7 @@ function KellyFavItems()
             if (!handler.isDownloadSupported) {
                 log('browser not support download API. Most of functional is turned OFF');
             }
-            
-            initImageGrid();           
+                      
             initWorktop();
                         
             if (env.onExtensionReady) env.onExtensionReady();

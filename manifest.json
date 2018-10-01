@@ -1,7 +1,5 @@
 {
    "content_scripts": [ {
-      "exclude_globs": [  "*://img1.joyreactor.cc/*", "*://img0.joyreactor.cc/*"],
-      "include_globs": [],
       "js": [ "khelper.user.js" ],
       "matches": [ 
 			"*://joyreactor.cc/*",
@@ -12,9 +10,8 @@
 			"*://pornreactor.cc/*"
 	  ]
    } ],
-   "converted_from_user_script": true,
    "manifest_version" : 2,
-   "version": "1.1.0.2",
+   "version": "1.1.0.3",
    "name": "__MSG_ext_name__",
    "description": "__MSG_ext_description__",
    "icons": { "32": "env/img/icon32x32.png",
@@ -25,6 +22,7 @@
    "permissions": [
        "downloads",
 	   "storage",
+       "tabs",
 	   "unlimitedStorage"
     ],
    "background": {

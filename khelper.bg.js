@@ -602,20 +602,25 @@ KellyTools.readInputFile = function(input, onRead, readAs) {
 // callback onLoad - executed only on succesful load data (response status = 200)
 // callback onFail - executed in any other case - any problems during load, or bad response status
 
-KellyTools.readUrl = function(url, onLoad, onFail, method, async) {
+KellyTools.readUrl = function(url, onLoad, onFail, method, async, mimeType) {
 
     if (!method) method = 'GET';
     if (typeof async == 'undefined') async = true;
 
     var request = new XMLHttpRequest();
         request.open(method, url, async);
+        
+        if (mimeType) {
+            
+           request.overrideMimeType(mimeType);
+        }        
 
         request.onload = function() {
-          if (this.status == 200) {
-             onLoad(this.response, url);
-          } else {
-             onFail(url, this.status, this.statusText);
-          }
+            if (this.status == 200) {
+                onLoad(this.response, url);
+            } else {
+                onFail(url, this.status, this.statusText);
+            }
         };
 
         request.onerror = function() {
@@ -857,6 +862,8 @@ var KellyEDispetcher = new Object;
         onChanged : false,
     }
     
+    KellyEDispetcher.blobData = [];
+    
     KellyEDispetcher.isDownloadSupported = function() {
     
         if (!KellyEDispetcher.api || typeof KellyEDispetcher.api.downloads == 'undefined') {
@@ -930,15 +937,14 @@ var KellyEDispetcher = new Object;
                     response.error = KellyEDispetcher.api.runtime.lastError.message;
                 }
                 
+                if (request.blob) {                    
+                    KellyEDispetcher.blobData[downloadId] = request.download.url;
+                }
+                
                 if (callback) callback(response);
                 
             });
             
-            // unload url blob data data
-            
-            if (request.blob) {
-                URL.revokeObjectURL(request.download.url);
-            }
             
             return true;
             
@@ -1013,10 +1019,36 @@ var KellyEDispetcher = new Object;
             // chrome.downloads.search({id : downloadId}, function(array of DownloadItem results) {...})
             
             if (!KellyEDispetcher.initEvents.onChanged) {
-            
+                
+                
                 KellyEDispetcher.initEvents.onChanged = function(downloadDelta) {
                                       
-                        // send onChange message to all subscribed tabs 
+                        // Clean up 
+                                             
+                        if (downloadDelta && downloadDelta.state) {
+                            
+                            console.log(downloadDelta.state.current);
+                            
+                            if (downloadDelta.state.current == "interrupted" || downloadDelta.state.current == "complete") {
+                                
+                                
+                                if (KellyEDispetcher.blobData[downloadDelta.id]) {
+                                    
+                                    
+                                    console.log(typeof KellyEDispetcher.blobData[downloadDelta.id]);
+                    
+                                    URL.revokeObjectURL(KellyEDispetcher.blobData[downloadDelta.id]);
+                                    delete KellyEDispetcher.blobData[downloadDelta.id];
+                                    
+                                    console.log('clear blob');
+                                }
+                                
+                                
+                            }
+
+                        }
+                        
+                        // Notify tabs
                         
                         for (var i=0; i <= KellyEDispetcher.tabEvents['onChanged'].length-1; ++i) {
                             
@@ -1024,7 +1056,14 @@ var KellyEDispetcher = new Object;
                         }
                     };
                 
-                KellyEDispetcher.api.downloads.onChanged.addListener(KellyEDispetcher.initEvents.onChanged );
+                KellyEDispetcher.api.downloads.onChanged.addListener( KellyEDispetcher.initEvents.onChanged );
+                console.log('create listener');
+            } else {
+                
+                console.log('update listener');
+                
+                KellyEDispetcher.api.downloads.onChanged.removeListener( KellyEDispetcher.initEvents.onChanged );
+                KellyEDispetcher.api.downloads.onChanged.addListener( KellyEDispetcher.initEvents.onChanged );
             }
             
         } else if (request.method == "getLocalStorageList") {
@@ -1243,7 +1282,7 @@ var KellyEDispetcher = new Object;
                     onFail('unknown_' + request.items[i], false, 'unexist css file ' + request.items[i]);
                 } else {
                 
-                    KellyTools.readUrl(css, onSuccess, onFail); 
+                    KellyTools.readUrl(css, onSuccess, onFail, 'GET', true, "text/css"); 
                 }
             }
             
