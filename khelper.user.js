@@ -4648,7 +4648,7 @@ function KellyGrabber(cfg) {
             onDownload = function(response) {};
         }
         
-        downloadOptions.url = isBlobData ? URL.createObjectURL(downloadOptions.url) : url;         
+        downloadOptions.url = isBlobData ? URL.createObjectURL(downloadOptions.url) : downloadOptions.url;         
         KellyTools.getBrowser().runtime.sendMessage({method: "downloads.download", blob : isBlobData, download : downloadOptions}, onDownload);             
         
         return true;

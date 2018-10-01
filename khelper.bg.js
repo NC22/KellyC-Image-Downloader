@@ -1027,20 +1027,13 @@ var KellyEDispetcher = new Object;
                                              
                         if (downloadDelta && downloadDelta.state) {
                             
-                            console.log(downloadDelta.state.current);
-                            
                             if (downloadDelta.state.current == "interrupted" || downloadDelta.state.current == "complete") {
                                 
                                 
                                 if (KellyEDispetcher.blobData[downloadDelta.id]) {
                                     
-                                    
-                                    console.log(typeof KellyEDispetcher.blobData[downloadDelta.id]);
-                    
                                     URL.revokeObjectURL(KellyEDispetcher.blobData[downloadDelta.id]);
                                     delete KellyEDispetcher.blobData[downloadDelta.id];
-                                    
-                                    console.log('clear blob');
                                 }
                                 
                                 
@@ -1057,11 +1050,9 @@ var KellyEDispetcher = new Object;
                     };
                 
                 KellyEDispetcher.api.downloads.onChanged.addListener( KellyEDispetcher.initEvents.onChanged );
-                console.log('create listener');
+                
             } else {
-                
-                console.log('update listener');
-                
+                                                
                 KellyEDispetcher.api.downloads.onChanged.removeListener( KellyEDispetcher.initEvents.onChanged );
                 KellyEDispetcher.api.downloads.onChanged.addListener( KellyEDispetcher.initEvents.onChanged );
             }
