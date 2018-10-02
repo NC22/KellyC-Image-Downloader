@@ -522,45 +522,6 @@ KellyTools.getGMTDate = function() {
     return new Date().toJSON().slice(0, 19).replace('T', ' ');
 }
 
-KellyTools.createAndDownloadFile = function(data, filename, mimetype) {
-
-    if (!data) return false;
-    if (!KellyTools.getBrowser()) return false;
-    
-    var ext = KellyTools.getExt(filename);
-    if (!ext) ext = 'txt';
-    
-    if (!mimetype) {
-        mimetype = 'application/x-' + ext;
-        
-        // MIME type list http://webdesign.about.com/od/multimedia/a/mime-types-by-content-type.htm
-        
-             if (ext == 'jpg' || ext == 'jpeg') mimetype = 'image/jpeg';
-        else if (ext == 'png' ) mimetype = 'image/png';
-        else if (ext == 'gif' ) mimetype = 'image/gif';
-        else if (ext == 'zip' ) mimetype = 'application/zip';
-        else if (ext == 'txt' ) mimetype = 'text/plain';
-        else if (ext == 'json' ) mimetype = 'application/json';
-    }
-    
-    if (filename.indexOf('.') == -1) filename += '.' + ext;
-    
-
-    var blobData = new Blob([data], {type : mimetype});
-    
-    var downloadOptions = {
-        filename : filename, 
-        conflictAction : 'uniquify',
-        method : 'GET',
-    }
-
-    downloadOptions.url = URL.createObjectURL(blobData);  
-    
-    KellyTools.getBrowser().runtime.sendMessage({method: "downloads.download", blob : true, download : downloadOptions}, function(response){});             
-
-    return true;
-}
-
 KellyTools.getParentByClass = function(el, className) {
     var parent = el;
  
@@ -925,6 +886,39 @@ var KellyEDispetcher = new Object;
             
             response.downloadId = -1;
         
+            var base64toBlob = function(base64Data, contentType) {
+                
+                contentType = contentType || '';
+                var sliceSize = 1024;
+                var byteCharacters = atob(base64Data);
+                var bytesLength = byteCharacters.length;
+                var slicesCount = Math.ceil(bytesLength / sliceSize);
+                var byteArrays = new Array(slicesCount);
+
+                for (var sliceIndex = 0; sliceIndex < slicesCount; ++sliceIndex) {
+                    var begin = sliceIndex * sliceSize;
+                    var end = Math.min(begin + sliceSize, bytesLength);
+
+                    var bytes = new Array(end - begin);
+                    for (var offset = begin, i = 0; offset < end; ++i, ++offset) {
+                        bytes[i] = byteCharacters[offset].charCodeAt(0);
+                    }
+                    byteArrays[sliceIndex] = new Uint8Array(bytes);
+                }
+                
+                return new Blob(byteArrays, { type: contentType });
+            }
+            
+            if (typeof request.download.url == 'object') {
+                
+                var mimeType = request.download.url.type;                
+                var blob = base64toBlob(request.download.url.base64, mimeType);
+                
+                request.download.url = URL.createObjectURL(blob);
+                request.blob = true;   
+                console.log('array of data recieved | data type ' + mimeType );
+            }
+            
             KellyTools.getBrowser().downloads.download(request.download, function (downloadId) {
                 
                 response.downloadId = downloadId;

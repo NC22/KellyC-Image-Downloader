@@ -221,6 +221,9 @@
     "grabber_common_folder":{  
         "message":"Base folder"
     },
+    "grabber_continue":{  
+        "message":"Continue"
+    },
     "grabber_selected_items":{  
         "message":"Items"
     },

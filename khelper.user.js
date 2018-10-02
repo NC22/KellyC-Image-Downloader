@@ -2456,7 +2456,7 @@ function KellyFavStorageManager(cfg) {
                             var path = handler.fav.getGlobal('env').profile + '/Storage/ExportedDBs/' + dbName + '_' + KellyTools.getTimeStamp() + '.' + handler.format;
                                 path = KellyTools.validateFolderPath(path);
                                 
-                            KellyTools.createAndDownloadFile(JSON.stringify(db), path);	
+                            handler.fav.getDownloadManager().createAndDownloadFile(JSON.stringify(db), path);	
                         });
                         
                         return false;
@@ -3570,6 +3570,11 @@ function KellyGrabber(cfg) {
     var style = false;
     var className = 'kellyGrabber-';
     
+    this.TRANSPORT_BLOB = 1001;
+    this.TRANSPORT_BLOBBASE64 = 1002;
+    
+    var transportMethod = handler.TRANSPORT_BLOBBASE64;
+    
     var buttons = {};
     
     var options = {	
@@ -3932,7 +3937,7 @@ function KellyGrabber(cfg) {
             fname += 'download_log_' + KellyTools.getTimeStamp() + '.log';
             fname = KellyTools.validateFolderPath(fname);
             
-        KellyTools.createAndDownloadFile(log, fname);
+        fav.getDownloadManager().createAndDownloadFile(log, fname);
         
     }
     
@@ -4166,7 +4171,7 @@ function KellyGrabber(cfg) {
             
             return 'canceling';
             
-        } else if ((ditem.blobRequest) || (ditem.downloadId && ditem.downloadId > 0)) {
+        } else if ((ditem.dataRequest) || (ditem.downloadId && ditem.downloadId > 0)) {
             
            return 'in_progress';
             
@@ -4580,9 +4585,9 @@ function KellyGrabber(cfg) {
             
             if (getDownloadItemState(downloads[i]) == 'in_progress') {
                                 
-                if (downloads[i].blobRequest) {                
-                    downloads[i].blobRequest.abort();  
-                    downloads[i].blobRequest = false;
+                if (downloads[i].dataRequest) {                
+                    downloads[i].dataRequest.abort();  
+                    downloads[i].dataRequest = false;
                 }
             
                 if (downloads[i].cancelTimer) {
@@ -4637,7 +4642,7 @@ function KellyGrabber(cfg) {
         return false;
     }
         
-    this.downloadUrl = function(isBlobData, downloadOptions, onDownload) {
+    this.downloadUrl = function(downloadOptions, onDownload) {
         
         if (!downloadOptions) return false;
         if (!downloadOptions.url) return false;
@@ -4648,11 +4653,32 @@ function KellyGrabber(cfg) {
             onDownload = function(response) {};
         }
         
-        downloadOptions.url = isBlobData ? URL.createObjectURL(downloadOptions.url) : downloadOptions.url;         
-        KellyTools.getBrowser().runtime.sendMessage({method: "downloads.download", blob : isBlobData, download : downloadOptions}, onDownload);             
+        var isBlob = false;
+        if (downloadOptions.url instanceof Blob) {
+            downloadOptions.url = URL.createObjectURL(downloadOptions.url);
+            isBlob = true;
+        }
+        
+        KellyTools.getBrowser().runtime.sendMessage({method: "downloads.download", blob : isBlob, download : downloadOptions}, onDownload);             
         
         return true;
     }
+    
+    // also some interesting design can be found here
+    // https://stackoverflow.com/questions/7370943/retrieving-binary-file-content-using-javascript-base64-encode-it-and-reverse-de
+    
+    function blobToBase64(blob, cb) {
+        
+        var reader = new FileReader();
+            reader.onload = function() {
+        
+        var dataUrl = reader.result;
+        var base64 = dataUrl.split(',')[1];
+            cb(base64);
+        };
+
+        reader.readAsDataURL(blob);
+    };
     
     function toTxtLog(str) {
     
@@ -4662,14 +4688,27 @@ function KellyGrabber(cfg) {
     // download file by request as blob data. GET | ASYNC
     // callback(url, data (false on fail), errorCode, errorNotice);
     
-    this.createBlobFromUrl = function(urlOrig, callback) {
+    this.getDataFromUrl = function(urlOrig, callback) {
         
         var xhr = new XMLHttpRequest();
             xhr.responseType = 'blob';
 
             xhr.onload = function(e) {
                 if (this.status == 200) {
-                    callback(urlOrig, this.response);
+                    
+                    if (transportMethod == handler.TRANSPORT_BLOBBASE64) {
+                        
+                        blobToBase64(this.response, function(base64) {
+                            
+                            callback(urlOrig, {base64 : base64, type : xhr.getResponseHeader('content-type')});
+                          
+                        });
+                        
+                    } else {
+                    
+                        callback(urlOrig, response);
+                    }
+                    
                 } else {
                     callback(urlOrig, false, this.status, this.statusText);
                 }
@@ -4684,6 +4723,67 @@ function KellyGrabber(cfg) {
             xhr.send();  
         
         return xhr;
+    }
+    
+    // fileData - arrayBuffer or plain text
+    
+    this.createAndDownloadFile = function(fileData, filename, mimetype) {
+
+        if (!fileData) return false;
+        if (!KellyTools.getBrowser()) return false;
+        
+        var ext = KellyTools.getExt(filename);
+        if (!ext) ext = 'txt';
+        
+        if (!mimetype) {
+            mimetype = 'application/x-' + ext;
+            
+            // MIME type list http://webdesign.about.com/od/multimedia/a/mime-types-by-content-type.htm
+            
+                 if (ext == 'jpg' || ext == 'jpeg') mimetype = 'image/jpeg';
+            else if (ext == 'png' ) mimetype = 'image/png';
+            else if (ext == 'gif' ) mimetype = 'image/gif';
+            else if (ext == 'zip' ) mimetype = 'application/zip';
+            else if (ext == 'txt' ) mimetype = 'text/plain';
+            else if (ext == 'json' ) mimetype = 'application/json';
+        }
+        
+        if (filename.indexOf('.') == -1) filename += '.' + ext;
+        
+        var downloadOptions = {
+            filename : filename, 
+            conflictAction : 'uniquify',
+            method : 'GET',
+        }
+        
+        var startDownload = function() {
+            
+            handler.downloadUrl(downloadOptions, function(response) {
+            
+                if (response.error) {
+                    
+                    console.log('download fail ' + response.error);
+                }
+                
+            });
+            
+        }
+        
+        downloadOptions.url = new Blob([fileData], {type : mimetype});
+        
+        if (transportMethod == handler.TRANSPORT_BLOBBASE64) {
+                
+            blobToBase64(downloadOptions.url, function(base64) {              
+                downloadOptions.url = {base64 : base64, type : mimetype};
+                startDownload();
+            });
+            
+        } else {
+            
+            startDownload();
+        }     
+        
+        return true;
     }
     
     this.downloadByXMLHTTPRequest = function(download) {
@@ -4747,34 +4847,35 @@ function KellyGrabber(cfg) {
             }			
         }
                 
-        var onLoadFileAsBlob = function(url, blobData, errorCode, errorNotice) {
+        var onLoadFile = function(url, fileData, errorCode, errorNotice) {
             
             if (mode != 'download') return false;
             
-            download.blobRequest = false;
+            download.dataRequest = false;
             
-            if (!blobData) {
+            if (!fileData) {
             
-                // get blob fail, download as url
+                // get DATA ARRAY OR BLOB fail, download as url
               
-                toTxtLog('file NOT LOADED as BLOB ' + download.url + ', attempt to download by download api without blob - BAD HEADERS : ' + downloadOptions.filename);
+                toTxtLog('file NOT LOADED as DATA ARRAY OR BLOB ' + download.url + ', attempt to download by download api without DATA ARRAY OR BLOB - BAD HEADERS : ' + downloadOptions.filename);
                 toTxtLog('LOAD FAIL NOTICE error code ' + errorCode + ', message : ' + errorNotice);
                 
-                console.log('onLoadFileAsBlob : bad blob data for download ' + download.url + '; error : ' + errorCode + ' | error message : ' + errorNotice);
+                console.log('onLoadFile : bad blob data for download ' + download.url + '; error : ' + errorCode + ' | error message : ' + errorNotice);
                         
                 downloadOptions.url = download.url;
-                handler.downloadUrl(false, downloadOptions, onDownloadApiStart);
+                handler.downloadUrl(downloadOptions, onDownloadApiStart);
                 
             } else {
                 
-                toTxtLog('file LOADED as BLOB ' + download.url + ', send to browser API for save to folder : ' + downloadOptions.filename);
-                downloadOptions.url = blobData;     
+                toTxtLog('file LOADED as DATA ARRAY OR BLOB ' + download.url + ', send to browser API for save to folder : ' + downloadOptions.filename);
+              
+                downloadOptions.url = fileData;     
 
-                handler.downloadUrl(true, downloadOptions, onDownloadApiStart);
+                handler.downloadUrl(downloadOptions, onDownloadApiStart);
             }
         }
         
-        download.blobRequest = handler.createBlobFromUrl(download.url, onLoadFileAsBlob);
+        download.dataRequest = handler.getDataFromUrl(download.url, onLoadFile);
         
         return true;
     }
@@ -5496,45 +5597,6 @@ KellyTools.getTimeStamp = function() {
 
 KellyTools.getGMTDate = function() {
     return new Date().toJSON().slice(0, 19).replace('T', ' ');
-}
-
-KellyTools.createAndDownloadFile = function(data, filename, mimetype) {
-
-    if (!data) return false;
-    if (!KellyTools.getBrowser()) return false;
-    
-    var ext = KellyTools.getExt(filename);
-    if (!ext) ext = 'txt';
-    
-    if (!mimetype) {
-        mimetype = 'application/x-' + ext;
-        
-        // MIME type list http://webdesign.about.com/od/multimedia/a/mime-types-by-content-type.htm
-        
-             if (ext == 'jpg' || ext == 'jpeg') mimetype = 'image/jpeg';
-        else if (ext == 'png' ) mimetype = 'image/png';
-        else if (ext == 'gif' ) mimetype = 'image/gif';
-        else if (ext == 'zip' ) mimetype = 'application/zip';
-        else if (ext == 'txt' ) mimetype = 'text/plain';
-        else if (ext == 'json' ) mimetype = 'application/json';
-    }
-    
-    if (filename.indexOf('.') == -1) filename += '.' + ext;
-    
-
-    var blobData = new Blob([data], {type : mimetype});
-    
-    var downloadOptions = {
-        filename : filename, 
-        conflictAction : 'uniquify',
-        method : 'GET',
-    }
-
-    downloadOptions.url = URL.createObjectURL(blobData);  
-    
-    KellyTools.getBrowser().runtime.sendMessage({method: "downloads.download", blob : true, download : downloadOptions}, function(response){});             
-
-    return true;
 }
 
 KellyTools.getParentByClass = function(el, className) {
@@ -7870,7 +7932,7 @@ function KellyFavItems()
             fname += fav.coptions.storage + '_filtered_' + KellyTools.getTimeStamp() + '.' + handler.getStorageManager().format;
             fname = KellyTools.validateFolderPath(fname);
             
-        KellyTools.createAndDownloadFile(JSON.stringify(storage), fname);
+        handler.getDownloadManager().createAndDownloadFile(JSON.stringify(storage), fname);
         return true;
     }
     
@@ -9314,9 +9376,9 @@ function KellyFavItems()
             
             for (var i = 0; i < postMedia.length; i++) {
             
-                dm.createBlobFromUrl(env.getImageDownloadLink(postMedia[i], true), function(url, blobData, errorCode, errorNotice) {
+                dm.getDataFromUrl(env.getImageDownloadLink(postMedia[i], true), function(url, fileData, errorCode, errorNotice) {
 
-                    if (!blobData) {
+                    if (!fileData) {
                         
                         log('downloadPostData : bad blob data for fast download; error : ' + errorCode + ' | error message : ' + errorNotice);
                         
@@ -9336,10 +9398,10 @@ function KellyFavItems()
                             conflictAction : fav.coptions.fastsave.conflict,
                             method : 'GET',
                             filename : KellyTools.validateFolderPath(fav.coptions.fastsave.baseFolder) + '/' + KellyTools.getUrlFileName(url),
-                            url : blobData,
-                        }
-                        
-                    dm.downloadUrl(true, downloadOptions, function(response) {
+                            url : fileData,
+                        }                        
+                          
+                    dm.downloadUrl(downloadOptions, function(response) {
                     
                         downloadInitiated++;
                         if (response.downloadId && response.downloadId != -1) downloadIds.push(response.downloadId);
@@ -9862,7 +9924,7 @@ function KellyFavItems()
                     fname += '_' + KellyTools.getTimeStamp() + '.' + handler.getStorageManager().format;
                     fname = KellyTools.validateFolderPath(fname);
                     
-                    KellyTools.createAndDownloadFile(JSON.stringify(favNativeParser.collectedData), fname);	
+                    handler.getDownloadManager().createAndDownloadFile(JSON.stringify(favNativeParser.collectedData), fname);	
                 }
                 
                 return false;

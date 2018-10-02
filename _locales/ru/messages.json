@@ -220,6 +220,9 @@
     },
     "grabber_common_folder":{  
         "message":"Основная директория"
+    },    
+    "grabber_continue":{  
+        "message":"Продолжить"
     },
     "grabber_selected_items":{  
         "message":"Элементы"
