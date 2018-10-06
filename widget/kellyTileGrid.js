@@ -29,6 +29,8 @@ function KellyTileGrid(cfg) {
     
     var rowHeight = 250; // требуемая высота тайловой строки
     
+    var updateAnimationFrame = true;
+    
     var rules = {
         min : 2, // минимальное кол-во элементов в строке не зависимо от rowHeight
         heightDiff : 10, // допустимая погрешность по высоте для текущей строки элементов
@@ -37,9 +39,8 @@ function KellyTileGrid(cfg) {
         dontWait : false,
         fixed : false,
         tmpBounds : false,
-        oversizedHeightRatio : 0.2,
-        
-        // внимание к длинным картинкам -oversized
+        minAspectRatio : 0.2, // картинка маркируется классом oversized, вызывается событие onBadBounds, при отсутствии пользовательского обработчика возвращающего пропорции, картинка скрывается         
+        recheckAlways : false, // (если данные из недоверенного источника) вызывать события загрузки пропорций изображения даже если есть предварительно заданные через атрибуты данные о пропорция для их пост валидации
     };
     
     var handler = this;
@@ -58,10 +59,10 @@ function KellyTileGrid(cfg) {
     };
     
     var imgEvents = {
-        onError : function(e) {
+        onLoadBoundsError : function(e) {
             onLoadBounds(this, 'error'); 
         },
-        onSuccess : function(e) {
+        onLoadBoundsSuccess : function(e) {
             onLoadBounds(this, 'success'); 
         },
     };
@@ -127,7 +128,7 @@ function KellyTileGrid(cfg) {
             return true;
         } 
         
-        handler.updateTileGrid(true);
+        delayUpdateTileGrid(true);
     }
     
    function isBoundsLoaded(tile) {
@@ -152,9 +153,15 @@ function KellyTileGrid(cfg) {
         return loaded;
     }
     
+    // data errorCode
+    // 1 - boundEl unexist
+    // 2 - error image load
+    // 3 - bad width \ height
+    // 4 - oversized
+    
     function onBadBounds(data) {
             
-        console.log(data);
+        // console.log(data);
         
         if (events.onBadBounds) {
             
@@ -181,13 +188,22 @@ function KellyTileGrid(cfg) {
         
         if (state == 'error') {
             boundEl.setAttribute('error', '1');
-        } else {
-            
-        }
+        }        
         
-        handler.updateTileGrid();
+        delayUpdateTileGrid();
     }
 
+    function delayUpdateTileGrid(resize) {
+        
+        if (!updateAnimationFrame) return false;        
+        updateAnimationFrame = false;
+        
+        window.requestAnimationFrame(function(){            
+            updateAnimationFrame = true;
+            handler.updateTileGrid(resize);
+        });      
+    }
+    
     function getResizedInfo(resizeTo, info, resizeBy) 
     {		 
         var k;
@@ -231,8 +247,8 @@ function KellyTileGrid(cfg) {
             var boundEl = handler.getBoundElement(tiles[i]);
             if (boundEl.tagName == 'IMG' && tiles[i].getAttribute('data-load-eventInit')) {
                 
-                boundEl.removeEventListener('error', imgEvents.onError);
-                boundEl.removeEventListener('load',  imgEvents.onSuccess);				
+                boundEl.removeEventListener('error', imgEvents.onLoadBoundsError);
+                boundEl.removeEventListener('load',  imgEvents.onLoadBoundsSuccess);				
                 tiles[i].setAttribute('data-load-eventInit', '0');
             }
         }
@@ -291,8 +307,10 @@ function KellyTileGrid(cfg) {
             
             if (tilesLoadState[i]) {
                 tilesLoaded++;                
-            } else {
+            } 
             
+            if (!tilesLoadState[i] || rules.recheckAlways) {
+                
                 var boundEl = handler.getBoundElement(tiles[i]);
                 if (boundEl.tagName == 'IMG' && !tiles[i].getAttribute('data-load-eventInit')) {
                     
@@ -304,8 +322,8 @@ function KellyTileGrid(cfg) {
                         }
                     */
                     
-                    boundEl.addEventListener('error', imgEvents.onError);
-                    boundEl.addEventListener('load', imgEvents.onSuccess);
+                    boundEl.addEventListener('error', imgEvents.onLoadBoundsError);
+                    boundEl.addEventListener('load',  imgEvents.onLoadBoundsSuccess);
                     
                     tiles[i].setAttribute('data-load-eventInit', '1');
                 }
@@ -433,10 +451,10 @@ function KellyTileGrid(cfg) {
                 
                 if (!imageInfo.height) imageInfo.height = imageInfo.width;
                 
-                var ratio = Math.min(imageInfo.width, imageInfo.height) / Math.max(imageInfo.height, imageInfo.width);
-                var oversized = false;
+                var aspectRatio = imageInfo.width / imageInfo.height;
+                var oversized = false;                
                 
-                if (imageInfo.height > imageInfo.width && ratio <= rules.oversizedHeightRatio) oversized = true; 
+                if (aspectRatio <= rules.minAspectRatio) oversized = true; 
                 
                 if (oversized) {
                     
@@ -532,7 +550,7 @@ function KellyTileGrid(cfg) {
     function getCurrentRowWidth() {
     
         var width = 0; 	
-        for (var i=0; i <= currentTileRow.length-1; ++i){ 
+        for (var i=0; i <= currentTileRow.length-1; i++){ 
             
             // масштабируем до нужной высоты весь набор изображений и смотрим сколько получилось по ширине в сумме
             
@@ -573,7 +591,7 @@ function KellyTileGrid(cfg) {
 
         currentRowWidth = 0;
         
-        for (var i=0; i <= currentTileRow.length-1; ++i){ 
+        for (var i=0; i <= currentTileRow.length-1; i++){ 
             
             if (!unfited) {
                 currentTileRow[i] = getResizedInfo(required.height, currentTileRow[i], 'height');

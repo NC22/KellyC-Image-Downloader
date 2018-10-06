@@ -1,3 +1,4 @@
+// part of KellyFavItems extension
 // JoyReactor environment driver
 
 // !@ - not required by FavItems object methods
@@ -177,7 +178,12 @@ var K_ENVIRONMENT = {
             addToFav.innerText = KellyLoc.s('Добавить в избранное', 'add_to_fav');
             addToFav.onclick = function() { 
                 
-                handler.fav.showAddToFavDialog(publication);
+                handler.fav.showAddToFavDialog(publication, false, function(selectedPost, selectedComment, selectedImages) {                    
+                    
+                    if (!selectedComment && handler.fav.getGlobal('fav').coptions.syncByAdd) {
+                        handler.syncFav(selectedPost, true);
+                    }                     
+                });
                 return false; 
             };
             
@@ -451,17 +457,7 @@ var K_ENVIRONMENT = {
         if (!info.userName) return false;
         
         info.url = '';
-        
-        if (window.origin.indexOf('https') != -1) {
-            info.url = 'https://';
-        } else {
-            info.url = 'http://';
-        }
-
-        // основной домен предоставляет больше метаинфы в отличии от old.
-        // если основной домен перестанет отдавать Access-Control-Allow-Origin для поддоменов, то нужно будет всегда использовать текущий домен
-        
-        info.url += this.mainDomain + this.favPage;
+        info.url += window.location.origin + this.favPage;
         info.url = info.url.replace('__USERNAME__', info.userName);
         
         var posts = document.getElementsByClassName('postContainer');
@@ -589,7 +585,32 @@ var K_ENVIRONMENT = {
     setFav : function(fav) {
         this.fav = fav;
         this.debug = fav.getGlobal('debug');
-    }
+    },
+    
+    /* @! */
+    getRecomendedDownloadSettings : function() {
+        
+        if (!this.fav || !this.fav.isDownloadSupported) return false;        
+        
+        var browser = KellyTools.getBrowserName();
+        
+        if (browser == 'opera' || browser == 'chrome') {
+            
+            return { 
+                transportMethod : KellyGrabber.TRANSPORT_BLOB, 
+                requestMethod : KellyGrabber.REQUEST_XML 
+            }
+            
+        } else {
+            
+            return { 
+                transportMethod : KellyGrabber.TRANSPORT_BLOBBASE64, 
+                requestMethod : KellyGrabber.REQUEST_IFRAME 
+            }
+            
+        }
+        
+    },
 }
 
 var K_DEFAULT_ENVIRONMENT = K_ENVIRONMENT;

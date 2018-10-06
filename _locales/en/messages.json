@@ -5,6 +5,9 @@
     "add_to_fav":{  
         "message":"Add to favourite"
     },
+    "add_to_fav_comment":{  
+        "message":"to favourite"
+    },    
     "add_to_item":{  
         "message":"Add to item"
     },
@@ -310,7 +313,56 @@
     },
     "grabber_name_template_help_4":{  
         "message":"\"<i>#category_1#/#filename#</i>\" - download file with original name and put it to subdirectory with name of first category (ex. <b>Downloads</b>/Dogs/dog.jpg)<br><br>"
+    },  
+    "grabber_options_title":{  
+        "message":"Downloads"
+    },    
+    "grabber_options_notice":{  
+        "message":"Different options for support browsers. Change only if something not work"
     },
+    "grabber_transport":{  
+        "message":"Way of how to transport data to background process"
+    },
+    "grabber_transport_blob":{  
+        "message":"Blob URL"
+    },   
+    "grabber_transport_blobbase64":{  
+        "message":"Binary Data"
+    },
+    "grabber_request":{  
+        "message":"Way of download data"
+    },
+    "grabber_request_xml":{  
+        "message":"XMLHttpRequest"
+    },
+    "grabber_request_iframe":{  
+        "message":"Iframe"
+    },
+    "grabber_request_help":{  
+        "message": "Browser cant download file directly for security reasons if image domain and site domain differs<br>"
+    },
+    "grabber_request_help_1":{  
+        "message": "For example http://www.example.com and http://example.com counts as different domain and will be blocked by CORS<br>"
+    },
+    "grabber_request_help_2":{  
+        "message": "We can use - \"Iframe\", that will answer by reglamented format<br>"
+    },  
+    "grabber_request_help_3":{  
+        "message": "Also if you still want to use direct download by XMLHttpRequest method, just search extension that disable security options ex. \"Allow-Control-Allow-Origin: * extension\"<br>"
+    },
+    "grabber_request_help_4":{  
+        "message": "<b>Change this option only if \"XMLHttpRequest\" dont work</b><br>"
+    },
+    "grabber_transport_help":{  
+        "message":"1. <b>Blob URL</b> - Send url that refer to data to background process (Blob -> Download API)<br>"
+    }, 
+    "grabber_transport_help_1":{  
+        "message":"2. <b>Binary Data</b> - Send binary data encoded in base64 format to background process (Blob -> Binary Base64 -> Blob -> Download API)<br>"
+    },
+    "grabber_transport_help_2":{  
+        "message":"<br><br>Change this option if you can't download any thing (log files, profiles)<br>"
+    },  
+    
     "hide_soc":{  
         "message":"Hide social networks markers from publication block"
     },
@@ -359,6 +411,9 @@
     "item_preview_show":{  
         "message":"Preview show"
     },
+    "item_add_err1":{  
+        "message":"Cant detect publication url"
+    },  
     "fav_list_empty":{  
         "message":"List of favourite items is empty"
     },
@@ -421,6 +476,9 @@
     },
     "remove_from_fav":{  
         "message":"Remove from favourite"
+    },
+    "remove_from_fav_comment":{  
+        "message":"remove from favourite"
     },
     "removed_cat":{  
         "message":"Removed category"

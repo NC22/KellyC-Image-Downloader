@@ -77,6 +77,7 @@
 
     margin : 0px;
     padding : 0px;
+    max-width : 640px;
 }
 
 .__BASECLASS__-ItemTip-images {
@@ -249,7 +250,7 @@
 
 .__BASECLASS__-FavItem-tmp-bounds .__BASECLASS__-preview  {
     width : auto;
-	height : auto;
+	height : 100%;
 }
 
 .__BASECLASS__-FavItem  {

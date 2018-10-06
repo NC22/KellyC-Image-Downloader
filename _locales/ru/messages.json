@@ -5,6 +5,9 @@
     "add_to_fav":{  
         "message":"Добавить в избранное"
     },
+    "add_to_fav_comment":{  
+        "message":"в избранное"
+    },
     "add_to_item":{  
         "message":"Добавить к изображению"
     },
@@ -309,8 +312,62 @@
         "message":"<b>#name#</b> - подпись<br>Примеры<br>\"<i>#filename#</i>\" - скачать файл в директорию загрузки с исходным названием  (например <b>Загрузки</b>/dog.jpg)<br>"
     },
     "grabber_name_template_help_4":{  
-        "message":"\"<i>#category_1#/#filename#</i>\" - скачать файл с исходным названием поместив его в дерикторию с названием его основной категории (например <b>Загрузки</b>/Dogs/dog.jpg)<br><br>"
-    },    
+        "message":"\"<i>#category_1#/#filename#</i>\" - скачать файл с исходным названием поместив его в дерикторию с названием его основной категории (например <b>Загрузки</b>/[Основная директория]/Dogs/dog.jpg)<br><br>"
+    }, 
+    "grabber_options_title":{  
+        "message":"Загрузки"
+    },
+    "grabber_options_notice":{  
+        "message":"Поддержка совместимости для разных браузеров. <b>Менять только если что-то не работает</b>."
+    },
+    "grabber_transport":{  
+        "message":"Способ передачи данных в фоновый процесс"
+    },
+    "grabber_transport_blob":{  
+        "message":"Blob URL"
+    },   
+    "grabber_transport_blobbase64":{  
+        "message":"Binary Data"
+    },
+    "grabber_request":{  
+        "message":"Способ скачивания изображений"
+    },
+    "grabber_request_xml":{  
+        "message":"Прямой запрос"
+    },
+    "grabber_request_iframe":{  
+        "message":"Iframe hook"
+    },
+    "grabber_request_help":{  
+        "message": "<b>Прямой запрос</b> - Прямой запрос через API XMLHttpRequest (XMLHttpRequest -> Blob) <br>"
+    },
+    "grabber_request_help_1":{  
+        "message": "<b>Iframe hook</b> - Запрашивать изображение в дочернем окне и перехватывать расширением бинарные данные (Iframe -> Self XMLHttpRequest -> Blob)<br>"
+    },   
+    "grabber_request_help_2":{  
+        "message": "<br><br>Браузер не позволяет скачивать данные напрямую если поддомен изображения и сайта отличаются, в остальных случаях прямой запрос должен работать корректно<br>"
+    },
+    "grabber_request_help_3":{  
+        "message": "Например http://www.example.com и http://example.com считаются разными доменами и попадают под ограничания безопасности - CORS<br>"
+    },
+    "grabber_request_help_4":{  
+        "message": "<br>Для того чтобы обойти это ограничение используется промежуточное звено - \"Iframe\", он передаст нужные данные по регламентированному способу обмена не зависимо от политики безопасности<br>"
+    },  
+    "grabber_request_help_5":{  
+        "message": "<br>Так же чтобы отключить ограничения и использовать прямой запрос, можно скачать доп. рассширение (искать \"Allow-Control-Allow-Origin: * extension\")<br>"
+    },
+    "grabber_request_help_6":{  
+        "message": "<br><br><b>Iframe hook следует рассматривать только если \"Прямой запрос\" не работает</b><br>"
+    }, 
+    "grabber_transport_help":{  
+        "message":"1. <b>Blob URL</b> - Передавать ссылку на массив данных (Blob -> Download API)<br>"
+    }, 
+    "grabber_transport_help_1":{  
+        "message":"2. <b>Binary data</b> - Передавать массив данных в закодированном виде (Blob -> Binary Base64 -> Blob Url -> Download API)<br>"
+    },      
+    "grabber_transport_help_2":{  
+        "message":"<br><br>Способ взаимодействия с фоновым процессом расширения необходимо корректировать только если не работает <b>любое скачивание</b> файлов (изображения, логи, профили)<br>"
+    },     
     "hide_soc":{  
         "message":"Скрывать кнопки соц. сетей из публикаций"
     },
@@ -350,6 +407,9 @@
     "item_upd":{  
         "message":"Избранная публикация обновлена"
     },
+    "item_add_err1":{  
+        "message":"Ошибка определения ссылки на публикацию"
+    },    
     "items":{  
         "message":"Публикации"
     },
@@ -418,6 +478,9 @@
     },
     "remove_from_fav":{  
         "message":"Удалить из избранного"
+    },
+    "remove_from_fav_comment":{  
+        "message":"удалить из избранного"
     },
     "removed_cat":{  
         "message":"Удаленная категория"

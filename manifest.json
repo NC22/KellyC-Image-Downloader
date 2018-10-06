@@ -1,6 +1,7 @@
 {
    "content_scripts": [ {
       "js": [ "khelper.user.js" ],
+      "all_frames": true,
       "matches": [ 
 			"*://joyreactor.cc/*",
 			"*://*.joyreactor.cc/*", 
