@@ -48,6 +48,7 @@ function KellyTooltip(cfg) {
     this.zIndex = false;
     
     this.contentId = '';
+    this.avoidOutOfBounds = true;
     
     this.userEvents = { onMouseOut : false, onMouseOver : false, onClose : false  };
     
@@ -81,7 +82,7 @@ function KellyTooltip(cfg) {
             handler.self.className = getSelfClass();
         }
         
-        var settings = ['target', 'message', 'hideWidth', 'offset', 'minWidth', 'closeByBody', 'classGroup', 'selfClass', 'zIndex', 'closeButton', 'removeOnClose'];
+        var settings = ['avoidOutOfBounds', 'target', 'message', 'hideWidth', 'offset', 'minWidth', 'closeByBody', 'classGroup', 'selfClass', 'zIndex', 'closeButton', 'removeOnClose'];
         
         for (var i=0; i < settings.length; i++) {
             var key = settings[i];
@@ -203,7 +204,14 @@ function KellyTooltip(cfg) {
             handler.updatePosition();	
         }
         
+        events.onScroll = function(e) {
+        
+            
+            handler.updatePosition();	
+        }
+        
         window.addEventListener('resize', events.onResize);
+        window.addEventListener('scroll', events.onScroll);
         
         return handler;
     }
@@ -292,6 +300,7 @@ function KellyTooltip(cfg) {
             // но можно и добавлять \ удалять события при показе \ скрытии подсказки
             document.body.removeEventListener('click', events.onBodyClick); 
             window.removeEventListener('resize', events.onResize);
+            window.removeEventListener('scroll', events.onScroll);
         }
     }
 
@@ -327,13 +336,13 @@ function KellyTooltip(cfg) {
         
         var scrollTop = (window.pageYOffset || document.documentElement.scrollTop) - (document.documentElement.clientTop || 0);
         var scrollLeft = (window.pageXOffset || document.documentElement.scrollLeft) - (document.documentElement.clientLeft || 0);
+        var screenBoundEl = (document.compatMode === "CSS1Compat") ? document.documentElement : document.body;
+        var screenBounds = { width : screenBoundEl.clientWidth, height : screenBoundEl.clientHeight};
         
         if (handler.getTarget()) {			
             var pos = handler.getTarget().getBoundingClientRect();	
-        } else if (handler.target == 'screen') {
-        
-            var screenBoundEl = (document.compatMode === "CSS1Compat") ? document.documentElement : document.body;
-            var pos = {left : 0, top : 0, width : screenBoundEl.clientWidth, height : screenBoundEl.clientHeight};
+        } else if (handler.target == 'screen') {            
+            var pos = {left : 0, top : 0, width : screenBounds.width, height : screenBounds.height};
         
         } else return false;
         
@@ -344,13 +353,22 @@ function KellyTooltip(cfg) {
         
         var left = pos.left + handler.offset.left + scrollLeft;
         var top = pos.top + handler.offset.top + scrollTop;
-                
-        if (handler.positionY == 'top' && handler.ptypeY == 'outside') {		
-            top = top - toolTipBounds.height; //  + handler.offset.top				
+              
+        if (handler.positionY == 'top' && handler.ptypeY == 'outside') {
+
+            top = top - toolTipBounds.height;
+
         } else if (handler.positionY == 'top' && handler.ptypeY == 'inside') {		
                         
         } else if (handler.positionY == 'bottom' && handler.ptypeY == 'outside') { 
-            top = top + pos.height; // - handler.offset.top
+            
+            // prevent out of screen show
+            if (this.avoidOutOfBounds && top + pos.height + toolTipBounds.height > scrollTop + screenBounds.height + 20) {
+                top = top - toolTipBounds.height - handler.offset.top; // show as top - outside
+            } else {
+                top = top + pos.height; 
+            }
+            
         } else if (handler.positionY == 'bottom' && handler.ptypeY == 'inside') { 
             top = top + pos.height - toolTipBounds.height; 
         } else if (handler.positionY == 'center') {
@@ -2853,7 +2871,63 @@ function KellyFavStorageManager(cfg) {
         return false;
     }
     
-    this.categoryCreate = function(db, name, catIsNSFW, order) {
+    this.categoryAssocToString = function(assoc) {
+        
+        if (!assoc) return '';
+        if (typeof assoc != 'object') return '';
+        if (!assoc.length) return '';
+        
+        var string = '';
+        
+        for (var i = 0; i < assoc.length; i++) {
+            assoc[i] = KellyTools.val(assoc[i], 'string');
+            if (assoc[i]) {
+                string += string ? ',' + assoc[i] : assoc[i];
+            }            
+        }
+        
+        return string;
+    }
+    
+    this.categoryAssocFromString = function(assoc) {
+             
+        return KellyTools.getVarList(assoc, 'string');
+    }
+    
+    this.updateAssocBuffer = function(db) {
+        
+        var pool = {};
+        
+        for (var i = 0; i < db.categories.length; i++) {
+            if (!db.categories[i].assoc) continue;
+            if (typeof db.categories[i].assoc != 'object') {
+                pool[db.categories[i].id] = handler.categoryAssocFromString(db.categories[i].assoc);
+            }
+        }
+        
+        db.cats_assoc_buffer = pool;
+        return pool;
+    }
+    
+    this.searchAssocByTag = function(db, tag) {
+        
+        if (!db.cats_assoc_buffer) {
+            handler.updateAssocBuffer(db);
+        }
+        
+        var buffer = db.cats_assoc_buffer;
+        
+        for (var i = 0; i < db.categories.length; i++) {
+            if (!buffer[db.categories[i].id] || !buffer[db.categories[i].id].length) continue;
+            if (buffer[db.categories[i].id].indexOf(tag) != -1) return db.categories[i].id;            
+        }
+        
+        return false;
+    }
+    
+    // todo move category edit to here
+    
+    this.categoryCreate = function(db, name, catIsNSFW, order, assoc) {
         
         if (!name) return false;
         
@@ -2876,8 +2950,11 @@ function KellyFavStorageManager(cfg) {
             id : db.ids, 
             nsfw : catIsNSFW,
             order : order,
-        }; 
-        
+        };
+
+        if (assoc) {
+            db.categories[key] = assoc;
+        }        
 
         return db.ids;
     }
@@ -3097,7 +3174,7 @@ function KellyFavStorageManager(cfg) {
     // todo check links .items.pImage and .link and .commentLink
     this.validateDBItems = function(data) {
         
-        var validKeys = ['categories', 'items', 'ids', 'selected_cats_ids', 'meta', 'coptions'];
+        var validKeys = ['categories', 'items', 'ids', 'selected_cats_ids', 'meta', 'coptions', 'cats_assoc_buffer'];
         
         for (var key in data) {            
             if (typeof data[key] == 'function') {
@@ -4145,6 +4222,7 @@ function KellyGrabber(cfg) {
                 positionX : 'right',				
                 ptypeX : 'outside',
                 ptypeY : 'inside',
+                avoidOutOfBounds : false,
             });
             
         var baseClass = fav.getGlobal('env').className + '-tooltipster-ItemInfo';
@@ -5668,6 +5746,9 @@ KellyTools.getPrintValues = function(print, reverse, limitFrom, limitTo) {
 }
 
 KellyTools.getVarList = function(str, type) {
+        
+    if (!str) return [];
+    
     str = str.trim();
     
     if (!str) return [];
@@ -6796,9 +6877,10 @@ function KellyFavItems()
             }
             
             page = 1;
-            fav.selected_cats_ids = validateCategories(fav.selected_cats_ids);	
-            
+            fav.selected_cats_ids = validateCategories(fav.selected_cats_ids);
             sm.validateDBItems(fav);
+            
+            fav.cats_assoc_buffer = false;
             
             if ((type == 'items' || !type) && onAfterload) onAfterload(); 
         }
@@ -8269,6 +8351,8 @@ function KellyFavItems()
         return '';
     }
     
+    // category list tooltip in readOnly false mode
+    
     function showItemInfoTooltip(index, target) {
     
         if (!fav.items[index]) return;
@@ -8281,6 +8365,7 @@ function KellyFavItems()
                 positionX : 'left',				
                 ptypeX : 'inside',
                 ptypeY : 'outside',
+                avoidOutOfBounds : false,
             });
             
         var item = fav.items[index];
@@ -8757,6 +8842,7 @@ function KellyFavItems()
                 positionX : 'left',
                 ptypeX : 'inside',                
                 ptypeY : 'outside',
+                avoidOutOfBounds : true,
             });
         
         html = '\
@@ -8804,6 +8890,7 @@ function KellyFavItems()
                 positionX : 'left',
                 ptypeX : 'inside',                
                 ptypeY : 'outside',
+                avoidOutOfBounds : true,
             });
         
         // Selected for add to publication in "Edit mode" (readonly = false)
@@ -8830,8 +8917,8 @@ function KellyFavItems()
             <div class="' + baseClass + '-tooltip">\
                 <label><input class="' + baseClass + '-check" type="checkbox" ' + filterChecked + '> ' + lng.s('Добавить к изображению', 'add_to_item') + '</label>\
                 <label><input class="' + baseClass + '-nsfw" type="checkbox" ' + isNSFWChecked + '> NSFW </label>\
-                <p>' + lng.s('Новое название', 'new_name') + '</p>\
-                <input class="' + baseClass + '-newname" type="text" value="' + category.name + '" placeholder="' + lng.s('Новое название', 'new_name') + '">\
+                <p><input class="' + baseClass + '-newname" type="text" value="' + category.name + '" placeholder="' + lng.s('Новое название', 'new_name') + '"></p>\
+                <p><input class="' + baseClass + '-associations" type="text" value="' + (!category.assoc ? '' : category.assoc) + '" placeholder="' + lng.s('Ассоциации', 'associations_tags') + '"></p>\
                 <p class="' + baseClass + '-order-buttons">' + lng.s('Приоритет', 'cat_order') + '\
                 <a href="#" class="' + env.className + '-neworder-up">&#9650;</a><a href="#" class="' + env.className + '-neworder-down">&#9660;</a></p>\
                 <!--input class="' + baseClass + '-neworder" type="text" value="' + (!category.order ? itemIndex : category.order) + '" placeholder="' + lng.s('Приоритет', 'cat_order') + '"-->\
@@ -8883,11 +8970,13 @@ function KellyFavItems()
                     name : KellyTools.inputVal(baseClass + '-newname', 'string', container),
                     nsfw : KellyTools.getElementByClass(container, baseClass + '-nsfw').checked,
                     // order : parseInt(document.getElementById('kelly-filter-neworder-' + itemIndex).value),
-                    
+                    assoc : KellyTools.getElementByClass(container, baseClass + '-associations').value,
                 }
                 
                 var result = handler.categoryEdit(editCat, itemIndex);
                 if (!result) return false;
+                
+                KellyTools.getElementByClass(container, baseClass + '-associations').value = category.assoc;
                 
                 showCatList();                
                 flushCatButton();
@@ -9806,7 +9895,7 @@ function KellyFavItems()
     //
     // 
     
-    function selectAutoCategories(db) {
+    function selectAutoCategories(db, tagList) {
         
         if (!db) db = fav;
         
@@ -9830,6 +9919,29 @@ function KellyFavItems()
             } else if (!containGif && selectedGifCat != -1) {                
                 db.selected_cats_ids.splice(selectedGifCat, 1);
             }           
+        }
+      
+        if (tagList) {
+            // remove current assoc categories
+            for (var i = 0; i < db.categories.length; i++) {
+                if (!db.categories[i].assoc) continue;
+                
+                var selectedIndex = db.selected_cats_ids.indexOf(db.categories[i].id);
+                if (selectedIndex != -1) {
+                    db.selected_cats_ids.splice(selectedIndex, 1);
+                }
+            }
+            
+            // select actual assoc categories for tagList
+            for (var i = 0; i < tagList.length; i++) {
+                var tagCatId = handler.getStorageManager().searchAssocByTag(db, tagList[i]); 
+                if (tagCatId === false) continue;
+                
+                if (db.selected_cats_ids.indexOf(tagCatId) == -1) {
+                    db.selected_cats_ids.push(tagCatId);
+                } 
+            }
+            
         }
     }
     
@@ -10024,7 +10136,13 @@ function KellyFavItems()
             handler.closeSidebar();
         }
        
-        selectAutoCategories();        
+        var postTags = false;
+        
+        if (env.getPostTags) {
+            postTags = env.getPostTags(selectedPost);
+        }
+        
+        selectAutoCategories(fav, postTags);        
         handler.showSidebar(false, onClose);
                 
         var catsHTML = '<option value="-1">' + lng.s('Без категории', 'cat_no_cat') + '</option>';
@@ -10067,12 +10185,7 @@ function KellyFavItems()
             handler.save('cfg'); 
 
             var result = handler.itemAdd();
-            
-            // todo get more result info
-            if (!result) {                
-                handler.showSidebarMessage(lng.s('Ошибка определения ссылки на публикацию', 'item_add_err1'), true);
-            }
-                        
+                     
             if (result && onAdd) onAdd(selectedPost, selectedComment, selectedImages);            
             return false; 
         }
@@ -10130,8 +10243,8 @@ function KellyFavItems()
             postItem.commentLink = env.getCommentLink(selectedComment);
             
             if (!postItem.commentLink) {
-                log('cant detect comment link');
-                log(selectedComment);
+                
+                if (!noSave) handler.showSidebarMessage(lng.s('Ошибка определения ссылки на публикацию', 'item_add_err1'), true);
                 return false;
             }
         } 
@@ -10191,7 +10304,7 @@ function KellyFavItems()
             fav.items[inFav] = postItem;
             handler.showSidebarMessage(lng.s('Избранная публикация обновлена', 'item_upd'));
             handler.save('items');
-            return false;
+            return true;
         }
             
         fav.ids++;		
@@ -10375,6 +10488,14 @@ function KellyFavItems()
             
             edited = true;
         }  
+        
+        if (typeof data.assoc != 'undefined') {
+            
+            data.assoc = handler.getStorageManager().categoryAssocFromString(data.assoc);
+            fav.categories[index].assoc = handler.getStorageManager().categoryAssocToString(data.assoc);
+            
+            edited = true;
+        } 
         
         if (edited) {
         
@@ -10590,12 +10711,14 @@ function KellyFavItems()
                 continue;
             }
             
+            var postTags = [];
+            
             if (env.getPostTags && (worker.catByTagList || worker.tagList)) {
-                 var postTags = env.getPostTags(selectedPost);
+                postTags = env.getPostTags(selectedPost);
             }
             
             worker.collectedData.selected_cats_ids = [];
-            selectAutoCategories(worker.collectedData);
+            selectAutoCategories(worker.collectedData, false);
             
             if (env.getPostTags && worker.catByTagList) {
             
@@ -10603,18 +10726,18 @@ function KellyFavItems()
                 
                     if (postTags.indexOf(worker.catByTagList[b]) != -1) {
                 
-                            var sm = handler.getStorageManager();
+                        var sm = handler.getStorageManager();
+                        
+                        var itemCatId = sm.getCategoryBy(worker.collectedData, worker.catByTagList[b], 'name');
+                            itemCatId = itemCatId.id;
                             
-                            var itemCatId = sm.getCategoryBy(worker.collectedData, worker.catByTagList[b], 'name');
-                                itemCatId = itemCatId.id;
-                                
-                            if (itemCatId == -1) {
-                                itemCatId = handler.getStorageManager().categoryCreate(worker.collectedData, worker.catByTagList[b], false);                                
-                            }
-                            
-                            if (itemCatId > 0 && worker.collectedData.selected_cats_ids.indexOf(itemCatId) == -1) {                                
-                                worker.collectedData.selected_cats_ids.push(itemCatId);
-                            }
+                        if (itemCatId == -1) {
+                            itemCatId = handler.getStorageManager().categoryCreate(worker.collectedData, worker.catByTagList[b], false);                                
+                        }
+                        
+                        if (itemCatId > 0 && worker.collectedData.selected_cats_ids.indexOf(itemCatId) == -1) {                                
+                            worker.collectedData.selected_cats_ids.push(itemCatId);
+                        }
                     }
                 }
             }

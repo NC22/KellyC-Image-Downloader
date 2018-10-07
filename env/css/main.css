@@ -52,6 +52,7 @@
 
 .__BASECLASS__-tooltipster-wrap.__BASECLASS__-Default-tooltipster {
 	padding-top : 6px; /* to avoid onmouse out, usualy dont needed */
+    padding-bottom : 6px;
 }
 
 .__BASECLASS__-tooltipster-wrap.__BASECLASS__-ItemTip-tooltipster  {

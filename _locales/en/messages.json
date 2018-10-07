@@ -17,6 +17,9 @@
     "apply":{  
         "message":"Apply"
     },
+    "associations_tags":{  
+        "message":"Associations with tags"
+    },
     "close":{  
         "message":"Close"
     },
@@ -412,7 +415,7 @@
         "message":"Preview show"
     },
     "item_add_err1":{  
-        "message":"Cant detect publication url"
+        "message":"Cant detect comment url"
     },  
     "fav_list_empty":{  
         "message":"List of favourite items is empty"

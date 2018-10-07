@@ -40,6 +40,7 @@ function KellyTooltip(cfg) {
     this.zIndex = false;
     
     this.contentId = '';
+    this.avoidOutOfBounds = true;
     
     this.userEvents = { onMouseOut : false, onMouseOver : false, onClose : false  };
     
@@ -73,7 +74,7 @@ function KellyTooltip(cfg) {
             handler.self.className = getSelfClass();
         }
         
-        var settings = ['target', 'message', 'hideWidth', 'offset', 'minWidth', 'closeByBody', 'classGroup', 'selfClass', 'zIndex', 'closeButton', 'removeOnClose'];
+        var settings = ['avoidOutOfBounds', 'target', 'message', 'hideWidth', 'offset', 'minWidth', 'closeByBody', 'classGroup', 'selfClass', 'zIndex', 'closeButton', 'removeOnClose'];
         
         for (var i=0; i < settings.length; i++) {
             var key = settings[i];
@@ -195,7 +196,14 @@ function KellyTooltip(cfg) {
             handler.updatePosition();	
         }
         
+        events.onScroll = function(e) {
+        
+            
+            handler.updatePosition();	
+        }
+        
         window.addEventListener('resize', events.onResize);
+        window.addEventListener('scroll', events.onScroll);
         
         return handler;
     }
@@ -284,6 +292,7 @@ function KellyTooltip(cfg) {
             // но можно и добавлять \ удалять события при показе \ скрытии подсказки
             document.body.removeEventListener('click', events.onBodyClick); 
             window.removeEventListener('resize', events.onResize);
+            window.removeEventListener('scroll', events.onScroll);
         }
     }
 
@@ -319,13 +328,13 @@ function KellyTooltip(cfg) {
         
         var scrollTop = (window.pageYOffset || document.documentElement.scrollTop) - (document.documentElement.clientTop || 0);
         var scrollLeft = (window.pageXOffset || document.documentElement.scrollLeft) - (document.documentElement.clientLeft || 0);
+        var screenBoundEl = (document.compatMode === "CSS1Compat") ? document.documentElement : document.body;
+        var screenBounds = { width : screenBoundEl.clientWidth, height : screenBoundEl.clientHeight};
         
         if (handler.getTarget()) {			
             var pos = handler.getTarget().getBoundingClientRect();	
-        } else if (handler.target == 'screen') {
-        
-            var screenBoundEl = (document.compatMode === "CSS1Compat") ? document.documentElement : document.body;
-            var pos = {left : 0, top : 0, width : screenBoundEl.clientWidth, height : screenBoundEl.clientHeight};
+        } else if (handler.target == 'screen') {            
+            var pos = {left : 0, top : 0, width : screenBounds.width, height : screenBounds.height};
         
         } else return false;
         
@@ -336,13 +345,22 @@ function KellyTooltip(cfg) {
         
         var left = pos.left + handler.offset.left + scrollLeft;
         var top = pos.top + handler.offset.top + scrollTop;
-                
-        if (handler.positionY == 'top' && handler.ptypeY == 'outside') {		
-            top = top - toolTipBounds.height; //  + handler.offset.top				
+              
+        if (handler.positionY == 'top' && handler.ptypeY == 'outside') {
+
+            top = top - toolTipBounds.height;
+
         } else if (handler.positionY == 'top' && handler.ptypeY == 'inside') {		
                         
         } else if (handler.positionY == 'bottom' && handler.ptypeY == 'outside') { 
-            top = top + pos.height; // - handler.offset.top
+            
+            // prevent out of screen show
+            if (this.avoidOutOfBounds && top + pos.height + toolTipBounds.height > scrollTop + screenBounds.height + 20) {
+                top = top - toolTipBounds.height - handler.offset.top; // show as top - outside
+            } else {
+                top = top + pos.height; 
+            }
+            
         } else if (handler.positionY == 'bottom' && handler.ptypeY == 'inside') { 
             top = top + pos.height - toolTipBounds.height; 
         } else if (handler.positionY == 'center') {

@@ -306,6 +306,9 @@ KellyTools.getPrintValues = function(print, reverse, limitFrom, limitTo) {
 }
 
 KellyTools.getVarList = function(str, type) {
+        
+    if (!str) return [];
+    
     str = str.trim();
     
     if (!str) return [];
