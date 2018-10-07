@@ -3795,8 +3795,6 @@ function KellyGrabber(cfg) {
     var fav; // kellyFavItems obj
     var lng = KellyLoc;
     
-    var addWorkInProgress = false;
-    
     var availableItemsIndexes = [];
     
     function constructor(cfg) { 
@@ -11948,7 +11946,6 @@ var K_DEFAULT_ENVIRONMENT = K_ENVIRONMENT;
 
 // initialization
 
-KellyTools.DEBUG = true;
 
 if (!K_FAV) var K_FAV = new KellyFavItems();
 

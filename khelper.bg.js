@@ -1412,7 +1412,6 @@ var KellyEDispetcher = new Object;
         
     }// initialization
 
-KellyTools.DEBUG = true;
 
 KellyEDispetcher.init();
 

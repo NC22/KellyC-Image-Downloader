@@ -3,7 +3,7 @@ pushd "%~1"
 SET frontend=khelper.user.js
 SET background=khelper.bg.js
 SET defaultProfile=env\profiles\joyreactor.js
-SET debug=1
+SET debug=0
 
 echo.>%frontend%
 

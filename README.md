@@ -1,9 +1,7 @@
 # KellyCFavourites
 Store you personal favourite publications localy
-<br>
-<b>KellyCFavourites v 1.1.0.4b</b>
-<br>
-<br>
+
+ <br>
 # RU <br>
 
 Расширение для каталогизации, быстрого сохранения понравившихся публикаций. Есть возможность экспорта уже имеющихся в профиле избранных публикаций и опционально дальнейшая их синхронизация.
