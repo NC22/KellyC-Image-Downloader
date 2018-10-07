@@ -10509,6 +10509,8 @@ function KellyFavItems()
             data.assoc = handler.getStorageManager().categoryAssocFromString(data.assoc);
             fav.categories[index].assoc = handler.getStorageManager().categoryAssocToString(data.assoc);
             
+            fav.cats_assoc_buffer = false;
+            
             edited = true;
         } 
         
