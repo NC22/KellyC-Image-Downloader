@@ -9,7 +9,6 @@
 var K_ENVIRONMENT = {
     
     fav : false, 
-    debug : false,
     
     className : 'kellyJRFav', 
     profile : 'joyreactor',
@@ -241,13 +240,10 @@ var K_ENVIRONMENT = {
             
             if (data.length == 1 && image && mainImage && image.indexOf(this.getImageDownloadLink(mainImage.url, false, true)) != -1) {
                 this.fav.setSelectionInfo('dimensions', mainImage);
-            } else if (data.length == 1 && image && mainImage) {
-                
-                if (this.debug) {
-                    KellyTools.log('Main image in schema org for publication is exist, but not mutched with detected first image in publication');    
-                    KellyTools.log(image);
-                    KellyTools.log(this.getImageDownloadLink(mainImage.url, false));
-                }                
+            } else if (data.length == 1 && image && mainImage) {                
+                KellyTools.log('Main image in schema org for publication is exist, but not mutched with detected first image in publication');    
+                KellyTools.log(image);
+                KellyTools.log(this.getImageDownloadLink(mainImage.url, false));                           
             }
         }
 
@@ -584,13 +580,10 @@ var K_ENVIRONMENT = {
     
     setFav : function(fav) {
         this.fav = fav;
-        this.debug = fav.getGlobal('debug');
     },
     
     /* @! */
     getRecomendedDownloadSettings : function() {
-        
-        if (!this.fav || !this.fav.isDownloadSupported) return false;        
         
         var browser = KellyTools.getBrowserName();
         

@@ -2288,7 +2288,6 @@ var KellyLoc = new Object();
 
     // loaded by requestLoc method localization data
     KellyLoc.locs = {};		
-    KellyLoc.debug = true;
     KellyLoc.browser = -1;
     
     // deprecated, detectLanguage not required for i18n mode
@@ -2305,12 +2304,6 @@ var KellyLoc = new Object();
         
     }
     
-    KellyLoc.log = function(message) {
-        if (this.debug) {
-            KellyTools.log(message, 'KellyLoc');
-        }
-    }
-        
     KellyLoc.parseText = function(text, vars) {
         
         if (!text) return '';
@@ -2938,7 +2931,7 @@ function KellyFavStorageManager(cfg) {
         }
         
         if (!order) {
-            order = db.categories.length;
+            order = db.categories.length + 1;
         }
           
         db.ids++;
@@ -3153,9 +3146,7 @@ function KellyFavStorageManager(cfg) {
     }
 
     this.log = function(text) {
-        if (handler.fav && handler.fav.getGlobal('debug')) {
-            KellyTools.log(text, 'KellyStorageManager');
-        }
+        KellyTools.log(text, 'KellyStorageManager');
     }
 
     this.getDefaultData = function() {
@@ -3529,7 +3520,7 @@ function KellyThreadWork(cfg) {
         
         threads = [];
         jobs = [];
-        console.log('clean job');
+        KellyTools.log('clean job', 'KellyThreadWork');
     }
         
     // todo add watch dog with timeout for long jobs
@@ -3548,8 +3539,8 @@ function KellyThreadWork(cfg) {
 
         if (!thread.response) {
             // error
-            console.log('job end without load document');
-            console.log(thread);
+            KellyTools.log('job end without load document', 'KellyThreadWork');
+            KellyTools.log(thread, 'KellyThreadWork');
         }
 
         thread.job.onLoad(handler, thread, jobs.length);
@@ -3568,12 +3559,12 @@ function KellyThreadWork(cfg) {
                 
                 if (untilPause > 0) {
                     untilPause--;
-                    console.log('before pause ' + untilPause);
+                    KellyTools.log('before pause ' + untilPause, 'KellyThreadWork');
                 } else {
                     untilPause = getRandom(pauseEvery);
                     timeout = getRandom(pauseTimer);
                     
-                    console.log('timeout ' + timeout + ' | new pause ' + untilPause);
+                    KellyTools.log('timeout ' + timeout + ' | new pause ' + untilPause, 'KellyThreadWork');
                     
                 }
             }
@@ -3887,7 +3878,7 @@ function KellyGrabber(cfg) {
                 requestMethod = cfg.driver.requestMethod;
                 transportMethod = cfg.driver.transportMethod;
                 
-                console.log('init driver ' + requestMethod + ' | ' + transportMethod);
+                KellyTools.log('init driver ' + requestMethod + ' | ' + transportMethod, 'KellyGrabber');
             }
         }
     }
@@ -4066,8 +4057,6 @@ function KellyGrabber(cfg) {
                 if (!options.maxDownloadsAtTime || options.maxDownloadsAtTime < 0) options.maxDownloadsAtTime = 1;
                 
                 this.value = options.maxDownloadsAtTime;
-                
-                console.log(options.maxDownloadsAtTime);
             }
    
         var intervalInput = KellyTools.getElementByClass(handler.container, className + '-interval');
@@ -4077,8 +4066,6 @@ function KellyGrabber(cfg) {
                 if (!options.interval || options.interval < 0.1) options.interval = 0.1;
                
                 this.value = options.interval;
-                 
-                console.log(options.interval);
             }
             
         var cancelInput = KellyTools.getElementByClass(handler.container, className + '-timeout');
@@ -4088,8 +4075,6 @@ function KellyGrabber(cfg) {
                 if (!options.cancelTimer || options.cancelTimer < 2) options.cancelTimer = 5 * 60;                
                 
                 this.value = options.cancelTimer;
-                
-                console.log(options.cancelTimer);
             } 
             
         downloadProgress = {
@@ -4252,7 +4237,7 @@ function KellyGrabber(cfg) {
         
         for (var i = 0; i <= downloads.length-1; i++) {
                 
-            //    console.log(handler.isItemShown(downloads[i].item));
+            //    KellyTools.log(handler.isItemShown(downloads[i].item));
             if (!downloads[i].item) continue;
             
             var downloadItemId = imageClassName + '-' + downloads[i].item.id;
@@ -4268,7 +4253,7 @@ function KellyGrabber(cfg) {
                 continue;
             }       
             
-            // console.log(imageClassName + '-' + downloads[i].item.id);
+            // KellyTools.log(imageClassName + '-' + downloads[i].item.id);
         
             var holder = KellyTools.getElementByClass(itemContainer, imageClassName + '-download-state-holder');
             
@@ -4342,7 +4327,7 @@ function KellyGrabber(cfg) {
                     html = showState(getDownloadItemState(downloads[i]));
                 } else {
                     
-                    // console.log(subItems[downloads[i].item.id]);
+                    // KellyTools.log(subItems[downloads[i].item.id]);
                     var subItemsStat = {
                         wait : 0,
                         complete : 0,
@@ -4436,10 +4421,10 @@ function KellyGrabber(cfg) {
         
         if (mode != 'download') return;
         
-        // console.log('incoming ' + downloadDelta.id);
+        // KellyTools.log('incoming ' + downloadDelta.id);
         // its not our item, exit
         if (downloadingIds.indexOf(downloadDelta.id) === -1) {
-            console.log('download id not found, skip ' + downloadDelta.id);
+            KellyTools.log('download id not found, skip ' + downloadDelta.id, 'KellyGrabber');
             return false;
         }
         
@@ -4447,14 +4432,14 @@ function KellyGrabber(cfg) {
             
             if (downloadDelta.state.current != "in_progress") {
                 
-                // console.log(downloadDelta);
+                // KellyTools.log(downloadDelta);
                 downloadingIds.splice(downloadingIds.indexOf(downloadDelta.id), 1);
             
                 var downloadIndex = handler.getDownloadById(downloadDelta.id);
                 if (downloadIndex === false) {
                 
-                    console.log('item by download id not found in common stack');
-                    console.log(downloadDelta);
+                    KellyTools.log('item by download id not found in common stack', 'KellyGrabber');
+                    KellyTools.log(downloadDelta, 'KellyGrabber');
                     
                     return false;
                 }
@@ -4475,8 +4460,8 @@ function KellyGrabber(cfg) {
                
             } else {
                 
-                // console.log(downloadDelta);
-                // console.log(downloadDelta.url + 'download process ' + downloadDelta.fileSize);
+                // KellyTools.log(downloadDelta);
+                // KellyTools.log(downloadDelta.url + 'download process ' + downloadDelta.fileSize);
             } 
             
             
@@ -4518,7 +4503,7 @@ function KellyGrabber(cfg) {
             events.onDownloadEnd(handler, ditem, getDownloadItemState(ditem));                    
         }
 
-        console.log('current in progress ' + curState.inProgress + ' | wait ' + curState.waitingNum);                
+        KellyTools.log('current in progress ' + curState.inProgress + ' | wait ' + curState.waitingNum, 'KellyGrabber');                
     }
     
     this.getControllEl = function(key) {
@@ -4604,7 +4589,7 @@ function KellyGrabber(cfg) {
             for (var i = 0; i < categories.length; i++) {            
                 if (item.categoryId.indexOf(categories[i].id) != -1) {
                     itemCatN++;
-                    // console.log('#category_' + itemCatN + '#' + ' - replace - ' + favItems.categories[i].name);
+                    // KellyTools.log('#category_' + itemCatN + '#' + ' - replace - ' + favItems.categories[i].name);
                     fileName = KellyTools.replaceAll(fileName, '#category_' + itemCatN + '#', categories[i].name);
                 }                
             }            
@@ -4633,9 +4618,9 @@ function KellyGrabber(cfg) {
             
             if (!fileUrlName) {
                 
-                console.log('cant find filename for ' + item.id);
-                console.log(item);
-                console.log(getNameTemplate());
+                KellyTools.log('cant find filename for ' + item.id);
+                KellyTools.log(item);
+                KellyTools.log(getNameTemplate());
                 
                 return false;
             }
@@ -5012,7 +4997,11 @@ function KellyGrabber(cfg) {
                             callback(urlOrig, false, -1, 'iframe load fail - ' + e.data.error);
                         }
                         
-                        fav.removeEventListener(window, "message", onLoadIframe, eventPrefix);  
+                        fav.removeEventListener(window, "message", onLoadIframe, eventPrefix); 
+
+                        iframe.src = '';
+                        iframe.onload = function() {}
+                        iframe.parentElement.removeChild(iframe);                        
                     }                    
                 }
             }
@@ -5074,10 +5063,14 @@ function KellyGrabber(cfg) {
         var startDownload = function() {
             
             handler.downloadUrl(downloadOptions, function(response) {
-            
+                if (!response) {
+                    
+                    KellyTools.log('download fail : empty response. Check background process log for more details', 'KellyGrabber', KellyTools.E_ERROR);
+                    return;
+                }
                 if (response.error) {
                     
-                    console.log('download fail ' + response.error);
+                    KellyTools.log('download fail ' + response.error, 'KellyGrabber', KellyTools.E_ERROR);
                 }
                 
             });
@@ -5151,7 +5144,7 @@ function KellyGrabber(cfg) {
                 }
                     
                 downloadingIds.push(response.downloadId);                
-                console.log('new downloading process ' + response.downloadId + ' for file ' + download.id);
+                KellyTools.log('new downloading process ' + response.downloadId + ' for file ' + download.id, 'KellyGrabber');
                 
                 download.downloadId = response.downloadId;                    
                 handler.updateStateForImageGrid();
@@ -5171,7 +5164,7 @@ function KellyGrabber(cfg) {
                     toTxtLog('file NOT LOADED as DATA ARRAY OR BLOB ' + download.url + ', attempt to download by download api without DATA ARRAY OR BLOB - BAD HEADERS : ' + downloadOptions.filename);
                     toTxtLog('LOAD FAIL NOTICE error code ' + errorCode + ', message : ' + errorNotice);
                 
-                    console.log('onLoadFile : bad blob data for download ' + download.url + '; error : ' + errorCode + ' | error message : ' + errorNotice);
+                    KellyTools.log('onLoadFile : bad blob data for download ' + download.url + '; error : ' + errorCode + ' | error message : ' + errorNotice);
                         
                     downloadOptions.url = download.url;
                     handler.downloadUrl(downloadOptions, onDownloadApiStart);
@@ -5340,7 +5333,7 @@ function KellyGrabber(cfg) {
         if (mode != 'wait') return false;
         
         if (!downloads.length) {
-            console.log('work empty');
+            KellyTools.log('work empty', 'KellyGrabber');
             return false;
         }
         
@@ -5354,7 +5347,7 @@ function KellyGrabber(cfg) {
            }
            
            options.itemsList = itemsListInput.value;
-           // console.log(acceptItems);
+           // KellyTools.log(acceptItems);
         }
         
         if (downloadsOffset <= 0) {
@@ -5391,7 +5384,7 @@ function KellyGrabber(cfg) {
         
         updateProgressBar();
         log = 'Start download process...' + "\r\n";
-        console.log(options);
+        KellyTools.log(options, 'KellyGrabber');
         
         return true;
     }
@@ -5948,7 +5941,7 @@ KellyTools.getBrowserName = function() {
     
     var userAgent = navigator.userAgent;
     
-    if (userAgent.indexOf("Opera") || userAgent.indexOf('OPR') != -1 ) return 'opera';
+    if (userAgent.indexOf("Opera") != -1 || userAgent.indexOf('OPR') != -1 ) return 'opera';
     if (userAgent.indexOf("Chrome") != -1 ) return 'chrome';
     if (userAgent.indexOf("Safari") != -1) return 'safari';
     if (userAgent.indexOf("Firefox") != -1) return 'firefox';    
@@ -5958,19 +5951,27 @@ KellyTools.getBrowserName = function() {
     return 'unknown';
 }
 
+KellyTools.DEBUG = false;
+KellyTools.E_NOTICE = 1;
+KellyTools.E_ERROR = 2;
+
 /*
     errorLevel 
     
-        1 - notice, notrace
-        2 - error, trace, default
+    1 - notice, notrace
+    2 - error, trace, default
 */
 
 KellyTools.log = function(info, module, errorLevel) {
     
     if (!module) module = 'Kelly';
-    
+  
     if (!errorLevel) {
-        errorLevel = 1;
+        errorLevel = KellyTools.E_NOTICE;
+    }    
+     
+    if (!this.DEBUG && errorLevel < KellyTools.E_ERROR) {
+        return;
     }
     
     if (typeof info == 'object' || typeof info == 'function') {
@@ -5980,7 +5981,7 @@ KellyTools.log = function(info, module, errorLevel) {
         console.log('[' + KellyTools.getTime() + '] ' + module + ' : '+ info);
     }
     
-    if (errorLevel >= 2 && console.trace) {
+    if (errorLevel >= KellyTools.E_ERROR && console.trace) {
         
         console.trace();
     }
@@ -6378,10 +6379,7 @@ function KellyFavItems()
     var downloadManager = false;
     var storageManager = false;
     var tooltip = false;
-           
-    // todo replace all debug vriables to common global constant
-    var debug = true;
-    
+               
     var page = 1;
     var uiBeasy = false;
     
@@ -6496,7 +6494,7 @@ function KellyFavItems()
             if (profile) {
                 KellyTools.getBrowser().runtime.sendMessage({method: "getProfile", profile : profile}, handler.exec);
             } else {
-                log('Unknown servise or site, cant find profile for ' + window.location.host, 2);
+                log('Unknown servise or site, cant find profile for ' + window.location.host, KellyTools.E_ERROR);
             }
             
         } else {
@@ -6511,14 +6509,14 @@ function KellyFavItems()
         }
         
         if (!cfg || (!cfg.envText && !cfg.env)) {
-            log('empty environment attribute or profile name', 2);
+            log('empty environment attribute or profile name', KellyTools.E_ERROR);
             log(cfg.error);
             return;
         }
     
         if (cfg.envText) {
                 
-            log('text environment string disabled for security reasons', 2);
+            log('text environment string disabled for security reasons', KellyTools.E_ERROR);
             return;
             
             /*
@@ -6541,13 +6539,13 @@ function KellyFavItems()
         } else env = cfg.env;
         
         if (!env) {
-            log('init env error', 2);
+            log('init env error', KellyTools.E_ERROR);
             return;
         }
         
         if (isMediaResource()) {
             
-            log(handler.PROGNAME + ' load as media item helper | profile ' + env.profile, 1);
+            log(handler.PROGNAME + ' load as media item helper | profile ' + env.profile);
             
         } else {
             
@@ -6557,8 +6555,6 @@ function KellyFavItems()
             if (action == 'main') {
          
                 handler.load(false, function() {
-                    
-                    KellyLoc.debug = debug;
                     
                     if (env.getPosts()) {                
                         handler.initOnPageReady();                    
@@ -6576,7 +6572,7 @@ function KellyFavItems()
                 // window.parent.postMessage({url : selfUrl, method : 'readyAsResource'}, "*");
             }
             
-            log(handler.PROGNAME + ' init | loaded in ' + action + ' mode | profile ' + env.profile, 1);
+            log(handler.PROGNAME + ' init | loaded in ' + action + ' mode | profile ' + env.profile + ' | DEBUG ' + (KellyTools.DEBUG ? 'enabled' : 'disabled'));           
         }
         
         handler.addEventListner(window, "message", function (e) {
@@ -6814,9 +6810,7 @@ function KellyFavItems()
     }
     
     function log(info, errorLevel) {
-        if (debug) {
-            KellyTools.log(info, 'KellyFavItems', errorLevel);
-        }
+        KellyTools.log(info, 'KellyFavItems', errorLevel);     
     }
 
     // validate selected categories, remove from selected if some of them not exist
@@ -6866,7 +6860,7 @@ function KellyFavItems()
                     
             if (!itemsDb) {
                 itemsDb = sm.getDefaultData();
-                log('load() ' + fav.coptions.storage + ' db not exist, default used', 1);
+                log('load() ' + fav.coptions.storage + ' db not exist, default used');
             }
             
             for (var k in itemsDb){
@@ -6888,7 +6882,7 @@ function KellyFavItems()
         var onLoadConfig = function (config) {
             
             if (config) fav = config;
-            else log('load() bad or empty config ' + sm.prefixCfg + 'config, default used', 1);
+            else log('load() bad or empty config ' + sm.prefixCfg + 'config, default used');
                                 
             if (!fav.selected_cats_ids) fav.selected_cats_ids = [];
             if (!fav.coptions) {
@@ -6921,18 +6915,18 @@ function KellyFavItems()
             
             if (!fav.coptions.grabberDriver) {
                 
-                if (!env.getRecomendedDownloadSettings) {
-                   
-                    fav.coptions.grabberDriver = KellyGrabber.validateDriver(false);
-                    
-                } else {
+                if (env.getRecomendedDownloadSettings) {
                     fav.coptions.grabberDriver = env.getRecomendedDownloadSettings();
+                } else {
+                    fav.coptions.grabberDriver = KellyGrabber.validateDriver(false);
                 }                
-            }
-            
+            } 
+                
             fav.coptions.debug = fav.coptions.debug ? true : false;
-            debug = fav.coptions.debug;
-            env.debug = debug;
+            if (fav.coptions.debug) {
+                KellyTools.DEBUG = true;                
+                log('debug mode overloaded by user config');
+            }
             
             fav.coptions.newFirst = fav.coptions.newFirst ? true : false;
             
@@ -7000,7 +6994,7 @@ function KellyFavItems()
             
     this.save = function(type, onSave) {
     
-        log('save() ' + type, 1);
+        log('save() ' + type);
         var notSaved = (!type) ? 2 : 1 ;
         
         if (!type || type == 'items') {
@@ -7010,7 +7004,7 @@ function KellyFavItems()
                 items : fav.items,  
                 ids : fav.ids, 
             }, function(error) {
-                  log('save() save data to storage ' + (error ? error : 'OK'), 1);
+                  log('save() save data to storage ' + (error ? error : 'OK'));
                   notSaved--;
                   if (!notSaved && onSave) onSave(error);
             });
@@ -7022,7 +7016,7 @@ function KellyFavItems()
                 selected_cats_ids : fav.selected_cats_ids, 
                 coptions : fav.coptions
             }, function(error) {
-                 log('save() save cfg to storage ' + (error ? error : 'OK'), 1);
+                 log('save() save cfg to storage ' + (error ? error : 'OK'));
                  notSaved--;
                  if (!notSaved && onSave) onSave(error);
             }, true);
@@ -7762,13 +7756,11 @@ function KellyFavItems()
         };
         
         fav.coptions.debug = false;
-        debug = false;
-        env.debug = false;
         
         if (KellyTools.getElementByClass(favContent, env.className + 'OptionsDebug').checked) {
             fav.coptions.debug = true;
-            debug = true;
-            env.debug = false;
+            KellyTools.DEBUG = true;
+            log('debug mode overloaded by user config');
         }
         
         fav.coptions.newFirst = false;
@@ -8171,7 +8163,7 @@ function KellyFavItems()
         output += '<tr><td>' + lng.s('Игнорировать посты', 'ignore_publications') + ' :</td>\
                         <td><input type="text" class="kellyBlockposts" value="' + KellyTools.varListToStr(fav.coptions.posts_blacklist) + '"></td>\
                    </tr>';
-        output += '<tr><td colspan="2"><label><input type="checkbox" class="' + env.className + 'OptionsDebug" ' + (debug ? 'checked' : '') + '> ' + lng.s('Режим отладки', 'debug') + '</label></td></tr>';
+        output += '<tr><td colspan="2"><label><input type="checkbox" class="' + env.className + 'OptionsDebug" ' + (fav.coptions.debug ? 'checked' : '') + '> ' + lng.s('Режим отладки', 'debug') + '</label></td></tr>';
         output += '<tr><td colspan="2"><label>' + lng.s('Версия', 'ext_ver') + ' : ' + handler.PROGNAME + '</label></td></tr>';
                   
         output += '</table>';
@@ -8774,7 +8766,7 @@ function KellyFavItems()
         var end = startItem + fav.coptions.grid.perPage - 1;         
         if (end > displayedItems.length-1) end = displayedItems.length-1;
               
-        log('show start : ' + startItem + ' | end : ' + end + ' | total : ' + displayedItems.length, 1);
+        log('show start : ' + startItem + ' | end : ' + end + ' | total : ' + displayedItems.length);
     
         for (var i = startItem; i <= end; i++) {
             showItem(fav.items[displayedItems[i]]);
@@ -8849,7 +8841,7 @@ function KellyFavItems()
             <div class="' + env.className + 'CatAddForm">\
                 <div>\
                     <input type="text" placeholder="' + lng.s('Название новой категории', 'cat_name') + '" value="" class="' + env.className + 'CatName"><br>\
-                    <input type="text" placeholder="' + lng.s('Приоритет', 'cat_order') + '" value="" class="' + env.className + 'CatOrder"><br>\
+                    <!--input type="text" placeholder="' + lng.s('Приоритет', 'cat_order') + '" value="" class="' + env.className + 'CatOrder"-->\
                     <a href="#" class="' + env.className + 'CatCreate">' + lng.s('Создать категорию', 'cat_create') + '</a>\
                 </div>\
             </div>';
@@ -9130,6 +9122,10 @@ function KellyFavItems()
             imageGridProportions = [];
             handler.save('items');
         }
+        
+        // todo save downloadManager options by - need "changed" marker
+        // fav.coptions.grabber = self.getOptions();
+        // handler.save('cfg');
         
         if (handler.getDownloadManager().getState() != 'wait') {
             handler.showSidebarMessage('Перед выполнением действия необходимо остановить загрузку данных');
@@ -9631,7 +9627,7 @@ function KellyFavItems()
         
         if (!type) {
         
-            log('setSelectionInfo : clean selected info', 1);
+            log('setSelectionInfo : clean selected info');
             if (selectedInfo) selectedInfo = false;
             
         } else {
@@ -9691,6 +9687,7 @@ function KellyFavItems()
         clearSidebarLoadEvents();
         
         var html = '<p>' + lng.s('Подтвердите удаление', 'delete_confirm') + '</p>';
+            html += '<p><b>' + fav.categories[itemIndex].name + '</b> (ID : ' + fav.categories[itemIndex].id + ')</p>';
             html += '<p><label><input type="checkbox" name="removeImages" class="' + env.className + 'RemoveImages">' + lng.s('Удалить все связанные изображения', 'delete_rcat_items')  +  '</label></p>'
             html += '<p class="' + env.className + '-ModalBox-controll-buttons"><a href="#" class="' + env.className + 'Remove">' + lng.s('Удалить', 'delete')  +  '</a>';
             html += '<a href="#" class="' + env.className + 'Cancel">' + lng.s('Отменить', 'cancel')  +  '</a></p>';       
@@ -9779,7 +9776,7 @@ function KellyFavItems()
         
         var catList = KellyTools.getElementByClass(modalBoxContent, env.className + '-remove-catList');    
             
-        html = '<ul>';
+        html = '<p>';
         
         if (fav.items[itemIndex].categoryId.length) {
             for (var i = 0; i < fav.items[itemIndex].categoryId.length; i++) {
@@ -9788,11 +9785,11 @@ function KellyFavItems()
                     continue;
                 } 
                 
-                html += '<li>' + category.name + ' (ID : ' + category.id + ')</li>';
+                html += (i > 0 ? ', ' : '') + '<span>' + category.name + ' (ID : ' + category.id + ')</span>';
             }
         }  
     
-        html += '</ul>';
+        html += '</p>';
         KellyTools.setHTMLData(catList, html);
         
         
@@ -10508,7 +10505,7 @@ function KellyFavItems()
 
     this.getGlobal = function(name) {
         
-        if (name == 'debug') return debug;	
+        if (name == 'debug') return fav.coptions.debug;	
         if (name == 'env') return env;		
         if (name == 'fav') return fav;
         if (name == 'filters') return catFilters;
@@ -10745,7 +10742,7 @@ function KellyFavItems()
             if (env.getPostTags && worker.tagList) {
                        
                 if (!postTags.length) {
-                    log('onDownloadNativeFavPage : post tag list is empty', 1);
+                    log('onDownloadNativeFavPage : post tag list is empty');
                     log(selectedPost);
                     continue;
                 }
@@ -10832,16 +10829,16 @@ function KellyFavItems()
             cleared++;
         }
         
-        log(pageInfo.page + ' | ' + pageInfo.itemsNum + ' | cleared res : ' + cleared, 1);
+        log(pageInfo.page + ' | ' + pageInfo.itemsNum + ' | cleared res : ' + cleared);
         // console.log(fav.native_tags);
-        log('--', 1);
+        log('--');
         
     }
     
     this.downloadNativeFavPage = function(el) {
         
         if (!env.getFavPageInfo) {
-            log(env.profile + 'not support native downloads', 1);
+            log(env.profile + 'not support native downloads');
             return false;
         }
         
@@ -10887,7 +10884,7 @@ function KellyFavItems()
         }
         
         
-        if (debug) {
+        if (KellyTools.DEBUG) {
             var downloaderOptions = favNativeParser.getCfg();            
             var dhtml = '';
             
@@ -10991,8 +10988,8 @@ function KellyFavItems()
 
         el.innerText = lng.s('Загрузка... (Отменить)', 'download_started_cancel');  
         
-        log('download native page started', 1);
-        log('Include Tag list :', 1);
+        log('download native page started');
+        log('Include Tag list :');
         log(favNativeParser.tagList);
         
         favNativeParser.exec();        
@@ -11006,7 +11003,7 @@ function KellyFavItems()
         }
         
         if (!env.getFavPageInfo) {
-            log(env.profile + 'not support native downloads', 1);
+            log(env.profile + 'not support native downloads');
             return false;
         }
         
@@ -11087,7 +11084,7 @@ function KellyFavItems()
                      ' + saveBlock + '\
                      <a href="#" class="kelly-DownloadFav">' + lng.s('Запустить скачивание страниц', 'download_start') + '</a>\
                      <a href="#" class="' + env.className + '-exporter-show-log" style="display : none;">' + lng.s('Показать лог', 'download_log') + '</a>\
-                     <a href="#" class="' + env.className + '-tech-options-show" style="' + (!debug ? 'display : none;' : '') + '">' + lng.s('Options', 'hidden_options') + '</a>\
+                     <a href="#" class="' + env.className + '-tech-options-show" style="' + (!KellyTools.DEBUG ? 'display : none;' : '') + '">' + lng.s('Options', 'hidden_options') + '</a>\
                      <div class="' + env.className + '-tech-options hidden" style="display : none;">\
                         ' + dhtml + '\
                      </div>\
@@ -11102,7 +11099,7 @@ function KellyFavItems()
             KellyTools.setHTMLData(favPageInfo.container, html);
             
             
-            if (debug) {
+            if (KellyTools.DEBUG) {
                 var showHiddenOptBtn = KellyTools.getElementByClass(favPageInfo.container, env.className + '-tech-options-show');
                     showHiddenOptBtn.onclick = function() {
                         
@@ -11193,7 +11190,7 @@ function KellyFavItems()
             handler.isDownloadSupported = response.isDownloadSupported;
             
             if (!handler.isDownloadSupported) {
-                log('browser not support download API. Most of functional is turned OFF');
+                log('browser not support download API. Most of functional is turned OFF', KellyTools.E_ERROR);
             }
                       
             initWorktop();
@@ -11201,7 +11198,7 @@ function KellyFavItems()
             if (env.onExtensionReady) env.onExtensionReady();
         };
         
-        KellyTools.getBrowser().runtime.sendMessage({method: "getCss", items : ['main', env.profile]}, onLoadCssResource);		
+        KellyTools.getBrowser().runtime.sendMessage({method: "getCss", items : ['main', env.profile], debug : fav.coptions.debug}, onLoadCssResource);		
         return true;
     }
         
@@ -11210,14 +11207,13 @@ function KellyFavItems()
         if (init) return false;
         
         if (!env.getMainContainers().body) {
-            debug = true;
-            log('initExtensionResources() main container is undefined ' + env.profile);
+            log('initExtensionResources() main container is undefined ' + env.profile, KellyTools.E_ERROR);
             return false;
         }
         
         if (!KellyTools.getBrowser()) {
         
-            log('Fail to get API functions, safe exit from page ' + document.title);
+            log('Fail to get API functions, safe exit from page ' + document.title, KellyTools.E_ERROR);
             return false; 
         }
         
@@ -11331,7 +11327,6 @@ function KellyFavItems()
 var K_ENVIRONMENT = {
     
     fav : false, 
-    debug : false,
     
     className : 'kellyJRFav', 
     profile : 'joyreactor',
@@ -11563,13 +11558,10 @@ var K_ENVIRONMENT = {
             
             if (data.length == 1 && image && mainImage && image.indexOf(this.getImageDownloadLink(mainImage.url, false, true)) != -1) {
                 this.fav.setSelectionInfo('dimensions', mainImage);
-            } else if (data.length == 1 && image && mainImage) {
-                
-                if (this.debug) {
-                    KellyTools.log('Main image in schema org for publication is exist, but not mutched with detected first image in publication');    
-                    KellyTools.log(image);
-                    KellyTools.log(this.getImageDownloadLink(mainImage.url, false));
-                }                
+            } else if (data.length == 1 && image && mainImage) {                
+                KellyTools.log('Main image in schema org for publication is exist, but not mutched with detected first image in publication');    
+                KellyTools.log(image);
+                KellyTools.log(this.getImageDownloadLink(mainImage.url, false));                           
             }
         }
 
@@ -11906,13 +11898,10 @@ var K_ENVIRONMENT = {
     
     setFav : function(fav) {
         this.fav = fav;
-        this.debug = fav.getGlobal('debug');
     },
     
     /* @! */
     getRecomendedDownloadSettings : function() {
-        
-        if (!this.fav || !this.fav.isDownloadSupported) return false;        
         
         var browser = KellyTools.getBrowserName();
         
@@ -11937,13 +11926,11 @@ var K_ENVIRONMENT = {
 
 var K_DEFAULT_ENVIRONMENT = K_ENVIRONMENT;
 
+// initialization
 
-
-
-//D:\Dropbox\Private\l scripts\jfav\release\Extension\\init.js
-
-
+KellyTools.DEBUG = true;
 
 if (!K_FAV) var K_FAV = new KellyFavItems();
 
-// keep empty space to prevent syntax errors if some symbols will added at end
+// keep empty space to prevent syntax errors if some symbols will added at end
+// end of file 

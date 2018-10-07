@@ -508,7 +508,7 @@ KellyTools.getBrowserName = function() {
     
     var userAgent = navigator.userAgent;
     
-    if (userAgent.indexOf("Opera") || userAgent.indexOf('OPR') != -1 ) return 'opera';
+    if (userAgent.indexOf("Opera") != -1 || userAgent.indexOf('OPR') != -1 ) return 'opera';
     if (userAgent.indexOf("Chrome") != -1 ) return 'chrome';
     if (userAgent.indexOf("Safari") != -1) return 'safari';
     if (userAgent.indexOf("Firefox") != -1) return 'firefox';    
@@ -518,19 +518,27 @@ KellyTools.getBrowserName = function() {
     return 'unknown';
 }
 
+KellyTools.DEBUG = false;
+KellyTools.E_NOTICE = 1;
+KellyTools.E_ERROR = 2;
+
 /*
     errorLevel 
     
-        1 - notice, notrace
-        2 - error, trace, default
+    1 - notice, notrace
+    2 - error, trace, default
 */
 
 KellyTools.log = function(info, module, errorLevel) {
     
     if (!module) module = 'Kelly';
-    
+  
     if (!errorLevel) {
-        errorLevel = 1;
+        errorLevel = KellyTools.E_NOTICE;
+    }    
+     
+    if (!this.DEBUG && errorLevel < KellyTools.E_ERROR) {
+        return;
     }
     
     if (typeof info == 'object' || typeof info == 'function') {
@@ -540,7 +548,7 @@ KellyTools.log = function(info, module, errorLevel) {
         console.log('[' + KellyTools.getTime() + '] ' + module + ' : '+ info);
     }
     
-    if (errorLevel >= 2 && console.trace) {
+    if (errorLevel >= KellyTools.E_ERROR && console.trace) {
         
         console.trace();
     }
@@ -872,7 +880,6 @@ var KellyEDispetcher = new Object;
     KellyEDispetcher.tabList = []; // all active tabs that request resources at list once
     
     KellyEDispetcher.eventsAccepted = false;
-    KellyEDispetcher.debug = true;
     KellyEDispetcher.envDir = 'env/';
     KellyEDispetcher.api = KellyTools.getBrowser();
     
@@ -913,13 +920,9 @@ var KellyEDispetcher = new Object;
     
     KellyEDispetcher.onMessage = function(request, sender, callback) {
             
-        if (KellyEDispetcher.debug) {
-            console.log(request);    
-            console.log(sender.tab ?
-                        "from a content script:" + sender.tab.url :
-                        "from the extension");
-        }
-        
+        KellyTools.log(request, 'KellyEDispetcher');    
+        KellyTools.log(sender.tab ? " request from content script : " + sender.tab.url : "from the extension", 'KellyEDispetcher');    
+    
         var response = {
             
             senderId : 'dispetcher',
@@ -932,12 +935,9 @@ var KellyEDispetcher = new Object;
             
             if (request.downloadId) {
                 KellyTools.getBrowser().downloads.cancel(request.downloadId);
-            } else {
-                
-                if (KellyEDispetcher.log) {
-                    console.log('bad request');
-                    console.log(request);
-                }
+            } else {                
+                KellyTools.log('Method : ' + request.method + ' : bad request', 'KellyEDispetcher');
+                KellyTools.log(request, 'KellyEDispetcher');
             }
                     
         } else if (request.method == 'downloads.download') {
@@ -974,7 +974,7 @@ var KellyEDispetcher = new Object;
                 
                 request.download.url = URL.createObjectURL(blob);
                 request.blob = true;   
-                console.log('array of data recieved | data type ' + mimeType );
+                KellyTools.log('array of data recieved | data type ' + mimeType , 'KellyEDispetcher');
             }
             
             KellyTools.getBrowser().downloads.download(request.download, function (downloadId) {
@@ -1273,6 +1273,11 @@ var KellyEDispetcher = new Object;
                 url : '',
             };
             
+            if (request.debug) {
+                KellyTools.DEBUG = true;
+                KellyTools.log('Tab loaded in debug mode, switch background process debug mode to TRUE', 'KellyEDispetcher')
+            }
+            
             var onGetResource = function(url, data, notice) {
                 
                 loaded++;
@@ -1315,9 +1320,7 @@ var KellyEDispetcher = new Object;
             
             for (var i = 0; i < request.items.length; i++) {
                 
-                if (KellyEDispetcher.debug) {
-                    console.log(request.items[i]);
-                }
+                KellyTools.log(request.items[i], 'KellyEDispetcher');
                 
                 var css = KellyTools.getBrowser().runtime.getURL(KellyEDispetcher.envDir + 'css/' + request.items[i] + '.css');
        
@@ -1327,8 +1330,7 @@ var KellyEDispetcher = new Object;
                 
                     KellyTools.readUrl(css, onSuccess, onFail, 'GET', true, "text/css"); 
                 }
-            }
-            
+            }            
            
             // identify requester, save for future notifications
             if (KellyEDispetcher.tabList.indexOf(sender.tab.id) == -1) {
@@ -1408,13 +1410,11 @@ var KellyEDispetcher = new Object;
         
         if (callback) callback(response);
         
-    }
+    }// initialization
 
-
-//D:\Dropbox\Private\l scripts\jfav\release\Extension\\init.bg.js
-
-
+KellyTools.DEBUG = true;
 
 KellyEDispetcher.init();
 
-// keep empty space to prevent syntax errors if some symbols will added at end
+// keep empty space to prevent syntax errors if some symbols will added at end
+// end of file 
