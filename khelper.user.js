@@ -3795,6 +3795,8 @@ function KellyGrabber(cfg) {
     var fav; // kellyFavItems obj
     var lng = KellyLoc;
     
+    var addWorkInProgress = false;
+    
     var availableItemsIndexes = [];
     
     function constructor(cfg) { 
@@ -4219,6 +4221,11 @@ function KellyGrabber(cfg) {
         var html = lng.s('Сохранить как', 'grabber_save_as') + ' : <br>' + downloads[downloadIndex].filename + '.' + downloads[downloadIndex].ext + '<br><br>';
             html += fav.showItemInfo(item);
             
+            if (downloads[downloadIndex].error) {
+                html += 'error : ' + downloads[downloadIndex].error + '<br><br>';
+                console.log(downloads[downloadIndex]);
+            }
+            
             KellyTools.setHTMLData(itemInfo, html);
     
         var tcontainer = tooltipEl.getContent();
@@ -4384,7 +4391,7 @@ function KellyGrabber(cfg) {
             
             return 'canceling';
             
-        } else if ((ditem.dataRequest) || (ditem.downloadId && ditem.downloadId > 0)) {
+        } else if ((ditem.dataRequest) || (ditem.downloadId && ditem.downloadId > 0) || (ditem.downloadId && ditem.downloadId === KellyGrabber.DOWNLOADID_GET_PROCESS)) {
             
            return 'in_progress';
             
@@ -4953,13 +4960,14 @@ function KellyGrabber(cfg) {
                 xhr.send();  
             
             return xhr;
+            
         } else {
             
             var getIframe = function() {
             
                 requestIframeId++;
                 
-                var iframe = document.createElement('iframe')
+                var iframe = document.createElement('iframe');
                     iframe.name = className + '-iframe-' + requestIframeId;
                     iframe.style.display = 'none';
                     iframe.style.width   = '1px';
@@ -4972,18 +4980,22 @@ function KellyGrabber(cfg) {
             
             var iframe = getIframe();
             var eventPrefix = 'input_message_' + iframe.name;
-            
-            var onLoadIframe = function(e) {
+            var closeConnection = false;
+            var onLoadIframe = false;
+                        
+            onLoadIframe = function(e) {
                      
-                if (!e.data || !e.data.method) return false;
+                if (!e.data || !e.data.method || closeConnection) return false;
                 
-                if (iframe.contentWindow == e.source) {        
+                if (iframe && iframe.contentWindow === e.source) {        
                     
                     if (e.data.method.indexOf('mediaReady') != -1) {
                         
                         e.source.postMessage({method : 'getMedia'}, "*");
                         
                     } else if (e.data.method.indexOf('sendResourceMedia') != -1) {
+                        
+                        closeConnection = true;
                         
                         if (e.data.base64) {
                             
@@ -4997,11 +5009,14 @@ function KellyGrabber(cfg) {
                             callback(urlOrig, false, -1, 'iframe load fail - ' + e.data.error);
                         }
                         
-                        fav.removeEventListener(window, "message", onLoadIframe, eventPrefix); 
-
                         iframe.src = '';
-                        iframe.onload = function() {}
-                        iframe.parentElement.removeChild(iframe);                        
+                        iframe.onload = function() {};
+                        
+                        if (iframe.parentElement) {
+                            iframe.parentElement.removeChild(iframe);                        
+                        }
+                        
+                        fav.removeEventListener(window, "message", onLoadIframe, eventPrefix);                         
                     }                    
                 }
             }
@@ -5016,8 +5031,9 @@ function KellyGrabber(cfg) {
             
                 iframe.src = '';
                 iframe.onload = function() {}
-                iframe.parentElement.removeChild(iframe);
-                
+                if (iframe.parentElement) {
+                    iframe.parentElement.removeChild(iframe);
+                }
             }};
         }
     }
@@ -5096,9 +5112,6 @@ function KellyGrabber(cfg) {
     
     this.downloadByXMLHTTPRequest = function(download) {
     
-        // design from https://stackoverflow.com/questions/20579112/send-referrer-header-with-chrome-downloads-api
-        // key is to save original headers
-    
         var baseFileFolder = options.baseFolder;        
         if (!baseFileFolder) baseFileFolder = '';
         
@@ -5112,14 +5125,14 @@ function KellyGrabber(cfg) {
             method : 'GET',
         }
         
-        toTxtLog('download : ' + downloadOptions.filename);
+        toTxtLog(download.id + ' | download : ' + downloadOptions.filename);
         
         var onDownloadApiStart = function(response){
                 
             if (!response.downloadId || response.downloadId < 0) {
                 
-                toTxtLog('download REJECTED by browser API : ' + downloadOptions.filename);
-                toTxtLog('error : ' + response.error + "\n\r");
+                toTxtLog(download.id + ' | download REJECTED by browser API : ' + downloadOptions.filename);
+                toTxtLog(download.id + ' | error : ' + response.error + "\n\r");
                 
                 resetItem(download);
                 
@@ -5130,12 +5143,12 @@ function KellyGrabber(cfg) {
                 
             } else {            
                                 
-                toTxtLog('download ACCEPTED by browser API : ' + downloadOptions.filename);
+                toTxtLog(download.id + ' | download ACCEPTED by browser API : ' + downloadOptions.filename);
                 
                 if (mode != 'download') { // perhapse promise was sended after cancel ?
                 
                     // download not needed
-                    toTxtLog('downloading start, but user CANCEL downloading process. SEND REJECT TO API for file : ' + downloadOptions.filename);
+                    toTxtLog(download.id + ' | downloading start, but user CANCEL downloading process. SEND REJECT TO API for file : ' + downloadOptions.filename);
                      
                     KellyTools.getBrowser().runtime.sendMessage({method: "downloads.cancel", downloadId : response.downloadId}, function(response) {
                     
@@ -5144,7 +5157,7 @@ function KellyGrabber(cfg) {
                 }
                     
                 downloadingIds.push(response.downloadId);                
-                KellyTools.log('new downloading process ' + response.downloadId + ' for file ' + download.id, 'KellyGrabber');
+                KellyTools.log(download.id + ' | new downloading process ' + response.downloadId, 'KellyGrabber');
                 
                 download.downloadId = response.downloadId;                    
                 handler.updateStateForImageGrid();
@@ -5172,16 +5185,15 @@ function KellyGrabber(cfg) {
                 
                 // todo cancel after few fails ?
                 
-                toTxtLog('file NOT LOADED as DATA ARRAY OR BLOB ' + download.url + ' : ' + downloadOptions.filename);
-                toTxtLog('LOAD FAIL NOTICE error code ' + errorCode + ', message : ' + errorNotice);
+                toTxtLog(download.id + ' | file NOT LOADED as DATA ARRAY OR BLOB ' + download.url + ' : ' + downloadOptions.filename);
+                toTxtLog(download.id + ' | LOAD FAIL NOTICE error code ' + errorCode + ', message : ' + errorNotice);
 
                 onDownloadApiStart({downloadId : false, error : 'DATA ARRAY get fail. Error code : ' + errorCode + ' |  error message : ' + errorNotice});
                 
                 
             } else {
                 
-                toTxtLog('file LOADED as DATA ARRAY OR BLOB ' + download.url + ', send to browser API for save to folder : ' + downloadOptions.filename);
-              
+                toTxtLog(download.id + ' | file LOADED as DATA ARRAY OR BLOB ' + download.url + ', send to browser API for save to folder : ' + downloadOptions.filename);                
                 downloadOptions.url = fileData;     
 
                 handler.downloadUrl(downloadOptions, onDownloadApiStart);
@@ -5217,18 +5229,14 @@ function KellyGrabber(cfg) {
     this.addDownloadWork = function() {
         
         if (mode != 'download') return false;
-        
-        var currentWork = handler.countCurrent('in_progress');        
-        if (currentWork >= options.maxDownloadsAtTime) return false;
-        
-        var newWorkNum = options.maxDownloadsAtTime - currentWork; 
-        var searchWorkErrorsLimit = 20;
-        
+                
         var addCancelTimer = function(downloadItem) {
             
             downloadItem.cancelTimer = setTimeout(function() {
                 
                 if (!downloadItem) return;
+                
+                toTxtLog(downloadItem.id + ' | CANCELED BY TIMEOUT ' + downloadItem.url + ', ' + downloadItem.filename);
                 
                 downloadItem.cancelTimer = false; 
                 resetItem(downloadItem);
@@ -5245,10 +5253,16 @@ function KellyGrabber(cfg) {
                     });                
                 }
                 
-                toTxtLog('CANCELED BY TIMEOUT ' + downloadItem.url + ', ' + downloadItem.filename);
-                
             }, options.cancelTimer * 1000);
         }
+        
+        var searchWorkErrorsLimit = 20;
+        var currentWork = handler.countCurrent('in_progress'); 
+        var newWorkNum = options.maxDownloadsAtTime - currentWork; 
+        
+        if (currentWork >= options.maxDownloadsAtTime) {
+            return;
+        } 
         
         for (var i = downloadsOffset; i <= downloads.length - 1; i++) {
             
@@ -5266,6 +5280,7 @@ function KellyGrabber(cfg) {
                 }
                 
                 newWorkNum--;
+                
             } else {
                 
                 // bad name template \ url \ extension - common for corrupted data
@@ -5280,17 +5295,19 @@ function KellyGrabber(cfg) {
                 }
                 
                 resetItem(downloadItem);
+                
                 downloadItem.workedout = true;
                 downloadItem.error = 'Initialize download data error';
                                     
                 searchWorkErrorsLimit--;
-                if (searchWorkErrorsLimit <= 0) break;
             }
-                        
-            if (newWorkNum <= 0) break;
-        }  
-         
-        updateProcessState();
+              
+            if (newWorkNum <= 0 || searchWorkErrorsLimit <= 0) {
+                 break;
+            }           
+        }   
+     
+        updateProcessState(); 
     }
     
     function resetItem(downloadItem) {
@@ -5380,10 +5397,11 @@ function KellyGrabber(cfg) {
         handler.resetDownloadItems(true);
         handler.updateStateForImageGrid();
         
+        log = '';
+        
         handler.addDownloadWork();
         
         updateProgressBar();
-        log = 'Start download process...' + "\r\n";
         KellyTools.log(options, 'KellyGrabber');
         
         return true;
