@@ -365,7 +365,9 @@
     "grabber_transport_help_2":{  
         "message":"<br><br>Change this option if you can't download any thing (log files, profiles)<br>"
     },  
-    
+     "grabber_errors_counter":{  
+        "message":"Failed : __ERRORSNUM__"
+    },
     "hide_soc":{  
         "message":"Hide social networks markers from publication block"
     },

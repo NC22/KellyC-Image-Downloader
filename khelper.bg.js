@@ -1372,44 +1372,10 @@ var KellyEDispetcher = new Object;
             var profile = KellyTools.getBrowser().runtime.getURL(KellyEDispetcher.envDir + 'profiles/' + request.profile + '.js');
             KellyTools.readUrl(profile, onSuccess, onFail); 
             
-            return true; // async mode
-         
-        /* deprecated */
-        } else if (request.method == 'getLanguage') {
-                        
-            var	onFail = function(url, errorCode, errorText) {
-                if (callback) {
-                    
-                    callback({
-                        languageData : false, 
-                        language : request.language, 
-                        error : 'load error',
-                    });
-                }
-            }
-            
-            var onSuccess = function(data, url) {
-                var error = '';
-                
-                if (callback) { 
-                
-                    callback({
-                        languageData : data, 
-                        language : request.language, 
-                        error : error,
-                    });
-                }
-            }
-            
-            var language = KellyTools.getBrowser().runtime.getURL(KellyEDispetcher.envDir + 'loc/' + request.language + '.js');
-            
-            KellyTools.readUrl(language, onSuccess, onFail); 
-            
-            return true; // async mode
-        }
+            return true; // async mode         
+        } 
         
-        if (callback) callback(response);
-        
+        if (callback) callback(response);        
     }// initialization
 
 

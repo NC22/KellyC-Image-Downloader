@@ -154,7 +154,7 @@ function KellyTooltip(cfg) {
                  handler.show(false); 
             }
             
-            content.appendChild(closeBtn);
+            container.appendChild(closeBtn);
             container.appendChild(content);
                            
         handler.self.appendChild(container);
@@ -2902,17 +2902,25 @@ function KellyFavStorageManager(cfg) {
         return pool;
     }
     
-    this.searchAssocByTag = function(db, tag) {
+    this.addAssocCatsByTag = function(db, tag) {
         
         if (!db.cats_assoc_buffer) {
             handler.updateAssocBuffer(db);
         }
         
-        var buffer = db.cats_assoc_buffer;
+        var catAssocs = db.cats_assoc_buffer;
         
         for (var i = 0; i < db.categories.length; i++) {
-            if (!buffer[db.categories[i].id] || !buffer[db.categories[i].id].length) continue;
-            if (buffer[db.categories[i].id].indexOf(tag) != -1) return db.categories[i].id;            
+            
+            if (!catAssocs[db.categories[i].id] || !catAssocs[db.categories[i].id].length) continue;
+            
+            if (catAssocs[db.categories[i].id].indexOf(tag) != -1) {
+                            
+                if (db.selected_cats_ids.indexOf(db.categories[i].id) == -1) {
+                    db.selected_cats_ids.push(db.categories[i].id);
+                } 
+            
+            }
         }
         
         return false;
@@ -3692,6 +3700,7 @@ function KellyThreadWork(cfg) {
 
 
 // part of KellyFavItems extension
+// todo check dublicates during one task
 
 function KellyGrabber(cfg) {
     
@@ -3788,9 +3797,12 @@ function KellyGrabber(cfg) {
     
     this.btnsSection = false; // main buttons container
     var downloadProgress = false;
-    
+    var errorProgress = false;
+        
     // last download process logged data
     var log = '';
+    
+    var failItems = [];
     
     var fav; // kellyFavItems obj
     var lng = KellyLoc;
@@ -3944,17 +3956,79 @@ function KellyGrabber(cfg) {
                         <input type="text" placeholder="1" class="' + className + '-timeout" value="' + options.cancelTimer + '">\
                     </td></tr>\
                     <!--tr><td colspan="2">\
-                        <label>' + lng.s('Исключать изображения с низким разрешением', 'grabber_exclude_lowres') + '</label><label><input type="checkbox" class="' + className + '-exclude-low-res" value="1"></label>\
+                        <label>' + lng.s('Исключать изображения с низким разрешением', 'grabber_exclude_lowres') + '</label>\
+                        <label><input type="checkbox" class="' + className + '-exclude-low-res" value="1"></label>\
                     </td></tr-->\
                     <tr><td colspan="2"><div class="' + className + '-controll-buttons"></div></td></tr>\
                     <tr><td colspan="2">\
                         <div class="' + className + '-progressbar"><span class="' + className + '-progressbar-line"></span><span class="' + className + '-progressbar-state"></span></div>\
                     </td></tr>\
+                    <tr class="' + className + '-error-wrap hidden"><td colspan="2">\
+                        <a class="' + className + '-error-counter" href="#"></a>\
+                    </td></tr>\
                 </table>\
             </div>\
         ';
         
-        KellyTools.setHTMLData(handler.container, html);
+        KellyTools.setHTMLData(handler.container, html);        
+        
+        errorProgress = {
+            block : KellyTools.getElementByClass(handler.container, className + '-error-wrap'),
+            counter : KellyTools.getElementByClass(handler.container, className + '-error-counter'),
+            tooltip : false,
+            updateTooltip : function() {
+               
+                if (!this.tooltip) {
+                    return;
+                }
+                 
+                var html = '';
+                for (var i=0; i < failItems.length; i++) {
+                    html+= '<p><b>#' + failItems[i].num + '</b> - ' + failItems[i].reason + '</p>';
+                }
+                    
+                var tcontainer = this.tooltip.getContent();
+                KellyTools.setHTMLData(tcontainer, '<div class="'  + className + '-error-list">' + html + '</div>');            
+                
+            }
+        };
+         
+        errorProgress.counter.onclick = function() {
+            
+            var envVars = fav.getGlobal('env');
+            
+            if (!errorProgress.tooltip) {
+                errorProgress.tooltip = new KellyTooltip({
+                    target : 'screen', 
+                    offset : {left : 20, top : -20}, 
+                    positionY : 'bottom',
+                    positionX : 'left',				
+                    ptypeX : 'inside',
+                    ptypeY : 'inside',
+                    closeByBody : false,
+                    closeButton : true,
+                    removeOnClose : true,                    
+                    selfClass : envVars.hostClass + ' ' + envVars.className + '-tooltipster-error',
+                    classGroup : envVars.className + '-tooltipster',
+                    events : {
+                        onClose : function() {
+                            errorProgress.tooltip = false;
+                        }
+                    }
+                });
+            }
+           
+            errorProgress.updateTooltip();
+            
+            setTimeout(function() {
+                
+                errorProgress.tooltip.show(true);                    
+                errorProgress.tooltip.updatePosition();
+                
+            }, 100);
+            
+            return false;
+        }        
             
         var baseFolderInput = KellyTools.getElementByClass(handler.container, className + '-controll-baseFolder');
             baseFolderInput.onchange = function() {
@@ -4124,21 +4198,41 @@ function KellyGrabber(cfg) {
     }
     
     function updateProgressBar() {
-        if (!downloadProgress || !downloadProgress.line) return false;
         
-        var total = downloads.length;
-        if (acceptItems) {
-            total = acceptItems.length;
+        if (downloadProgress && downloadProgress.line) { 
+        
+            var total = downloads.length;
+            if (acceptItems) {
+                total = acceptItems.length;
+            }
+            
+            var current = handler.countCurrent('complete');
+            if (current > total) {
+                toTxtLog('CHECK COUNTER ' + current + ' / ' + total);
+                current = total;
+            }
+            
+            downloadProgress.state.innerText = current + ' / ' + total;        
+            downloadProgress.line.style.width = Math.round(current / (total / 100)) + '%';
         }
         
-        var current = handler.countCurrent('complete');
-        if (current > total) {
-            toTxtLog('CHECK COUNTER ' + current + ' / ' + total);
-            current = total;
+        if (errorProgress && errorProgress.block) {
+            if (failItems.length) {
+                
+                if (errorProgress.block.className.indexOf('active') == -1) {
+                    errorProgress.block.className = errorProgress.block.className.replace('hidden', 'active');
+                }
+                
+                errorProgress.counter.innerText = lng.s('Ошибки загрузки : __ERRORSNUM__', 'grabber_errors_counter', {ERRORSNUM : failItems.length});                
+                errorProgress.updateTooltip();
+                
+            } else {
+                
+                if (errorProgress.block.className.indexOf('hidden') == -1) {
+                    errorProgress.block.className = errorProgress.block.className.replace('active', 'hidden');
+                }
+            }
         }
-        
-        downloadProgress.state.innerText = current + ' / ' + total;        
-        downloadProgress.line.style.width = Math.round(current / (total / 100)) + '%';
     }
     
     function downloadLog() {
@@ -4570,15 +4664,18 @@ function KellyGrabber(cfg) {
         }        
                
         if (!ditem.url || ditem.url.length < 6) {
-            
+                        
+            addFailItem(ditem, 'Некорректный Url скачиваемого файла ' + ditem.url);
             return false;
             
         } else {
             
             ditem.ext = KellyTools.getExt(ditem.url);
             
-            if (!ditem.ext) {            
-                 return false;
+            if (!ditem.ext) {  
+                
+                addFailItem(ditem, 'Неопределено расширение для загружаемого файла ' + ditem.url);
+                return false;
             }
         }
                 
@@ -4627,6 +4724,7 @@ function KellyGrabber(cfg) {
                 KellyTools.log(item);
                 KellyTools.log(getNameTemplate());
                 
+                addFailItem(ditem, 'Ошибка получения имени файла (#filename#) для Url ' + ditem.url);                
                 return false;
             }
             
@@ -4641,7 +4739,10 @@ function KellyGrabber(cfg) {
         fileName = KellyTools.replaceAll(fileName, /#category_[1-9]+#/, '');        
         fileName = KellyTools.validateFolderPath(fileName);
         
-        if (!fileName) return false;
+        if (!fileName){
+            addFailItem(ditem, 'Ошибка валидации шаблона пути для загружаемого файла ' + ditem.url);
+            return false;
+        }    
         
         if (!originalName && ditem.subItem > 0) {
             fileName += '_' + ditem.subItem;
@@ -4951,7 +5052,7 @@ function KellyGrabber(cfg) {
 
                 xhr.onerror = function(e) {
                     
-                    callback(urlOrig, false, -1, 'domain mismatch ? check Access-Control-Allow-Origin header | input url ' + urlOrig);
+                    callback(urlOrig, false, -1, 'check connection or domain mismatch (Access-Control-Allow-Origin header) | input url ' + urlOrig);
                 };
 
                 xhr.open('get', urlOrig, true);
@@ -4973,14 +5074,14 @@ function KellyGrabber(cfg) {
                     
                 document.getElementsByTagName('body')[0].appendChild(iframe);  
                 return iframe;    
-            }
-            
+            }            
             
             var iframe = getIframe();
+            
             var eventPrefix = 'input_message_' + iframe.name;
             var closeConnection = false;
-            var onLoadIframe = false;
-                        
+            var onLoadIframe = false;                        
+            
             onLoadIframe = function(e) {
                      
                 if (!e.data || !e.data.method || closeConnection) return false;
@@ -5004,35 +5105,41 @@ function KellyGrabber(cfg) {
                             
                         } else {
                             
+                            // если разорвано подключение \ картинка недоступна - e.data.error = url load fail
+                            // в случае если подключение блокирует adblock или еще какой-либо внешний процесс, то обратная связь пропадает (остается только таймаут)
+                            
                             callback(urlOrig, false, -1, 'iframe load fail - ' + e.data.error);
                         }
                         
-                        iframe.src = '';
-                        iframe.onload = function() {};
-                        
-                        if (iframe.parentElement) {
-                            iframe.parentElement.removeChild(iframe);                        
-                        }
-                        
-                        fav.removeEventListener(window, "message", onLoadIframe, eventPrefix);                         
+                        abortIframe();                       
                     }                    
                 }
+            }
+                        
+            var abortIframe = function() {
+                fav.removeEventListener(window, "message", onLoadIframe, eventPrefix);
+            
+                iframe.src = '';
+                iframe.onload = function() {}
+                iframe.onerror = function() {}
+                
+                if (iframe.parentElement) {
+                    iframe.parentElement.removeChild(iframe);
+                }
+            }
+            
+            iframe.onerror = function() {      
+            
+                callback(urlOrig, false, -1, 'iframe load fail - connection error');                
+                abortIframe();
             }
 
             fav.removeEventListener(window, "message", onLoadIframe, eventPrefix);	
             fav.addEventListner(window, "message", onLoadIframe, eventPrefix);
             
-                iframe.src = urlOrig;
+            iframe.src = urlOrig;
             
-            return {type : 'iframe', self : iframe, abort : function() {
-                fav.removeEventListener(window, "message", onLoadIframe, eventPrefix);
-            
-                iframe.src = '';
-                iframe.onload = function() {}
-                if (iframe.parentElement) {
-                    iframe.parentElement.removeChild(iframe);
-                }
-            }};
+            return {type : 'iframe', self : iframe, abort : abortIframe};
         }
     }
     
@@ -5108,6 +5215,13 @@ function KellyGrabber(cfg) {
         return true;
     }
     
+    function addFailItem(item, reason) {
+        failItems[failItems.length] = {
+            num : downloads.indexOf(item) + 1,
+            reason : reason,
+        }
+    }
+    
     this.downloadByXMLHTTPRequest = function(download) {
     
         var baseFileFolder = options.baseFolder;        
@@ -5132,12 +5246,17 @@ function KellyGrabber(cfg) {
                 toTxtLog(download.id + ' | download REJECTED by browser API : ' + downloadOptions.filename);
                 toTxtLog(download.id + ' | error : ' + response.error + "\n\r");
                 
+                addFailItem(download, 'Ошибка подключения');
+                
                 resetItem(download);
                 
                 download.workedout = true;
                 download.error = response.error;
                 
-                handler.onDownloadEnd(download);
+                handler.onDownloadEnd(download);  
+                
+                updateProgressBar();
+                handler.updateStateForImageGrid();
                 
             } else {            
                                 
@@ -5148,10 +5267,9 @@ function KellyGrabber(cfg) {
                     // download not needed
                     toTxtLog(download.id + ' | downloading start, but user CANCEL downloading process. SEND REJECT TO API for file : ' + downloadOptions.filename);
                      
-                    KellyTools.getBrowser().runtime.sendMessage({method: "downloads.cancel", downloadId : response.downloadId}, function(response) {
+                    KellyTools.getBrowser().runtime.sendMessage({method: "downloads.cancel", downloadId : response.downloadId}, function(response) {});
                     
-                    });
-                    return false;
+                    return;
                 }
                     
                 downloadingIds.push(response.downloadId);                
@@ -5186,8 +5304,7 @@ function KellyGrabber(cfg) {
                 toTxtLog(download.id + ' | file NOT LOADED as DATA ARRAY OR BLOB ' + download.url + ' : ' + downloadOptions.filename);
                 toTxtLog(download.id + ' | LOAD FAIL NOTICE error code ' + errorCode + ', message : ' + errorNotice);
 
-                onDownloadApiStart({downloadId : false, error : 'DATA ARRAY get fail. Error code : ' + errorCode + ' |  error message : ' + errorNotice});
-                
+                onDownloadApiStart({downloadId : false, error : 'DATA ARRAY get fail. Error code : ' + errorCode + ' |  error message : ' + errorNotice});                
                 
             } else {
                 
@@ -5241,6 +5358,9 @@ function KellyGrabber(cfg) {
                            
                 downloadItem.error = 'Canceled by timeout';	
                 downloadItem.canceling = true;
+                
+                
+                addFailItem(downloadItem, 'Завершена по таймауту');
                 
                 if (downloadItem.downloadId > 0) {                    
                     KellyTools.getBrowser().runtime.sendMessage({method: "downloads.cancel", downloadId : downloadItem.downloadId}, function(response) {   
@@ -5337,8 +5457,7 @@ function KellyGrabber(cfg) {
             } 
             
             resetItem(downloads[i]);
-        }
-        
+        }        
     }
     
     this.download = function() {
@@ -5352,11 +5471,15 @@ function KellyGrabber(cfg) {
             return false;
         }
         
-        acceptItems = false;
-        var itemsListInput = KellyTools.getElementByClass(handler.container, className + '-itemsList');
+        failItems = [];
         
+        acceptItems = false;
+        
+        var itemsListInput = KellyTools.getElementByClass(handler.container, className + '-itemsList');        
         if (itemsListInput && itemsListInput.value) {
+            
            acceptItems = KellyTools.getPrintValues(itemsListInput.value, false, 1, downloads.length);
+           
            if (!acceptItems.length) {
                 acceptItems = false;
            }
@@ -5372,27 +5495,12 @@ function KellyGrabber(cfg) {
         }
                 
         if (!options.interval) options.interval = 0.1;
-               
-        /*
-        downloadsOffset = KellyTools.inputVal(className + '-from', 'int', handler.container) - 1;
-        options.to = KellyTools.inputVal(className + '-to', 'int', handler.container) - 1;
-       
-        
-        
-        if (options.to <= 0 || options.to > downloads.length-1) {
-            options.to = downloads.length-1;            
-        }
-        
-        if (downloadsOffset > options.to) {
-            downloadsOffset = 0;            
-        }
-        */
-        
+                       
         assignEvents();
-        
-        handler.updateStartButtonState('stop');  
-        
+                        
         handler.resetDownloadItems(true);
+
+        handler.updateStartButtonState('stop'); 
         handler.updateStateForImageGrid();
         
         log = '';
@@ -6384,8 +6492,6 @@ function KellyFavItems()
     var catFilterNot = false; // режим выбора категории с отрицанием
     var catIgnoreFilters = [];
     
-    var commentsBlockTimer = [];
-    
     var readOnly = true;
     var imagesAsDownloadItems = false;
     
@@ -6739,6 +6845,10 @@ function KellyFavItems()
                     }                    
                 },
                 
+                onResize : function(self) {
+                    if (mode != 'fav') return true; // exit
+                },
+                
             },
             
         });
@@ -6763,7 +6873,7 @@ function KellyFavItems()
         favCounter.innerText = fav.items.length;
     }
     
-    function getInitAction() { // if page included as Iframe, we use it just to restore local storage data on subdomain, or domain with other name
+    function getInitAction() { 
     
         var mode = KellyTools.getUrlParam(env.actionVar);
         if (!mode) return 'main';
@@ -6923,9 +7033,7 @@ function KellyFavItems()
             if (!fav.coptions.storage) {
                 fav.coptions.storage = 'default';
             }
-                    
-            // fav.items[fav.items.length] = {"categoryId":[6,4,12],"previewImage":"http://img1.joyreactor.cc/pics/post/bad.jpg","name":""};
-            
+                   
             if (!fav.coptions.comments_blacklist)  fav.coptions.comments_blacklist = [];
             if (!fav.coptions.posts_blacklist)  fav.coptions.posts_blacklist = [];
             
@@ -7283,12 +7391,20 @@ function KellyFavItems()
         addImageInfoTip(tip);
         
         handler.addEventListner(window, "resize", function (e) {
+            
+            if (env.events.onWindowResize && env.events.onWindowResize(e)) return;
+            
             updateSidebarPosition();
+            
         }, '_fav_dialog');
         
         handler.addEventListner(window, "scroll", function (e) {
+            
+            if (env.events.onWindowScroll && env.events.onWindowScroll(e)) return;
+            
             updateFastSaveButtonsState();
             updateSidebarPosition();
+            
         }, '_fav_dialog');
         
         updateFastSaveButtonsState();
@@ -7361,7 +7477,7 @@ function KellyFavItems()
         }
         
         
-        if (env.onInitWorktop) env.onInitWorktop();	
+        if (env.events.onInitWorktop) env.events.onInitWorktop();	
         
         return true;
     }
@@ -7430,112 +7546,7 @@ function KellyFavItems()
         
         return menuButtonA;
     }
-    
-    function getPostUserName(postBlock) {
-        var nameContainer = KellyTools.getElementByClass(postBlock, 'uhead_nick');
-        if (nameContainer) {
-            var img = KellyTools.getElementByClass(postBlock, 'avatar');
-            if (img) return img.getAttribute('alt');
-        }
-        
-        return false;
-    }
-    
-    function getCommentUserName(comment) {
-        var nameContainer = KellyTools.getElementByClass(comment, 'reply-link');
-        if (nameContainer) {   
-                var a = KellyTools.getElementByTag(nameContainer, 'A');
-                if (a) return a.textContent || a.innerText || '';
-        }
-        
-        return false;
-    }
-    
-    function getCommentsList(postBlock) {    
-        
-        var comments = postBlock.getElementsByClassName('comment');
-        if (comments.length) return comments;
-
-        return false;               
-    }
-    
-    // todo move to profile
-    
-    function formatPostContainer(postBlock) {
-        
-        if (fav.coptions.posts_blacklist) {  
-            var userName = getPostUserName(postBlock);
-            if (fav.coptions.posts_blacklist.indexOf(userName) != -1) { 
-                postBlock.style.display = 'none';            
-                return false;
-            }
-        }
-        
-        var censored = postBlock.innerHTML.indexOf('/images/censorship') != -1 ? true : false;
-        
-        if (!env.updatePostFavButton(postBlock)) return false;    
-        
-        var toogleCommentsButton = postBlock.getElementsByClassName('toggleComments');
-
-        if (toogleCommentsButton.length) {
-            toogleCommentsButton = toogleCommentsButton[0];
-            handler.removeEventListener(toogleCommentsButton, 'click', 'toogle_comments_' + postBlock.id);
-            
-            handler.addEventListner(toogleCommentsButton, "click", function (e) {
-                    handler.onPostCommentsShowClick(postBlock);
-                    return false;
-            }, 'toogle_comments_' + postBlock.id);
-        }
-        
-        formatComments(postBlock);     
-            
-        var shareButtonsBlock = KellyTools.getElementByClass(postBlock, 'share_buttons');
-        if (shareButtonsBlock) {
-            
-            var fastSave = KellyTools.getElementByClass(postBlock,  env.className + '-fast-save');
-            if (!censored && fav.coptions.fastsave.enabled) {
-                
-                if (!fastSave) {
-                    fastSave = document.createElement('DIV');                    
-                    shareButtonsBlock.appendChild(fastSave); 
-                        
-                    var fastSaveBaseClass =  env.hostClass + ' ' + env.className + '-fast-save ' + env.className + '-icon-diskete ';
-                
-                    fastSave.className = fastSaveBaseClass + env.className + '-fast-save-unchecked';
-                    fastSave.onclick = function() {
-                        if (this.className.indexOf('loading') != -1 || this.className.indexOf('unavailable') != -1) return false;
-                                          
-                        fastSave.className = fastSave.className.replace('unchecked', 'checked');
-                        this.className += ' ' + env.className + '-fast-save-loading';
-            
-                        KellyTools.getBrowser().runtime.sendMessage({method: "onChanged.keepAliveListener"}, function(response) {                           
-                            fastDownloadPostData(postBlock, false, function(success) {
-                                fastSave.className = fastSaveBaseClass + env.className + '-fast-save-' + (success ? '' : 'not') + 'downloaded';
-                            });
-                        });
-                        
-                        return false;
-                    }  
-                } 
-                
-            } else {
-                if (fastSave) {
-                    fastSave.parentNode.removeChild(fastSave);
-                }
-            }
-            
-            if (fav.coptions.hideSoc) {
-                var shareButtons = shareButtonsBlock.childNodes;
-                for (var i = 0; i < shareButtons.length; i++) {            
-                    if (shareButtons[i].tagName == 'A' && shareButtons[i].className.indexOf('share') != -1) {
-                        // keep technically alive
-                        shareButtons[i].setAttribute('style', 'height : 0px; width : 0px; opacity : 0; margin : 0px; padding : 0px; display : block; overflow : hidden;');
-                    }
-                }
-            }
-        }
-    }
-             
+       
     function toogleActive(el) {
         if (!el) return;
         
@@ -7593,111 +7604,6 @@ function KellyFavItems()
         }
     }
     
-    function getCommentText(comment) {
-    
-        var contentContainer = KellyTools.getElementByClass(comment, 'txt');
-        
-        if (!contentContainer) return '';
-        
-        var textContainer = contentContainer.childNodes[0];
-        return textContainer.textContent || textContainer.innerText || '';
-    }
-    
-    function formatComments(block) {
-    
-        var comments = getCommentsList(block);
-        if (!comments) return false;
-        
-        for(var i = 0; i < comments.length; i++) {
-        
-            if (fav.coptions.comments_blacklist) {  
-                var userName = getCommentUserName(comments[i]);
-                if (fav.coptions.comments_blacklist.indexOf(userName) != -1) { 
-                    comments[i].style.display = 'none';            
-                    continue;
-                }
-            }
-        
-            var addToFavButton = comments[i].getElementsByClassName(env.className + '-addToFavComment');
-            
-            if (!addToFavButton.length) {
-        
-                var bottomLink = comments[i].getElementsByClassName('comment_link');
-                if (bottomLink.length) {
-                
-                    addToFavButton = document.createElement('a');
-                    addToFavButton.href = '#';
-                    
-                    addToFavButton.innerText = '';
-                    
-                    addToFavButton.setAttribute('commentId', comments[i].id);
-                    addToFavButton.className = env.className + '-addToFavComment';
-            
-                    bottomLink[0].parentElement.appendChild(addToFavButton);
-                    // responseButton.parentNode.inserBefore(addToFavButton, responseButton.nextSibling) insert after
-                }
-            } else {
-                addToFavButton = addToFavButton[0];
-            }
-            
-            
-            // searh comment by link
-            var link = KellyTools.getRelativeUrl(env.getCommentLink(comments[i]));
-            if (!link) continue;
-            
-            var inFav = handler.getStorageManager().searchItem(fav, {link : false, commentLink : link});
-    
-            if (inFav !== false) {
-                
-                addToFavButton.setAttribute('itemIndex', inFav);
-                addToFavButton.onclick = function() { 
-                    handler.showRemoveFromFavDialog(this.getAttribute('itemIndex')); 
-                    return false;
-                };
-                
-                addToFavButton.innerText = lng.s('удалить из избранного', 'remove_from_fav_comment');
-                
-            } else {
-                                
-                addToFavButton.onclick =  function() {		
-                    var comment = KellyTools.getParentByClass(this, 'comment', true);
-                    
-                    // console.log(comment);
-                    if (!comment) return false;
-                   
-                    handler.showAddToFavDialog(block, comment);
-                    return false;					
-                }
-                
-                addToFavButton.innerText = lng.s('Добавить в избранное', 'add_to_fav_comment');
-            }
-            
-        }
-        
-        log('formatComments : ' + comments.length + ' - '+ block.id);
-    }
-    
-    // format comments on button show with delay, until comments block will be loaded
-    this.onPostCommentsShowClick = function(postBlock, clearTimer) {
-        
-        if (clearTimer) {
-            commentsBlockTimer = false;
-            clearTimeout(commentsBlockTimer[postBlock.id]);
-        }
-        
-        if (commentsBlockTimer[postBlock.id]) return false;
-        
-        var commentsBlock = postBlock.getElementsByClassName('comment_list_post'); // KellyTools.getElementByClass(postBlock, 'comment_list_post'); // check is block loaded  
-               
-        if (!commentsBlock.length) { // todo exit after num iterations        
-            commentsBlockTimer[postBlock.id] = setTimeout(function() { handler.onPostCommentsShowClick(postBlock, true); }, 100);
-            return false;
-        }
-                       
-        formatComments(postBlock);
-        return false;
-    }
- 
     this.updateImageGrid = function() {
         
         imageGrid.updateConfig({tilesBlock : imagesBlock});
@@ -9947,14 +9853,10 @@ function KellyFavItems()
             
             // select actual assoc categories for tagList
             for (var i = 0; i < tagList.length; i++) {
-                var tagCatId = handler.getStorageManager().searchAssocByTag(db, tagList[i]); 
-                if (tagCatId === false) continue;
-                
-                if (db.selected_cats_ids.indexOf(tagCatId) == -1) {
-                    db.selected_cats_ids.push(tagCatId);
-                } 
+                handler.getStorageManager().addAssocCatsByTag(db, tagList[i]);
             }
             
+            log(fav.cats_assoc_buffer);
         }
     }
     
@@ -10000,7 +9902,7 @@ function KellyFavItems()
         }     
     }
     
-    function fastDownloadPostData(postData, onInit, onDownload) {
+    this.fastDownloadPostData = function(postData, onInit, onDownload) {
         
         if (!handler.isDownloadSupported || !fav.coptions.fastsave.enabled) {
             return false;
@@ -10250,7 +10152,7 @@ function KellyFavItems()
         //var firstImageBlock = KellyTools.getElementByClass(selectedPost, 'image');
         if (selectedComment) {
         
-            var text = getCommentText(selectedComment);
+            var text = env.getCommentText(selectedComment);
             if (text) postItem.text = text;
 
             postItem.commentLink = env.getCommentLink(selectedComment);
@@ -10328,7 +10230,7 @@ function KellyFavItems()
         fav.items[fav.items.length] = postItem;
         handler.updateFavCounter();
             
-        selectedComment ? formatComments(selectedPost) : formatPostContainer(selectedPost);
+        selectedComment ? env.formatComments(selectedPost) : env.formatPostContainer(selectedPost);
         
         log('post saved');
         log(postItem);
@@ -10353,15 +10255,11 @@ function KellyFavItems()
 
         if (!postBlock) { // update all visible posts
         
-            var posts = document.getElementsByClassName('postContainer');
-            
-            for (var i = 0; i < posts.length; i++) {
-                formatPostContainer(posts[i]);
-            }
-            
+           handler.formatPostContainers();
+           
         } else {
         
-            formatPostContainer(postBlock);
+            env.formatPostContainer(postBlock);
             
         }
     }
@@ -10402,12 +10300,7 @@ function KellyFavItems()
                 
             } while (imageItem);
             
-            var posts = document.getElementsByClassName('postContainer');
-            
-            for (var posti = 0; posti < posts.length; posti++) {
-                formatPostContainer(posts[posti]);
-            }
-            
+            handler.formatPostContainers();            
             handler.updateFavCounter();
             
         } else {
@@ -10598,14 +10491,14 @@ function KellyFavItems()
     
     this.onDownloadNativeFavPagesEnd = function() {
     
-        var downloadBtn = KellyTools.getElementByClass(document, 'kelly-DownloadFav');
+        var downloadBtn = KellyTools.getElementByClass(document, env.className + '-DownloadFav');
         if (downloadBtn) downloadBtn.innerText = lng.s('Запустить скачивание страниц', 'download_start');	
             
         if (!favNativeParser || !favNativeParser.collectedData.items.length) return false;
                                 
-        KellyTools.getElementByClass(document, 'kelly-Save').style.display = 'block';
+        KellyTools.getElementByClass(document, env.className + '-Save').style.display = 'block';
             
-        var saveNew = KellyTools.getElementByClass(document, 'kelly-SaveFavNew');
+        var saveNew = KellyTools.getElementByClass(document, env.className + '-SaveFavNew');
             saveNew.onclick = function() {
             
                 if (favNativeParser && favNativeParser.collectedData.items.length) {
@@ -10671,10 +10564,10 @@ function KellyFavItems()
                 loadDoc.innerHTML = '';
                 loadDoc.appendChild(KellyTools.val(thread.response, 'html'));
                 
-            var posts = loadDoc.getElementsByClassName('postContainer');
+            var posts = env.getPosts(loadDoc);
             if (!posts) {
             
-                error = 'Отсутствует контейнер postContainer для страницы ' + thread.job.data.page;
+                error = 'Отсутствуют публикации для страницы ' + thread.job.data.page;
             } else {
                 logNum++;
                 
@@ -10704,10 +10597,7 @@ function KellyFavItems()
             itemsNum : 0,
         }
         
-        // check uniquie throw searchItem - ok
-        // check for duplicates on save in current storage by post url updatePostFavButton as example - ok
-        // exlude unnesessery data to improve load speed - ok
-        
+        // exlude unnesessery data to improve load speed - ok        
         // clear selected cats to ignore current profile categories in itemAdd method (used to collect selectedImages to new item)
             fav.selected_cats_ids = [];
             
@@ -10877,7 +10767,7 @@ function KellyFavItems()
         
         favNativeParser.collectedData = handler.getStorageManager().getDefaultData();
         
-        var pages = KellyTools.getElementByClass(document, 'kelly-PageArray'); 
+        var pages = KellyTools.getElementByClass(document, env.className + '-PageArray'); 
         var pagesList = [];
         
         var message = KellyTools.getElementByClass(document, env.className + '-exporter-process');
@@ -10956,7 +10846,7 @@ function KellyFavItems()
                 return false;
             }
         
-        var saveFavItemsButton = KellyTools.getElementByClass(document, 'kelly-Save');
+        var saveFavItemsButton = KellyTools.getElementByClass(document, env.className + '-Save');
             saveFavItemsButton.style.display = 'none';
          
         favNativeParser.tagList = false;
@@ -11036,9 +10926,9 @@ function KellyFavItems()
             }
         
             var saveBlock = '\
-                <div class="kelly-Save" style="display : none;">\
+                <div class="' + env.className + '-Save" style="display : none;">\
                     <p>' + lng.s('', 'download_save_notice') + '</p>\
-                    <a href="#" class="kelly-SaveFavNew" >' + lng.s('Скачать как файл профиля', 'download_save') + '</a>\
+                    <a href="#" class="' + env.className + '-SaveFavNew" >' + lng.s('Скачать как файл профиля', 'download_save') + '</a>\
                 </div><br>';
             
             var items = favPageInfo.items;
@@ -11093,14 +10983,14 @@ function KellyFavItems()
                      ' +  lng.s('Страниц', 'pages_n') + ' : ' + favPageInfo.pages + ' (' + items + ')<br>\
                      ' +  lng.s('Укажите список страниц выборки, которые необходимо скачать. Например 2, 4, 66-99, 44, 78, 8-9, 29-77 и т.п.,', 'download_example') + '<br>\
                      ' +  lng.s('Если нужно захватить все страницы оставьте не заполненным', 'download_tip') + '<br>\
-                     <input class="kelly-PageArray" type="text" placeholder="' + lng.s('Страницы', 'pages')+ '" value=""><br>\
+                     <input class="' + env.className +'-PageArray" type="text" placeholder="' + lng.s('Страницы', 'pages')+ '" value=""><br>\
                      <label><input type="checkbox" class="' + env.className + '-exporter-skip-empty"> ' +  
                         lng.s('Пропускать публикации не имеющие медиа данных (текст, заблокировано цензурой)', 'download_skip_empty') +
                      '</label>\
                      ' + tagFilterHtml + '\
                      <br>\
                      ' + saveBlock + '\
-                     <a href="#" class="kelly-DownloadFav">' + lng.s('Запустить скачивание страниц', 'download_start') + '</a>\
+                     <a href="#" class="' + env.className + '-DownloadFav">' + lng.s('Запустить скачивание страниц', 'download_start') + '</a>\
                      <a href="#" class="' + env.className + '-exporter-show-log" style="display : none;">' + lng.s('Показать лог', 'download_log') + '</a>\
                      <a href="#" class="' + env.className + '-tech-options-show" style="' + (!KellyTools.DEBUG ? 'display : none;' : '') + '">' + lng.s('Options', 'hidden_options') + '</a>\
                      <div class="' + env.className + '-tech-options hidden" style="display : none;">\
@@ -11167,7 +11057,7 @@ function KellyFavItems()
                 };
             }            
             
-            KellyTools.getElementByClass(document, 'kelly-DownloadFav').onclick = function() {
+            KellyTools.getElementByClass(document, env.className + '-DownloadFav').onclick = function() {
                 handler.downloadNativeFavPage(this);
                 return false;
             };
@@ -11175,11 +11065,11 @@ function KellyFavItems()
         
     }
     
-    this.formatPostContainers = function() {
+    this.formatPostContainers = function(container) {
         
-        publications = env.getPosts();
+        publications = env.getPosts(container);
         for (var i = 0; i < publications.length; i++) {
-            formatPostContainer(publications[i]);
+            env.formatPostContainer(publications[i]);
         }
     }
     
@@ -11213,7 +11103,7 @@ function KellyFavItems()
                       
             initWorktop();
                         
-            if (env.onExtensionReady) env.onExtensionReady();
+            if (env.events.onExtensionReady) env.events.onExtensionReady();
         };
         
         KellyTools.getBrowser().runtime.sendMessage({method: "getCss", items : ['main', env.profile], debug : fav.coptions.debug}, onLoadCssResource);		
@@ -11268,7 +11158,7 @@ function KellyFavItems()
             
         }, 'next_fav_page');    
         
-        if (env.onPageReady && env.onPageReady()) {			
+        if (env.events.onPageReady && env.events.onPageReady()) {			
             return false;
         }
         
@@ -11337,131 +11227,105 @@ function KellyFavItems()
 // part of KellyFavItems extension
 // JoyReactor environment driver
 
-// !@ - not required by FavItems object methods
-
 // default profile driver must be assign to K_DEFAULT_ENVIRONMENT variable
 // todo move formatcomment \ formatpost methods from FavItems to keep core without "environment only" / driver methods
 
-var K_ENVIRONMENT = {
-    
-    fav : false, 
-    
-    className : 'kellyJRFav', 
-    profile : 'joyreactor',
-    mainDomain : 'joyreactor.cc',
+function kellyProfileJoyreactor() {
         
-    hostClass : window.location.host.split(".").join("_"),
+    var handler = this;
+    var favPageUrlTpl = '/user/__USERNAME__/favorite/__PAGENUMBER__';  
+    var publicationClass = 'postContainer';
     
-    actionVar : 'dkl_pp', 
-    containers : false,
+    var mainDomain = 'joyreactor.cc';    
+    var mainContainers = false;
+    
+    var commentsBlockTimer = [];
+      
+    /* imp */
+    
+    this.className = 'kellyJRFav'; 
+    this.profile = 'joyreactor';        
+    this.hostClass = window.location.host.split(".").join("_");
+    
+    this.actionVar = 'dkl_pp';
+  
+    this.fav = false;        
+    this.events = {
 
-    // !@ private 
+        onWindowScroll : function() {
+            
+            return false;
+        },
         
-    favPage : '/user/__USERNAME__/favorite/__PAGENUMBER__',  
-    publication : 'postContainer', 
-    
-    isNSFW : function() {
-        var sfw = KellyTools.getElementByClass(document, 'sswither');
-        if (sfw && sfw.className.indexOf('active') != -1) return false;
-        else return true;
-    },
-    
-    getMainContainers : function() {
+        onWindowResize : function() {
+            
+            return false;
+        },
         
-        if (!this.containers) {
-            this.containers = {
-                body : document.getElementById('container'), // place where to put all dynamic absolute position elements
-                content : document.getElementById('contentinner'), // place where to put main extension container
-                
-                // two bottom will be used only by profile js file in future
-                
-                sideBlock : document.getElementById('sidebar'),
-                menu : document.getElementById('submenu'),
-            };
-        }
+        onPageReady : function() {
+            
+            return false;
+        },
         
-        return this.containers;
-    },
-   
-    // will be replaced by formatPosts
-    
-    getPosts : function() {
-        return document.getElementsByClassName(this.publication);
-    },
-   
-    /* @! */        
-    getPostTags : function(publication, limitTags) {
+        onInitWorktop : function() {
+            
+            return false;
+        },
         
-        if (!limitTags) limitTags = false;
-        
-        var tags = [];
-        var nativeTags = KellyTools.getElementByClass(publication, 'taglist');
-        if (!nativeTags) return tags;
-        
-        var nativeTags = nativeTags.getElementsByTagName('A');
-        if (!nativeTags || !nativeTags.length) return tags;
-    
-        for (var i = 0; i < nativeTags.length; i++) {
-           var tagName = nativeTags[i].innerHTML.trim(); 
-           if (!tagName) continue;
-           
-           tags[tags.length] = tagName;
-           if (limitTags && tags.length >= limitTags) return tags;
-        }
-        
-        return tags;
-    },
-    
-    // !@
-    getPostLinkEl : function(publication) {
-        
-        if (window.location.host.indexOf('old.') == -1) {
+        onExtensionReady : function() {
+                     
+            if (window.location.host == handler.mainDomain || window.location.host.indexOf('old.') == -1) {
 
-            var link = KellyTools.getElementByClass(publication, 'link_wr');
-            if (link) link = KellyTools.getChildByTag(link, 'a');
-        } else {
-            var link = publication.querySelector('[title="ссылка на пост"]');
-        }		
-        
-        return link;
-    },
-    
-    // get canonical url link in format "//url"
-    
-    getPostLink : function(publication, el) {
-        
-        if (!el) el = this.getPostLinkEl(publication);
-    
-        if (el) {
-            var link = el.href.match(/[A-Za-z.0-9]+\/post\/[0-9]+/g);
-            return link ? '//' + link[0] : false;
-        }
-        
-        return '';    
-    },  
-    
-    // get canonical comment url link in format "//url"
-    
-    getCommentLink : function(comment) {
-        
-        if (!comment) return '';
-        
-        var links = comment.getElementsByTagName('a');
-        
-        for (var b = 0; b < links.length; b++) {
-            if (links[b].href.length > 10 && links[b].href.indexOf('#comment') != -1) {
-                var link = links[b].href.match(/[A-Za-z.0-9]+\/post\/[0-9]+#comment[0-9]+/g);
-                return link ? '//' + link[0] : false;
+                var bar = document.getElementById('searchBar');
+                
+                var style = {
+                    bg : false,
+                    btn : false,
+                };
+                
+                if (bar) {
+                    style.bg = window.getComputedStyle(bar).backgroundColor;
+                    
+                    var btn = bar.querySelector('.submenuitem.active a');
+                    if (btn) {
+                        style.btn = window.getComputedStyle(btn).backgroundColor;
+                    }
+                }
+                
+                css = "\n\r\n\r\n\r" + '/* ' +  handler.profile + '-dynamic */' + "\n\r\n\r\n\r";
+                if (style.btn && style.btn.indexOf('0, 0, 0, 0') == -1) {
+                    css += '.' + handler.className + '-basecolor-dynamic {';
+                    css += 'background-color : ' + style.btn + '!important;';
+                    css += '}';
+                }
+                
+                if (style.bg && style.bg.indexOf('0, 0, 0, 0') == -1) {
+                
+                    css += '.active .' + handler.className + '-buttoncolor-dynamic, \
+                            .active.' + handler.className + '-buttoncolor-dynamic, \
+                            .' + handler.className + '-ahover-dynamic:hover .' + handler.className + '-buttoncolor-dynamic, \
+                            .' + handler.className + '-ahover-dynamic .' + handler.className + '-buttoncolor-dynamic:hover \
+                            {';
+                            
+                    css += 'background-color : ' + style.btn + '!important;';
+                    css += '}';
+                                        
+                    css += '.' + handler.className + '-buttoncolor-any-dynamic {';
+                    css += 'background-color : ' + style.btn + '!important;';
+                    css += '}';
+                }
+                
+                handler.fav.addCss(css);
             }
-        }
-        
-        return '';
-    },    
+            
+            handler.fav.showNativeFavoritePageInfo();
+        },
     
-    updatePostFavButton : function(publication) {
+    }
+    
+    function updatePostFavButton(publication) {
         
-        var handler = this;
-        var link = handler.getPostLinkEl(publication);
+        var link = getPostLinkEl(publication);
         
         if (!link) {            
             KellyTools.log('empty post link element', 'profile updatePostFavButton');
@@ -11481,6 +11345,7 @@ var K_ENVIRONMENT = {
         // create if not exist
         
         if (!addToFav) {
+            
             addToFav = document.createElement('a');
             addToFav.className = handler.className + '-post-FavAdd';
             
@@ -11494,8 +11359,7 @@ var K_ENVIRONMENT = {
         // update title
         
         if (inFav !== false) {
-            
-            
+                        
             addToFav.innerText = KellyLoc.s('Удалить из избранного', 'remove_from_fav');
             addToFav.onclick = function() { 
             
@@ -11519,83 +11383,30 @@ var K_ENVIRONMENT = {
                         handler.syncFav(selectedPost, true);
                     }                     
                 });
+                
                 return false; 
             };
             
         }
                 
         return true;            
-    },	
-  
-    getAllMedia : function(publication) {
-        
-        var data = [];
-        
-        if (!publication) return data;
-        
-        var content = false;
-        
-        if (publication.className.indexOf('comment') != -1) {
-            content = KellyTools.getElementByClass(publication, 'txt');
-        } else {
-            content = KellyTools.getElementByClass(publication, 'post_content');
-        }
-        
-        if (!content) return data;
-        
-        var mainImage = this.getMainImage(publication, content);
-        
-        // censored posts not contain post container and
-        // /images/censorship/ru.png
-        
-        var imagesEl = content.getElementsByClassName('image');
-        
-        for (var i = 0; i < imagesEl.length; i++) {
-            
-            var image = '';
-            
-            if (imagesEl[i].innerHTML.indexOf('gif_source') !== -1) {
-                
-                // extended gif info for fast get dimensions \ keep gif unloaded until thats needed
-                var gif = KellyTools.getElementByTag(imagesEl[i], 'a');                
-                if (gif) {
-                    image = this.getImageDownloadLink(gif.getAttribute("href"), false);
-                }
-                
-            } else {
-            
-                var imageEl = KellyTools.getElementByTag(imagesEl[i], 'img');
-                if (imageEl) {
-                    image = this.getImageDownloadLink(imageEl.getAttribute("src"), false);
-                }     
-            }
-            
-            if (image) data.push(image);
-            
-            // todo test assoc main image with gifs
-            
-            if (data.length == 1 && image && mainImage && image.indexOf(this.getImageDownloadLink(mainImage.url, false, true)) != -1) {
-                this.fav.setSelectionInfo('dimensions', mainImage);
-            } else if (data.length == 1 && image && mainImage) {                
-                KellyTools.log('Main image in schema org for publication is exist, but not mutched with detected first image in publication');    
-                KellyTools.log(image);
-                KellyTools.log(this.getImageDownloadLink(mainImage.url, false));                           
-            }
-        }
-
-        if (!data.length && mainImage) {
-            
-            mainImage.url = this.getImageDownloadLink(mainImage.url, false);
-            data.push(mainImage.url);
-            
-            this.fav.setSelectionInfo('dimensions', mainImage);
-        }
-        
-        return data; //  return decodeURIComponent(url);
-    },		
+    }
     
-    /* @! */
-    getMainImage : function(publication, content) {
+    
+    function getPostLinkEl(publication) {
+        
+        if (window.location.host.indexOf('old.') == -1) {
+
+            var link = KellyTools.getElementByClass(publication, 'link_wr');
+            if (link) link = KellyTools.getChildByTag(link, 'a');
+        } else {
+            var link = publication.querySelector('[title="ссылка на пост"]');
+        }		
+        
+        return link;
+    }
+    
+    function getMainImage(publication, content) {
         
         if (!publication) return false;
         
@@ -11624,15 +11435,13 @@ var K_ENVIRONMENT = {
             mainImage = KellyTools.parseJSON(schemaOrg);
             if (mainImage && mainImage.image) {
                 mainImage = mainImage.image;
-                mainImage.url = this.getImageDownloadLink(mainImage.url, false);
+                mainImage.url = handler.getImageDownloadLink(mainImage.url, false);
                 if (!mainImage.url || !mainImage.width || !mainImage.height) {
                     mainImage = false;
                 }
             } else {
                 mainImage = false;
-                if (this.log) {
-                    KellyTools.log('parse json data fail : ' + schemaOrg, 'profile getMainImage');
-                }
+                KellyTools.log('parse json data fail : ' + schemaOrg, 'profile getMainImage');               
             }
         }
 
@@ -11641,44 +11450,324 @@ var K_ENVIRONMENT = {
         }
         
         return mainImage;
-    },
+    }
     
-    // route format
-    // [image-server-subdomain].[domain].cc/pics/[comment|post]/full/[title]-[image-id].[extension]
-    
-    getImageDownloadLink : function(url, full, relative) {
+    function getCommentsList(postBlock) {    
         
-             url = url.trim();
-        if (!url || url.length < 10) return url;
-        
-        // for correct download process we must keep same domain for image
-        // to avoid show copyright \ watermarks
+        var comments = postBlock.getElementsByClassName('comment');
+        if (comments.length) return comments;
+
+        return false;               
+    }
     
-        var imgServer = url.match(/img(\d+)/);
-        if (imgServer &&  imgServer.length) {
-            
-            // encoded original file name, decoded untested but may be work
-            var filename = KellyTools.getUrlFileName(url, false, true);
-            if (!filename) return url;
-            
-            imgServer = imgServer[0];
-            var type = url.indexOf('comment') == -1 ? 'post' : 'comment';
-            url = window.location.protocol + '//' + imgServer + '.' + window.location.host + '/pics/' + type + '/' + (full ? 'full/' : '') + filename;
+    function getPostUserName(publication) {
+        var nameContainer = KellyTools.getElementByClass(publication, 'uhead_nick');
+        if (nameContainer) {
+            var img = KellyTools.getElementByClass(publication, 'avatar');
+            if (img) return img.getAttribute('alt');
         }
         
-        
-        return url;
-    },
+        return false;
+    }
     
-    updateSidebarPosition : function(lock) {
-    
-        if (!this.fav) return false;
+    function getCommentUserName(comment) {
+        var nameContainer = KellyTools.getElementByClass(comment, 'reply-link');
+        if (nameContainer) {   
+                var a = KellyTools.getElementByTag(nameContainer, 'A');
+                if (a) return a.textContent || a.innerText || '';
+        }
         
-        var sideBarWrap = this.fav.getSidebar();
+        return false;
+    }
+        
+    this.getCommentText = function(comment) {
+    
+        var contentContainer = KellyTools.getElementByClass(comment, 'txt');
+        
+        if (!contentContainer) return '';
+        
+        var textContainer = contentContainer.childNodes[0];
+        return textContainer.textContent || textContainer.innerText || '';
+    }
+        
+    this.formatComments = function(block) {
+    
+        var comments = getCommentsList(block);
+        if (!comments) return false;
+        
+        var blackList = handler.fav.getGlobal('fav').coptions.comments_blacklist;
+        
+        for(var i = 0; i < comments.length; i++) {
+                                    
+            if (blackList) {  
+                var userName = getCommentUserName(comments[i]);
+                if (blackList.indexOf(userName) != -1) { 
+                    comments[i].style.display = 'none';            
+                    continue;
+                }
+            }
+        
+            var addToFavButton = comments[i].getElementsByClassName(handler.className + '-addToFavComment');
+            
+            if (!addToFavButton.length) {
+        
+                var bottomLink = comments[i].getElementsByClassName('comment_link');
+                if (bottomLink.length) {
+                
+                    addToFavButton = document.createElement('a');
+                    addToFavButton.href = '#';
+                    
+                    addToFavButton.innerText = '';
+                    
+                    addToFavButton.setAttribute('commentId', comments[i].id);
+                    addToFavButton.className = handler.className + '-addToFavComment';
+            
+                    bottomLink[0].parentElement.appendChild(addToFavButton);
+                    // responseButton.parentNode.inserBefore(addToFavButton, responseButton.nextSibling) insert after
+                }
+            } else {
+                addToFavButton = addToFavButton[0];
+            }
+            
+            
+            // searh comment by link
+            var link = KellyTools.getRelativeUrl(handler.getCommentLink(comments[i]));
+            if (!link) continue;
+            
+            var inFav = handler.fav.getStorageManager().searchItem(handler.fav.getGlobal('fav'), {link : false, commentLink : link});
+    
+            if (inFav !== false) {
+                
+                addToFavButton.setAttribute('itemIndex', inFav);
+                addToFavButton.onclick = function() { 
+                    handler.fav.showRemoveFromFavDialog(this.getAttribute('itemIndex')); 
+                    return false;
+                };
+                
+                addToFavButton.innerText = KellyLoc.s('удалить из избранного', 'remove_from_fav_comment');
+                
+            } else {
+                                
+                addToFavButton.onclick =  function() {		
+                    var comment = KellyTools.getParentByClass(this, 'comment', true);
+                    
+                    // console.log(comment);
+                    if (!comment) return false;
+                   
+                    handler.fav.showAddToFavDialog(block, comment);
+                    return false;					
+                }
+                
+                addToFavButton.innerText = KellyLoc.s('в избранное', 'add_to_fav_comment');
+            }
+            
+        }
+        
+        KellyTools.log('formatComments : ' + comments.length + ' - '+ block.id);
+    }    
+    
+    this.formatPostContainer = function(postBlock) {
+        
+        var coptions = handler.fav.getGlobal('fav').coptions;
+        var blackList = coptions.posts_blacklist;
+        
+        if (blackList) {  
+            var userName = getPostUserName(postBlock);
+            if (blackList.indexOf(userName) != -1) { 
+                postBlock.style.display = 'none';            
+                return false;
+            }
+        }
+        
+        var censored = postBlock.innerHTML.indexOf('/images/censorship') != -1 ? true : false;
+        
+        if (!updatePostFavButton(postBlock)) return false;    
+        
+        var toogleCommentsButton = postBlock.getElementsByClassName('toggleComments');
+
+        if (toogleCommentsButton.length) {
+            toogleCommentsButton = toogleCommentsButton[0];
+            handler.fav.removeEventListener(toogleCommentsButton, 'click', 'toogle_comments_' + postBlock.id);
+            
+            var onPostCommentsShowClick = function(postBlock, clearTimer) {
+        
+                if (clearTimer) {
+                    commentsBlockTimer = false;
+                    clearTimeout(commentsBlockTimer[postBlock.id]);
+                }
+                
+                if (commentsBlockTimer[postBlock.id]) return false;
+                
+                var commentsBlock = postBlock.getElementsByClassName('comment_list_post'); // KellyTools.getElementByClass(postBlock, 'comment_list_post'); // check is block loaded  
+                       
+                if (!commentsBlock.length) { // todo exit after num iterations        
+                    commentsBlockTimer[postBlock.id] = setTimeout(function() { onPostCommentsShowClick(postBlock, true); }, 100);
+                    return false;
+                }
+                               
+                handler.formatComments(postBlock);
+                return false;
+            }
+                    
+            handler.fav.addEventListner(toogleCommentsButton, "click", function (e) {
+                
+                onPostCommentsShowClick(postBlock);                   
+                return false;
+                
+            }, 'toogle_comments_' + postBlock.id);
+        }
+        
+        handler.formatComments(postBlock);     
+            
+        var shareButtonsBlock = KellyTools.getElementByClass(postBlock, 'share_buttons');
+        if (shareButtonsBlock) {
+            
+            var fastSave = KellyTools.getElementByClass(postBlock,  handler.className + '-fast-save');
+            if (!censored && coptions.fastsave.enabled) {
+                
+                if (!fastSave) {
+                    fastSave = document.createElement('DIV');                    
+                    shareButtonsBlock.appendChild(fastSave); 
+                        
+                    var fastSaveBaseClass =  handler.hostClass + ' ' + handler.className + '-fast-save ' + handler.className + '-icon-diskete ';
+                
+                    fastSave.className = fastSaveBaseClass + handler.className + '-fast-save-unchecked';
+                    fastSave.onclick = function() {
+                        if (this.className.indexOf('loading') != -1 || this.className.indexOf('unavailable') != -1) return false;
+                                          
+                        fastSave.className = fastSave.className.replace('unchecked', 'checked');
+                        this.className += ' ' + handler.className + '-fast-save-loading';
+            
+                        KellyTools.getBrowser().runtime.sendMessage({method: "onChanged.keepAliveListener"}, function(response) {                           
+                            handler.fav.fastDownloadPostData(postBlock, false, function(success) {
+                                fastSave.className = fastSaveBaseClass + handler.className + '-fast-save-' + (success ? '' : 'not') + 'downloaded';
+                            });
+                        });
+                        
+                        return false;
+                    }  
+                } 
+                
+            } else {
+                if (fastSave) {
+                    fastSave.parentNode.removeChild(fastSave);
+                }
+            }
+            
+            if (coptions.hideSoc) {
+                var shareButtons = shareButtonsBlock.childNodes;
+                for (var i = 0; i < shareButtons.length; i++) {            
+                    if (shareButtons[i].tagName == 'A' && shareButtons[i].className.indexOf('share') != -1) {
+                        // keep technically alive
+                        shareButtons[i].setAttribute('style', 'height : 0px; width : 0px; opacity : 0; margin : 0px; padding : 0px; display : block; overflow : hidden;');
+                    }
+                }
+            }
+        }
+    }   
+            
+    this.isNSFW = function() {
+        
+        var sfw = KellyTools.getElementByClass(document, 'sswither');
+        
+        if (sfw && sfw.className.indexOf('active') != -1) return false;
+        else return true;
+    }
+    
+    this.getMainContainers = function() {
+        
+        if (!mainContainers) {
+            mainContainers = {
+                body : document.getElementById('container'), // place where to put all dynamic absolute position elements
+                content : document.getElementById('contentinner'), // place where to put main extension container
+                
+                // two bottom will be used only by profile js file in future
+                
+                sideBlock : document.getElementById('sidebar'),
+                menu : document.getElementById('submenu'),
+            };
+        }
+        
+        return mainContainers;
+    }
+    
+    // will be replaced by formatPosts
+    
+    this.getPosts = function(container) {
+        if (!container) container = document;
+        
+        return container.getElementsByClassName(publicationClass);
+    }
+    
+    /* not imp */
+    
+    this.getPostTags = function(publication, limitTags) {
+        
+        if (!limitTags) limitTags = false;
+        
+        var tags = [];
+        var nativeTags = KellyTools.getElementByClass(publication, 'taglist');
+        if (!nativeTags) return tags;
+        
+        var nativeTags = nativeTags.getElementsByTagName('A');
+        if (!nativeTags || !nativeTags.length) return tags;
+    
+        for (var i = 0; i < nativeTags.length; i++) {
+           var tagName = nativeTags[i].innerHTML.trim(); 
+           if (!tagName) continue;
+           
+           tags[tags.length] = tagName;
+           if (limitTags && tags.length >= limitTags) return tags;
+        }
+        
+        return tags;
+    }
+    
+    /* imp */
+    // get canonical url link in format "//url"
+    
+    this.getPostLink = function(publication, el) {
+        
+        if (!el) el = getPostLinkEl(publication);
+    
+        if (el) {
+            var link = el.href.match(/[A-Za-z.0-9]+\/post\/[0-9]+/g);
+            return link ? '//' + link[0] : false;
+        }
+        
+        return '';    
+    }    
+    
+    /* imp */
+    // get canonical comment url link in format "//url"
+    
+    this.getCommentLink = function(comment) {
+        
+        if (!comment) return '';
+        
+        var links = comment.getElementsByTagName('a');
+        
+        for (var b = 0; b < links.length; b++) {
+            if (links[b].href.length > 10 && links[b].href.indexOf('#comment') != -1) {
+                var link = links[b].href.match(/[A-Za-z.0-9]+\/post\/[0-9]+#comment[0-9]+/g);
+                return link ? '//' + link[0] : false;
+            }
+        }
+        
+        return '';
+    }
+    
+    /* not imp */
+    
+    this.updateSidebarPosition = function(lock) {
+    
+        if (!handler.fav) return false;
+        
+        var sideBarWrap = handler.fav.getSidebar();
         
         if (!sideBarWrap || sideBarWrap.className.indexOf('hidden') !== -1) return false;
     
-        var sideBlock = this.getMainContainers().sideBlock;
+        var sideBlock = handler.getMainContainers().sideBlock;
         var minTop = 0;
         
         if (sideBlock) {
@@ -11687,15 +11776,15 @@ var K_ENVIRONMENT = {
                     
         var modalBoxTop = 24;
         
-        var filters = KellyTools.getElementByClass(sideBarWrap, this.className + '-FiltersMenu');     
+        var filters = KellyTools.getElementByClass(sideBarWrap, handler.className + '-FiltersMenu');     
         if (filters && filters.offsetHeight > 440 && filters.className.indexOf('calculated') == -1) {
             
-            var filtersBlock = KellyTools.getElementByClass(sideBarWrap, this.className + '-FiltersMenu-container');
+            var filtersBlock = KellyTools.getElementByClass(sideBarWrap, handler.className + '-FiltersMenu-container');
                 
             filtersBlock.style.maxHeight = '0';
             filtersBlock.style.overflow = 'hidden';
             
-            var modalBox = KellyTools.getElementByClass(document, this.className + '-ModalBox-main');						
+            var modalBox = KellyTools.getElementByClass(document, handler.className + '-ModalBox-main');						
                 modalBox.style.minHeight = '0';
 
             var modalBoxHeight = modalBox.getBoundingClientRect().height;       
@@ -11738,11 +11827,109 @@ var K_ENVIRONMENT = {
         }		
         
         // tagList
-    },
+    }
     
+    /* imp */
+    
+    this.getAllMedia = function(publication) {
+        
+        var data = [];
+        
+        if (!publication) return data;
+        
+        var content = false;
+        
+        if (publication.className.indexOf('comment') != -1) {
+            content = KellyTools.getElementByClass(publication, 'txt');
+        } else {
+            content = KellyTools.getElementByClass(publication, 'post_content');
+        }
+        
+        if (!content) return data;
+        
+        var mainImage = getMainImage(publication, content);
+        
+        // censored posts not contain post container and
+        // /images/censorship/ru.png
+        
+        var imagesEl = content.getElementsByClassName('image');
+        
+        for (var i = 0; i < imagesEl.length; i++) {
+            
+            var image = '';
+            
+            if (imagesEl[i].innerHTML.indexOf('gif_source') !== -1) {
+                
+                // extended gif info for fast get dimensions \ keep gif unloaded until thats needed
+                var gif = KellyTools.getElementByTag(imagesEl[i], 'a');                
+                if (gif) {
+                    image = handler.getImageDownloadLink(gif.getAttribute("href"), false);
+                }
+                
+            } else {
+            
+                var imageEl = KellyTools.getElementByTag(imagesEl[i], 'img');
+                if (imageEl) {
+                    image = handler.getImageDownloadLink(imageEl.getAttribute("src"), false);
+                }     
+            }
+            
+            if (image) data.push(image);
+            
+            // todo test assoc main image with gifs
+            
+            if (data.length == 1 && image && mainImage && image.indexOf(handler.getImageDownloadLink(mainImage.url, false, true)) != -1) {
+                handler.fav.setSelectionInfo('dimensions', mainImage);
+            } else if (data.length == 1 && image && mainImage) {                
+                KellyTools.log('Main image in schema org for publication is exist, but not mutched with detected first image in publication');    
+                KellyTools.log(image);
+                KellyTools.log(handler.getImageDownloadLink(mainImage.url, false));                           
+            }
+        }
+
+        if (!data.length && mainImage) {
+            
+            mainImage.url = handler.getImageDownloadLink(mainImage.url, false);
+            data.push(mainImage.url);
+            
+            handler.fav.setSelectionInfo('dimensions', mainImage);
+        }
+        
+        return data; //  return decodeURIComponent(url);
+    }
+    
+    /* imp */
+    // route format
+    // [image-server-subdomain].[domain].cc/pics/[comment|post]/full/[title]-[image-id].[extension]
+    
+    this.getImageDownloadLink = function(url, full, relative) {
+        
+             url = url.trim();
+        if (!url || url.length < 10) return url;
+        
+        // for correct download process we must keep same domain for image
+        // to avoid show copyright \ watermarks
+    
+        var imgServer = url.match(/img(\d+)/);
+        if (imgServer &&  imgServer.length) {
+            
+            // encoded original file name, decoded untested but may be work
+            var filename = KellyTools.getUrlFileName(url, false, true);
+            if (!filename) return url;
+            
+            imgServer = imgServer[0];
+            var type = url.indexOf('comment') == -1 ? 'post' : 'comment';
+            url = window.location.protocol + '//' + imgServer + '.' + window.location.host + '/pics/' + type + '/' + (full ? 'full/' : '') + filename;
+        }
+        
+        
+        return url;
+    }
+    
+    /* imp */
     // return same url if not supported
     
-    getStaticImage : function(source) {
+    this.getStaticImage = function(source) {
 
         if (source.indexOf('reactor') != -1) {
         
@@ -11756,9 +11943,10 @@ var K_ENVIRONMENT = {
         return source;
     },
     
+    /* not imp */
     // return false if not supported for page \ site
     
-    getFavPageInfo : function() {
+    this.getFavPageInfo = function() {
     
         var header = KellyTools.getElementByClass(document, 'mainheader');
         if (!header) {
@@ -11789,7 +11977,7 @@ var K_ENVIRONMENT = {
         if (!info.userName) return false;
         
         info.url = '';
-        info.url += window.location.origin + this.favPage;
+        info.url += window.location.origin + favPageUrlTpl;
         info.url = info.url.replace('__USERNAME__', info.userName);
         
         var posts = document.getElementsByClassName('postContainer');
@@ -11829,74 +12017,21 @@ var K_ENVIRONMENT = {
         }
         
         
-        info.container = KellyTools.getElementByClass(document, this.className + '-FavNativeInfo'); 
+        info.container = KellyTools.getElementByClass(document, handler.className + '-FavNativeInfo'); 
         if (!info.container) {
         
             info.container = document.createElement('div');
-            info.container.className = this.className + '-FavNativeInfo';
+            info.container.className = handler.className + '-FavNativeInfo';
             
             info.header.parentNode.insertBefore(info.container, info.header.nextSibling);
         }
             
         return info;
-    },
+    }
     
-    /* @! */
-    onInitWorktop : function() {
-    
-    },
-    
-    /* @! */
-    onExtensionReady : function() {
-                 
-        if (window.location.host == this.mainDomain || window.location.host.indexOf('old.') == -1) {
-
-            var bar = document.getElementById('searchBar');
-            
-            var style = {
-                bg : false,
-                btn : false,
-            };
-            
-            if (bar) {
-                style.bg = window.getComputedStyle(bar).backgroundColor;
-                
-                var btn = bar.querySelector('.submenuitem.active a');
-                if (btn) {
-                    style.btn = window.getComputedStyle(btn).backgroundColor;
-                }
-            }
-            
-            css = "\n\r\n\r\n\r" + '/* ' +  this.profile + '-dynamic */' + "\n\r\n\r\n\r";
-            if (style.btn && style.btn.indexOf('0, 0, 0, 0') == -1) {
-                css += '.' + this.className + '-basecolor-dynamic {';
-                css += 'background-color : ' + style.btn + '!important;';
-                css += '}';
-            }
-            
-            if (style.bg && style.bg.indexOf('0, 0, 0, 0') == -1) {
-            
-                css += '.active .' + this.className + '-buttoncolor-dynamic, \
-                        .active.' + this.className + '-buttoncolor-dynamic, \
-                        .' + this.className + '-ahover-dynamic:hover .' + this.className + '-buttoncolor-dynamic, \
-                        .' + this.className + '-ahover-dynamic .' + this.className + '-buttoncolor-dynamic:hover \
-                        {';
-                        
-                css += 'background-color : ' + style.btn + '!important;';
-                css += '}';
-                                    
-                css += '.' + this.className + '-buttoncolor-any-dynamic {';
-                css += 'background-color : ' + style.btn + '!important;';
-                css += '}';
-            }
-            
-            this.fav.addCss(css);
-        }
-        
-        this.fav.showNativeFavoritePageInfo();
-    },
-    
-    syncFav : function(publication, inFav) {        
+    /* imp */
+     
+    this.syncFav = function(publication, inFav) {        
         var item = publication.querySelector('.favorite_link');
         if (!item) return;
         
@@ -11906,20 +12041,17 @@ var K_ENVIRONMENT = {
         } else if (!inFav && item.className.indexOf(' favorite') != -1) {                
             KellyTools.dispatchEvent(item);
         }
-    },
+    }
     
-    /* @! */
-    onPageReady : function() {
-        
-        return false;
-    },
+    /* imp */
     
-    setFav : function(fav) {
-        this.fav = fav;
-    },
+    this.setFav = function(fav) {
+        handler.fav = fav;
+    }
     
-    /* @! */
-    getRecomendedDownloadSettings : function() {
+    /* not imp */
+    
+    this.getRecomendedDownloadSettings = function() {
         
         var browser = KellyTools.getBrowserName();
         
@@ -11939,10 +12071,20 @@ var K_ENVIRONMENT = {
             
         }
         
-    },
+    }
+    
 }
 
-var K_DEFAULT_ENVIRONMENT = K_ENVIRONMENT;
+kellyProfileJoyreactor.getInstance = function() {
+    if (typeof kellyProfileJoyreactor.self == 'undefined') {
+        kellyProfileJoyreactor.self = new kellyProfileJoyreactor();
+    }
+    
+    return kellyProfileJoyreactor.self;
+}
+
+
+var K_DEFAULT_ENVIRONMENT = kellyProfileJoyreactor.getInstance();
 
 // initialization
 

@@ -146,7 +146,7 @@ function KellyTooltip(cfg) {
                  handler.show(false); 
             }
             
-            content.appendChild(closeBtn);
+            container.appendChild(closeBtn);
             container.appendChild(content);
                            
         handler.self.appendChild(container);
