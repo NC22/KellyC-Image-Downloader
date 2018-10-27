@@ -62,6 +62,9 @@
     "cats":{  
         "message":"Categories"
     },
+    "cats_filter":{  
+        "message":"Mode for include \\ exclude categories from filtered data"
+    },
     "cgrid_default_rowst":{  
         "message":"Default row style"
     },
@@ -95,6 +98,15 @@
     "cgrid_type_fixed":{  
         "message":"Fixed number of elements per row"
     },
+    "cgrid_imageview":{  
+        "message":"Image view mode"
+    },
+    "cgrid_imageview_hd":{  
+        "message":"Open original image (HD)"
+    },
+    "cgrid_imageview_preview":{  
+        "message":"Open preview image"
+    },      
     "change":{  
         "message":"Change"
     },
@@ -169,12 +181,15 @@
     },    
     "download_save":{  
         "message":"Save as profile file"
-    },   
+    },           
+    "download_pages_autosave" : {
+        "message":"Autosave after to separate file after setted number of pages"
+    },
     "download_save_notice":{  
         "message":"Saved profile can be added to extension thow menu (Options -> Profiles -> Add new profile)"
     },   
     "download_limitpages":{  
-        "message":"Selection hit limit. Please set export pages manualy (not more then __MAXPAGESPERIMPORT__ pages per one operation)"
+        "message":"Selection hit limit (__CURRENTPAGESPERIMPORT__). Please set export pages manualy (not more then __MAXPAGESPERIMPORT__ pages per one operation)"
     },
     "edit_mode":{  
         "message":"Edit mode"
@@ -232,6 +247,9 @@
     },
     "grabber_selected_items":{  
         "message":"Items"
+    }, 
+    "grabber_selected_items_not_found":{  
+        "message":"Cant select any items for download setted in \"Items\" field"
     },
     "grabber_source":{  
         "message":"High quality"
@@ -332,6 +350,9 @@
     "grabber_transport_blobbase64":{  
         "message":"Binary Data"
     },
+    "grabber_flip_numbers":{  
+        "message":"Invert numeration"
+    },
     "grabber_request":{  
         "message":"Way of download data"
     },
@@ -364,7 +385,7 @@
     },
     "grabber_transport_help_2":{  
         "message":"<br><br>Change this option if you can't download any thing (log files, profiles)<br>"
-    },  
+    }, 
      "grabber_errors_counter":{  
         "message":"Failed : __ERRORSNUM__"
     },
@@ -478,6 +499,9 @@
     },    
     "reset":{  
         "message":"Reset"
+    },  
+    "restore":{  
+        "message":"Restore"
     },
     "remove_from_fav":{  
         "message":"Remove from favourite"
@@ -508,6 +532,15 @@
     },
     "storage_add_new":{  
         "message":"Add new"
+    },
+    "storage_io_options":{  
+        "message":"Import \\ Export config"
+    },
+    "storage_io_options_export":{  
+        "message":"Export"
+    },
+    "storage_io_options_import":{  
+        "message":"Import"
     },
     "storage_load_from_file":{  
         "message":"Load from file"
@@ -568,6 +601,15 @@
     },   
     "storage_create_e2":{  
         "message":"Bad profile file format (JSON parse fail)"
+    }, 
+    "storage_import_e1":{  
+        "message":"Please select file"
+    }, 
+    "storage_import_limit":{  
+        "message":"File is too big (maximum file size __MAX_CONFIG_SIZE__ mb). Uploaded file __FILESIZE__ mb."
+    }, 
+    "storage_import_e2":{  
+        "message":"Error while write data"
     }, 
     "sync_by_add":{  
         "message":"If user is logged in, dublicates publication to main favourites storage"

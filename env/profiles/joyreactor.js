@@ -14,6 +14,9 @@ function kellyProfileJoyreactor() {
     var mainContainers = false;
     
     var commentsBlockTimer = [];
+    
+    var sideBarPaddingTop = 24;
+    var publications = false;
       
     /* imp */
     
@@ -28,6 +31,7 @@ function kellyProfileJoyreactor() {
 
         onWindowScroll : function() {
             
+            updateFastSaveButtonsState();
             return false;
         },
         
@@ -38,11 +42,14 @@ function kellyProfileJoyreactor() {
         
         onPageReady : function() {
             
+            publications = handler.getPosts();
+            
             return false;
         },
         
         onInitWorktop : function() {
             
+            updateFastSaveButtonsState();
             return false;
         },
         
@@ -94,6 +101,40 @@ function kellyProfileJoyreactor() {
             
             handler.fav.showNativeFavoritePageInfo();
         },
+        
+        onSideBarShow : function() {
+            
+            var sideBarWrap = handler.fav.getSidebar();            
+            if (!sideBarWrap || sideBarWrap.className.indexOf('hidden') !== -1) return false;
+            
+            var filters = KellyTools.getElementByClass(sideBarWrap, handler.className + '-FiltersMenu');     
+            
+            if (filters && filters.offsetHeight > 440 && filters.className.indexOf('calculated') == -1) {
+                
+                var filtersBlock = KellyTools.getElementByClass(sideBarWrap, handler.className + '-FiltersMenu-container');
+                    
+                filtersBlock.style.maxHeight = '0';
+                filtersBlock.style.overflow = 'hidden';
+                
+                var modalBox = KellyTools.getElementByClass(document, handler.className + '-ModalBox-main');						
+                    modalBox.style.minHeight = '0';
+
+                var modalBoxHeight = modalBox.getBoundingClientRect().height;       
+                
+                var viewport = KellyTools.getViewport();
+                if (viewport.screenHeight < modalBoxHeight + filters.offsetHeight + sideBarPaddingTop) {
+                    filtersBlock.style.maxHeight = (viewport.screenHeight - modalBoxHeight - sideBarPaddingTop - 44 - sideBarPaddingTop) + 'px';
+                    filtersBlock.style.overflowY = 'scroll';
+
+                } else {
+                        
+                    filtersBlock.style.maxHeight = 'none';
+                    filtersBlock.style.overflow = 'auto';
+                }
+                
+                filters.className += ' calculated';
+            }
+        }
     
     }
     
@@ -253,7 +294,43 @@ function kellyProfileJoyreactor() {
         
         return false;
     }
+    
+    function updateFastSaveButtonsState() {
         
+        var options = handler.fav.getGlobal('fav');
+        
+        
+        if (!handler.fav.isDownloadSupported || !options.coptions.fastsave.enabled || !options.coptions.fastsave.check) {
+            return false;
+        }
+        
+        if (!publications || !publications.length) return false;
+
+        var scrollBottom = KellyTools.getViewport().scrollBottom;
+        
+        var updatePublicationFastButton = function(publication) {
+            
+            var button = KellyTools.getElementByClass(publication, handler.className + '-fast-save-unchecked');           
+            if (!button) return;
+            
+            if (button.getBoundingClientRect().top < scrollBottom + 100) {
+                
+                button.classList.remove(handler.className + '-fast-save-unchecked');
+                
+                handler.fav.getFastSave().downloadCheckState(publication, function(state) {
+                    button.classList.add(handler.className + '-fast-save-' + state);
+                });
+            } 
+        }
+        
+        for (var i = 0; i < publications.length; i++) {
+            
+            if (!publications[i]) continue;
+            
+            updatePublicationFastButton(publications[i]);                    
+        }
+    }
+    
     this.getCommentText = function(comment) {
     
         var contentContainer = KellyTools.getElementByClass(comment, 'txt');
@@ -407,16 +484,26 @@ function kellyProfileJoyreactor() {
                 
                     fastSave.className = fastSaveBaseClass + handler.className + '-fast-save-unchecked';
                     fastSave.onclick = function() {
-                        if (this.className.indexOf('loading') != -1 || this.className.indexOf('unavailable') != -1) return false;
-                                          
-                        fastSave.className = fastSave.className.replace('unchecked', 'checked');
-                        this.className += ' ' + handler.className + '-fast-save-loading';
-            
-                        KellyTools.getBrowser().runtime.sendMessage({method: "onChanged.keepAliveListener"}, function(response) {                           
-                            handler.fav.fastDownloadPostData(postBlock, false, function(success) {
+                        
+                        if (this.className.indexOf('unavailable') != -1) return false;
+                        
+                        if (this.className.indexOf('loading') != -1) {
+                            
+                            handler.fav.getFastSave().downloadCancel();
+                            fastSave.classList.remove(handler.className + '-fast-save-loading');                          
+                            
+                        } else {
+                                    
+                            var downloadEnabled = handler.fav.getFastSave().downloadPostData(postBlock, function(success) {
+                                fastSave.classList.remove(handler.className + '-fast-save-loading');
                                 fastSave.className = fastSaveBaseClass + handler.className + '-fast-save-' + (success ? '' : 'not') + 'downloaded';
                             });
-                        });
+                            
+                            if (downloadEnabled) {
+                                fastSave.classList.remove(handler.className + '-fast-save-unchecked');
+                                fastSave.classList.add(handler.className + '-fast-save-loading');
+                            }
+                        }
                         
                         return false;
                     }  
@@ -452,13 +539,17 @@ function kellyProfileJoyreactor() {
         
         if (!mainContainers) {
             mainContainers = {
+                
+                // public
+                
                 body : document.getElementById('container'), // place where to put all dynamic absolute position elements
                 content : document.getElementById('contentinner'), // place where to put main extension container
                 
-                // two bottom will be used only by profile js file in future
+                // private
                 
                 sideBlock : document.getElementById('sidebar'),
                 menu : document.getElementById('submenu'),
+                tagList : document.getElementById('tagList'), // or check pageInner
             };
         }
         
@@ -537,55 +628,28 @@ function kellyProfileJoyreactor() {
     
         if (!handler.fav) return false;
         
-        var sideBarWrap = handler.fav.getSidebar();
+        var sideBarWrap = handler.fav.getView('sidebar');
         
         if (!sideBarWrap || sideBarWrap.className.indexOf('hidden') !== -1) return false;
     
-        var sideBlock = handler.getMainContainers().sideBlock;
-        var minTop = 0;
-        
-        if (sideBlock) {
-            minTop = sideBlock.getBoundingClientRect().top;
-        }
-                    
-        var modalBoxTop = 24;
-        
-        var filters = KellyTools.getElementByClass(sideBarWrap, handler.className + '-FiltersMenu');     
-        if (filters && filters.offsetHeight > 440 && filters.className.indexOf('calculated') == -1) {
-            
-            var filtersBlock = KellyTools.getElementByClass(sideBarWrap, handler.className + '-FiltersMenu-container');
-                
-            filtersBlock.style.maxHeight = '0';
-            filtersBlock.style.overflow = 'hidden';
-            
-            var modalBox = KellyTools.getElementByClass(document, handler.className + '-ModalBox-main');						
-                modalBox.style.minHeight = '0';
-
-            var modalBoxHeight = modalBox.getBoundingClientRect().height;       
-            
-            var viewport = KellyTools.getViewport();
-            if (viewport.screenHeight < modalBoxHeight + filters.offsetHeight + modalBoxTop) {
-                filtersBlock.style.maxHeight = (viewport.screenHeight - modalBoxHeight - modalBoxTop - 44 - modalBoxTop) + 'px';
-                filtersBlock.style.overflowY = 'scroll';
-
-            } else {
-                    
-                filtersBlock.style.maxHeight = 'none';
-                filtersBlock.style.overflow = 'auto';
-            }
-            
-            filters.className += ' calculated';
-        }
-        
-        // screen.height / 2  - (sideBarWrap.getBoundingClientRect().height / 2) - 24
-        
-        if (lock || modalBoxTop < minTop) modalBoxTop = minTop;
+        var sideBlock = handler.getMainContainers().sideBlock;        
+        var sideBlockBounds = sideBlock.getBoundingClientRect();
         
         var scrollTop = KellyTools.getScrollTop();
         var scrollLeft = KellyTools.getScrollLeft();
         
-        sideBarWrap.style.top = modalBoxTop + scrollTop  + 'px';
+        var top = 0;
         
+        if (sideBlock) {
+            top = sideBlockBounds.top + scrollTop;
+        }
+                    
+        // screen.height / 2  - (sideBarWrap.getBoundingClientRect().height / 2) - 24
+        
+        if (!lock && sideBarPaddingTop + scrollTop > top) top = sideBarPaddingTop + scrollTop;
+                
+        sideBarWrap.style.top = top + 'px';
+       
         var widthBase = 0;
         
         if (window.location.host.indexOf('old.') == -1) {
@@ -594,11 +658,24 @@ function kellyProfileJoyreactor() {
         
         if (sideBlock) {
             sideBarWrap.style.right = 'auto';
-            sideBarWrap.style.left = Math.round(sideBlock.getBoundingClientRect().left + scrollLeft) + 'px';
-            sideBarWrap.style.width = Math.round(sideBlock.getBoundingClientRect().width + widthBase) + 'px';
+            sideBarWrap.style.left = Math.round(sideBlockBounds.left + scrollLeft) + 'px';
+            sideBarWrap.style.width = Math.round(sideBlockBounds.width + widthBase) + 'px';
         } else {
             sideBarWrap.right = '0px';
         }		
+        
+        var tagList = handler.getMainContainers().tagList;
+        if (tagList) {
+            
+            var sideBarWrapBounds = sideBarWrap.getBoundingClientRect();
+            var bottomLimit = tagList.getBoundingClientRect().top + scrollTop;
+            
+            if (sideBarWrapBounds.height + sideBarWrapBounds.top + scrollTop >= bottomLimit) {
+                
+                // console.log(sideBarWrapBounds.height + scrollTop)
+                sideBarWrap.style.top = (bottomLimit - sideBarWrapBounds.height) + 'px';
+            }
+        }
         
         // tagList
     }

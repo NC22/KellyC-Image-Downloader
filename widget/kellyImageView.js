@@ -55,12 +55,19 @@ function KellyImgView(cfg) {
         onBeforeGalleryOpen : false, // 
         onBeforeShow : false, // изображение загружено но не показано, переменные окружения обновлены
         onClose : false, //
-    }; 
+    };
  
     var moveable = true;
     var swipe = false;	
     var bodyLockCss = false;
-    var lockMoveMethod = 'lockMove'; // hideScroll (position : fixed элементы все равно сдвигаются если привязаны к правой стороне) | lockMove (блокирует движение но скроллбар остается)
+    
+    // блокировка скролла при показе изображения
+    // метод hideScroll - скрывает скроллбар для body (см. showBodyScroll), добавляет соразмерный отступ; минус - position : fixed элементы все равно сдвигаются если привязаны к правой стороне
+    // метод lockMove   - прерывает события движения (см. disableMoveContainer), скроллбар остается
+    
+    var lockMoveMethod = 'lockMove'; 
+   
+    var lazyHand = { enabled : false, event : false };
    
     function constructor(cfg) {
         handler.updateConfig(cfg);
@@ -106,14 +113,45 @@ function KellyImgView(cfg) {
         }
         
         if (typeof cfg.moveable != 'undefined') {
-            moveable = cfg.moveable;
+            moveable = cfg.moveable ? true : false;
         }
         
         if (typeof cfg.swipe != 'undefined') {
-            swipe = cfg.swipe;
-        }   
+            swipe = cfg.swipe ? true : false;
+        } 
+        
+        if (typeof cfg.lazyHand != 'undefined') {
+            lazyHand.enabled = cfg.lazyHand ? true : false;
+            
+            if (!lazyHand.enabled) {
+                handler.removeEventListener(document.body, "mousemove", 'lazy_hand_');
+                lazyHand.event = false;                          
+                lazyHand.button = false;
+                lazyHand.pos = false;
+            }
+        }
+                
+    }   
+    
+    function lazyHandUpdate(e) {
+        
+        var curPos = getEventDot(e);
+        
+        var distance = false;
+        
+        if (lazyHand.pos) {
+            distance = calcDistance(lazyHand.pos, curPos);
+        }
+        
+        if (!distance || distance > 30) {
+            // handler.updateButtonsPos();
+            handler.removeEventListener(document.body, "mousemove", 'lazy_hand_');
+            lazyHand.event = false;            
+            lazyHand.button = false;
+            lazyHand.pos = false;
+        }
     }
-   
+       
     function isImgLoaded(imgElement) {
         
         if (!imgElement.src) return true;
@@ -181,7 +219,7 @@ function KellyImgView(cfg) {
     this.getImages = function() {
         return images;
     }
-           
+    
     this.getCurrentState = function() {	
         
         return { 
@@ -211,8 +249,6 @@ function KellyImgView(cfg) {
                 }
             }
         }        
-        
-        handler.updateButtonsPos();
     }
     
     this.hideLoader = function(hide) {
@@ -224,7 +260,7 @@ function KellyImgView(cfg) {
         }
     }
     
-    this.addButton = function(innerHTML, index, onclick, addition) {
+    this.addButton = function(innerHTML, index, eventOnClick, addition) {
         
         if (!getBlock()) {        
             console.log('cant create buttons, main block not ready');
@@ -248,7 +284,21 @@ function KellyImgView(cfg) {
         
         var button = document.createElement('div');
             if (additionStyle) button.setAttribute('style', additionStyle);
-            button.onclick = onclick;
+            button.onclick = function(e) {
+                
+                if (lazyHand.enabled) {
+                    
+                    lazyHand.button = this;
+                    lazyHand.pos = getEventDot(e);
+            
+                    if (!lazyHand.event) {
+                        handler.addEventListner(document.body, "mousemove", lazyHandUpdate, 'lazy_hand_');              
+                        lazyHand.event = true;
+                    }
+                }
+                
+                if (eventOnClick) eventOnClick(e);
+            }
             button.className = className;
             
         addHtml(button, innerHTML);
@@ -304,7 +354,8 @@ function KellyImgView(cfg) {
         for (var k in buttons) {
             
             if (buttons[k].className.indexOf('hidden') != -1) continue;
-            
+            // if (lazyHand.button && lazyHand.enabled && !lazyHand.ignore && lazyHand.button == buttons[k]) continue;
+               
             item++;                
             var buttonBounds = buttons[k].getBoundingClientRect();
             
@@ -359,6 +410,8 @@ function KellyImgView(cfg) {
            
         if (show && blockShown) return;
         
+        handler.removeEventListener(document.body, "mousemove", 'lazy_hand_');
+
         // will be extended if something from this events will be used for some thing else
         
         var disableMoveContainer = function(disable) {
@@ -400,9 +453,17 @@ function KellyImgView(cfg) {
             deleteClass(block, 'fade');
             
             block.onclick = function(e) { 
-            
+                
+                if (lazyHand.enabled && lazyHand.button) {                    
+                    e.preventDefault();
+                    lazyHand.button.onclick(e);
+                    return false;
+                }
+                
                 if (e.target != this) return false;
-                handler.cancelLoad(); return false; 
+                
+                handler.cancelLoad();
+                return false; 
             }        
                  
             handler.addEventListner(window, "scroll", function (e) {
@@ -410,9 +471,8 @@ function KellyImgView(cfg) {
             }, 'img_view_');
             
             handler.addEventListner(window, "resize", function (e) {
-
-                    handler.updateSize(e);
-                    return false;
+                handler.updateSize(e);
+                return false;
             }, 'image_update_');
 
            // env.addEventListner(block, "mousemove", function (e) {
@@ -427,7 +487,7 @@ function KellyImgView(cfg) {
                 var left = c == 1 || c == 29 || c == 65 || c == 100;
                
                 if (right || left) {
-                    
+                    // lazyHand.ignore = true;
                     handler.nextImage(right, 1, e);
                 }
                 
@@ -485,7 +545,10 @@ function KellyImgView(cfg) {
             userEvents.onBeforeGalleryOpen(handler, galleryItemPointer, galleryData);
         }
         
-        if (!blockShown) showMainBlock(true);
+        if (!blockShown) {
+            showMainBlock(true);
+            // lazyHand.ignore = true;
+        }
         
         if (!galleryItemPointer && !galleryData) {
         
@@ -514,7 +577,7 @@ function KellyImgView(cfg) {
         handler.hideLoader(false);
         handler.updateBlockPosition();    
         
-          image = document.createElement("img");
+        image = document.createElement("img");
         image.src = getImageUrlFromPointer(galleryItemPointer);  
         
         if (isImgLoaded(image)) handler.imageShow();
@@ -563,8 +626,7 @@ function KellyImgView(cfg) {
         image.style.height = rHeight + 'px';
         
         image.style.left = Math.floor(posCenter.left - (rWidth / 2)) + 'px';
-        image.style.top = Math.floor(posCenter.top - (rHeight / 2)) + 'px';
-        
+        image.style.top = Math.floor(posCenter.top - (rHeight / 2)) + 'px';        
         
         handler.updateButtonsPos();
     }
@@ -605,6 +667,7 @@ function KellyImgView(cfg) {
         return {x: x, y: y, touches : touches};
     }
     
+    // unused
     this.updateCursor = function(e) {
     
         console.log(getEventDot(e));
@@ -730,6 +793,8 @@ function KellyImgView(cfg) {
         }, 'image_drag_');
     }
     
+    // calls after image fully loaded and ready to show
+    
     this.imageShow = function() {
     
         beasy = false;
@@ -757,12 +822,17 @@ function KellyImgView(cfg) {
             return false;
         }
         
-        handler.hideLoader(true);
-        setTimeout(function() { image.style.opacity = '1'; handler.hideButtons(false); }, 100);  
+        setTimeout(function() { 
         
+            image.style.opacity = '1'; 
+            handler.hideButtons(false);             
+            handler.updateButtonsPos(false);
+            
+        }, 100);         
     }
     
     this.updateSize = function(e) {
+        
         if (!image) return false;
             
         var bounds = handler.getClientBounds(); 
@@ -807,7 +877,7 @@ function KellyImgView(cfg) {
         image.style.height = imageBounds.resizedHeight + 'px';
         image.style.left =  newPos.left + 'px';
         image.style.top = newPos.top + 'px';
-        
+           
         handler.updateButtonsPos(newPos);
         return true;
     }
@@ -816,7 +886,6 @@ function KellyImgView(cfg) {
     
     this.cancelLoad = function(stage) {
 
-       
         if (stage == 2) {
             beasy = false; 
             isMoved = false;

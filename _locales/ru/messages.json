@@ -62,6 +62,9 @@
     "cats":{  
         "message":"Категории"
     },
+    "cats_filter":{  
+        "message":"Режим добавления в выборку \\ исключения из выборки категрий"
+    },
     "cgrid_default_rowst":{  
         "message":"Стиль по умолчанию для элемента строки"
     },
@@ -95,6 +98,15 @@
     "cgrid_type_fixed":{  
         "message":"Фиксированое количество в строке"
     },
+    "cgrid_imageview":{  
+        "message":"Режим просмотра"
+    },
+    "cgrid_imageview_hd":{  
+        "message":"Открывать оригинал (HD)"
+    },
+    "cgrid_imageview_preview":{  
+        "message":"Открывать превью"
+    },  
     "change":{  
         "message":"Применить"
     },
@@ -145,6 +157,9 @@
     },
     "download_title":{  
         "message":"Выгрузить в профиль данных"
+    },    
+    "download_pages_autosave" : {
+        "message":"Автоматически сохранять в отдельный файл через указанное число страниц"
     },
     "download_tag_filter_1":{  
         "message":"<br>Укажите теги, посты которых необходимо сохранять. Например \"art девушка, art\". Если необходимо исключить определенные теги, то они должны начинаться с символа \"-\" в названии."
@@ -172,9 +187,9 @@
     },    
     "download_save_notice":{  
         "message":"Просмотреть профиль можно добавив его через настройки расширения (Настройки -> Профили -> Добавить новый профиль)"
-    },  
+    },
     "download_limitpages":{  
-        "message":"Выборка содержит превышающие лимиты значения. Ограничте выборку (не более __MAXPAGESPERIMPORT__ страниц за одну операцию)"
+        "message":"Выборка содержит превышающие лимиты значения (__CURRENTPAGESPERIMPORT__). Ограничте выборку (не более __MAXPAGESPERIMPORT__ страниц для одного файла профиля)"
     },
     "edit_mode":{  
         "message":"Режим редактирования"
@@ -232,6 +247,9 @@
     },
     "grabber_selected_items":{  
         "message":"Элементы"
+    },
+    "grabber_selected_items_not_found":{  
+        "message":"Список элементов определенный полем \"Элементы\" пуст"
     },
     "grabber_source":{  
         "message":"Оригинал"
@@ -340,6 +358,9 @@
     },
     "grabber_request_iframe":{  
         "message":"Iframe hook"
+    },
+    "grabber_flip_numbers":{  
+        "message":"Инвертировать нумерацию"
     },
     "grabber_request_help":{  
         "message": "<b>Прямой запрос</b> - Прямой запрос через API XMLHttpRequest (XMLHttpRequest -> Blob) <br>"
@@ -496,6 +517,9 @@
     },    
     "reset":{  
         "message":"Сбросить"
+    }, 
+    "restore":{  
+        "message":"Восстановление"
     },
     "save":{  
         "message":"Сохранить"
@@ -517,6 +541,15 @@
     },   
     "storage_add_new":{  
         "message":"Добавить новый профиль"
+    },    
+    "storage_io_options":{  
+        "message":"Импорт \\ Экспорт текущих настроек"
+    },
+    "storage_io_options_export":{  
+        "message":"Восстановить"
+    },
+    "storage_io_options_import":{  
+        "message":"Скачать текущие настройки"
     },
     "storage_load_from_file":{  
         "message":"Загрузить из файла"
@@ -577,7 +610,19 @@
     },   
     "storage_create_e2":{  
         "message":"Ошибка парсинга структурированных данных файла профиля"
-    },  
+    }, 
+    "storage_import_e1":{  
+        "message":"Укажите файл из которого будут импортированы настройки"
+    }, 
+    "storage_import_limit":{  
+        "message":"Превышен максимально допустимый лимит для файла настроек (__MAX_CONFIG_SIZE__мб). Размер загружаемого файла __FILESIZE__мб."
+    }, 
+    "storage_import_e2":{  
+        "message":"Ошибка записи данных"
+    }, 
+    "storage_import_ok":{  
+        "message":"Данные обновлены"
+    },
     "sync_by_add":{  
         "message":"Дублировать в основное избранное пользователя, если авторизован"
     },        

@@ -973,21 +973,31 @@
 	margin-bottom : 24px;
 }
 
+.__BASECLASS__-tech-options,
 .__BASECLASS__-exporter-container {
-	margin-bottom : 24px;
+    margin : 0px;
+    padding : 0px;
     border: 1px solid rgba(0, 0, 0, 0.35);
-    padding: 16px;
     opacity : 0;
     max-height : 0px;
     transition : opacity 0.3s;
     overflow : hidden;
 }
 
+.__BASECLASS__-exporter-container label {
+    display : block;
+}
+
+.__BASECLASS__-tech-options {
+    border : 0px;
+}
+
+.__BASECLASS__-tech-options.active,
 .__BASECLASS__-exporter-container.active {
-    
     opacity : 1;
-    max-height : none;
-   
+    max-height : none;	
+    margin-bottom : 24px;
+    padding: 16px;
 }
 
 .__BASECLASS__-exporter-log {
@@ -1004,7 +1014,6 @@
 	width : 400px;
 	height : 200px;
 }
-
 
 .__BASECLASS__-filters-AdditionButtons td {
 	text-align: center;

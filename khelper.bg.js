@@ -129,6 +129,15 @@ KellyTools.setHTMLData = function(el, val) {
     }
 }
 
+KellyTools.toogleActive = function(el) {
+    
+    if (el.className.indexOf('hidden') != -1) {
+        el.className = el.className.replace('hidden', 'active');
+    } else {
+        el.className = el.className.replace('active', 'hidden');
+    }
+}
+
 KellyTools.inputVal = function(el, type, parent) {
     
     var value = ''; 
@@ -212,6 +221,7 @@ KellyTools.getUrlFileName = function(url, excludeExt, noDecode) {
     
     if (!noDecode && url.indexOf('%') != -1) {
         url = decodeURIComponent(url);
+        url = url.replace(/[^а-яА-Яa-z0-9áéíóúñü ._-]/gim, "");
     } 
     
     if (excludeExt && url.indexOf('.') != -1) {       
@@ -229,8 +239,6 @@ KellyTools.getUrlExt = function(url) {
     return this.getExt(url);        
 }
     
-// unused end
-
 KellyTools.getUrlParam = function(param, url) {
     if (!url) url = location.search;
     
