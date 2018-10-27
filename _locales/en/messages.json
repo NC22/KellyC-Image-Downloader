@@ -537,10 +537,10 @@
         "message":"Import \\ Export config"
     },
     "storage_io_options_export":{  
-        "message":"Export"
+        "message":"Restore from file"
     },
     "storage_io_options_import":{  
-        "message":"Import"
+        "message":"Download current"
     },
     "storage_load_from_file":{  
         "message":"Load from file"
@@ -610,7 +610,10 @@
     }, 
     "storage_import_e2":{  
         "message":"Error while write data"
-    }, 
+    },     
+    "storage_import_ok":{  
+        "message":"Current configuration updated"
+    },
     "sync_by_add":{  
         "message":"If user is logged in, dublicates publication to main favourites storage"
     },  
