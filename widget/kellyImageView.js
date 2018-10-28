@@ -369,11 +369,10 @@ function KellyImgView(cfg) {
                 }
                 
                 if (horizontal && top <= 0) {
-                    top = pos.top + padding;
+                    top = pos.top;
                     
                     if (pos.top + buttonBounds.height <= 0) {
-                        top = padding;
-                        
+                        top = 0;                        
                     }
                 }
                 

@@ -1589,11 +1589,10 @@ function KellyImgView(cfg) {
                 }
                 
                 if (horizontal && top <= 0) {
-                    top = pos.top + padding;
+                    top = pos.top;
                     
                     if (pos.top + buttonBounds.height <= 0) {
-                        top = padding;
-                        
+                        top = 0;                        
                     }
                 }
                 
@@ -7605,7 +7604,7 @@ function KellyOptions(cfg) {
 
 function KellyFavItems() 
 {
-    this.PROGNAME = 'KellyFavItems v1.1.0.7b';
+    this.PROGNAME = 'KellyFavItems v1.1.0.8b';
     
     var handler = this;	
         
