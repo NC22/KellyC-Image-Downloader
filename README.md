@@ -8,4 +8,6 @@ Store you personal favourite publications for JoyReactor localy
 <br>
 <h2>License</h2>
 <br>
-[GNU General Public License v3](http://www.gnu.org/licenses/gpl.html) 
+<a href="http://www.gnu.org/licenses/gpl.html">GNU General Public License v3</a>
+<br>
+<br>
