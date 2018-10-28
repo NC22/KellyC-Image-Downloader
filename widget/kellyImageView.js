@@ -5,7 +5,7 @@
    @description    image view widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.0.6 22.09.18
+   @version        v 1.0.8 28.10.18
    
    ToDo : 
    
@@ -20,7 +20,7 @@ function KellyImgView(cfg) {
     var handler = this;    
     var events = new Array();
     
-    var beasy = false;
+    var beasy = false; // false or beasy process name (loadImage, close, nextImage)
     
     var image = false; // dom el - current loaded image, false if not shown (getCurrentImage().image)
     var imageBounds = false; 
@@ -55,6 +55,7 @@ function KellyImgView(cfg) {
         onBeforeGalleryOpen : false, // 
         onBeforeShow : false, // изображение загружено но не показано, переменные окружения обновлены
         onClose : false, //
+        onNextImage : false, // onNextImage(handler, nextImage, next)
     };
  
     var moveable = true;
@@ -105,6 +106,10 @@ function KellyImgView(cfg) {
             
             if (cfg.userEvents.onClose) {
                 userEvents.onClose = cfg.userEvents.onClose;
+            }    
+
+            if (cfg.userEvents.onNextImage) {
+                userEvents.onNextImage = cfg.userEvents.onNextImage;
             }
         }
         
@@ -121,11 +126,9 @@ function KellyImgView(cfg) {
         } 
         
         if (typeof cfg.lazyHand != 'undefined') {
-            lazyHand.enabled = cfg.lazyHand ? true : false;
             
-            if (!lazyHand.enabled) {
-                handler.removeEventListener(document.body, "mousemove", 'lazy_hand_');
-                lazyHand.event = false;                          
+            lazyHand.enabled = cfg.lazyHand ? true : false;            
+            if (!lazyHand.enabled) {                         
                 lazyHand.button = false;
                 lazyHand.pos = false;
             }
@@ -135,20 +138,23 @@ function KellyImgView(cfg) {
     
     function lazyHandUpdate(e) {
         
+        if (!lazyHand.enabled || !lazyHand.button) {
+            return false;
+        }
+            
         var curPos = getEventDot(e);
-        
         var distance = false;
         
         if (lazyHand.pos) {
             distance = calcDistance(lazyHand.pos, curPos);
         }
         
-        if (!distance || distance > 30) {
-            // handler.updateButtonsPos();
-            handler.removeEventListener(document.body, "mousemove", 'lazy_hand_');
-            lazyHand.event = false;            
+        if (distance === false || distance > 30) {  
             lazyHand.button = false;
             lazyHand.pos = false;
+            return false;
+        } else {        
+            return true;
         }
     }
        
@@ -225,6 +231,7 @@ function KellyImgView(cfg) {
         return { 
             block : getBlock(),
             image : image, 
+            beasy : beasy,
             gallery : selectedGallery, 
             index : cursor,
             cursor : cursor,
@@ -286,15 +293,9 @@ function KellyImgView(cfg) {
             if (additionStyle) button.setAttribute('style', additionStyle);
             button.onclick = function(e) {
                 
-                if (lazyHand.enabled) {
-                    
-                    lazyHand.button = this;
+                if (lazyHand.enabled) {                    
+                    lazyHand.button = this; 
                     lazyHand.pos = getEventDot(e);
-            
-                    if (!lazyHand.event) {
-                        handler.addEventListner(document.body, "mousemove", lazyHandUpdate, 'lazy_hand_');              
-                        lazyHand.event = true;
-                    }
                 }
                 
                 if (eventOnClick) eventOnClick(e);
@@ -348,31 +349,36 @@ function KellyImgView(cfg) {
         var item = 0;
         var horizontal = false;        
         
-        var left = pos.left + parseInt(image.style.width) + 12;
+        var padding = 12;
+        var left = pos.left + parseInt(image.style.width) + padding;
         var top = pos.top;
         
         for (var k in buttons) {
             
             if (buttons[k].className.indexOf('hidden') != -1) continue;
-            // if (lazyHand.button && lazyHand.enabled && !lazyHand.ignore && lazyHand.button == buttons[k]) continue;
-               
+            
             item++;                
             var buttonBounds = buttons[k].getBoundingClientRect();
             
             if (item == 1) {
                 // console.log(top - buttonBounds.height)
-                if (left + buttonBounds.width > clientBounds.screenWidth - 12) {
+                if (left + buttonBounds.width > clientBounds.screenWidth - padding) {
                     horizontal = true;
                     left = pos.left;
-                    top -= buttonBounds.height +  12;                    
+                    top -= buttonBounds.height + padding;                    
                 }
-
-                if (horizontal && top - buttonBounds.height <= 0) {
-                    top = pos.top;
+                
+                if (horizontal && top <= 0) {
+                    top = pos.top + padding;
+                    
+                    if (pos.top + buttonBounds.height <= 0) {
+                        top = padding;
+                        
+                    }
                 }
                 
                 if (!horizontal && top <= 0) {
-                    top = 0;
+                    top = padding;
                 }
             } 
             
@@ -454,7 +460,7 @@ function KellyImgView(cfg) {
             
             block.onclick = function(e) { 
                 
-                if (lazyHand.enabled && lazyHand.button) {                    
+                if (lazyHandUpdate(e)) {                    
                     e.preventDefault();
                     lazyHand.button.onclick(e);
                     return false;
@@ -537,7 +543,11 @@ function KellyImgView(cfg) {
         
         if (beasy) return false;
         
-        beasy = true;
+        if (image.parentNode) image.parentNode.removeChild(image);
+        image = false;            
+        imageBounds = false;
+            
+        beasy = 'loadImage';
         scale = 1;
         // console.log('load image');
         
@@ -914,7 +924,7 @@ function KellyImgView(cfg) {
             showMainBlock(false);
             
             imageBounds = false;
-            beasy = true; 
+            beasy = 'close'; 
             
             handler.hideLoader(true);
             
@@ -1036,23 +1046,25 @@ function KellyImgView(cfg) {
              
         if (stage == 2) {
         
-            beasy = false;
-            if (image.parentNode) image.parentNode.removeChild(image);
-            image = false;            
-            imageBounds = false;
-            
+            beasy = false;            
             handler.loadImage(false, {cursor : next ? 'next' : 'prev'});
             
         } else { // select image and fade
         
             if (beasy) return false;
             if (!image) return false;
-            if (!getNextImage(next)) return false;
+            
+            var nextImage = getNextImage(next);            
+            if (!nextImage) return false;
+            
+            if (userEvents.onNextImage) {
+                userEvents.onNextImage(handler, nextImage, next);
+            }
             
             handler.hideLoader(false);
             handler.hideButtons(true);
             
-            beasy = true;
+            beasy = 'nextImage';
             image.style.opacity = '0';
             
             // todo make load at same time as previuse image fades

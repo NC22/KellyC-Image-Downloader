@@ -360,15 +360,8 @@ function KellyTooltip(cfg) {
 
         } else if (handler.positionY == 'top' && handler.ptypeY == 'inside') {		
                         
-        } else if (handler.positionY == 'bottom' && handler.ptypeY == 'outside') { 
-            
-            // prevent out of screen show
-            if (this.avoidOutOfBounds && top + pos.height + toolTipBounds.height > scrollTop + screenBounds.height + 20) {
-                top = top - toolTipBounds.height - handler.offset.top; // show as top - outside
-            } else {
-                top = top + pos.height; 
-            }
-            
+        } else if (handler.positionY == 'bottom' && handler.ptypeY == 'outside') {             
+            top = top + pos.height; 
         } else if (handler.positionY == 'bottom' && handler.ptypeY == 'inside') { 
             top = top + pos.height - toolTipBounds.height; 
         } else if (handler.positionY == 'center') {
@@ -385,6 +378,42 @@ function KellyTooltip(cfg) {
             left = left + pos.width - toolTipBounds.width;	
         } else if (handler.positionX == 'center') {
             left += pos.width / 2 - toolTipBounds.width / 2;
+        }
+        
+        if (this.avoidOutOfBounds && handler.target != 'screen') {
+            
+            // move to full width \ height to another side if out of bounds
+            
+            if ( top + toolTipBounds.height > scrollTop + screenBounds.height) {
+                top = top - toolTipBounds.height - handler.offset.top; 
+                
+                if (handler.ptypeY == 'outside') {
+                    top -= pos.height;
+                }
+                
+            }  else if ( top + toolTipBounds.height < 0 ) {
+                top = top + toolTipBounds.height + handler.offset.top;  
+                
+                if (handler.ptypeY == 'outside') {
+                    top += pos.height;
+                }
+            }
+            
+            if ( left + toolTipBounds.width > scrollLeft + screenBounds.width) {
+                
+                left = left - toolTipBounds.width - handler.offset.left;  
+                
+                if (handler.ptypeX == 'outside') {
+                    left -= pos.width;
+                }
+                
+            } else if ( left + toolTipBounds.width < 0 ) {
+                left = left + toolTipBounds.width + handler.offset.left;
+
+                if (handler.ptypeX == 'outside') {
+                    left += pos.width;
+                }                
+            }
         }
         
         toolTip.style.top = top + 'px';
@@ -509,7 +538,7 @@ KellyTooltip.addTipToEl = function(el, message, cfg, delay, onShow) {
                 tooltip.show(true);
                 tooltip.updatePosition();
                 
-                if (onShow) onShow(el, e);
+                if (onShow) onShow(el, e,  tooltip);
                 
                 el.onmouseover = onmouseOver;
                 
@@ -1196,7 +1225,7 @@ function KellyTileGrid(cfg) {
    @description    image view widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.0.6 22.09.18
+   @version        v 1.0.8 28.10.18
    
    ToDo : 
    
@@ -1211,7 +1240,7 @@ function KellyImgView(cfg) {
     var handler = this;    
     var events = new Array();
     
-    var beasy = false;
+    var beasy = false; // false or beasy process name (loadImage, close, nextImage)
     
     var image = false; // dom el - current loaded image, false if not shown (getCurrentImage().image)
     var imageBounds = false; 
@@ -1246,6 +1275,7 @@ function KellyImgView(cfg) {
         onBeforeGalleryOpen : false, // 
         onBeforeShow : false, // изображение загружено но не показано, переменные окружения обновлены
         onClose : false, //
+        onNextImage : false, // onNextImage(handler, nextImage, next)
     };
  
     var moveable = true;
@@ -1296,6 +1326,10 @@ function KellyImgView(cfg) {
             
             if (cfg.userEvents.onClose) {
                 userEvents.onClose = cfg.userEvents.onClose;
+            }    
+
+            if (cfg.userEvents.onNextImage) {
+                userEvents.onNextImage = cfg.userEvents.onNextImage;
             }
         }
         
@@ -1312,11 +1346,9 @@ function KellyImgView(cfg) {
         } 
         
         if (typeof cfg.lazyHand != 'undefined') {
-            lazyHand.enabled = cfg.lazyHand ? true : false;
             
-            if (!lazyHand.enabled) {
-                handler.removeEventListener(document.body, "mousemove", 'lazy_hand_');
-                lazyHand.event = false;                          
+            lazyHand.enabled = cfg.lazyHand ? true : false;            
+            if (!lazyHand.enabled) {                         
                 lazyHand.button = false;
                 lazyHand.pos = false;
             }
@@ -1326,20 +1358,23 @@ function KellyImgView(cfg) {
     
     function lazyHandUpdate(e) {
         
+        if (!lazyHand.enabled || !lazyHand.button) {
+            return false;
+        }
+            
         var curPos = getEventDot(e);
-        
         var distance = false;
         
         if (lazyHand.pos) {
             distance = calcDistance(lazyHand.pos, curPos);
         }
         
-        if (!distance || distance > 30) {
-            // handler.updateButtonsPos();
-            handler.removeEventListener(document.body, "mousemove", 'lazy_hand_');
-            lazyHand.event = false;            
+        if (distance === false || distance > 30) {  
             lazyHand.button = false;
             lazyHand.pos = false;
+            return false;
+        } else {        
+            return true;
         }
     }
        
@@ -1416,6 +1451,7 @@ function KellyImgView(cfg) {
         return { 
             block : getBlock(),
             image : image, 
+            beasy : beasy,
             gallery : selectedGallery, 
             index : cursor,
             cursor : cursor,
@@ -1477,15 +1513,9 @@ function KellyImgView(cfg) {
             if (additionStyle) button.setAttribute('style', additionStyle);
             button.onclick = function(e) {
                 
-                if (lazyHand.enabled) {
-                    
-                    lazyHand.button = this;
+                if (lazyHand.enabled) {                    
+                    lazyHand.button = this; 
                     lazyHand.pos = getEventDot(e);
-            
-                    if (!lazyHand.event) {
-                        handler.addEventListner(document.body, "mousemove", lazyHandUpdate, 'lazy_hand_');              
-                        lazyHand.event = true;
-                    }
                 }
                 
                 if (eventOnClick) eventOnClick(e);
@@ -1539,31 +1569,36 @@ function KellyImgView(cfg) {
         var item = 0;
         var horizontal = false;        
         
-        var left = pos.left + parseInt(image.style.width) + 12;
+        var padding = 12;
+        var left = pos.left + parseInt(image.style.width) + padding;
         var top = pos.top;
         
         for (var k in buttons) {
             
             if (buttons[k].className.indexOf('hidden') != -1) continue;
-            // if (lazyHand.button && lazyHand.enabled && !lazyHand.ignore && lazyHand.button == buttons[k]) continue;
-               
+            
             item++;                
             var buttonBounds = buttons[k].getBoundingClientRect();
             
             if (item == 1) {
                 // console.log(top - buttonBounds.height)
-                if (left + buttonBounds.width > clientBounds.screenWidth - 12) {
+                if (left + buttonBounds.width > clientBounds.screenWidth - padding) {
                     horizontal = true;
                     left = pos.left;
-                    top -= buttonBounds.height +  12;                    
+                    top -= buttonBounds.height + padding;                    
                 }
-
-                if (horizontal && top - buttonBounds.height <= 0) {
-                    top = pos.top;
+                
+                if (horizontal && top <= 0) {
+                    top = pos.top + padding;
+                    
+                    if (pos.top + buttonBounds.height <= 0) {
+                        top = padding;
+                        
+                    }
                 }
                 
                 if (!horizontal && top <= 0) {
-                    top = 0;
+                    top = padding;
                 }
             } 
             
@@ -1645,7 +1680,7 @@ function KellyImgView(cfg) {
             
             block.onclick = function(e) { 
                 
-                if (lazyHand.enabled && lazyHand.button) {                    
+                if (lazyHandUpdate(e)) {                    
                     e.preventDefault();
                     lazyHand.button.onclick(e);
                     return false;
@@ -1728,7 +1763,11 @@ function KellyImgView(cfg) {
         
         if (beasy) return false;
         
-        beasy = true;
+        if (image.parentNode) image.parentNode.removeChild(image);
+        image = false;            
+        imageBounds = false;
+            
+        beasy = 'loadImage';
         scale = 1;
         // console.log('load image');
         
@@ -2105,7 +2144,7 @@ function KellyImgView(cfg) {
             showMainBlock(false);
             
             imageBounds = false;
-            beasy = true; 
+            beasy = 'close'; 
             
             handler.hideLoader(true);
             
@@ -2227,23 +2266,25 @@ function KellyImgView(cfg) {
              
         if (stage == 2) {
         
-            beasy = false;
-            if (image.parentNode) image.parentNode.removeChild(image);
-            image = false;            
-            imageBounds = false;
-            
+            beasy = false;            
             handler.loadImage(false, {cursor : next ? 'next' : 'prev'});
             
         } else { // select image and fade
         
             if (beasy) return false;
             if (!image) return false;
-            if (!getNextImage(next)) return false;
+            
+            var nextImage = getNextImage(next);            
+            if (!nextImage) return false;
+            
+            if (userEvents.onNextImage) {
+                userEvents.onNextImage(handler, nextImage, next);
+            }
             
             handler.hideLoader(false);
             handler.hideButtons(true);
             
-            beasy = true;
+            beasy = 'nextImage';
             image.style.opacity = '0';
             
             // todo make load at same time as previuse image fades
@@ -7564,7 +7605,7 @@ function KellyOptions(cfg) {
 
 function KellyFavItems() 
 {
-    this.PROGNAME = 'KellyFavItems v1.1.0.6b';
+    this.PROGNAME = 'KellyFavItems v1.1.0.7b';
     
     var handler = this;	
         
@@ -8076,6 +8117,7 @@ function KellyFavItems()
                     },
                     
                     onClose : function(tooltip) {
+                        
                         tooltip.updateCfg({closeButton : false});
                         
                         setTimeout(function() {
@@ -8365,13 +8407,23 @@ function KellyFavItems()
                     if (i == 0) imgTitle = lng.s('Основное изображение', 'image_main');
                     
                     text += '<li><a href="' + env.getImageDownloadLink(item.pImage[i], true) + '" target="_blank">';
-                    text += '<img src="' + env.getStaticImage(env.getImageDownloadLink(item.pImage[i], false)) + '" alt="' + imgTitle + '"></a></li>';
+                    
+                    text += '<img \
+                             class="' + env.className + '-ItemTip-image" \
+                             src="' + env.getStaticImage(env.getImageDownloadLink(item.pImage[i], false)) + '" \
+                             alt="' + imgTitle + '" \
+                             itemIndex="' + fav.items.indexOf(item) + '" \
+                             kellyGallery="collection" \
+                             kellyGalleryIndex="' + i + '" \
+                            >';
+                            
+                    text += '</a></li>';
                 }
                     
             text += '</ul>';
         
         } else {
-        
+                
             text += '<a href="' + env.getImageDownloadLink(item.pImage, true) + '" target="_blank">' + lng.s('Основное изображение', 'image_main') + '</a>' + '<br>';
         }
         
@@ -8380,29 +8432,55 @@ function KellyFavItems()
        
     function addImageInfoTip(el) {
         
-        var getMessage = function(el, e) {
+        var item = false;
         
-            var item = false;
-            var state = imgViewer.getCurrentState();
+        var getCurrentImage = function(state) {
+            var image = false;
+            
             if (state.imageData) {		
                 if (typeof state.imageData.pImage != 'undefined') {
-                    item = state.imageData;
+                    image = state.imageData;
                 } else {
-                    item = state.imageData[state.cursor];
+                    image = state.imageData[state.cursor];
                 }
             }
+            return image;
+        }
+        
+        var getMessage = function(el, e) {
+        
+            var state = imgViewer.getCurrentState();
+            item = getCurrentImage(state); 
             
             if (!item) return false;
         
             var message = document.createElement('div');
                 
-            KellyTools.setHTMLData(message, handler.showItemInfo(item));                
-         
+            KellyTools.setHTMLData(message, handler.showItemInfo(item)); 
+            
+            handler.applayItemCollectionButton(message.getElementsByClassName(env.className + '-ItemTip-image'));
+            
             return message;
         }
         
+        var onShow = function(el, e, tooltip) {
+            
+            var state = imgViewer.getCurrentState();
+            
+            if (state.beasy || !state.shown || getCurrentImage(state) != item) {
+                tooltip.remove();
+                imgViewer.tooltip = false;
+            }
+            
+            if (imgViewer.tooltip) {
+                imgViewer.tooltip.remove();
+            }
+            
+            imgViewer.tooltip = tooltip;
+        }
+        
         KellyTooltip.addTipToEl(el, getMessage, {
-            offset : {left : -20, top : 0}, 
+            offset : {left : 0, top : 0}, 
             positionY : 'top',
             positionX : 'right',
             ptypeX : 'outside',
@@ -8411,7 +8489,7 @@ function KellyFavItems()
             selfClass : env.hostClass + ' ' + env.className + '-ItemTip-tooltipster',
             classGroup : env.className + '-tooltipster',
             removeOnClose : true,
-        }, 100);	
+        }, 100, onShow);	
     }
     
     function initWorktop() {
@@ -8444,7 +8522,26 @@ function KellyFavItems()
             
             KellyTools.setHTMLData(imgView, '<div class="' + imgViewClass + '-loader ' + imgViewClass + '-loader-hidden"></div><div class="' + imgViewClass + '-img" ></div>');
             
-            imgViewer = new KellyImgView({className : env.className + '-ImgView', viewerBlock : imgView, lazyHand : true});
+            imgViewer = new KellyImgView({
+                className : env.className + '-ImgView', 
+                viewerBlock : imgView, 
+                lazyHand : true,
+                userEvents : {
+                    onClose : function() {
+                        if (imgViewer.tooltip) {
+                            imgViewer.tooltip.remove();
+                            imgViewer.tooltip = false;
+                        }
+                    },
+                    onNextImage : function(handler, nextImage, action) {
+                        
+                        if (imgViewer.tooltip) {
+                            imgViewer.tooltip.remove();
+                            imgViewer.tooltip = false;
+                        }
+                    },
+                },
+            });
             
         var downloaderHTML = '\
             <div class="' + modalClass + ' ' + modalClass + '-downloader hidden">\
@@ -9034,6 +9131,28 @@ function KellyFavItems()
         return true;
     }
     
+    this.applayItemCollectionButton = function(items) {
+        
+        if (!items || !items.length) return;
+        
+        for (var i = 0; i < items.length; i++) {
+            items[i].onclick = function() {
+            
+                var item = fav.items[this.getAttribute('itemIndex')];
+                var imageSet = [];
+                
+                for (var b = 0; b < item.pImage.length; b++) {
+                    imageSet[imageSet.length] = env.getImageDownloadLink(item.pImage[b], fav.coptions.grid.viewerShowAs == 'hd' ? true : false);
+                }
+                
+                imgViewer.addToGallery(imageSet, 'collection', item);
+                imgViewer.loadImage(this);   
+                
+                return false;
+            }
+        }
+    }
+    
     function showItem(item, subItem) {
         
         if (!item) return false;
@@ -9130,21 +9249,7 @@ function KellyFavItems()
                 collectionBtn.setAttribute('kellyGalleryIndex', 0);
                 collectionBtn.setAttribute('itemIndex', index);
                 
-                collectionBtn.onclick = function() {
-                
-                    var item = fav.items[this.getAttribute('itemIndex')];
-                    var imageSet = [];
-                    
-                    for (var b = 0; b < item.pImage.length; b++) {
-                        imageSet[imageSet.length] = env.getImageDownloadLink(item.pImage[b], fav.coptions.grid.viewerShowAs == 'hd' ? true : false);
-                    }
-                    
-                    imgViewer.addToGallery(imageSet, 'collection', item);
-                    imgViewer.loadImage(this);   
-                    
-                    return false;
-                }
-                
+                handler.applayItemCollectionButton([collectionBtn]);
             }
             // todo replace
             //env.getImageDownloadLink(galleryImages[galleryIndex], true)

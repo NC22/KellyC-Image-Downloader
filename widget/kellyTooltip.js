@@ -352,15 +352,8 @@ function KellyTooltip(cfg) {
 
         } else if (handler.positionY == 'top' && handler.ptypeY == 'inside') {		
                         
-        } else if (handler.positionY == 'bottom' && handler.ptypeY == 'outside') { 
-            
-            // prevent out of screen show
-            if (this.avoidOutOfBounds && top + pos.height + toolTipBounds.height > scrollTop + screenBounds.height + 20) {
-                top = top - toolTipBounds.height - handler.offset.top; // show as top - outside
-            } else {
-                top = top + pos.height; 
-            }
-            
+        } else if (handler.positionY == 'bottom' && handler.ptypeY == 'outside') {             
+            top = top + pos.height; 
         } else if (handler.positionY == 'bottom' && handler.ptypeY == 'inside') { 
             top = top + pos.height - toolTipBounds.height; 
         } else if (handler.positionY == 'center') {
@@ -377,6 +370,42 @@ function KellyTooltip(cfg) {
             left = left + pos.width - toolTipBounds.width;	
         } else if (handler.positionX == 'center') {
             left += pos.width / 2 - toolTipBounds.width / 2;
+        }
+        
+        if (this.avoidOutOfBounds && handler.target != 'screen') {
+            
+            // move to full width \ height to another side if out of bounds
+            
+            if ( top + toolTipBounds.height > scrollTop + screenBounds.height) {
+                top = top - toolTipBounds.height - handler.offset.top; 
+                
+                if (handler.ptypeY == 'outside') {
+                    top -= pos.height;
+                }
+                
+            }  else if ( top + toolTipBounds.height < 0 ) {
+                top = top + toolTipBounds.height + handler.offset.top;  
+                
+                if (handler.ptypeY == 'outside') {
+                    top += pos.height;
+                }
+            }
+            
+            if ( left + toolTipBounds.width > scrollLeft + screenBounds.width) {
+                
+                left = left - toolTipBounds.width - handler.offset.left;  
+                
+                if (handler.ptypeX == 'outside') {
+                    left -= pos.width;
+                }
+                
+            } else if ( left + toolTipBounds.width < 0 ) {
+                left = left + toolTipBounds.width + handler.offset.left;
+
+                if (handler.ptypeX == 'outside') {
+                    left += pos.width;
+                }                
+            }
         }
         
         toolTip.style.top = top + 'px';
@@ -501,7 +530,7 @@ KellyTooltip.addTipToEl = function(el, message, cfg, delay, onShow) {
                 tooltip.show(true);
                 tooltip.updatePosition();
                 
-                if (onShow) onShow(el, e);
+                if (onShow) onShow(el, e,  tooltip);
                 
                 el.onmouseover = onmouseOver;
                 

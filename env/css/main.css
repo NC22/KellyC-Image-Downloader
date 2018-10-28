@@ -56,7 +56,8 @@
 }
 
 .__BASECLASS__-tooltipster-wrap.__BASECLASS__-ItemTip-tooltipster  {
-	padding-left : 40px;
+	padding-left : 10px;
+    padding-right : 10px;
 }
 
 .__BASECLASS__-tooltipster-wrap.__BASECLASS__-Default-tooltipster, 
