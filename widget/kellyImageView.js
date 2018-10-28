@@ -433,7 +433,6 @@ function KellyImgView(cfg) {
         var disableMoveContainer = function(disable) {
         
             var stop = function(e) {
-                console.log('tewt');
                 preventEvent(e);
                 return false;
             }
