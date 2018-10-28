@@ -504,9 +504,12 @@ KellyTooltip.addTipToEl = function(el, message, cfg, delay, onShow) {
     }
     
     cfg.target = el;
-
+    var wait = false;
+    
     el.onmouseover = function (e) { 
-            
+        
+        if (wait) return;
+        
         var tipTimer = setTimeout(function() {
             
             var text = false;
@@ -519,20 +522,15 @@ KellyTooltip.addTipToEl = function(el, message, cfg, delay, onShow) {
             
             var tooltip = new KellyTooltip(cfg);
             
-            var onmouseOver = el.onmouseover;
-            
-            el.onmouseout = function(e) {}
-            el.onmouseover = function(e) {}
-            
             setTimeout(function() {
-            
+                
+                wait = false;
+                
                 tooltip.setMessage(text);			
                 tooltip.show(true);
                 tooltip.updatePosition();
                 
                 if (onShow) onShow(el, e,  tooltip);
-                
-                el.onmouseover = onmouseOver;
                 
                 el.onmouseout = function(e) {
                     var related = e.toElement || e.relatedTarget;
@@ -556,6 +554,8 @@ KellyTooltip.addTipToEl = function(el, message, cfg, delay, onShow) {
         }, delay);
         
         el.onmouseout = function(e) {
+            if (wait) return;
+            
             if (tipTimer) {
                 clearTimeout(tipTimer);
             }

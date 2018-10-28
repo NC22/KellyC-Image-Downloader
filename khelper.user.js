@@ -512,9 +512,12 @@ KellyTooltip.addTipToEl = function(el, message, cfg, delay, onShow) {
     }
     
     cfg.target = el;
-
+    var wait = false;
+    
     el.onmouseover = function (e) { 
-            
+        
+        if (wait) return;
+        
         var tipTimer = setTimeout(function() {
             
             var text = false;
@@ -527,20 +530,15 @@ KellyTooltip.addTipToEl = function(el, message, cfg, delay, onShow) {
             
             var tooltip = new KellyTooltip(cfg);
             
-            var onmouseOver = el.onmouseover;
-            
-            el.onmouseout = function(e) {}
-            el.onmouseover = function(e) {}
-            
             setTimeout(function() {
-            
+                
+                wait = false;
+                
                 tooltip.setMessage(text);			
                 tooltip.show(true);
                 tooltip.updatePosition();
                 
                 if (onShow) onShow(el, e,  tooltip);
-                
-                el.onmouseover = onmouseOver;
                 
                 el.onmouseout = function(e) {
                     var related = e.toElement || e.relatedTarget;
@@ -564,6 +562,8 @@ KellyTooltip.addTipToEl = function(el, message, cfg, delay, onShow) {
         }, delay);
         
         el.onmouseout = function(e) {
+            if (wait) return;
+            
             if (tipTimer) {
                 clearTimeout(tipTimer);
             }
@@ -1225,7 +1225,7 @@ function KellyTileGrid(cfg) {
    @description    image view widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.0.8 28.10.18
+   @version        v 1.0.9 28.10.18
    
    ToDo : 
    
@@ -1274,7 +1274,8 @@ function KellyImgView(cfg) {
     var userEvents = { 
         onBeforeGalleryOpen : false, // 
         onBeforeShow : false, // изображение загружено но не показано, переменные окружения обновлены
-        onClose : false, //
+        onClose : false, // calls after hide viewer block
+        onShow : false, // onShow(handler, show)  calls before show \ hide viewer block
         onNextImage : false, // onNextImage(handler, nextImage, next)
     };
  
@@ -1285,6 +1286,9 @@ function KellyImgView(cfg) {
     // блокировка скролла при показе изображения
     // метод hideScroll - скрывает скроллбар для body (см. showBodyScroll), добавляет соразмерный отступ; минус - position : fixed элементы все равно сдвигаются если привязаны к правой стороне
     // метод lockMove   - прерывает события движения (см. disableMoveContainer), скроллбар остается
+    
+    // lockMove - not working in Edge
+    // see https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/7134034/ - already two years not fixed bug in Edge with scroll event
     
     var lockMoveMethod = 'lockMove'; 
    
@@ -1315,22 +1319,18 @@ function KellyImgView(cfg) {
         }
         
         if (cfg.userEvents) {
-         
-            if (cfg.userEvents.onBeforeGalleryOpen) {
-                userEvents.onBeforeGalleryOpen = cfg.userEvents.onBeforeGalleryOpen;
-            }
             
-            if (cfg.userEvents.onBeforeShow) {
-                userEvents.onBeforeShow = cfg.userEvents.onBeforeShow;
+            for (var k in userEvents){
+                if (typeof cfg.userEvents[k] == 'function') {
+                    userEvents[k] = cfg.userEvents[k];
+                }
             }
-            
-            if (cfg.userEvents.onClose) {
-                userEvents.onClose = cfg.userEvents.onClose;
-            }    
-
-            if (cfg.userEvents.onNextImage) {
-                userEvents.onNextImage = cfg.userEvents.onNextImage;
-            }
+        }
+    
+        if (cfg.userEvents === false) {
+            for (var k in userEvents){
+                 userEvents[k] = false;
+            }               
         }
         
         if (cfg.buttonsMargin) {
@@ -1353,7 +1353,10 @@ function KellyImgView(cfg) {
                 lazyHand.pos = false;
             }
         }
-                
+        
+        if (cfg.lockMoveMethod) {
+            lockMoveMethod = cfg.lockMoveMethod;
+        }               
     }   
     
     function lazyHandUpdate(e) {
@@ -1631,9 +1634,17 @@ function KellyImgView(cfg) {
         else return false;
     }
     
+    function preventEvent(event) {
+        event.preventDefault ? event.preventDefault() : (event.returnValue = false);
+    }
+    
     function showMainBlock(show) {
            
         if (show && blockShown) return;
+        
+        if (userEvents.onShow) {
+            userEvents.onShow(handler, show);
+        }
         
         handler.removeEventListener(document.body, "mousemove", 'lazy_hand_');
 
@@ -1642,7 +1653,9 @@ function KellyImgView(cfg) {
         var disableMoveContainer = function(disable) {
         
             var stop = function(e) {
-                event.preventDefault();
+                console.log('tewt');
+                preventEvent(e);
+                return false;
             }
             
             if (disable) {
@@ -1679,9 +1692,16 @@ function KellyImgView(cfg) {
             
             block.onclick = function(e) { 
                 
-                if (lazyHandUpdate(e)) {                    
-                    e.preventDefault();
-                    lazyHand.button.onclick(e);
+                if (lazyHandUpdate(e) && e.target != lazyHand.button) {                    
+                    preventEvent(e);
+                    
+                    try {                        
+                        var retranslateEvent = new e.constructor(e.type, e); 
+                        lazyHand.button.dispatchEvent(retranslateEvent);
+                    } catch(e){
+                        lazyHand.button.onclick(e);
+                    }
+                    
                     return false;
                 }
                 
@@ -6681,12 +6701,23 @@ KellyTools.getBrowserName = function() {
     
     var userAgent = navigator.userAgent;
     
-    if (userAgent.indexOf("Opera") != -1 || userAgent.indexOf('OPR') != -1 ) return 'opera';
-    if (userAgent.indexOf("Chrome") != -1 ) return 'chrome';
-    if (userAgent.indexOf("Safari") != -1) return 'safari';
-    if (userAgent.indexOf("Firefox") != -1) return 'firefox';    
-    if (userAgent.indexOf("Edge") != -1) return 'edge';
-    if (userAgent.indexOf("MSIE") != -1) return 'ie';
+    var test = ['opera', 'firefox', 'ie', 'edge', 'chrome'];
+    
+    for (var i = 0; i < test.length; i++) {
+        var bTest = test[i];
+        
+        if (bTest == 'opera') {
+            if ((!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0) return 'opera';
+        } else if ( bTest == 'firefox' ) {
+            if (typeof InstallTrigger !== 'undefined') return 'firefox';
+        } else if ( bTest == 'ie' ) {
+            if (/*@cc_on!@*/false || !!document.documentMode) return 'ie';
+        } else if ( bTest == 'edge' ) {
+            if (!!window.StyleMedia) return 'edge';
+        } else if ( bTest == 'chrome' ) {
+            if (!!window.chrome && !!window.chrome.webstore) return 'chrome';
+        } 
+    }
     
     return 'unknown';
 }
@@ -8525,20 +8556,29 @@ function KellyFavItems()
                 className : env.className + '-ImgView', 
                 viewerBlock : imgView, 
                 lazyHand : true,
+                lockMoveMethod : ['edge', 'ie'].indexOf(KellyTools.getBrowserName()) != -1 ? 'hideScroll' : 'lockMove',
                 userEvents : {
+                    
                     onClose : function() {
                         if (imgViewer.tooltip) {
                             imgViewer.tooltip.remove();
                             imgViewer.tooltip = false;
                         }
                     },
-                    onNextImage : function(handler, nextImage, action) {
+                    
+                    onNextImage : function(self, nextImage, action) {
                         
                         if (imgViewer.tooltip) {
                             imgViewer.tooltip.remove();
                             imgViewer.tooltip = false;
                         }
                     },
+                    
+                    onShow : function(self, show) {
+                        if (handler.getTooltip().isShown()) {
+                            handler.getTooltip().show(false);
+                        }
+                    }
                 },
             });
             
