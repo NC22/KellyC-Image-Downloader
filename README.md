@@ -1,4 +1,4 @@
-# KellyCFavourites
+<h1>KellyCFavourites</h1>
 Store you personal favourite publications for JoyReactor localy
 
 <br>
@@ -6,6 +6,6 @@ Store you personal favourite publications for JoyReactor localy
 <br>
 <br>
 <br>
-# License 
-
- [GNU General Public License v3](http://www.gnu.org/licenses/gpl.html) 
+<h2>License</h2>
+<br>
+[GNU General Public License v3](http://www.gnu.org/licenses/gpl.html) 
