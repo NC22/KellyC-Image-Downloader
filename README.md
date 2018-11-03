@@ -4,7 +4,9 @@ Store you personal favourite publications for JoyReactor localy
 <br>
 <b><a href="//github.com/NC22/KellyCFavorites/wiki">Wiki</a></b>
 <br>
-<p>Compatible with all modern browsers</p>
+<br>
+<br>
+<p>Compatible with Chrome, Opera, FireFox, Edge</p>
 <p>This extension add the following functional for sites joyreactor.com, joyreactor.cc, old.reactor.cc, safereactor.cc : </p>
 <p>
 <ul>
