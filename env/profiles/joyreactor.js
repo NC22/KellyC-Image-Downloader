@@ -712,9 +712,14 @@ function kellyProfileJoyreactor() {
             if (imagesEl[i].innerHTML.indexOf('gif_source') !== -1) {
                 
                 // extended gif info for fast get dimensions \ keep gif unloaded until thats needed
-                var gif = KellyTools.getElementByTag(imagesEl[i], 'a');                
-                if (gif) {
-                    image = handler.getImageDownloadLink(gif.getAttribute("href"), false);
+                var gifSrc = imagesEl[i].getElementsByTagName('a');  
+                if (gifSrc && gifSrc.length) {
+                    for (var b = 0; b < gifSrc.length; gifSrc++) {
+                        if (gifSrc[b].className.indexOf('gif_source') != -1) {
+                            image = handler.getImageDownloadLink(gifSrc[b].getAttribute("href"), false);
+                            break;
+                        }
+                    }
                 }
                 
             } else {
