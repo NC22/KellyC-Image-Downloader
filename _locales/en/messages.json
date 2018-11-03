@@ -561,13 +561,13 @@
         "message":"For selected storage type (<b>localstorage</b>) max amount of space is limited and in common case can't be more then <b>4mb</b>. Please delete unused profiles if you near to this limit, or select another storage type"
     },
     "storage_manager_api_notice":{  
-        "message":"For selected storage type (<b>Browser API</b>) max amount of space is <b>unlimited</b>. Please controll used resources by yourself"
+        "message":"For selected storage type (<b>Browser API</b>) max amount of space is <b>__MAX_ENV_SIZE__mb</b> (maximum per profile file <b>__MAX_TOTAL_PER_DB__mb</b>)"
     },    
     "storage_manager_hit_limit_db":{  
-        "message":"Profile file can't be more than <b>__MAX_TOTAL_PER_DB__</b> mb"
+        "message":"Profile file can't be more than <b>__MAX_TOTAL_PER_DB__</b>mb"
     },    
     "storage_manager_hit_limit_env":{  
-        "message":"Reached max amount of data for current environment (more then <b>__MAX_ENV_SIZE__</b> mb)"
+        "message":"Reached max amount of data for current environment (more then <b>__MAX_ENV_SIZE__</b>mb)"
     },
     "storage_type":{  
         "message":"Storage type"
