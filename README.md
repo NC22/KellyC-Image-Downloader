@@ -1,8 +1,9 @@
 <h1>KellyCFavourites</h1>
 Store you personal favourite publications for JoyReactor localy
-
 <br>
-<b><a href="//github.com/NC22/KellyCFavorites/wiki">Wiki</a></b>
+<br>
+<br>
+<b><a href="https://catface.ru/way/kellyc_favorites/">Home page</a> | <a href="//github.com/NC22/KellyCFavorites/wiki">Wiki</a></b>
 <br>
 <br>
 <br>
