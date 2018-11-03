@@ -605,17 +605,26 @@
 }
 
 .__BASECLASS__-ImgView-loader {
+    
     /* https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_loader */
-     position : absolute;
-     left : 50%;
-     top : 50%;
-     border: 14px solid rgba(243, 243, 243, 0.67);
-     border-radius: 50%;
-     border-left: 14px solid #ff6922;
-     width: 88px;
-     height: 88px;
-     animation: __BASECLASS__LoaderSpin 2s linear infinite;
-     margin: -44px;
+    
+    position : absolute;
+    
+    left : 50%;
+    top : 50%;
+    
+    border: 14px solid rgba(243, 243, 243, 0.67);
+    border-radius: 50%;
+    border-left: 14px solid #ff6922;
+
+    animation: __BASECLASS__LoaderSpin 2s linear infinite;
+
+    width: 80px;
+	height: 80px;
+    
+    margin: -40px;
+    
+    box-sizing: border-box;
 }
 
 @keyframes __BASECLASS__LoaderSpin {
@@ -1222,6 +1231,15 @@
     width: 100%;
     height: 100%;
     border-radius: 6px;
+}
+
+.__BASECLASS__-downloader-progressbar-line.__BASECLASS__-downloader-progressbar-line-err {
+    left : auto;
+    right: 0;
+}
+
+.__BASECLASS__-downloader-progressbar-line-err:after {
+    background: rgba(239, 94, 126, 0.76);
 }
 
 .__BASECLASS__-downloader-progressbar-state {

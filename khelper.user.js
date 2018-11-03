@@ -173,21 +173,9 @@ function KellyTooltip(cfg) {
      
         events.onBodyClick = function(e) {
             
-            if (handler.closeByBody) {
-                
-                if (e.target != handler.self) {
-                    
-                    var parent = e.target;
-                    while (parent && handler.self != parent) {
-                        parent = parent.parentElement;
-                    }  
-                    
-                    if (!parent) {								
-                        handler.show(false);
-                    }
-                }
+            if (handler.closeByBody && !handler.isChild(e.target, handler.self)) {
+                handler.show(false);
             }
-            
         };
         
         document.body.addEventListener('click', events.onBodyClick);
@@ -304,8 +292,12 @@ function KellyTooltip(cfg) {
         }
     }
 
-    this.isChild = function(target, searchParent) {
-        var parent = target;
+    // check is element related to an searchParent element
+    
+    this.isChild = function(childTarget, searchParent) {
+        var parent = childTarget;
+
+        if (!childTarget) return false;
         
         if (!searchParent) searchParent = handler.self;
         
@@ -1225,7 +1217,7 @@ function KellyTileGrid(cfg) {
    @description    image view widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.0.9 28.10.18
+   @version        v 1.1.2 03.11.18
    
    ToDo : 
    
@@ -1272,11 +1264,11 @@ function KellyImgView(cfg) {
     var imagesData = {};
     
     var userEvents = { 
-        onBeforeGalleryOpen : false, // 
-        onBeforeShow : false, // изображение загружено но не показано, переменные окружения обновлены
-        onClose : false, // calls after hide viewer block
-        onShow : false, // onShow(handler, show)  calls before show \ hide viewer block
-        onNextImage : false, // onNextImage(handler, nextImage, next)
+        onBeforeImageLoad : false,  // onBeforeImageLoad(handler, galleryItemPointer, galleryData) calls before onShow and initialize open image process (to prevent, return true in userEvent method) 
+        onBeforeImageShow : false,  // onBeforeImageShow(handler, image) calls before add loaded image to container изображение загружено но не показано, переменные окружения обновлены
+        onClose : false,            // onShow(handler) calls after hide viewer block
+        onShow : false,             // onShow(handler, show) calls before show \ hide viewer block
+        onNextImage : false,        // onNextImage(handler, nextImage, next)
     };
  
     var moveable = true;
@@ -1646,7 +1638,7 @@ function KellyImgView(cfg) {
             userEvents.onShow(handler, show);
         }
         
-        handler.removeEventListener(document.body, "mousemove", 'lazy_hand_');
+        handler.removeEventPListener(document.body, "mousemove", 'lazy_hand_');
 
         // will be extended if something from this events will be used for some thing else
         
@@ -1659,15 +1651,15 @@ function KellyImgView(cfg) {
             
             if (disable) {
             
-                handler.addEventListner(window, 'wheel', stop, '_scroll');
-                handler.addEventListner(window, 'mousewheel', stop, '_scroll');
-                handler.addEventListner(window, 'touchmove', stop, '_scroll');
+                handler.addEventPListener(window, 'wheel', stop, '_scroll');
+                handler.addEventPListener(window, 'mousewheel', stop, '_scroll');
+                handler.addEventPListener(window, 'touchmove', stop, '_scroll');
             
             } else {
             
-                handler.removeEventListener(window, 'touchmove', '_scroll');            
-                handler.removeEventListener(window, 'mousewheel', '_scroll');
-                handler.removeEventListener(window, 'wheel', '_scroll');
+                handler.removeEventPListener(window, 'touchmove', '_scroll');            
+                handler.removeEventPListener(window, 'mousewheel', '_scroll');
+                handler.removeEventPListener(window, 'wheel', '_scroll');
             }
             
         }            
@@ -1710,20 +1702,20 @@ function KellyImgView(cfg) {
                 return false; 
             }        
                  
-            handler.addEventListner(window, "scroll", function (e) {
+            handler.addEventPListener(window, "scroll", function (e) {
                 handler.updateBlockPosition();
             }, 'img_view_');
             
-            handler.addEventListner(window, "resize", function (e) {
+            handler.addEventPListener(window, "resize", function (e) {
                 handler.updateSize(e);
                 return false;
             }, 'image_update_');
 
-           // env.addEventListner(block, "mousemove", function (e) {
+           // env.addEventPListener(block, "mousemove", function (e) {
            //     handler.updateCursor();
            // }, 'image_mouse_move_');            
 
-            handler.addEventListner(document.body, "keyup", function (e) {
+            handler.addEventPListener(document.body, "keyup", function (e) {
             
                 var c = e.keyCode - 36;
                
@@ -1757,19 +1749,20 @@ function KellyImgView(cfg) {
                 
                 deleteClass(block, 'active');
                 deleteClass(block, 'fade');              
-                handler.removeEventListener(window, "scroll", 'img_view_');
+                handler.removeEventPListener(window, "scroll", 'img_view_');
                 blockShown = false;
                 
             }, fadeTime);  
             
             
             addClass(block, 'fade');
-            handler.removeEventListener(window, "resize", 'image_update_');
-            handler.removeEventListener(document.body, "keyup", 'next_image_key');
+            handler.removeEventPListener(window, "resize", 'image_update_');
+            handler.removeEventPListener(document.body, "keyup", 'next_image_key');
         }     
     }
     
     // initialize image viewer from gallery pointer with start cursor \ gallery and image src, or go to nextimage in selected gallery
+    // see usage in .nextImage method
     
     // galleryItemPointer - dom element with kellyGallery and kellyGalleryIndex attributes, if false, go to next \ prev in current gallery
     // initial image must be setted in href \ src \ or in data-image attribute, else - set kellyGalleryIndex to -1 to start from begining of gallery array
@@ -1781,17 +1774,19 @@ function KellyImgView(cfg) {
         
         if (beasy) return false;
         
+        if (userEvents.onBeforeImageLoad && userEvents.onBeforeImageLoad(handler, galleryItemPointer, galleryData)) {
+            return false;
+        }
+        
+        // reset previouse image bounds info 
+        
         if (image.parentNode) image.parentNode.removeChild(image);
         image = false;            
         imageBounds = false;
             
         beasy = 'loadImage';
         scale = 1;
-        // console.log('load image');
-        
-        if (userEvents.onBeforeGalleryOpen) {
-            userEvents.onBeforeGalleryOpen(handler, galleryItemPointer, galleryData);
-        }
+        // console.log('load image');        
         
         if (!blockShown) {
             showMainBlock(true);
@@ -1829,7 +1824,9 @@ function KellyImgView(cfg) {
         image.src = getImageUrlFromPointer(galleryItemPointer);  
         
         if (isImgLoaded(image)) handler.imageShow();
-        else image.onload = function() { handler.imageShow(); return false; }	
+        else image.onload = function() { 
+            handler.imageShow(); return false; 
+        }	
     }
     
     this.getClientBounds = function() {
@@ -1972,10 +1969,10 @@ function KellyImgView(cfg) {
     this.dragEnd = function(e) {
     
         isMoved = false;
-        handler.removeEventListener(document.body, "mousemove", 'image_drag_');
-        handler.removeEventListener(document.body, "mouseup", 'image_drag_');
-        handler.removeEventListener(document.body, "touchmove", 'image_drag_');
-        handler.removeEventListener(document.body, "touchend", 'image_drag_');
+        handler.removeEventPListener(document.body, "mousemove", 'image_drag_');
+        handler.removeEventPListener(document.body, "mouseup", 'image_drag_');
+        handler.removeEventPListener(document.body, "touchmove", 'image_drag_');
+        handler.removeEventPListener(document.body, "touchend", 'image_drag_');
         
         if (!lastPos) return;
         
@@ -2024,19 +2021,19 @@ function KellyImgView(cfg) {
         // move.x = parseInt(image.style.left)
         
         isMoved = true; 
-        handler.addEventListner(document.body, "mousemove", function (e) {
+        handler.addEventPListener(document.body, "mousemove", function (e) {
             handler.drag(e);
         }, 'image_drag_');
-        handler.addEventListner(document.body, "mouseup", function (e) {
+        handler.addEventPListener(document.body, "mouseup", function (e) {
             handler.dragEnd(e);
         }, 'image_drag_');
-        handler.addEventListner(document.body, "mouseout", function (e) {
+        handler.addEventPListener(document.body, "mouseout", function (e) {
             handler.dragEnd(e);
         }, 'image_drag_');
-        handler.addEventListner(document.body, "touchend", function (e) {
+        handler.addEventPListener(document.body, "touchend", function (e) {
             handler.dragEnd(e);
         }, 'image_drag_');
-        handler.addEventListner(document.body, "touchmove", function (e) {
+        handler.addEventPListener(document.body, "touchmove", function (e) {
             handler.drag(e);
         }, 'image_drag_');
     }
@@ -2052,8 +2049,8 @@ function KellyImgView(cfg) {
         handler.hideLoader(true);
         handler.updateSize(false);
         
-        if (userEvents.onBeforeShow) {
-            userEvents.onBeforeShow(handler, image);
+        if (userEvents.onBeforeImageShow && userEvents.onBeforeImageShow(handler, image)) {
+            return;
         }
         
         imgContainer.innerHTML = '';
@@ -2354,21 +2351,26 @@ function KellyImgView(cfg) {
             for (var i = 0, l = images[galleryName].length; i < l; i++)  {
                 images[galleryName][i].setAttribute('kellyGallery', galleryName);
                 images[galleryName][i].setAttribute('kellyGalleryIndex', i);
-                images[galleryName][i].onclick = function(e) {
-                                    
+                
+                handler.addEventPListener(images[galleryName][i], 'click', function(e) {
+                    
+                    preventEvent(e);
+                    
+                    // ignore click on child elements if attribute is setted
+                    
                     if (this.getAttribute('data-ignore-click') == 'child' && e.target !== this) return true; // pass throw child events if they exist
                 
                     handler.loadImage(this);
                     return false;
                     
-                }
+                }, 'showGallery');
             }	
         }
         
         return true;    
     }
     
-    this.addEventListner = function(object, event, callback, prefix) {
+    this.addEventPListener = function(object, event, callback, prefix) {
         if (!object)
             return false;
         if (!prefix)
@@ -2385,7 +2387,7 @@ function KellyImgView(cfg) {
         return true;
     }
 
-    this.removeEventListener = function(object, event, prefix) {
+    this.removeEventPListener = function(object, event, prefix) {
         if (!object)
             return false;
         if (!prefix)
@@ -2402,6 +2404,18 @@ function KellyImgView(cfg) {
 
         events[prefix + event] = null;
         return true;
+    }
+    
+    this.removeEvents = function(galleryName) {
+        
+        if (!images || !images[galleryName] || !images[galleryName].length) return false;
+        
+        for (var i = 0, l = images[galleryName].length; i < l; i++)  {
+            var item = images[galleryName][i];
+            if (typeof item == 'string') continue;
+            
+            handler.removeEventPListener(item, 'click', 'showGallery');
+        }
     }
     
     constructor(cfg);
@@ -3438,7 +3452,7 @@ function KellyFavStorageManager(cfg) {
         if (!data.coptions.grabber) {
             
             data.coptions.grabber = {
-                nameTemplate : '#category_1#/#number#_#filename#',
+                nameTemplate : '#number#_#filename#', // '#category_1#/#number#_#filename#'
                 baseFolder : env.profile + '/' + 'Downloads',
                 invertNumeration : true,
                 quality : 'hd',
@@ -4353,7 +4367,11 @@ function KellyGrabber(cfg) {
                     </td></tr-->\
                     <tr><td colspan="2"><div class="' + className + '-controll-buttons"></div></td></tr>\
                     <tr><td colspan="2">\
-                        <div class="' + className + '-progressbar"><span class="' + className + '-progressbar-line"></span><span class="' + className + '-progressbar-state"></span></div>\
+                        <div class="' + className + '-progressbar">\
+                            <span class="' + className + '-progressbar-line ' + className + '-progressbar-line-ok"></span>\
+                            <span class="' + className + '-progressbar-line ' + className + '-progressbar-line-err"></span>\
+                            <span class="' + className + '-progressbar-state"></span>\
+                        </div>\
                     </td></tr>\
                     <tr class="' + className + '-error-wrap hidden"><td colspan="2">\
                         <a class="' + className + '-error-counter" href="#"></a>\
@@ -4442,7 +4460,7 @@ function KellyGrabber(cfg) {
         var itemsList = KellyTools.getElementByClass(handler.container, className + '-itemsList');
             itemsList.onchange = function() {
                 
-                if (!KellyTools.getPrintValues(options.itemsList, false, 1, downloads.length).length) {                    
+                if (!KellyTools.getPrintValues(this.value, false, 1, downloads.length).length) {                    
                     showNotice('grabber_selected_items_not_found', 1);    
                     this.value = '';
                 }
@@ -4540,7 +4558,8 @@ function KellyGrabber(cfg) {
             } 
             
         downloadProgress = {
-            line : KellyTools.getElementByClass(handler.container, className + '-progressbar-line'),
+            line : KellyTools.getElementByClass(handler.container, className + '-progressbar-line-ok'),
+            lineErr : KellyTools.getElementByClass(handler.container, className + '-progressbar-line-err'),
             state : KellyTools.getElementByClass(handler.container, className + '-progressbar-state'),
         }
     
@@ -4596,12 +4615,21 @@ function KellyGrabber(cfg) {
             
             var current = handler.countCurrent('complete');
             if (current > total) {
-                toTxtLog('CHECK COUNTER ' + current + ' / ' + total);
+                toTxtLog('COUNTER more that total items. CHECK COUNTER ' + current + ' / ' + total);
                 current = total;
             }
             
+            var complete = Math.round(current / (total / 100));
+            var bad = failItems.length ? Math.round(failItems.length / (total / 100)) : 0;
+                        
             downloadProgress.state.innerText = current + ' / ' + total;        
-            downloadProgress.line.style.width = Math.round(current / (total / 100)) + '%';
+            downloadProgress.line.style.width = complete + '%';
+            
+            if (bad > 0) {
+                downloadProgress.lineErr.style.width = bad + '%';
+            } else {
+                downloadProgress.lineErr.style.width = '0px';
+            }
         }
         
         if (errorProgress && errorProgress.block) {
@@ -5586,7 +5614,7 @@ function KellyGrabber(cfg) {
             }
                         
             var abortIframe = function() {
-                fav.removeEventListener(window, "message", onLoadIframe, eventPrefix);
+                fav.removeEventPListener(window, "message", onLoadIframe, eventPrefix);
             
                 iframe.src = '';
                 iframe.onload = function() {}
@@ -5603,8 +5631,8 @@ function KellyGrabber(cfg) {
                 abortIframe();
             }
 
-            fav.removeEventListener(window, "message", onLoadIframe, eventPrefix);	
-            fav.addEventListner(window, "message", onLoadIframe, eventPrefix);
+            fav.removeEventPListener(window, "message", onLoadIframe, eventPrefix);	
+            fav.addEventPListener(window, "message", onLoadIframe, eventPrefix);
             
             iframe.src = urlOrig;
             
@@ -5740,7 +5768,7 @@ function KellyGrabber(cfg) {
             method : 'GET',
         }
         
-        toTxtLog(download.id + ' | download : ' + downloadOptions.filename);
+        toTxtLog('DOWNLOADID ' + download.id + ' | download : ' + downloadOptions.filename);
         
         // download of Blob data throw browser download API started, next catch changes throw onDownloadProcessChanged method until comlete state
                 
@@ -5748,8 +5776,8 @@ function KellyGrabber(cfg) {
                 
             if (!response.downloadId || response.downloadId < 0) {
                 
-                toTxtLog(download.id + ' | download REJECTED by browser API : ' + downloadOptions.filename);
-                toTxtLog(download.id + ' | error : ' + response.error + "\n\r");
+                toTxtLog('DOWNLOADID ' + download.id + ' | download REJECTED by browser API : ' + downloadOptions.filename);
+                toTxtLog('DOWNLOADID ' + download.id + ' | error : ' + response.error + "\n\r");
                 
                 addFailItem(download, 'Ошибка загрузки' + (response.error ? ' : ' + response.error : ''));
                 
@@ -5765,12 +5793,12 @@ function KellyGrabber(cfg) {
                 
             } else {            
 
-                toTxtLog(download.id + ' | download ACCEPTED by browser API : ' + downloadOptions.filename);
+                toTxtLog('DOWNLOADID ' + download.id + ' | download ACCEPTED by browser API : ' + downloadOptions.filename);
                 
                 if (mode != 'download') { // perhapse promise was sended after cancel ?
                 
                     // download not needed
-                    toTxtLog(download.id + ' | downloading start, but user CANCEL downloading process. SEND REJECT TO API for file : ' + downloadOptions.filename);
+                    toTxtLog('DOWNLOADID ' + download.id + ' | downloading start, but user CANCEL downloading process. SEND REJECT TO API for file : ' + downloadOptions.filename);
                      
                     KellyTools.getBrowser().runtime.sendMessage({method: "downloads.cancel", downloadId : response.downloadId}, function(response) {});
                     
@@ -5778,7 +5806,7 @@ function KellyGrabber(cfg) {
                 }
                     
                 downloadingIds.push(response.downloadId);                
-                KellyTools.log(download.id + ' | new downloading process ' + response.downloadId, 'KellyGrabber');
+                KellyTools.log('DOWNLOADID ' + download.id + ' | new downloading process ' + response.downloadId, 'KellyGrabber');
                 
                 download.downloadId = response.downloadId;                    
                 handler.updateStateForImageGrid();
@@ -5805,14 +5833,14 @@ function KellyGrabber(cfg) {
                     handler.downloadUrl(downloadOptions, onDownloadApiStart);
                 */
                 
-                toTxtLog(download.id + ' | file NOT LOADED as DATA ARRAY OR BLOB ' + download.url + ' : ' + downloadOptions.filename);
-                toTxtLog(download.id + ' | LOAD FAIL NOTICE error code ' + errorCode + ', message : ' + errorNotice);
+                toTxtLog('DOWNLOADID ' + download.id + ' | file NOT LOADED as DATA ARRAY OR BLOB ' + download.url + ' : ' + downloadOptions.filename);
+                toTxtLog('DOWNLOADID ' + download.id + ' | LOAD FAIL NOTICE error code ' + errorCode + ', message : ' + errorNotice);
 
                 onDownloadApiStart({downloadId : false, error : 'DATA ARRAY get fail. Error code : ' + errorCode + ' |  error message : ' + errorNotice});                
                 
             } else {
                 
-                toTxtLog(download.id + ' | file LOADED as DATA ARRAY OR BLOB ' + download.url + ', send to browser API for save to folder : ' + downloadOptions.filename);                
+                toTxtLog('DOWNLOADID ' + download.id + ' | file LOADED as DATA ARRAY OR BLOB ' + download.url + ', send to browser API for save to folder : ' + downloadOptions.filename);                
                 downloadOptions.url = fileData;     
 
                 handler.downloadUrl(downloadOptions, onDownloadApiStart);
@@ -5856,7 +5884,7 @@ function KellyGrabber(cfg) {
                 
                 if (!downloadItem) return;
                 
-                toTxtLog(downloadItem.id + ' | CANCELED BY TIMEOUT ' + downloadItem.url + ', ' + downloadItem.filename);
+                toTxtLog('DOWNLOADID ' + downloadItem.id + ' | CANCELED BY TIMEOUT ' + downloadItem.url + ', ' + downloadItem.filename);
                 
                 downloadItem.cancelTimer = false; 
                 resetItem(downloadItem);
@@ -5911,7 +5939,7 @@ function KellyGrabber(cfg) {
                 
                 try {
                     
-                     toTxtLog('download item dump ' + JSON.stringify(downloads[i].item));
+                     toTxtLog('CANT INIT Download item dump ' + JSON.stringify(downloads[i].item));
                     
                 } catch (E) {
                     
@@ -7634,7 +7662,7 @@ function KellyOptions(cfg) {
 
 function KellyFavItems() 
 {
-    this.PROGNAME = 'KellyFavItems v1.1.0.8b';
+    this.PROGNAME = 'KellyFavItems v1.1.1.2';
     
     var handler = this;	
         
@@ -7879,7 +7907,7 @@ function KellyFavItems()
                     if (env.getPosts()) {                
                         handler.initOnPageReady();                    
                     } else {                    
-                        handler.addEventListner(window, "load", function (e) {
+                        handler.addEventPListener(window, "load", function (e) {
                             handler.initOnPageReady();
                             return false;
                         }, 'init_');                    
@@ -7895,7 +7923,7 @@ function KellyFavItems()
             log(handler.PROGNAME + ' init | loaded in ' + action + ' mode | profile ' + env.profile + ' | DEBUG ' + (KellyTools.DEBUG ? 'enabled' : 'disabled'));           
         }
         
-        handler.addEventListner(window, "message", function (e) {
+        handler.addEventPListener(window, "message", function (e) {
             getMessage(e);
         }, 'input_message_');             
     }
@@ -7933,7 +7961,7 @@ function KellyFavItems()
                                        
                     } else {
                              
-                        var output = {filename : KellyTools.getUrlFileName(selfUrl, false, true), method : 'sendResourceMedia', error : 'bad status', base64 : false};
+                        var output = {filename : KellyTools.getUrlFileName(selfUrl, false, true), method : 'sendResourceMedia', error : 'bad response status ' + this.status, base64 : false};
                         window.parent.postMessage(output, "*"); 
                     }
                 };
@@ -8607,7 +8635,7 @@ function KellyFavItems()
         var tip = imgViewer.addButton('?', 'info', function() { });
         addImageInfoTip(tip);
         
-        handler.addEventListner(window, "resize", function (e) {
+        handler.addEventPListener(window, "resize", function (e) {
             
             if (env.events.onWindowResize && env.events.onWindowResize(e)) return;
             
@@ -8615,7 +8643,7 @@ function KellyFavItems()
             
         }, '_fav_dialog');
         
-        handler.addEventListner(window, "scroll", function (e) {
+        handler.addEventPListener(window, "scroll", function (e) {
             
             if (env.events.onWindowScroll && env.events.onWindowScroll(e)) return;
             
@@ -8753,7 +8781,7 @@ function KellyFavItems()
     
         siteContent.style.display = 'block';
         favContent.style.display = 'none';
-        handler.removeEventListener(window, 'scroll', 'fav_scroll');
+        handler.removeEventPListener(window, 'scroll', 'fav_scroll');
 
         imageGrid.close();
         
@@ -11844,7 +11872,7 @@ function KellyFavItems()
         
         // parallel with load resources in initCss
         
-        handler.addEventListner(document.body, "keyup", function (e) {
+        handler.addEventPListener(document.body, "keyup", function (e) {
             
             if (!e.target) return;
             
@@ -11884,9 +11912,9 @@ function KellyFavItems()
         initExtensionResources();       
     }
     
-    this.addEventListner = function(object, event, callback, prefix) {
+    this.addEventPListener = function(object, event, callback, prefix) {
     
-        handler.removeEventListener(object, event, prefix);
+        handler.removeEventPListener(object, event, prefix);
         
         if (typeof object !== 'object') {
             object = document.getElementById(object);
@@ -11908,7 +11936,7 @@ function KellyFavItems()
         return true;
     }
 
-    this.removeEventListener = function(object, event, prefix) {
+    this.removeEventPListener = function(object, event, prefix) {
         if (typeof object !== 'object') {
             object = document.getElementById(object);
         }
@@ -11945,7 +11973,7 @@ function KellyFavItems()
 // JoyReactor environment driver
 
 // default profile driver must be assign to K_DEFAULT_ENVIRONMENT variable
-// todo move formatcomment \ formatpost methods from FavItems to keep core without "environment only" / driver methods
+// todo environment only ui methods
 
 function kellyProfileJoyreactor() {
         
@@ -12381,7 +12409,7 @@ function kellyProfileJoyreactor() {
 
         if (toogleCommentsButton.length) {
             toogleCommentsButton = toogleCommentsButton[0];
-            handler.fav.removeEventListener(toogleCommentsButton, 'click', 'toogle_comments_' + postBlock.id);
+            handler.fav.removeEventPListener(toogleCommentsButton, 'click', 'toogle_comments_' + postBlock.id);
             
             var onPostCommentsShowClick = function(postBlock, clearTimer) {
         
@@ -12403,7 +12431,7 @@ function kellyProfileJoyreactor() {
                 return false;
             }
                     
-            handler.fav.addEventListner(toogleCommentsButton, "click", function (e) {
+            handler.fav.addEventPListener(toogleCommentsButton, "click", function (e) {
                 
                 onPostCommentsShowClick(postBlock);                   
                 return false;

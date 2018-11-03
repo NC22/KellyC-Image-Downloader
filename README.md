@@ -4,6 +4,17 @@ Store you personal favourite publications for JoyReactor localy
 <br>
 <b><a href="//github.com/NC22/KellyCFavorites/wiki">Wiki</a></b>
 <br>
+<p>Compatible with all modern browsers</p>
+<p>This extension add the following functional for sites joyreactor.com, joyreactor.cc, old.reactor.cc, safereactor.cc : </p>
+<p>
+<ul>
+    <li>Allow user to save liked data without registartion \ logged in to site (creates addition button - "Add to favourite" for publications and "to favourite" for comments)</li>
+    <li>Store \ manage \ export \ import publications and comments that user like. (throw "Save" icon and "Options" button placed in header menu of site)</li>
+    <li>Export site favourites of selected user to local profile (from pages like http://safereactor.cc/user/Радиоволна/favorite)</li>
+    <li>Batch download of images from filtered publications in local profile (select range, number of threads, etc) *</li>
+</ul>
+</p>
+<p>* currently not supported by Edge (unvailable in Browser API)</p> 
 <br>
 <br>
 <h2>License</h2>

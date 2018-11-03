@@ -165,21 +165,9 @@ function KellyTooltip(cfg) {
      
         events.onBodyClick = function(e) {
             
-            if (handler.closeByBody) {
-                
-                if (e.target != handler.self) {
-                    
-                    var parent = e.target;
-                    while (parent && handler.self != parent) {
-                        parent = parent.parentElement;
-                    }  
-                    
-                    if (!parent) {								
-                        handler.show(false);
-                    }
-                }
+            if (handler.closeByBody && !handler.isChild(e.target, handler.self)) {
+                handler.show(false);
             }
-            
         };
         
         document.body.addEventListener('click', events.onBodyClick);
@@ -296,8 +284,12 @@ function KellyTooltip(cfg) {
         }
     }
 
-    this.isChild = function(target, searchParent) {
-        var parent = target;
+    // check is element related to an searchParent element
+    
+    this.isChild = function(childTarget, searchParent) {
+        var parent = childTarget;
+
+        if (!childTarget) return false;
         
         if (!searchParent) searchParent = handler.self;
         

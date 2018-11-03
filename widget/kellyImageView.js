@@ -5,7 +5,7 @@
    @description    image view widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.0.9 28.10.18
+   @version        v 1.1.2 03.11.18
    
    ToDo : 
    
@@ -52,11 +52,11 @@ function KellyImgView(cfg) {
     var imagesData = {};
     
     var userEvents = { 
-        onBeforeGalleryOpen : false, // 
-        onBeforeShow : false, // изображение загружено но не показано, переменные окружения обновлены
-        onClose : false, // calls after hide viewer block
-        onShow : false, // onShow(handler, show)  calls before show \ hide viewer block
-        onNextImage : false, // onNextImage(handler, nextImage, next)
+        onBeforeImageLoad : false,  // onBeforeImageLoad(handler, galleryItemPointer, galleryData) calls before onShow and initialize open image process (to prevent, return true in userEvent method) 
+        onBeforeImageShow : false,  // onBeforeImageShow(handler, image) calls before add loaded image to container изображение загружено но не показано, переменные окружения обновлены
+        onClose : false,            // onShow(handler) calls after hide viewer block
+        onShow : false,             // onShow(handler, show) calls before show \ hide viewer block
+        onNextImage : false,        // onNextImage(handler, nextImage, next)
     };
  
     var moveable = true;
@@ -426,7 +426,7 @@ function KellyImgView(cfg) {
             userEvents.onShow(handler, show);
         }
         
-        handler.removeEventListener(document.body, "mousemove", 'lazy_hand_');
+        handler.removeEventPListener(document.body, "mousemove", 'lazy_hand_');
 
         // will be extended if something from this events will be used for some thing else
         
@@ -439,15 +439,15 @@ function KellyImgView(cfg) {
             
             if (disable) {
             
-                handler.addEventListner(window, 'wheel', stop, '_scroll');
-                handler.addEventListner(window, 'mousewheel', stop, '_scroll');
-                handler.addEventListner(window, 'touchmove', stop, '_scroll');
+                handler.addEventPListener(window, 'wheel', stop, '_scroll');
+                handler.addEventPListener(window, 'mousewheel', stop, '_scroll');
+                handler.addEventPListener(window, 'touchmove', stop, '_scroll');
             
             } else {
             
-                handler.removeEventListener(window, 'touchmove', '_scroll');            
-                handler.removeEventListener(window, 'mousewheel', '_scroll');
-                handler.removeEventListener(window, 'wheel', '_scroll');
+                handler.removeEventPListener(window, 'touchmove', '_scroll');            
+                handler.removeEventPListener(window, 'mousewheel', '_scroll');
+                handler.removeEventPListener(window, 'wheel', '_scroll');
             }
             
         }            
@@ -490,20 +490,20 @@ function KellyImgView(cfg) {
                 return false; 
             }        
                  
-            handler.addEventListner(window, "scroll", function (e) {
+            handler.addEventPListener(window, "scroll", function (e) {
                 handler.updateBlockPosition();
             }, 'img_view_');
             
-            handler.addEventListner(window, "resize", function (e) {
+            handler.addEventPListener(window, "resize", function (e) {
                 handler.updateSize(e);
                 return false;
             }, 'image_update_');
 
-           // env.addEventListner(block, "mousemove", function (e) {
+           // env.addEventPListener(block, "mousemove", function (e) {
            //     handler.updateCursor();
            // }, 'image_mouse_move_');            
 
-            handler.addEventListner(document.body, "keyup", function (e) {
+            handler.addEventPListener(document.body, "keyup", function (e) {
             
                 var c = e.keyCode - 36;
                
@@ -537,19 +537,20 @@ function KellyImgView(cfg) {
                 
                 deleteClass(block, 'active');
                 deleteClass(block, 'fade');              
-                handler.removeEventListener(window, "scroll", 'img_view_');
+                handler.removeEventPListener(window, "scroll", 'img_view_');
                 blockShown = false;
                 
             }, fadeTime);  
             
             
             addClass(block, 'fade');
-            handler.removeEventListener(window, "resize", 'image_update_');
-            handler.removeEventListener(document.body, "keyup", 'next_image_key');
+            handler.removeEventPListener(window, "resize", 'image_update_');
+            handler.removeEventPListener(document.body, "keyup", 'next_image_key');
         }     
     }
     
     // initialize image viewer from gallery pointer with start cursor \ gallery and image src, or go to nextimage in selected gallery
+    // see usage in .nextImage method
     
     // galleryItemPointer - dom element with kellyGallery and kellyGalleryIndex attributes, if false, go to next \ prev in current gallery
     // initial image must be setted in href \ src \ or in data-image attribute, else - set kellyGalleryIndex to -1 to start from begining of gallery array
@@ -561,17 +562,19 @@ function KellyImgView(cfg) {
         
         if (beasy) return false;
         
+        if (userEvents.onBeforeImageLoad && userEvents.onBeforeImageLoad(handler, galleryItemPointer, galleryData)) {
+            return false;
+        }
+        
+        // reset previouse image bounds info 
+        
         if (image.parentNode) image.parentNode.removeChild(image);
         image = false;            
         imageBounds = false;
             
         beasy = 'loadImage';
         scale = 1;
-        // console.log('load image');
-        
-        if (userEvents.onBeforeGalleryOpen) {
-            userEvents.onBeforeGalleryOpen(handler, galleryItemPointer, galleryData);
-        }
+        // console.log('load image');        
         
         if (!blockShown) {
             showMainBlock(true);
@@ -609,7 +612,9 @@ function KellyImgView(cfg) {
         image.src = getImageUrlFromPointer(galleryItemPointer);  
         
         if (isImgLoaded(image)) handler.imageShow();
-        else image.onload = function() { handler.imageShow(); return false; }	
+        else image.onload = function() { 
+            handler.imageShow(); return false; 
+        }	
     }
     
     this.getClientBounds = function() {
@@ -752,10 +757,10 @@ function KellyImgView(cfg) {
     this.dragEnd = function(e) {
     
         isMoved = false;
-        handler.removeEventListener(document.body, "mousemove", 'image_drag_');
-        handler.removeEventListener(document.body, "mouseup", 'image_drag_');
-        handler.removeEventListener(document.body, "touchmove", 'image_drag_');
-        handler.removeEventListener(document.body, "touchend", 'image_drag_');
+        handler.removeEventPListener(document.body, "mousemove", 'image_drag_');
+        handler.removeEventPListener(document.body, "mouseup", 'image_drag_');
+        handler.removeEventPListener(document.body, "touchmove", 'image_drag_');
+        handler.removeEventPListener(document.body, "touchend", 'image_drag_');
         
         if (!lastPos) return;
         
@@ -804,19 +809,19 @@ function KellyImgView(cfg) {
         // move.x = parseInt(image.style.left)
         
         isMoved = true; 
-        handler.addEventListner(document.body, "mousemove", function (e) {
+        handler.addEventPListener(document.body, "mousemove", function (e) {
             handler.drag(e);
         }, 'image_drag_');
-        handler.addEventListner(document.body, "mouseup", function (e) {
+        handler.addEventPListener(document.body, "mouseup", function (e) {
             handler.dragEnd(e);
         }, 'image_drag_');
-        handler.addEventListner(document.body, "mouseout", function (e) {
+        handler.addEventPListener(document.body, "mouseout", function (e) {
             handler.dragEnd(e);
         }, 'image_drag_');
-        handler.addEventListner(document.body, "touchend", function (e) {
+        handler.addEventPListener(document.body, "touchend", function (e) {
             handler.dragEnd(e);
         }, 'image_drag_');
-        handler.addEventListner(document.body, "touchmove", function (e) {
+        handler.addEventPListener(document.body, "touchmove", function (e) {
             handler.drag(e);
         }, 'image_drag_');
     }
@@ -832,8 +837,8 @@ function KellyImgView(cfg) {
         handler.hideLoader(true);
         handler.updateSize(false);
         
-        if (userEvents.onBeforeShow) {
-            userEvents.onBeforeShow(handler, image);
+        if (userEvents.onBeforeImageShow && userEvents.onBeforeImageShow(handler, image)) {
+            return;
         }
         
         imgContainer.innerHTML = '';
@@ -1134,21 +1139,26 @@ function KellyImgView(cfg) {
             for (var i = 0, l = images[galleryName].length; i < l; i++)  {
                 images[galleryName][i].setAttribute('kellyGallery', galleryName);
                 images[galleryName][i].setAttribute('kellyGalleryIndex', i);
-                images[galleryName][i].onclick = function(e) {
-                                    
+                
+                handler.addEventPListener(images[galleryName][i], 'click', function(e) {
+                    
+                    preventEvent(e);
+                    
+                    // ignore click on child elements if attribute is setted
+                    
                     if (this.getAttribute('data-ignore-click') == 'child' && e.target !== this) return true; // pass throw child events if they exist
                 
                     handler.loadImage(this);
                     return false;
                     
-                }
+                }, 'showGallery');
             }	
         }
         
         return true;    
     }
     
-    this.addEventListner = function(object, event, callback, prefix) {
+    this.addEventPListener = function(object, event, callback, prefix) {
         if (!object)
             return false;
         if (!prefix)
@@ -1165,7 +1175,7 @@ function KellyImgView(cfg) {
         return true;
     }
 
-    this.removeEventListener = function(object, event, prefix) {
+    this.removeEventPListener = function(object, event, prefix) {
         if (!object)
             return false;
         if (!prefix)
@@ -1182,6 +1192,18 @@ function KellyImgView(cfg) {
 
         events[prefix + event] = null;
         return true;
+    }
+    
+    this.removeEvents = function(galleryName) {
+        
+        if (!images || !images[galleryName] || !images[galleryName].length) return false;
+        
+        for (var i = 0, l = images[galleryName].length; i < l; i++)  {
+            var item = images[galleryName][i];
+            if (typeof item == 'string') continue;
+            
+            handler.removeEventPListener(item, 'click', 'showGallery');
+        }
     }
     
     constructor(cfg);

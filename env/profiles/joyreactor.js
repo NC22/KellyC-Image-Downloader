@@ -2,7 +2,7 @@
 // JoyReactor environment driver
 
 // default profile driver must be assign to K_DEFAULT_ENVIRONMENT variable
-// todo move formatcomment \ formatpost methods from FavItems to keep core without "environment only" / driver methods
+// todo environment only ui methods
 
 function kellyProfileJoyreactor() {
         
@@ -438,7 +438,7 @@ function kellyProfileJoyreactor() {
 
         if (toogleCommentsButton.length) {
             toogleCommentsButton = toogleCommentsButton[0];
-            handler.fav.removeEventListener(toogleCommentsButton, 'click', 'toogle_comments_' + postBlock.id);
+            handler.fav.removeEventPListener(toogleCommentsButton, 'click', 'toogle_comments_' + postBlock.id);
             
             var onPostCommentsShowClick = function(postBlock, clearTimer) {
         
@@ -460,7 +460,7 @@ function kellyProfileJoyreactor() {
                 return false;
             }
                     
-            handler.fav.addEventListner(toogleCommentsButton, "click", function (e) {
+            handler.fav.addEventPListener(toogleCommentsButton, "click", function (e) {
                 
                 onPostCommentsShowClick(postBlock);                   
                 return false;
