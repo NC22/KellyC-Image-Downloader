@@ -4342,8 +4342,8 @@ function KellyGrabber(cfg) {
                         <input type="text" placeholder="" class="' + className + '-nameTemplate" value="' + options.nameTemplate + '">\
                     </td></tr>\
                     <tr class="' + extendedClass + '"><td colspan="2">\
-                        <label>' + lng.s('Инвертировать нумерацию', 'grabber_flip_numbers') + ' \
-                            <input type="checkbox" class="' + className + '-invertNumeration" ' + (options.invertNumeration ? 'checked' : '') + '>\
+                        <label><input type="checkbox" class="' + className + '-invertNumeration" ' + (options.invertNumeration ? 'checked' : '') + '>\
+                            ' + lng.s('Инвертировать нумерацию', 'grabber_flip_numbers') + '\
                         </label>\
                     </td></tr>\
                     <tr class="' + extendedClass + '"><td>\
@@ -4362,8 +4362,8 @@ function KellyGrabber(cfg) {
                         <input type="text" placeholder="1" class="' + className + '-timeout" value="' + options.cancelTimer + '">\
                     </td></tr>\
                     <!--tr><td colspan="2">\
-                        <label>' + lng.s('Исключать изображения с низким разрешением', 'grabber_exclude_lowres') + '</label>\
                         <label><input type="checkbox" class="' + className + '-exclude-low-res" value="1"></label>\
+                        <label>' + lng.s('Исключать изображения с низким разрешением', 'grabber_exclude_lowres') + '</label>\
                     </td></tr-->\
                     <tr><td colspan="2"><div class="' + className + '-controll-buttons"></div></td></tr>\
                     <tr><td colspan="2">\
@@ -11164,9 +11164,14 @@ function KellyFavItems()
         if (downloadBtn) downloadBtn.innerText = lng.s('Запустить скачивание страниц', 'download_start');	
             
         if (!favNativeParser || !favNativeParser.collectedData.items.length) return false;
-                                
-        KellyTools.getElementByClass(document, env.className + '-Save').style.display = 'block';
-            
+           
+        if (fav.coptions.downloader.autosaveEnabled) { //  && favNativeParser.jobSaved > favNativeParser.jobAutosave 
+            favNativeParser.jobSaved += favNativeParser.jobAutosave - favNativeParser.jobBeforeAutosave;
+            favNativeParser.saveData(true);            
+        } else {
+            KellyTools.getElementByClass(document, env.className + '-Save').style.display = 'block';
+        }
+        
         var saveNew = KellyTools.getElementByClass(document, env.className + '-SaveFavNew');
             saveNew.onclick = function() {
             
@@ -11187,6 +11192,8 @@ function KellyFavItems()
         
         if (logNum > 1000) {
             logEl.innerHTML = '';
+            logNum = 0;
+            logEl.setAttribute('data-lines', 0);
         }
         
         KellyTools.getElementByClass(document, env.className + '-exporter-process').innerText = lng.s('Страниц в очереди __PAGESN__', 'download_pages_left', {PAGESN : jobsLength});
@@ -11227,7 +11234,7 @@ function KellyFavItems()
                 logEl.setAttribute('data-lines', logNum+1);
             }
             
-            worker.jobBeforeAutoave--;
+            worker.jobBeforeAutosave--;
         }
         
         if (error) {
@@ -11392,9 +11399,9 @@ function KellyFavItems()
         // console.log(fav.native_tags);
         log('--');        
     
-        if (fav.coptions.downloader.autosaveEnabled && !worker.jobBeforeAutoave) {
+        if (fav.coptions.downloader.autosaveEnabled && !worker.jobBeforeAutosave) {
             
-            worker.jobBeforeAutoave = worker.jobAutosave ? worker.jobAutosave : 1000;
+            worker.jobBeforeAutosave = worker.jobAutosave ? worker.jobAutosave : 1000;
             worker.jobSaved = worker.jobSaved ? worker.jobSaved+worker.jobAutosave : worker.jobAutosave;
             worker.saveData(true);
             
@@ -11466,7 +11473,7 @@ function KellyFavItems()
             }
                   
             favNativeParser.jobAutosave = autosave;
-            favNativeParser.jobBeforeAutoave = autosave;
+            favNativeParser.jobBeforeAutosave = autosave;
             favNativeParser.jobSaved = 0;
             
         }
@@ -11490,9 +11497,7 @@ function KellyFavItems()
         
             pagesList = KellyTools.getPrintValues('1-' + favInfo.pages, true);
         }	
-                
-        // todo разделить автосохранение и лимиты (автосохранение опционально)
-                
+              
         if (!fav.coptions.downloader.autosaveEnabled && favInfo.pages > favNativeParser.maxPagesPerExport && pagesList.length > favNativeParser.maxPagesPerExport ) {
                         
             message.innerText = lng.s('', 'download_limitpages', {MAXPAGESPERIMPORT : favNativeParser.maxPagesPerExport, CURRENTPAGESPERIMPORT : pagesList.length});
@@ -11568,10 +11573,16 @@ function KellyFavItems()
         var tagFilterEnabled = KellyTools.getElementByClass(document, env.className + '-exporter-tag-filter-show');
             tagFilterEnabled = tagFilterEnabled && tagFilterEnabled.checked ? true : false;
         
-        if (tagFilterEnabled && tagFilter) {
+        if (tagFilterEnabled != fav.coptions.downloader.tagListEnabled) {
+            
+            fav.coptions.downloader.tagListEnabled = tagFilterEnabled;
+            updateOptions = true;
+        }
+        
+        if (fav.coptions.downloader.tagListEnabled && tagFilter) {
             if (tagFilter.value != fav.coptions.downloader.tagList) {
-                fav.coptions.downloader.tagList = KellyTools.inputVal(tagFilter, 'longtext'); 
                 
+                fav.coptions.downloader.tagList = KellyTools.inputVal(tagFilter, 'longtext');                 
                 updateOptions = true;
             }
             
@@ -11582,10 +11593,15 @@ function KellyFavItems()
         var catCreateEnabled = KellyTools.getElementByClass(document, env.className + '-exporter-create-by-tag-show');
             catCreateEnabled = catCreateEnabled && catCreateEnabled.checked ? true : false;
         
-        if (catCreateEnabled && catCreate) {
+        if (catCreateEnabled != fav.coptions.downloader.catByTagListEnabled) {
+            fav.coptions.downloader.catByTagListEnabled = catCreateEnabled;
+            updateOptions = true;
+        }
+        
+        if (fav.coptions.downloader.catByTagListEnabled && catCreate) {
             if (catCreate.value != fav.coptions.downloader.catByTagList) {
-                fav.coptions.downloader.catByTagList = KellyTools.inputVal(catCreate, 'longtext'); 
                 
+                fav.coptions.downloader.catByTagList = KellyTools.inputVal(catCreate, 'longtext');                 
                 updateOptions = true;
             }
             
@@ -11693,8 +11709,8 @@ function KellyFavItems()
             if (env.getPostTags) {
             
                 tagFilterHtml = '\
-                    <label><input type="checkbox" class="' + env.className + '-exporter-tag-filter-show"> ' + lng.s('Применять фильтрацию по тегам', 'download_tag_filter_show') + '</label>\
-                    <div class="' + env.className + '-exporter-tag-filter-container" style="display : none;">'
+                    <label><input type="checkbox" class="' + env.className + '-exporter-tag-filter-show" ' + ( fav.coptions.downloader.tagListEnabled ? 'checked' : '' ) + '> ' + lng.s('Применять фильтрацию по тегам', 'download_tag_filter_show') + '</label>\
+                    <div class="' + env.className + '-exporter-tag-filter-container" style=" ' + (  fav.coptions.downloader.tagListEnabled ? '' : 'display : none;' ) + '">'
                         + lng.s('', 'download_tag_filter_1') + '<br>'
                         + lng.s('Если теги не определены, выполняется сохранение всех публикаций', 'download_tag_filter_empty') 
                         + '</br>\
@@ -11703,8 +11719,8 @@ function KellyFavItems()
                 ';
                 
                 tagFilterHtml += '\
-                    <label><input type="checkbox" class="' + env.className + '-exporter-create-by-tag-show"> ' + lng.s('Автоматически создавать категории для тегов', 'download_createc_by_tag') + '</label>\
-                    <div class="' + env.className + '-exporter-create-by-tag-container" style="display : none;">'
+                    <label><input type="checkbox" class="' + env.className + '-exporter-create-by-tag-show" ' + ( fav.coptions.downloader.catByTagListEnabled ? 'checked' : '' ) + '> ' + lng.s('Автоматически создавать категории для тегов', 'download_createc_by_tag') + '</label>\
+                    <div class="' + env.className + '-exporter-create-by-tag-container" style="' + (  fav.coptions.downloader.catByTagListEnabled ? '' : 'display : none;' ) + '">'
                         + lng.s('Если публикация содержит один из перечисленных в поле тегов, к публикации будет добавлена соответствующая категория', 'download_createc_1') + '<br>'
                         + '</br>\
                         <textarea class="' + env.className + '-exporter-create-by-tag" placeholder="' + lng.s('Автоматически создавать категории для тегов', 'download_createc_by_tag') + '">' + createByTags + '</textarea>\
