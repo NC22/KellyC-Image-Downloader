@@ -9508,7 +9508,7 @@ function KellyFavItems()
                 avoidOutOfBounds : true,
             });
         
-        html = '\
+        var html = '\
             <div class="' + env.className + 'CatAddForm">\
                 <div>\
                     <input type="text" placeholder="' + lng.s('Название новой категории', 'cat_name') + '" value="" class="' + env.className + 'CatName"><br>\
@@ -12678,7 +12678,12 @@ function kellyProfileJoyreactor() {
         var content = false;
         
         if (publication.className.indexOf('comment') != -1) {
-            content = KellyTools.getElementByClass(publication, 'txt');
+            
+            // highlited comments - <div class="comment hightlighted filled">[...]</div>
+            // common comments    - <div class="comment"><div class="txt">[...]</div></div>
+            
+            content = publication;
+            
         } else {
             content = KellyTools.getElementByClass(publication, 'post_content');
         }
@@ -12729,6 +12734,9 @@ function kellyProfileJoyreactor() {
                 KellyTools.log(handler.getImageDownloadLink(mainImage.url, false));                           
             }
         }
+        
+        console.log(imagesEl);
+        console.log(data);
 
         if (!data.length && mainImage) {
             
