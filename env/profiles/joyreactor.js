@@ -748,9 +748,6 @@ function kellyProfileJoyreactor() {
             }
         }
         
-        console.log(imagesEl);
-        console.log(data);
-
         if (!data.length && mainImage) {
             
             mainImage.url = handler.getImageDownloadLink(mainImage.url, false);
