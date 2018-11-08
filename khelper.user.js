@@ -7662,7 +7662,7 @@ function KellyOptions(cfg) {
 
 function KellyFavItems() 
 {
-    this.PROGNAME = 'KellyFavItems v1.1.1.2';
+    this.PROGNAME = 'KellyFavItems v1.1.1.3';
     
     var handler = this;	
         
@@ -12735,9 +12735,6 @@ function kellyProfileJoyreactor() {
             }
         }
         
-        console.log(imagesEl);
-        console.log(data);
-
         if (!data.length && mainImage) {
             
             mainImage.url = handler.getImageDownloadLink(mainImage.url, false);
