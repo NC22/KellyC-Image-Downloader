@@ -138,6 +138,18 @@ function kellyProfileJoyreactor() {
     
     }
     
+    function syncFav(publication, inFav) {        
+        var item = publication.querySelector('.favorite_link');
+        if (!item) return;
+        
+        
+        if (inFav && item.className.indexOf(' favorite') == -1) {                
+            KellyTools.dispatchEvent(item);
+        } else if (!inFav && item.className.indexOf(' favorite') != -1) {                
+            KellyTools.dispatchEvent(item);
+        }
+    }
+    
     function updatePostFavButton(publication) {
         
         var link = getPostLinkEl(publication);
@@ -179,7 +191,7 @@ function kellyProfileJoyreactor() {
             addToFav.onclick = function() { 
             
                 handler.fav.showRemoveFromFavDialog(inFav, function() {
-                    if (handler.fav.getGlobal('fav').coptions.syncByAdd) handler.syncFav(publication, false);
+                    if (handler.fav.getGlobal('fav').coptions.syncByAdd) syncFav(publication, false);
                     
                     handler.fav.closeSidebar(); 
                 }); 
@@ -195,7 +207,7 @@ function kellyProfileJoyreactor() {
                 handler.fav.showAddToFavDialog(publication, false, function(selectedPost, selectedComment, selectedImages) {                    
                     
                     if (!selectedComment && handler.fav.getGlobal('fav').coptions.syncByAdd) {
-                        handler.syncFav(selectedPost, true);
+                        syncFav(selectedPost, true);
                     }                     
                 });
                 
@@ -889,27 +901,14 @@ function kellyProfileJoyreactor() {
             
         return info;
     }
-    
-    /* imp */
-     
-    this.syncFav = function(publication, inFav) {        
-        var item = publication.querySelector('.favorite_link');
-        if (!item) return;
-        
-        
-        if (inFav && item.className.indexOf(' favorite') == -1) {                
-            KellyTools.dispatchEvent(item);
-        } else if (!inFav && item.className.indexOf(' favorite') != -1) {                
-            KellyTools.dispatchEvent(item);
-        }
-    }
+
     
     /* imp */
     
     this.setFav = function(fav) {
         handler.fav = fav;
     }
-    
+     
     /* not imp */
     
     this.getRecomendedDownloadSettings = function() {

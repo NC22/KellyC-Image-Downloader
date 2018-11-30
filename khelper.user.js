@@ -6099,6 +6099,12 @@ function KellyFastSave(cfg) {
     
     this.favEnv = false;
     
+    /*
+        Check is download methods supported by browser and config option for fast download is activated
+        
+        return boolean
+    */
+    
     this.isAvailable = function() {
                 
         if (!handler.favEnv.isDownloadSupported || !handler.favEnv.getGlobal('fav').coptions.fastsave.enabled) {
@@ -6106,11 +6112,24 @@ function KellyFastSave(cfg) {
         } else return true;
     }
     
+    /*
+        Reset any dowloads if something in work now. No any callbacks, see  download manager methods for more options
+        
+    */
+    
     this.downloadCancel = function() {
         
         handler.favEnv.getDownloadManager().cancelDownloads();
     }
+    
+    /*
+        Asyc download publication. Download folder \ overwrite rules taken from main config - fav.coptions (handler.favEnv.getGlobal('fav'))
         
+        postData - html element, publication container
+        onGetState(state) - calls when state is recieved - return string ( 'downloaded' || 'notdownloaded' || 'unavailable' )
+        
+    */
+    
     this.downloadPostData = function(postData, onDownload) {
         
         if (!handler.isAvailable()) return false;
@@ -6175,6 +6194,14 @@ function KellyFastSave(cfg) {
          return true;
     }
  
+    /*
+        Asyc check is publication already downloaded
+        
+        postData - html element, publication container
+        onGetState(state) - calls when state is recieved - return string ( 'downloaded' || 'notdownloaded' || 'unavailable')
+        
+    */
+    
     this.downloadCheckState = function(postData, onGetState) {
     
         if (!handler.isAvailable()) return;
@@ -7657,8 +7684,6 @@ function KellyOptions(cfg) {
 // @author         Rubchuk Vladimir <torrenttvi@gmail.com>
 // @license        GPLv3
 // ==/UserScript==
-
-// todo выгрузка настроек \ автодамп импорта избранного сайта каждые N-страниц \ скрывать тултип при перелистывании страниц
 
 function KellyFavItems() 
 {
@@ -12125,6 +12150,18 @@ function kellyProfileJoyreactor() {
     
     }
     
+    function syncFav(publication, inFav) {        
+        var item = publication.querySelector('.favorite_link');
+        if (!item) return;
+        
+        
+        if (inFav && item.className.indexOf(' favorite') == -1) {                
+            KellyTools.dispatchEvent(item);
+        } else if (!inFav && item.className.indexOf(' favorite') != -1) {                
+            KellyTools.dispatchEvent(item);
+        }
+    }
+    
     function updatePostFavButton(publication) {
         
         var link = getPostLinkEl(publication);
@@ -12166,7 +12203,7 @@ function kellyProfileJoyreactor() {
             addToFav.onclick = function() { 
             
                 handler.fav.showRemoveFromFavDialog(inFav, function() {
-                    if (handler.fav.getGlobal('fav').coptions.syncByAdd) handler.syncFav(publication, false);
+                    if (handler.fav.getGlobal('fav').coptions.syncByAdd) syncFav(publication, false);
                     
                     handler.fav.closeSidebar(); 
                 }); 
@@ -12182,7 +12219,7 @@ function kellyProfileJoyreactor() {
                 handler.fav.showAddToFavDialog(publication, false, function(selectedPost, selectedComment, selectedImages) {                    
                     
                     if (!selectedComment && handler.fav.getGlobal('fav').coptions.syncByAdd) {
-                        handler.syncFav(selectedPost, true);
+                        syncFav(selectedPost, true);
                     }                     
                 });
                 
@@ -12876,27 +12913,14 @@ function kellyProfileJoyreactor() {
             
         return info;
     }
-    
-    /* imp */
-     
-    this.syncFav = function(publication, inFav) {        
-        var item = publication.querySelector('.favorite_link');
-        if (!item) return;
-        
-        
-        if (inFav && item.className.indexOf(' favorite') == -1) {                
-            KellyTools.dispatchEvent(item);
-        } else if (!inFav && item.className.indexOf(' favorite') != -1) {                
-            KellyTools.dispatchEvent(item);
-        }
-    }
+
     
     /* imp */
     
     this.setFav = function(fav) {
         handler.fav = fav;
     }
-    
+     
     /* not imp */
     
     this.getRecomendedDownloadSettings = function() {
