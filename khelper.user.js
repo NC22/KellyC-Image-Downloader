@@ -12390,11 +12390,8 @@ function kellyProfileJoyreactor() {
                 if (bottomLink.length) {
                 
                     addToFavButton = document.createElement('a');
-                    addToFavButton.href = '#';
-                    
+                    addToFavButton.href = '#';                    
                     addToFavButton.innerText = '';
-                    
-                    addToFavButton.setAttribute('commentId', comments[i].id);
                     addToFavButton.className = handler.className + '-addToFavComment';
             
                     bottomLink[0].parentElement.appendChild(addToFavButton);

@@ -13,8 +13,12 @@
      line-height: 0px;
 }
 
- .__BASECLASS__-FavContainer-page {
+.__BASECLASS__-FavContainer-page {
      line-height: 20px;
+}
+
+.__BASECLASS__-addToFavComment {
+    margin-right : 5px;
 }
 
 /* pagination */
