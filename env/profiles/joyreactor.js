@@ -40,12 +40,22 @@ function kellyProfileJoyreactor() {
             return false;
         },
         
+        /* 
+            calls on document.ready, or if getPosts find some data
+            if return true prevent native init environment logic (initOnPageReady -> InitWorktop)
+        */        
+        
         onPageReady : function() {
             
             publications = handler.getPosts();
             
             return false;
         },
+        
+        /* 
+            calls after extension resources is loaded
+            if return true prevent native init worktop logic (image viewer initialization)
+        */     
         
         onInitWorktop : function() {
             
@@ -908,6 +918,11 @@ function kellyProfileJoyreactor() {
      
     /* not imp */
     
+    // for ignore some pages if needed, return main | ignore
+    // this.getInitAction = function() { return 'main'}
+    
+    /* not imp */
+    
     this.getRecomendedDownloadSettings = function() {
         
         var browser = KellyTools.getBrowserName();
@@ -939,7 +954,3 @@ kellyProfileJoyreactor.getInstance = function() {
     
     return kellyProfileJoyreactor.self;
 }
-
-
-var K_DEFAULT_ENVIRONMENT = kellyProfileJoyreactor.getInstance();
-

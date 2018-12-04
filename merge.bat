@@ -2,7 +2,6 @@
 pushd "%~1"
 SET frontend=khelper.user.js
 SET background=khelper.bg.js
-SET defaultProfile=env\profiles\joyreactor.js
 SET debug=0
 
 echo.>%frontend%
@@ -20,7 +19,7 @@ for %%x in (
 	"%~dp0\lib\kellyTools.js"
     "%~dp0\lib\kellyOptions.js"
 	"%~dp0\lib\kellyFavItems.js"
-	"%~dp0\%defaultProfile%"  
+	"%~dp0\env\profiles\joyreactor.js" 
 ) do (
 
     @echo.>> %frontend%

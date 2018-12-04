@@ -2754,7 +2754,9 @@ function KellyFavStorageManager(cfg) {
         if (handler.inUse) return;
         
         handler.wrap.innerHTML = '';
-        
+                
+        // todo - replace var name to base class and rename class, check correct
+                
         var overwriteId = handler.className + '-overwrite';
         var html = '\
             <div class="' + handler.className + '-wrap">\
@@ -4061,9 +4063,11 @@ function KellyThreadWork(cfg) {
 
 function KellyGrabber(cfg) {
     
-    var handler = this;   
+    var handler = this;  
     
-    var downloadingIds = []; // ids from chrome API that returned for each download process
+    // ids from chrome API that returned for each download process [only in progress items]
+    
+    var downloadingIds = []; 
   
     // array of current added throw method addDownloadItem download items
     // 
@@ -4092,7 +4096,7 @@ function KellyGrabber(cfg) {
         /*
             onDownloadAllEnd(handler, result)
             
-            calls on download process ended
+            calls when download process ended successfull (ignore human actions - stop \ continue, add events if needed)
             
             you can check list of all current downloads (see methods handler.getDownloads and handler.getDownloadItemState)            
             addition returned result data
@@ -4166,6 +4170,8 @@ function KellyGrabber(cfg) {
 
     
     var buttons = {};
+    
+    // configurable options. restored from kellyStorageManager (fav.coptions.grabber)
     
     var options = false;
     
@@ -4397,11 +4403,22 @@ function KellyGrabber(cfg) {
                     return;
                 }
                  
+                 
+                var failedList = '';
+                 
                 var html = '';
                 for (var i=0; i < failItems.length; i++) {
+                    
+                    failedList += (failedList ? ',' : '') + failItems[i].num;
+                    
                     html+= '<p><b>#' + failItems[i].num + '</b> - ' + failItems[i].reason + '</p>';
                 }
+                
+                if (failedList) {
                     
+                    html = '<p class="'  + className + '-error-list-itemsline">' + failedList + '</p>' + html;
+                }
+
                 var tcontainer = this.tooltip.getContent();
                 KellyTools.setHTMLData(tcontainer, '<div class="'  + className + '-error-list">' + html + '</div>');            
                 
@@ -5001,7 +5018,9 @@ function KellyGrabber(cfg) {
         if (mode != 'download') return;
         
         // KellyTools.log('incoming ' + downloadDelta.id);
-        // its not our item, exit
+        
+        // if its not our item then exit
+        
         if (downloadingIds.indexOf(downloadDelta.id) === -1) {
             KellyTools.log('download id not found, skip ' + downloadDelta.id, 'KellyGrabber');
             return false;
@@ -5221,11 +5240,8 @@ function KellyGrabber(cfg) {
         }
         
         if (fileName.indexOf('#number#') != -1) {
-            
-            var itemIndex = downloads.indexOf(ditem);            
-            var itemN = options.invertNumeration ? downloads.length - itemIndex : itemIndex+1;
-            
-            fileName = KellyTools.replaceAll(fileName, '#number#', itemN); 
+       
+            fileName = KellyTools.replaceAll(fileName, '#number#', handler.getDownloadItemN(ditem)); 
         }
         
         fileName = KellyTools.replaceAll(fileName, /#category_[1-9]+#/, '');        
@@ -5359,6 +5375,8 @@ function KellyGrabber(cfg) {
              buttons['save_log'].style.display = 'block';
         }       
     }
+    
+    // show \ hide continue button, update continue button cursor if current process wasnt fully finished
     
     function updateContinue(hide) {
         
@@ -5740,13 +5758,16 @@ function KellyGrabber(cfg) {
     
     function addFailItem(item, reason) {
         
-        var itemIndex = downloads.indexOf(item) + 1;
-        
         failItems[failItems.length] = {
-            
-            num : options.invertNumeration ? downloads.length - itemIndex : itemIndex+1,
+            num : handler.getDownloadItemN(item),
             reason : reason,
         }
+    }
+    
+    this.getDownloadItemN = function(item) {        
+    
+        var itemIndex = downloads.indexOf(item);        
+        return options.invertNumeration ? downloads.length - itemIndex : itemIndex+1;
     }
     
     // start download of item, return false if fail to initialize, used only in addDownloadWork that marks failed to init items
@@ -5994,9 +6015,7 @@ function KellyGrabber(cfg) {
     }
     
     this.download = function() {
-        
-        log = '';
-        
+               
         if (mode != 'wait') return false;
         
         if (!downloads.length) {
@@ -6015,14 +6034,12 @@ function KellyGrabber(cfg) {
            
            // KellyTools.log(acceptItems);
         }
-        
-        failItems = [];
-        
+              
         if (downloadsOffset <= 0) {
             downloadsOffset = 0;   
         } else if (downloadsOffset > downloads.length-1) {
             downloadsOffset = downloads.length-1;            
-        }
+        }       
                 
         if (!options.interval) options.interval = 0.1;
                        
@@ -6032,8 +6049,12 @@ function KellyGrabber(cfg) {
 
         handler.updateStartButtonState('stop'); 
         handler.updateStateForImageGrid();
-        
-        log = '';
+ 
+        if (downloadsOffset == 0) {
+                
+            log = '';
+            failItems = [];
+        }        
         
         handler.addDownloadWork();
         
@@ -6248,6 +6269,10 @@ function KellyFastSave(cfg) {
 // part of KellyFavItems extension
 
 KellyTools = new Object();
+
+KellyTools.DEBUG = false;
+KellyTools.E_NOTICE = 1;
+KellyTools.E_ERROR = 2;
 
 // Get screen width \ height
 
@@ -6775,10 +6800,6 @@ KellyTools.getBrowserName = function() {
     
     return 'unknown';
 }
-
-KellyTools.DEBUG = false;
-KellyTools.E_NOTICE = 1;
-KellyTools.E_ERROR = 2;
 
 /*
     errorLevel 
@@ -7857,19 +7878,15 @@ function KellyFavItems()
     function constructor(noexec) {
         
         if (noexec) return;
+      
+        if (window.location.host.indexOf('tumblr') != -1) {
+            K_DEFAULT_ENVIRONMENT = kellyProfileTumblr.getInstance();
+        } else {
+            K_DEFAULT_ENVIRONMENT = kellyProfileJoyreactor.getInstance();
+        }
         
-        if (typeof K_DEFAULT_ENVIRONMENT == 'undefined') {
-            
-            // for other services, currently none
-            
-            var profile = false; // check by window.location.host if some excludes will be in future		
-            
-            if (profile) {
-                KellyTools.getBrowser().runtime.sendMessage({method: "getProfile", profile : profile}, handler.exec);
-            } else {
-                log('Unknown servise or site, cant find profile for ' + window.location.host, KellyTools.E_ERROR);
-            }
-            
+        if (!K_DEFAULT_ENVIRONMENT) {          
+            log('Unknown servise or site, cant find profile for ' + window.location.host, KellyTools.E_ERROR);            
         } else {
             handler.exec({env : K_DEFAULT_ENVIRONMENT});
         }
@@ -7887,29 +7904,7 @@ function KellyFavItems()
             return;
         }
     
-        if (cfg.envText) {
-                
-            log('text environment string disabled for security reasons', KellyTools.E_ERROR);
-            return;
-            
-            /*
-            K_ENVIRONMENT = false;
-        
-            try {
-                e__val(cfg.envText);
-            } catch (e) {
-                if (e) {
-                    log(e);
-                    return;
-                }
-            }
-            
-            if (typeof K_ENVIRONMENT != 'undefined') {
-                env = K_ENVIRONMENT;
-            }
-            */
-        
-        } else env = cfg.env;
+        env = cfg.env;
         
         if (!env) {
             log('init env error', KellyTools.E_ERROR);
@@ -7924,7 +7919,7 @@ function KellyFavItems()
             
             env.setFav(handler);		
             
-            var action = getInitAction();        
+            var action = (env.getInitAction) ? env.getInitAction() : 'main';        
             if (action == 'main') {
          
                 handler.load(false, function() {
@@ -7939,11 +7934,9 @@ function KellyFavItems()
                     }
                 });
                 
-            } else if (action == 'disable') {
-                
-                // currently unused
-                // window.parent.postMessage({url : selfUrl, method : 'readyAsResource'}, "*");
-            }
+            } else if (action == 'ignore') {
+                return;
+            } 
             
             log(handler.PROGNAME + ' init | loaded in ' + action + ' mode | profile ' + env.profile + ' | DEBUG ' + (KellyTools.DEBUG ? 'enabled' : 'disabled'));           
         }
@@ -8136,14 +8129,6 @@ function KellyFavItems()
         
         favCounter.className = env.className + '-FavItemsCount ' + env.className + '-buttoncolor-dynamic ' + itemsLengthClass;        
         favCounter.innerText = fav.items.length;
-    }
-    
-    function getInitAction() { 
-    
-        var mode = KellyTools.getUrlParam(env.actionVar);
-        if (!mode) return 'main';
-        
-        return mode;
     }
     
     this.getStorageManager = function() {
@@ -8576,6 +8561,8 @@ function KellyFavItems()
     
     function initWorktop() {
         
+        if (env.events.onInitWorktop && env.events.onInitWorktop()) return true;	
+        
         // todo modal mode for fit to ANY site
                 
         handler.getImageGrid(); 
@@ -8742,9 +8729,6 @@ function KellyFavItems()
         } else {
             log('main container inner not found');
         }
-        
-        
-        if (env.events.onInitWorktop) env.events.onInitWorktop();	
         
         return true;
     }
@@ -11856,11 +11840,8 @@ function KellyFavItems()
         }
     }
     
-    function initExtensionResources() {
+    this.initExtensionResources = function() {
         
-        if (init) return true;
-        init = true;   
-                
         var onLoadCssResource = function(response) {
             
             // console.log(response.url);
@@ -11871,8 +11852,10 @@ function KellyFavItems()
             }
             
             if (!response.data.css) {
+                
                 log('onLoadCssResource : css empty');
                 log('onLoadCssResource : Browser API response : ' + response.data.notice);
+                
                 return false; 
             }
             
@@ -11899,6 +11882,11 @@ function KellyFavItems()
     this.initOnPageReady = function() {
         
         if (init) return false;
+        init = true;
+        
+        if (env.events.onPageReady && env.events.onPageReady()) {			
+            return false;
+        }
         
         if (!env.getMainContainers().body) {
             log('initExtensionResources() main container is undefined ' + env.profile, KellyTools.E_ERROR);
@@ -11942,15 +11930,11 @@ function KellyFavItems()
                 }             
             }
             
-        }, 'next_fav_page');    
-        
-        if (env.events.onPageReady && env.events.onPageReady()) {			
-            return false;
-        }
+        }, 'next_fav_page');            
         
         // currently we can modify post containers without waiting css, looks fine
         handler.formatPostContainers();
-        initExtensionResources();       
+        handler.initExtensionResources();       
     }
     
     this.addEventPListener = function(object, event, callback, prefix) {
@@ -12052,12 +12036,22 @@ function kellyProfileJoyreactor() {
             return false;
         },
         
+        /* 
+            calls on document.ready, or if getPosts find some data
+            if return true prevent native init environment logic (initOnPageReady -> InitWorktop)
+        */        
+        
         onPageReady : function() {
             
             publications = handler.getPosts();
             
             return false;
         },
+        
+        /* 
+            calls after extension resources is loaded
+            if return true prevent native init worktop logic (image viewer initialization)
+        */     
         
         onInitWorktop : function() {
             
@@ -12920,6 +12914,11 @@ function kellyProfileJoyreactor() {
      
     /* not imp */
     
+    // for ignore some pages if needed, return main | ignore
+    // this.getInitAction = function() { return 'main'}
+    
+    /* not imp */
+    
     this.getRecomendedDownloadSettings = function() {
         
         var browser = KellyTools.getBrowserName();
@@ -12950,15 +12949,14 @@ kellyProfileJoyreactor.getInstance = function() {
     }
     
     return kellyProfileJoyreactor.self;
+}// initialization
+
+
+if (typeof K_DEFAULT_ENVIRONMENT == 'undefined' || !K_DEFAULT_ENVIRONMENT) {
+    var K_DEFAULT_ENVIRONMENT = false;
 }
 
-
-var K_DEFAULT_ENVIRONMENT = kellyProfileJoyreactor.getInstance();
-
-// initialization
-
-
-if (!K_FAV) var K_FAV = new KellyFavItems();
+var K_FAV = new KellyFavItems();
 
 // keep empty space to prevent syntax errors if some symbols will added at end
 // end of file 

@@ -10,6 +10,10 @@
 
 KellyTools = new Object();
 
+KellyTools.DEBUG = false;
+KellyTools.E_NOTICE = 1;
+KellyTools.E_ERROR = 2;
+
 // Get screen width \ height
 
 KellyTools.getViewport = function() {
@@ -536,10 +540,6 @@ KellyTools.getBrowserName = function() {
     
     return 'unknown';
 }
-
-KellyTools.DEBUG = false;
-KellyTools.E_NOTICE = 1;
-KellyTools.E_ERROR = 2;
 
 /*
     errorLevel 
@@ -1360,6 +1360,8 @@ var KellyEDispetcher = new Object;
             
         } else if (request.method == 'getProfile') {
             
+            // method would be useful with eval onSuccess -> data, but its not safe so dont use it
+            
             var	onFail = function(url, errorCode, errorText) {
             
                 if (callback) {
@@ -1381,7 +1383,7 @@ var KellyEDispetcher = new Object;
                 
 
                     callback({
-                        envText : data, 
+                        env : K_DEFAULT_ENVIRONMENT, // initialized in eval data
                         profile : request.profile, 
                         error : error,
                     });

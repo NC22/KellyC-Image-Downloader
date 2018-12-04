@@ -1203,6 +1203,14 @@
     font-size : 12px;
 }
 
+.__BASECLASS__-downloader-error-list-itemsline {
+    
+    padding-bottom: 64px;
+    padding-top: 64px;
+
+}
+
+
 .__BASECLASS__-downloader-progressbar {
     text-align: center;
     height: 32px;
