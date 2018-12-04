@@ -5090,6 +5090,7 @@ function KellyGrabber(cfg) {
                                 
             handler.updateStartButtonState('start');
             updateContinue(true);
+            updateProgressBar(); 
         } 
         
         return {inProgress : inProgress, waitingNum : waitingNum};
@@ -7708,7 +7709,7 @@ function KellyOptions(cfg) {
 
 function KellyFavItems() 
 {
-    this.PROGNAME = 'KellyFavItems v1.1.1.3';
+    this.PROGNAME = 'KellyFavItems v1.1.1.4';
     
     var handler = this;	
         
