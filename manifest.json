@@ -7,6 +7,7 @@
 			"*://*.joyreactor.cc/*", 
 			"*://*.reactor.cc/*", 
 			"*://joyreactor.com/*",
+            "*://jr-proxy.com/*",
             "*://safereactor.cc/*"
 	  ]
    } ],

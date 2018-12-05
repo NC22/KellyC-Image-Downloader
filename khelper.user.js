@@ -6339,7 +6339,7 @@ KellyTools.val = function(value, type) {
         
     } else if (type == 'float') {
         
-        return KellyTools.validateFloatSting(value);
+        return KellyTools.validateFloatString(value);
         
     } else if (type == 'bool') {
         
@@ -6668,7 +6668,7 @@ KellyTools.parseTagsList = function(text) {
     return tagList;
 }
 
-KellyTools.validateFloatSting = function(val) {
+KellyTools.validateFloatString = function(val) {
 
     if (!val) return 0.0;
     
@@ -7055,12 +7055,12 @@ KellyTools.showPagination = function(params) {
     
     var page = params.curPage ? params.curPage : 1;
     var pageListItemsNum = params.pageItemsNum ? params.pageItemsNum : 4; // maximum number of page buttons
-    var pageStart = 1; // rendered button start
+    var pageStart = 1; // page number, rendered button start
 
     pageStart = page - Math.ceil(pageListItemsNum / 2);       
     if (pageStart < 1) pageStart = 1; 
     
-    var pageEnd = pageStart + pageListItemsNum - 1; // rendered button end
+    var pageEnd = pageStart + pageListItemsNum - 1; // page number, rendered button end
     if (pageListItemsNum > totalPages) pageEnd = totalPages;
     
     if (pageEnd <= 1) pageEnd = totalPages;
@@ -7082,62 +7082,54 @@ KellyTools.showPagination = function(params) {
         goToPreviuse.onclick = goToFunction;
              
     if (pageStart > 1) {
-        var goToBegin = goToPreviuse.cloneNode(true);
-        goToBegin.setAttribute('pageNum', '1');
-        goToBegin.onclick = goToFunction;
-        goToBegin.innerText = '<<';
         
-        params.container.appendChild(goToBegin); 
+        var goToBegin = goToPreviuse.cloneNode(true);
+            goToBegin.setAttribute('pageNum', '1');
+            goToBegin.onclick = goToFunction;
+            goToBegin.innerText = '<<';
+        
+        // if (totalPages > 2) 
+        params.container.appendChild(goToBegin);
+        params.container.appendChild(goToPreviuse);
     }
-    
-    if (pageStart > 1) { 
-        params.container.appendChild(goToPreviuse); 
-    }
-          
+        
     for (var pageNum = pageStart; pageNum <= pageEnd; pageNum++) {
-         var pageEl = document.createElement('a');
-             pageEl.href = '#';
-             pageEl.innerText = pageNum;
-             pageEl.className = params.classPrefix + '-item';
-             if (pageNum >= 100) pageEl.className += ' ' + params.classPrefix + '-item-100';
-             
-             pageEl.setAttribute('pageNum', pageNum);
-             
-        if (page == pageNum) pageEl.className += ' active';
+        
+        var pageEl = document.createElement('a');
+            pageEl.href = '#';
+            pageEl.innerText = pageNum;
+            pageEl.className = params.classPrefix + '-item';
             
-            pageEl.onclick = goToFunction;                
-            params.container.appendChild(pageEl);
+            if (pageNum >= 100) pageEl.className += ' ' + params.classPrefix + '-item-100';
+
+            pageEl.setAttribute('pageNum', pageNum);
+             
+        if (page == pageNum) {
+            pageEl.className += ' active';
+        }
+        
+        pageEl.onclick = goToFunction;                
+        params.container.appendChild(pageEl);
     }
 
-    var goToNext = document.createElement('a');
-        goToNext.href = '#';
-        goToNext.setAttribute('pageNum', 'next');
-        goToNext.className = params.classPrefix + '-item';
-        goToNext.innerText = '>';
-        goToNext.onclick = goToFunction;
-        
-    if (pageEnd < totalPages) { 
-        params.container.appendChild(goToNext);
-    }
-    
     if (pageEnd < totalPages) {
+        
+        var goToNext = document.createElement('a');
+            goToNext.href = '#';
+            goToNext.setAttribute('pageNum', 'next');
+            goToNext.className = params.classPrefix + '-item';
+            goToNext.onclick = goToFunction;            
+            goToNext.innerText = '>';
+            
+        params.container.appendChild(goToNext);
+        
         var goToEnd = goToPreviuse.cloneNode(true);
-        goToEnd.setAttribute('pageNum', totalPages);            
-        goToEnd.onclick = goToFunction;
-        goToEnd.innerText = '>>';
+            goToEnd.setAttribute('pageNum', totalPages);            
+            goToEnd.onclick = goToFunction;
+            goToEnd.innerText = '>>';
         
+        // if (totalPages > 2) 
         params.container.appendChild(goToEnd); 
-    }
-    
-    if (totalPages > pageListItemsNum) {
-    
-        if (page < totalPages - 1) {
-            // go to end
-        }
-        
-        if (page > 1) {
-            // go to begin
-        }
     }
     
     return params.container;
@@ -8091,7 +8083,7 @@ function KellyFavItems()
                 
                 onResizeImage : function(self, itemInfo) {
                 
-                    // todo show in original size elements that smaller then resized version
+                    // todo show in original size elements that smaller then resized-fitted version
                     
                     if (!itemInfo.tile) return;
                     if (itemInfo.width < 140) {
@@ -8564,7 +8556,7 @@ function KellyFavItems()
         
         if (env.events.onInitWorktop && env.events.onInitWorktop()) return true;	
         
-        // todo modal mode for fit to ANY site
+        // todo modal mode for fit to ANY site, or overloading by profilejs
                 
         handler.getImageGrid(); 
         
@@ -9174,7 +9166,7 @@ function KellyFavItems()
         imgViewer.addToGallery(galleryImages, 'fav-images', galleryImagesData);  
     }
     
-    this.downloadFilteredData = function(format) { // todo format
+    this.downloadFilteredData = function(format) {
         
         if (!displayedItems || !displayedItems.length) return false;
         
@@ -9314,7 +9306,7 @@ function KellyFavItems()
             
                 additionAtributes += ' data-images="' + imageCount + '" ';
                 
-                // todo button to explode collection 
+                // todo - button to explode collection ? create separate fav.items for pImage array items, keep link to index of main item
                 
                 collectionBtn = document.createElement('a');
                 collectionBtn.innerText = imageCount;
@@ -9327,10 +9319,10 @@ function KellyFavItems()
                 
                 handler.applayItemCollectionButton([collectionBtn]);
             }
-            // todo replace
-            //env.getImageDownloadLink(galleryImages[galleryIndex], true)
-            
-            if (!fav.coptions.animateGif || !item.pw) coverImage = env.getStaticImage(coverImage);
+                    
+            if (!fav.coptions.animateGif || !item.pw) {
+                coverImage = env.getStaticImage(coverImage);
+            }
             
             var html = '\
                 <img style="' + fav.coptions.grid.cssItem + '" \
@@ -9825,7 +9817,8 @@ function KellyFavItems()
             handler.save('items');
         }
         
-        // todo save downloadManager options by - need "changed" marker
+        // todo save downloadManager config options by onConfigChanged event (currently event not exist, and config saved after click on Download button)
+        
         // fav.coptions.grabber = self.getOptions();
         // handler.save('cfg');
         
@@ -10478,7 +10471,6 @@ function KellyFavItems()
         return true;
     }
     
-    // postBlock is deprecated variable - unimportant here, todo remove
     // onApply  - применить изменения (удаление части элементов из подборки)
     // onRemove - полное удаление
     // onCancel - отмена
@@ -11174,7 +11166,9 @@ function KellyFavItems()
         if (downloadBtn) downloadBtn.innerText = lng.s('Запустить скачивание страниц', 'download_start');	
             
         if (!favNativeParser || !favNativeParser.collectedData.items.length) return false;
-           
+        
+        // todo - notify about auto download ?
+        
         if (fav.coptions.downloader.autosaveEnabled) { //  && favNativeParser.jobSaved > favNativeParser.jobAutosave 
             favNativeParser.jobSaved += favNativeParser.jobAutosave - favNativeParser.jobBeforeAutosave;
             favNativeParser.saveData(true);            
