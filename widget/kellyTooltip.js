@@ -373,6 +373,8 @@ function KellyTooltip(cfg) {
                 
                 if (handler.ptypeY == 'outside') {
                     top -= pos.height;
+                } else {
+                    top += pos.height; // untested
                 }
                 
             }  else if ( top + toolTipBounds.height < 0 ) {
@@ -380,15 +382,19 @@ function KellyTooltip(cfg) {
                 
                 if (handler.ptypeY == 'outside') {
                     top += pos.height;
+                } else {
+                    top -= pos.height; // untested
                 }
             }
             
             if ( left + toolTipBounds.width > scrollLeft + screenBounds.width) {
                 
-                left = left - toolTipBounds.width - handler.offset.left;  
+                left = left - toolTipBounds.width - handler.offset.left;
                 
                 if (handler.ptypeX == 'outside') {
                     left -= pos.width;
+                } else {
+                    left += pos.width;
                 }
                 
             } else if ( left + toolTipBounds.width < 0 ) {
@@ -396,7 +402,9 @@ function KellyTooltip(cfg) {
 
                 if (handler.ptypeX == 'outside') {
                     left += pos.width;
-                }                
+                } else {
+                    left -= pos.width; // untested
+                }              
             }
         }
         

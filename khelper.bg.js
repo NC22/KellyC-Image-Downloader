@@ -133,6 +133,15 @@ KellyTools.setHTMLData = function(el, val) {
     }
 }
 
+KellyTools.classList = function(action, el, val) {
+    
+    if (action == 'add') {
+        el.classList.add(val);
+    } else if (action == 'remove') {
+        el.classList.remove(val);
+    }
+}
+
 KellyTools.toogleActive = function(el) {
     
     if (el.className.indexOf('hidden') != -1) {

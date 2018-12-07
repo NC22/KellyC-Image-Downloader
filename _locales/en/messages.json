@@ -389,6 +389,12 @@
      "grabber_errors_counter":{  
         "message":"Failed : __ERRORSNUM__"
     },
+    "goto_page":{  
+        "message":"Go to page"
+    },
+    "go":{  
+        "message":"Go"
+    },
     "hide_soc":{  
         "message":"Hide social networks markers from publication block"
     },
@@ -481,6 +487,9 @@
     },    
     "other":{  
         "message":"Other"
+    },
+    "page":{  
+        "message":"Page"
     },
     "pages":{  
         "message":"Pages"
@@ -593,7 +602,7 @@
     "storage_create_ok_mcancel":{  
         "message":"Profile added"
     },         
-    "storage_create_ok_moverwrite":{  
+    "storage_create_ok_madd":{  
         "message":"Profile updated"
     },   
     "storage_create_e1":{  

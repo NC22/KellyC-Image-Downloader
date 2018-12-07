@@ -381,6 +381,8 @@ function KellyTooltip(cfg) {
                 
                 if (handler.ptypeY == 'outside') {
                     top -= pos.height;
+                } else {
+                    top += pos.height; // untested
                 }
                 
             }  else if ( top + toolTipBounds.height < 0 ) {
@@ -388,15 +390,19 @@ function KellyTooltip(cfg) {
                 
                 if (handler.ptypeY == 'outside') {
                     top += pos.height;
+                } else {
+                    top -= pos.height; // untested
                 }
             }
             
             if ( left + toolTipBounds.width > scrollLeft + screenBounds.width) {
                 
-                left = left - toolTipBounds.width - handler.offset.left;  
+                left = left - toolTipBounds.width - handler.offset.left;
                 
                 if (handler.ptypeX == 'outside') {
                     left -= pos.width;
+                } else {
+                    left += pos.width;
                 }
                 
             } else if ( left + toolTipBounds.width < 0 ) {
@@ -404,7 +410,9 @@ function KellyTooltip(cfg) {
 
                 if (handler.ptypeX == 'outside') {
                     left += pos.width;
-                }                
+                } else {
+                    left -= pos.width; // untested
+                }              
             }
         }
         
@@ -2490,9 +2498,9 @@ function KellyFavStorageManager(cfg) {
     var MAX_TOTAL_PER_DB = 28; // mb ~60000 images
     var MAX_CONFIG_SIZE = 2; // mb
     
-    // prefixes modified by environment on init, relative to current site environment file
-    // todo add list all storages for extension
-    
+    // todo - more options for "add data to db" function (import only images without categories)
+    // prefixes can be modified by environment on init, relative to current site environment file
+        
     this.prefix = 'kelly_db_';
     this.prefixCfg = 'kelly_cfg_';
     
@@ -2900,7 +2908,15 @@ function KellyFavStorageManager(cfg) {
                             
                             var noticeName = 'storage_create_ok_mcancel';
                             if (db && mode == 'add') {
+                                
                                 noticeName = 'storage_create_ok_madd';
+                                
+                                if (dbName == handler.fav.getGlobal('fav').coptions.storage) {
+                                    
+                                    handler.fav.load('items', function() {
+                                        handler.fav.updateFavCounter();
+                                    });	
+                                }
                             }
                             
                             handler.getStorageList(handler.showStorageList);							
@@ -2938,6 +2954,7 @@ function KellyFavStorageManager(cfg) {
 
                                     var result = handler.addDataToDb(db, newDBData);
                                     
+                                    // todo show result public
                                     handler.log(result);  
                                     
                                     newDBData = db;
@@ -4096,7 +4113,7 @@ function KellyGrabber(cfg) {
         /*
             onDownloadAllEnd(handler, result)
             
-            calls when download process ended successfull (ignore human actions - stop \ continue, add events if needed)
+            calls when download process ended successfull or canceled by client (method handler.cancelDownloads)
             
             you can check list of all current downloads (see methods handler.getDownloads and handler.getDownloadItemState)            
             addition returned result data
@@ -4106,6 +4123,7 @@ function KellyGrabber(cfg) {
                 complete  - successfull downloaded
                 failed    - fails num
                 failItems - fail items as downloadItem ojects
+                canceled  - is process was canceled by client
             }
         */
         
@@ -5068,12 +5086,12 @@ function KellyGrabber(cfg) {
         handler.updateStateForImageGrid();
     }
     
-    function updateProcessState() {
+    function updateProcessState(canceled) {
             
         var inProgress = handler.countCurrent('in_progress');
         var waitingNum = handler.countCurrent('wait');
         
-        if (!waitingNum && !inProgress) {
+        if ((!waitingNum && !inProgress) || canceled) {
             
             if (events.onDownloadAllEnd) {
                 
@@ -5083,13 +5101,17 @@ function KellyGrabber(cfg) {
                     complete : handler.countCurrent('complete'),
                     failed : failItems.length,
                     failItems : failItems,
+                    canceled : canceled ? true : false,
                 }
                 
                 events.onDownloadAllEnd(handler, response);
             }
                                 
             handler.updateStartButtonState('start');
-            updateContinue(true);
+            
+            var hideContinue = canceled ? false : true;
+            
+            updateContinue(hideContinue);
             updateProgressBar(); 
         } 
         
@@ -5241,7 +5263,7 @@ function KellyGrabber(cfg) {
         }
         
         if (fileName.indexOf('#number#') != -1) {
-       
+                        
             fileName = KellyTools.replaceAll(fileName, '#number#', handler.getDownloadItemN(ditem)); 
         }
         
@@ -5415,18 +5437,15 @@ function KellyGrabber(cfg) {
         }
         
         changeState('cancel');
-        
-        // that shold call from event OnStateChanged
-                
+             
         var untilStop = 0;      
  
         var checkAllCanceled = function() {            
             
             if (untilStop <= 0) {
-                updateContinue();
-
+                
+                updateProcessState(true); 
                 handler.resetDownloadItems(true);
-                handler.updateStartButtonState('start');
                 
                 if (onCancel) onCancel();
             }
@@ -5765,10 +5784,19 @@ function KellyGrabber(cfg) {
         }
     }
     
-    this.getDownloadItemN = function(item) {        
+    this.getDownloadItemN = function(ditem) {        
     
-        var itemIndex = downloads.indexOf(item);        
-        return options.invertNumeration ? downloads.length - itemIndex : itemIndex+1;
+        var itemIndex = downloads.indexOf(ditem);        
+        var N = options.invertNumeration ? downloads.length - itemIndex : itemIndex+1;
+        
+        // save right order inside collections
+        
+        if (options.invertNumeration && typeof ditem.item.pImage !== 'string') {
+            
+            N -= (ditem.item.pImage.length - ditem.subItem - 1) - ditem.subItem;
+        }
+        
+        return N;
     }
     
     // start download of item, return false if fail to initialize, used only in addDownloadWork that marks failed to init items
@@ -6391,6 +6419,15 @@ KellyTools.setHTMLData = function(el, val) {
                 el.appendChild(valBody.childNodes[0]);
             }
         }
+    }
+}
+
+KellyTools.classList = function(action, el, val) {
+    
+    if (action == 'add') {
+        el.classList.add(val);
+    } else if (action == 'remove') {
+        el.classList.remove(val);
     }
 }
 
@@ -8247,6 +8284,8 @@ function KellyFavItems()
             if (!itemsDb) {
                 itemsDb = sm.getDefaultData();
                 log('load() ' + fav.coptions.storage + ' db not exist, default used');
+                
+                handler.save('items');
             }
             
             for (var k in itemsDb){
@@ -8332,22 +8371,31 @@ function KellyFavItems()
         }
     }
     
+    this.getFavPageListCount = function() {
+       
+        if (!displayedItems || !displayedItems.length) return 0;
+        
+        return Math.ceil(displayedItems.length / fav.coptions.grid.perPage);
+    }
+    
     this.goToFavPage = function(newPage) {
         
         if (page == newPage) return false;
         if (tooltipBeasy) return false;
         
-        if (!displayedItems || !displayedItems.length || !imagesBlock) return false;
-                
-              
+        if (!imagesBlock) return false;
+        
+        var totalPages = handler.getFavPageListCount();
+        if (!totalPages) return false;
+                        
         if (imageGridProportions.length) {
+            
             log('save new proportions for items');
             imageGridProportions = [];
+            
             handler.save('items');
-        }
-        
-        var totalPages = Math.ceil(displayedItems.length / fav.coptions.grid.perPage);
-               
+        }        
+           
         if (newPage == 'next') newPage = page+1;
         else if (newPage == 'previuse' || newPage == 'prev' ) newPage = page-1;
         else {
@@ -8765,17 +8813,7 @@ function KellyFavItems()
         }
         
         return menuButtonA;
-    }
-       
-    function toogleActive(el) {
-        if (!el) return;
-        
-        if (el.className.indexOf('active') !== -1) {
-            el.className = el.className.replace('active', '');
-        } else {
-            el.className += ' active';
-        }
-    }
+    }     
     
     // exit from Favourites plugin block
     
@@ -8807,6 +8845,7 @@ function KellyFavItems()
     // вывести контент расширения и назначить режим отображения
     
     function displayFavouritesBlock(newMode) {
+        
         siteContent.style.display = 'none';
         favContent.style.display = 'block';
                 
@@ -9496,7 +9535,54 @@ function KellyFavItems()
         
         return controlls;
     }
+    
+    function showGoToPageTooltip(target) {
         
+        var tooltipEl = handler.getTooltip();
+            tooltipEl.updateCfg({
+                target : target, 
+                offset : {left : 0, top : 0}, 
+                positionY : 'bottom',
+                positionX : 'left',
+                ptypeX : 'inside',                
+                ptypeY : 'outside',
+                avoidOutOfBounds : true,
+                closeButton : false,
+            });
+        
+        tooltipBeasy = true; 
+        
+        var html = '\
+            <div class="' + env.className + '-GoToPageForm">\
+                <div>\
+                    <input type="text" placeholder="' + lng.s('Перейти на страницу', 'goto') + '" value="" class="' + env.className + '-GoToPage"><br>\
+                    <a href="#" class="' + env.className + '-Go">' + lng.s('Перейти', 'go') + '</a>\
+                </div>\
+            </div>';
+        
+        var container = tooltipEl.getContent();
+        KellyTools.setHTMLData(container, html);
+                
+        KellyTools.getElementByClass(container, env.className + '-Go').onclick = function() { 
+            
+            var page = KellyTools.inputVal(env.className + '-GoToPage', 'int', container);
+            var totalPages = handler.getFavPageListCount();
+            
+           
+            if (page > totalPages) page = totalPages;
+            if (page < 1) page = 1;
+            
+            tooltipBeasy = false;
+            tooltipEl.show(false);
+            
+            handler.goToFavPage(page);
+            
+            return false; 
+        }
+        
+        tooltipEl.show(true, 'gotoFavPage');
+    }  
+    
     function showCategoryCreateTooltip(target) {
         
         var tooltipEl = handler.getTooltip();
@@ -9852,8 +9938,7 @@ function KellyFavItems()
             // catIgnoreFilters = [];
         }		
         
-        if (!env.isNSFW() || fav.coptions.ignoreNSFW) {
-                               
+        if (!env.isNSFW() || fav.coptions.ignoreNSFW) {                               
             handler.ignoreNSFW();
         }
         
@@ -9870,6 +9955,12 @@ function KellyFavItems()
             displayFavouritesBlock('fav');
             return;
         }
+        
+        // update image list selected array by current selected \ deselected category filters
+        
+        updateFilteredData();
+        
+        // prepare dom elements
         
         favContent.innerHTML = '';
         
@@ -10111,6 +10202,27 @@ function KellyFavItems()
             additionButtons.appendChild(optionsButton);
         }
             
+        if (handler.getFavPageListCount() > 14) {
+            
+            var gotoPage = editButton.cloneNode();
+                gotoPage.innerText = lng.s('Страница', 'page');
+                gotoPage.className = env.className + '-FavEditButton ' + env.className + '-FavEditButton-page';
+                gotoPage.title = lng.s('Перейти на страницу', 'goto_page');
+                gotoPage.onclick = function (e) { 
+                
+                    if (handler.getTooltip().isShown() == 'gotoFavPage') {
+                        handler.getTooltip().show(false);
+                        tooltipBeasy = false;
+                    } else {                      
+                        showGoToPageTooltip(this);                       
+                    }                  
+                    
+                    return false;
+                }
+                
+            additionButtons.appendChild(gotoPage);    
+        }
+            
         if (handler.isDownloadSupported) {   
             
             var showDownloadManagerForm = function(show) {
@@ -10141,7 +10253,13 @@ function KellyFavItems()
                                     fav.coptions.grabber = self.getOptions();
                                     handler.save('cfg');
                                 }
-                            }
+                            },
+                            
+                            onDownloadAllEnd : function(handler, result) {
+                                
+                                KellyTools.log(result, 'KellyFavItems | downloadManager');   
+                                
+                            },
                         }
                     })
                     
@@ -10152,7 +10270,7 @@ function KellyFavItems()
                 
                 updateSidebarPosition();
             }
-            
+                   
             var download = editButton.cloneNode();
                 download.className = env.className + '-FavEditButton ' + env.className + '-FavEditButton-download ' + (imagesAsDownloadItems ? 'active' : 'hidden');
                 download.innerText = lng.s('Загрузки', 'download_manager');
@@ -10163,20 +10281,26 @@ function KellyFavItems()
                     
                     if (imagesAsDownloadItems) { 
                         imagesAsDownloadItems = false;
-                        this.className = this.className.replace('active', 'hidden');
-                        editButton.style.display = 'block';
+                        
+                        KellyTools.classList('remove', this, 'active');
+                        KellyTools.classList('add', this, 'hidden');
+                        
+                        KellyTools.classList('remove', editButton, 'hidden');
                         
                         sideBarLock = false;
                         showDownloadManagerForm(false);
                     } else {
                         imagesAsDownloadItems = true;
-                        this.className = this.className.replace('hidden', 'active');  
                         
+                        KellyTools.classList('remove', this, 'hidden');
+                        KellyTools.classList('add', this, 'active');
+                        
+                        KellyTools.classList('add', editButton, 'hidden');
+                        
+                        // turn off edit mode while in download mode
                         if (!readOnly) {
                             editButton.click();
                         }
-                        
-                        editButton.style.display = 'none';
                         
                         sideBarLock = true;
                         handler.getDownloadManager().setDownloadTasks(displayedItems);                        
@@ -10192,16 +10316,18 @@ function KellyFavItems()
             
             
             if (imagesAsDownloadItems) {
+                
+                // turn off edit mode while in download mode
                 if (!readOnly) {
                     editButton.click();
                 }
                 
-                editButton.style.display = 'none';
+                KellyTools.classList('add', editButton, 'hidden');
             }       
        
         }
             
-            typeFiltersContainer.appendChild(logicButton);
+        typeFiltersContainer.appendChild(logicButton);
         
         var cOptions = document.createElement('div');	
         KellyTools.setHTMLData(cOptions, '<table><tbody><tr><td></td><td></td><td></td></tr></tbody></table>');
@@ -10248,13 +10374,14 @@ function KellyFavItems()
             imagesBlock.className = env.className + '-imagesBlock-container ' + env.className + '-imagesBlock-container-active';
         }
         
-        updateFilteredData();
-        
         if (imagesAsDownloadItems) {
             showDownloadManagerForm(true);
         }
         
-        favContent.appendChild(imagesBlock);       
+        favContent.appendChild(imagesBlock);
+        
+        // display         
+        
         handler.updateImagesBlock();
         
         handler.showSidebar(true);
@@ -10882,8 +11009,10 @@ function KellyFavItems()
         if (inFav !== false) {
             
             fav.items[inFav] = postItem;
+            
             handler.showSidebarMessage(lng.s('Избранная публикация обновлена', 'item_upd'));
             handler.save('items');
+            
             return true;
         }
             
@@ -10899,6 +11028,7 @@ function KellyFavItems()
         
         log('post saved');
         log(postItem);
+        
         handler.save('items');
         
         return true;
@@ -10914,8 +11044,7 @@ function KellyFavItems()
     
         fav.items.splice(index, 1);
         
-        handler.updateFavCounter();
-        
+        handler.updateFavCounter();        
         handler.save('items');
 
         if (!postBlock) { // update all visible posts

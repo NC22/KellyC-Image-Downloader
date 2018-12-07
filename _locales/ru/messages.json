@@ -397,7 +397,13 @@
     },  
     "grabber_errors_counter":{  
         "message":"Ошибки загрузки : __ERRORSNUM__"
-    },      
+    },  
+    "goto_page":{  
+        "message":"Перейти на страницу"
+    },    
+    "go":{  
+        "message":"Перейти"
+    },
     "hide_soc":{  
         "message":"Скрывать кнопки соц. сетей из публикаций"
     },
@@ -490,7 +496,10 @@
     },    
     "other":{  
         "message":"Остальное"
-    },   
+    },  
+    "page":{  
+        "message":"Страница"
+    }, 
     "pages":{  
         "message":"Страницы"
     },
@@ -602,7 +611,7 @@
     "storage_create_ok_mcancel":{  
         "message":"Профиль добавлен"
     },   
-    "storage_create_ok_moverwrite":{  
+    "storage_create_ok_madd":{  
         "message":"Профиль дополнен"
     },    
     "storage_create_e1":{  

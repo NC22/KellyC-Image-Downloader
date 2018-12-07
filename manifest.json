@@ -3,35 +3,36 @@
       "js": [ "khelper.user.js" ],
       "all_frames": true,
       "matches": [ 
-			"*://joyreactor.cc/*",
-			"*://*.joyreactor.cc/*", 
-			"*://*.reactor.cc/*", 
-			"*://joyreactor.com/*",
-            "*://jr-proxy.com/*",
-            "*://safereactor.cc/*"
-	  ]
+        "*://joyreactor.cc/*",
+        "*://*.joyreactor.cc/*", 
+        "*://*.reactor.cc/*", 
+        "*://joyreactor.com/*",
+        "*://jr-proxy.com/*",
+        "*://safereactor.cc/*"
+        ]
    } ],
    "manifest_version" : 2,
    "version": "1.1.1.4",
    "name": "__MSG_ext_name__",
    "description": "__MSG_ext_description__",
-   "icons": { "32": "env/img/icon32x32.png",
-			  "44": "env/img/icon44x44.png",
-			  "128": "env/img/icon128x128.png" },
+   "icons": { 
+        "32": "env/img/icon32x32.png",
+        "44": "env/img/icon44x44.png",
+        "128": "env/img/icon128x128.png" },
    "author" : "nradiowave",
    "default_locale" : "en",
    "permissions": [
-       "downloads",
-	   "storage",
-       "tabs",
-	   "unlimitedStorage"
+        "downloads",
+        "storage",
+        "tabs",
+        "unlimitedStorage"
     ],
    "background": {
     "scripts": ["khelper.bg.js"],
     "persistent": false
    },
    "web_accessible_resources": [
-		"env/css/*.css",
-		"env/profile/*.js"
-	]
+        "env/css/*.css",
+        "env/profile/*.js"
+    ]
 }

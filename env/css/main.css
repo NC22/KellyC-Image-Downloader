@@ -325,6 +325,12 @@
      display : inline-block;
 }
 
+.__BASECLASS__-FavEditButton-edit.hidden {
+    pointer-events : none;
+    opacity : 0.5;
+    cursor : default;
+}
+
 .__BASECLASS__-FavEditButton-edit, .__BASECLASS__-FavEditButton-options, .__BASECLASS__-FavEditButton-download, .__BASECLASS__-FavEditButton-reset {
      display : inline-block;	
 	 float : left;
@@ -332,17 +338,15 @@
 	 height : 22px;
 }
 
-.__BASECLASS__-FavEditButton-download {
-    float: right;
-    padding-left: 4px;
-    padding-right: 4px;
-}
-
-.__BASECLASS__-FavEditButton-reset {
+.__BASECLASS__-FavEditButton-reset, .__BASECLASS__-FavEditButton-download, .__BASECLASS__-FavEditButton-page {
      float : right;
      background : #fff;
      padding-left : 4px;
      padding-right : 4px;
+}
+
+.__BASECLASS__-FavEditButton-page {
+    float : left;
 }
 
 .__BASECLASS__-TypeFiltersContainer {
