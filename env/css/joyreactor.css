@@ -27,12 +27,18 @@
     background-color : #aaff9b;
 }
 
-.old_reactor_cc.__BASECLASS__-fast-save-downloaded:after, .old_reactor_cc.__BASECLASS__-fast-save-notdownloaded:after {
-    top: -8px;
-    right: -8px;
-    width: 16px;
-    height: 16px;
+.old_reactor_cc.__BASECLASS__-fast-save-downloaded:after, 
+.old_reactor_cc.__BASECLASS__-fast-save-notdownloaded:after,
+.old_reactor_cc.__BASECLASS__-sidebar-addtofav-added:after {
+    top: 6px;
+    right: -4px;
+    width: 8px;
+    height: 8px;
     border-radius: 12px;
+}
+
+.old_reactor_cc.__BASECLASS__-fast-save, .old_reactor_cc.__BASECLASS__-sidebar-addtofav {
+    image-rendering: auto;
 }
 
 .old_reactor_cc .__BASECLASS__-FavFilter-logic {

@@ -355,7 +355,11 @@
     cursor : default;
 }
 
-.__BASECLASS__-FavEditButton-edit, .__BASECLASS__-FavEditButton-options, .__BASECLASS__-FavEditButton-download, .__BASECLASS__-FavEditButton-reset {
+.__BASECLASS__-FavEditButton-edit,
+.__BASECLASS__-FavEditButton-options,
+.__BASECLASS__-FavEditButton-download,
+.__BASECLASS__-FavEditButton-page, 
+.__BASECLASS__-FavEditButton-reset {
      display : inline-block;	
 	 float : left;
 	 line-height : 22px;
