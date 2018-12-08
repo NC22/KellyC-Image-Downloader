@@ -10673,6 +10673,8 @@ function KellyFavItems()
             removeButton.innerText = lng.s('Удалить всю подборку', 'delete_all_items');
         }
          
+        // update post containers in .itemRemove method
+         
         removeApplyButton.onclick = function() {
 
             if (!selectedImages || selectedImages.length <= 0) {
@@ -11043,22 +11045,14 @@ function KellyFavItems()
     // index - item index in fav.items[index] - comment \ or post
     // postBlock - not important post container dom element referense, helps to find affected post
         
-    this.itemRemove = function(index, postBlock) {
+    this.itemRemove = function(index) {
     
         fav.items.splice(index, 1);
         
         handler.updateFavCounter();        
         handler.save('items');
 
-        if (!postBlock) { // update all visible posts
-        
-           handler.formatPostContainers();
-           
-        } else {
-        
-            env.formatPostContainer(postBlock);
-            
-        }
+        handler.formatPostContainers();
     }
     
     // удалить категорию с последующим обновлением контейнеров публикаций 
@@ -12298,8 +12292,18 @@ function kellyProfileJoyreactor() {
         
         var inFav = handler.fav.getStorageManager().searchItem(handler.fav.getGlobal('fav'), {link : linkUrl, commentLink : false});
         
-        var addToFav = KellyTools.getElementByClass(publication, handler.className + '-post-FavAdd');
+        // remove unused dublicates from conflict extension if its active
+        
+        var jrasDublicates = KellyTools.getElementByClass(publication, 'jras-pcLinks-img');
+        if (jrasDublicates) {
+            var jrasAddToFav = jrasDublicates.getElementsByClassName(handler.className + '-post-FavAdd');
+            for (var i = 0; i < jrasAddToFav.length; i++) {
+                jrasAddToFav[i].parentElement.removeChild(jrasAddToFav[i]);                
+            }
+        }
     
+        var addToFav = KellyTools.getElementByClass(publication, handler.className + '-post-FavAdd');
+      
         // create if not exist
         
         if (!addToFav) {
@@ -12354,11 +12358,11 @@ function kellyProfileJoyreactor() {
     function getPostLinkEl(publication) {
         
         if (window.location.host.indexOf('old.') == -1) {
-
-            var link = KellyTools.getElementByClass(publication, 'link_wr');
-            if (link) link = KellyTools.getChildByTag(link, 'a');
+            
+            var link = publication.querySelector('.ufoot_first .link_wr a'); // avoid links in jras-pcLinks-img container
+            
         } else {
-            var link = publication.querySelector('[title="ссылка на пост"]');
+            var link = publication.querySelector('.ufoot [title="ссылка на пост"]');
         }		
         
         return link;
@@ -12506,7 +12510,18 @@ function kellyProfileJoyreactor() {
             if (!addToFavButton.length) {
         
                 var bottomLink = comments[i].getElementsByClassName('reply-link');
-                if (bottomLink.length) {
+                var linksPlaceholder = false;
+                
+                if (!bottomLink.length) {
+                    bottomLink = comments[i].getElementsByClassName('comment_link');    
+                    if (bottomLink.length) {
+                        linksPlaceholder = bottomLink[0].parentElement;
+                    }                        
+                } else {
+                    linksPlaceholder = bottomLink[0];
+                }
+                
+                if (linksPlaceholder) {
                 
                     addToFavButton = document.createElement('a');
                     addToFavButton.href = '#';                    

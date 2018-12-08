@@ -1,5 +1,19 @@
 /* css compatibility with profile */
 
+.topbar_wr {
+    z-index : 995;
+}
+
+.jras-pcLinks-img .__BASECLASS__-post-FavAdd {
+    display : none;
+}
+
+.old_reactor_cc.__BASECLASS__-fast-save {
+   
+    display : inline-block;
+    margin-top : 0px;
+}
+
 .old_reactor_cc.__BASECLASS__-fast-save {
     width: 16px;
     height: 16px;

@@ -913,12 +913,17 @@
     
     text-align: center;
     vertical-align: middle;
-    display : inline-block;
+    
+    display : block;
+    
     cursor: pointer;
     image-rendering: pixelated;
     
     position: relative;
     box-sizing: border-box;
+    
+    margin : 0;
+    margin-top : 5px;
 }
 
 .__BASECLASS__-fast-save-unavailable {

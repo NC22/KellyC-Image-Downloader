@@ -3,7 +3,7 @@
         "message":"Добавить отмеченые категории"
     },
     "add_to_fav":{  
-        "message":"Добавить в избранное"
+        "message":"в избранное"
     },
     "add_to_fav_comment":{  
         "message":"в избранное"
@@ -519,7 +519,7 @@
         "message":"Публикация"
     },
     "remove_from_fav":{  
-        "message":"Удалить из избранного"
+        "message":"удалить из избранного"
     },
     "remove_from_fav_comment":{  
         "message":"удалить из избранного"
