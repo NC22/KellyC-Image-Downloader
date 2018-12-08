@@ -37,15 +37,19 @@
 }
 
 .old_reactor_cc.__BASECLASS__-FavContainer {
-     border : 1px solid #b56b14;
-     background : #fff;
+
+    background : #fff;
     padding: 10px 9px;
     border: 1px solid #b56b14;
+    
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
+    
     border-radius: 5px;
     background: #ffffff;
     overflow: hidden;
+    
+    min-height: 400px;
 }
 
 .old_reactor_cc .__BASECLASS__-FiltersMenu > li {
@@ -65,13 +69,21 @@
     background-color: white;
     font-size: 11px;
     font-weight: bold;
-    height: 25px;
-    line-height: 25px;
+    height: 20px;
+    line-height: 20px;
     margin: 0;
     overflow: hidden;
     border-radius: 3px;
     margin-right: 4px;
     float: left;
+}
+
+.old_reactor_cc .__BASECLASS__-tooltipster-close {
+    line-height: 23px;
+}
+
+.old_reactor_cc .__BASECLASS__-tooltipster-content {
+    font-size : 13.33px;
 }
 
 .old_reactor_cc .__BASECLASS__-FiltersMenu > li > a.active {
@@ -82,7 +94,7 @@
      background : #ea8080; 
 }
 
-.old_reactor_cc .__BASECLASS__-ModalBox .kellyJRFav-ModalBox-content a {
+.old_reactor_cc .__BASECLASS__-ModalBox .__BASECLASS__-ModalBox-content a {
 
     color : #000;
 }
@@ -186,6 +198,10 @@
     
     opacity : 0;
     transition : opacity 0.3s;
+}
+
+#submenu div.old_reactor_cc div.__BASECLASS__-FavItemsCount {
+    background: rgba(237, 85, 0, 1);
 }
 
 #submenu div div.__BASECLASS__-FavItemsCount.__BASECLASS__-FavItemsCount-1 {

@@ -24,8 +24,6 @@ function kellyProfileJoyreactor() {
     this.profile = 'joyreactor';        
     this.hostClass = window.location.host.split(".").join("_");
     
-    this.actionVar = 'dkl_pp';
-  
     this.fav = false;        
     this.events = {
 
@@ -384,7 +382,7 @@ function kellyProfileJoyreactor() {
             
             if (!addToFavButton.length) {
         
-                var bottomLink = comments[i].getElementsByClassName('comment_link');
+                var bottomLink = comments[i].getElementsByClassName('reply-link');
                 if (bottomLink.length) {
                 
                     addToFavButton = document.createElement('a');
@@ -392,9 +390,12 @@ function kellyProfileJoyreactor() {
                     addToFavButton.innerText = '';
                     addToFavButton.className = handler.className + '-addToFavComment';
             
-                    bottomLink[0].parentElement.appendChild(addToFavButton);
+                    bottomLink[0].appendChild(addToFavButton);
                     // responseButton.parentNode.inserBefore(addToFavButton, responseButton.nextSibling) insert after
+                } else {
+                     KellyTools.log('formatComments : cant find placeholder for append "Add to fav button"'); 
                 }
+                
             } else {
                 addToFavButton = addToFavButton[0];
             }

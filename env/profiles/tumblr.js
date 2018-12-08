@@ -17,9 +17,7 @@ function kellyProfileTumblr() {
     this.className = 'kellyJRFav'; 
     this.profile = 'tumblr';        
     this.hostClass = window.location.host.split(".").join("_");
-    
-    this.actionVar = 'dkl_pp';
-  
+
     this.fav = false;        
     this.events = {
 

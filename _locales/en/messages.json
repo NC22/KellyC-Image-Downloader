@@ -467,6 +467,9 @@
     "next":{  
         "message":"Next"
     },
+    "nsfw_tip":{  
+        "message":"Auto deselect categories that marked as NSFW"
+    },
     "no_image":{  
         "message":"Without image"
     },

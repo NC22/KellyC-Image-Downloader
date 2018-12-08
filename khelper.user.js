@@ -8414,6 +8414,8 @@ function KellyFavItems()
         
         page = newPage;
         
+        handler.showSidebarMessage(false);
+        
         //imagesBlock.className = imagesBlock.className.replace('active', 'hidden');
         
         //setTimeout(function() {
@@ -9555,8 +9557,8 @@ function KellyFavItems()
         var html = '\
             <div class="' + env.className + '-GoToPageForm">\
                 <div>\
-                    <input type="text" placeholder="' + lng.s('Перейти на страницу', 'goto') + '" value="" class="' + env.className + '-GoToPage"><br>\
-                    <a href="#" class="' + env.className + '-Go">' + lng.s('Перейти', 'go') + '</a>\
+                    <p><input type="text" placeholder="' + lng.s('Перейти на страницу', 'goto') + '" value="" class="' + env.className + '-GoToPage"></p>\
+                    <p><a href="#" class="' + env.className + '-Go">' + lng.s('Перейти', 'go') + '</a></p>\
                 </div>\
             </div>';
         
@@ -9599,9 +9601,9 @@ function KellyFavItems()
         var html = '\
             <div class="' + env.className + 'CatAddForm">\
                 <div>\
-                    <input type="text" placeholder="' + lng.s('Название новой категории', 'cat_name') + '" value="" class="' + env.className + 'CatName"><br>\
+                    <p><input type="text" placeholder="' + lng.s('Название новой категории', 'cat_name') + '" value="" class="' + env.className + 'CatName"></p>\
                     <!--input type="text" placeholder="' + lng.s('Приоритет', 'cat_order') + '" value="" class="' + env.className + 'CatOrder"-->\
-                    <a href="#" class="' + env.className + 'CatCreate">' + lng.s('Создать категорию', 'cat_create') + '</a>\
+                    <p><a href="#" class="' + env.className + 'CatCreate">' + lng.s('Создать категорию', 'cat_create') + '</a></p>\
                 </div>\
             </div>';
         
@@ -9680,9 +9682,9 @@ function KellyFavItems()
                     <a href="#" class="' + env.className + '-neworder-down ' + baseClass + '-make-beasy">&#9660;</a>\
                 </p>\
                 <!--input class="' + baseClass + '-neworder" type="text" value="' + (!category.order ? itemIndex : category.order) + '" placeholder="' + lng.s('Приоритет', 'cat_order') + '"-->\
-                <br>\
-                <a class="' + baseClass + '-newname-button" href="#">' + lng.s('Применить', 'change') + '</a>\
-                ' + deleteButtonHtml + '\
+                \
+                <p><a class="' + baseClass + '-newname-button" href="#">' + lng.s('Применить', 'change') + '</a>\
+                ' + deleteButtonHtml + '</p>\
             </div>';
         
         var container = tooltipEl.getContent();
@@ -10120,7 +10122,7 @@ function KellyFavItems()
             
         var no = logicButton.cloneNode();
             no.className = env.className + '-FavFilter';
-            no.title = lng.s('Режим добавления в выборку \ исключения из выборки категрии', 'cats_filter')
+            no.title = lng.s('Режим добавления в выборку \ исключения из выборки категрии', 'cats_filter');
             if (!catFilterNot) no.innerText = '+ ' + lng.s('Категории', 'cats');
             else no.innerText = '- ' + lng.s('Категории', 'cats');
             
@@ -10169,6 +10171,7 @@ function KellyFavItems()
             if (fav.coptions.ignoreNSFW) nsfw.innerText = '- NSFW';
             else nsfw.innerText = '+ NSFW';
             
+            nsfw.title = lng.s('', 'nsfw_tip');
             nsfw.onclick = function () {
                 
                 if (!checkSafeUpdateData()) return false;
@@ -12144,8 +12147,6 @@ function kellyProfileJoyreactor() {
     this.profile = 'joyreactor';        
     this.hostClass = window.location.host.split(".").join("_");
     
-    this.actionVar = 'dkl_pp';
-  
     this.fav = false;        
     this.events = {
 
@@ -12504,7 +12505,7 @@ function kellyProfileJoyreactor() {
             
             if (!addToFavButton.length) {
         
-                var bottomLink = comments[i].getElementsByClassName('comment_link');
+                var bottomLink = comments[i].getElementsByClassName('reply-link');
                 if (bottomLink.length) {
                 
                     addToFavButton = document.createElement('a');
@@ -12512,9 +12513,12 @@ function kellyProfileJoyreactor() {
                     addToFavButton.innerText = '';
                     addToFavButton.className = handler.className + '-addToFavComment';
             
-                    bottomLink[0].parentElement.appendChild(addToFavButton);
+                    bottomLink[0].appendChild(addToFavButton);
                     // responseButton.parentNode.inserBefore(addToFavButton, responseButton.nextSibling) insert after
+                } else {
+                     KellyTools.log('formatComments : cant find placeholder for append "Add to fav button"'); 
                 }
+                
             } else {
                 addToFavButton = addToFavButton[0];
             }
