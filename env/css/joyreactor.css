@@ -8,16 +8,18 @@
     display : none;
 }
 
-.old_reactor_cc.__BASECLASS__-fast-save {
+.old_reactor_cc.__BASECLASS__-fast-save, .old_reactor_cc.__BASECLASS__-sidebar-addtofav {
    
     display : inline-block;
     margin-top : 0px;
 }
 
-.old_reactor_cc.__BASECLASS__-fast-save {
+.old_reactor_cc.__BASECLASS__-fast-save, .old_reactor_cc.__BASECLASS__-sidebar-addtofav {
     width: 16px;
     height: 16px;
     background-size: 16px;
+    margin-left : 3px;
+    margin-right : 3px;
 }
 
 

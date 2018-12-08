@@ -5,6 +5,9 @@
     "add_to_fav":{  
         "message":"в избранное"
     },
+    "add_to_fav_tip":{  
+        "message":"Добавить в избранное"
+    },
     "add_to_fav_comment":{  
         "message":"в избранное"
     },
@@ -523,6 +526,9 @@
     },
     "remove_from_fav_comment":{  
         "message":"удалить из избранного"
+    },       
+    "remove_from_fav_tip":{  
+        "message":"Удалить в избранное"
     },
     "removed_cat":{  
         "message":"Удаленная категория"

@@ -12275,86 +12275,6 @@ function kellyProfileJoyreactor() {
         }
     }
     
-    function updatePostFavButton(publication) {
-        
-        var link = getPostLinkEl(publication);
-        
-        if (!link) {            
-            KellyTools.log('empty post link element', 'profile updatePostFavButton');
-            return false;        
-        }
-        
-        var linkUrl = handler.getPostLink(publication, link);
-        if (!linkUrl) {
-            KellyTools.log('bad post url', 'profile updatePostFavButton');
-            return false;  
-        }
-        
-        var inFav = handler.fav.getStorageManager().searchItem(handler.fav.getGlobal('fav'), {link : linkUrl, commentLink : false});
-        
-        // remove unused dublicates from conflict extension if its active
-        
-        var jrasDublicates = KellyTools.getElementByClass(publication, 'jras-pcLinks-img');
-        if (jrasDublicates) {
-            var jrasAddToFav = jrasDublicates.getElementsByClassName(handler.className + '-post-FavAdd');
-            for (var i = 0; i < jrasAddToFav.length; i++) {
-                jrasAddToFav[i].parentElement.removeChild(jrasAddToFav[i]);                
-            }
-        }
-    
-        var addToFav = KellyTools.getElementByClass(publication, handler.className + '-post-FavAdd');
-      
-        // create if not exist
-        
-        if (!addToFav) {
-            
-            addToFav = document.createElement('a');
-            addToFav.className = handler.className + '-post-FavAdd';
-            
-            // keep same url as main button, to dont loose getPostLink method functional and keep similar environment
-            addToFav.href = link.href; 
-           
-            var parentNode = link.parentNode;
-                parentNode.insertBefore(addToFav, link);
-        }
-        
-        // update title
-        
-        if (inFav !== false) {
-                        
-            addToFav.innerText = KellyLoc.s('Удалить из избранного', 'remove_from_fav');
-            addToFav.onclick = function() { 
-            
-                handler.fav.showRemoveFromFavDialog(inFav, function() {
-                    if (handler.fav.getGlobal('fav').coptions.syncByAdd) syncFav(publication, false);
-                    
-                    handler.fav.closeSidebar(); 
-                }); 
-                
-                return false; 
-            };
-            
-        } else {
-            
-            addToFav.innerText = KellyLoc.s('Добавить в избранное', 'add_to_fav');
-            addToFav.onclick = function() { 
-                
-                handler.fav.showAddToFavDialog(publication, false, function(selectedPost, selectedComment, selectedImages) {                    
-                    
-                    if (!selectedComment && handler.fav.getGlobal('fav').coptions.syncByAdd) {
-                        syncFav(selectedPost, true);
-                    }                     
-                });
-                
-                return false; 
-            };
-            
-        }
-                
-        return true;            
-    }
-    
-    
     function getPostLinkEl(publication) {
         
         if (window.location.host.indexOf('old.') == -1) {
@@ -12575,6 +12495,129 @@ function kellyProfileJoyreactor() {
         KellyTools.log('formatComments : ' + comments.length + ' - '+ block.id);
     }    
     
+    function updateFastSaveButton(postBlock, placeholder, showButton) {
+        
+        var fastSave = KellyTools.getElementByClass(placeholder,  handler.className + '-fast-save');
+        
+        var censored = postBlock.innerHTML.indexOf('/images/censorship') != -1 ? true : false;
+        
+        if (!censored && showButton) {
+            
+            if (!fastSave) {
+                
+                fastSave = document.createElement('DIV'); 
+                fastSave.title = KellyLoc.s('', 'fast_download');     
+                
+                placeholder.appendChild(fastSave); 
+                    
+                var fastSaveBaseClass =  handler.hostClass + ' ' + handler.className + '-fast-save ' + handler.className + '-icon-diskete-yellow ';
+            
+                fastSave.className = fastSaveBaseClass + handler.className + '-fast-save-unchecked';
+                fastSave.onclick = function() {
+                    
+                    if (this.className.indexOf('unavailable') != -1) return false;
+                    
+                    if (this.className.indexOf('loading') != -1) {
+                        
+                        handler.fav.getFastSave().downloadCancel();
+                        fastSave.classList.remove(handler.className + '-fast-save-loading');                          
+                        
+                    } else {
+                                
+                        var downloadEnabled = handler.fav.getFastSave().downloadPostData(postBlock, function(success) {
+                            fastSave.classList.remove(handler.className + '-fast-save-loading');
+                            fastSave.className = fastSaveBaseClass + handler.className + '-fast-save-' + (success ? '' : 'not') + 'downloaded';
+                        });
+                        
+                        if (downloadEnabled) {
+                            fastSave.classList.remove(handler.className + '-fast-save-unchecked');
+                            fastSave.classList.add(handler.className + '-fast-save-loading');
+                        }
+                    }
+                    
+                    return false;
+                }  
+            } 
+            
+        } else {
+            
+            if (fastSave) {
+                fastSave.parentNode.removeChild(fastSave);
+            }
+                        
+            fastSave = false;
+        }
+        
+        return fastSave;
+    }
+    
+    function updateAddToFavButton(postBlock, placeholder) {
+         
+        var link = getPostLinkEl(postBlock);
+        
+        if (!link) {            
+            KellyTools.log('empty post link element', 'profile updatePostFavButton');
+            return false;        
+        }
+        
+        var linkUrl = handler.getPostLink(postBlock, link);
+        if (!linkUrl) {
+            KellyTools.log('bad post url', 'profile updatePostFavButton');
+            return false;  
+        }
+              
+        var addToFav = KellyTools.getElementByClass(placeholder,  handler.className + '-sidebar-addtofav');
+        
+        if (!addToFav) {
+            
+            addToFav = document.createElement('DIV'); 
+            addToFav.className = handler.hostClass + ' ' + handler.className + '-icon-diskete ' + handler.className +'-sidebar-addtofav';
+                 
+            placeholder.appendChild(addToFav);    
+        }         
+        
+        var inFav = handler.fav.getStorageManager().searchItem(handler.fav.getGlobal('fav'), {link : linkUrl, commentLink : false});
+                
+        // update title
+        
+        if (inFav !== false) {
+            
+            KellyTools.classList('add', addToFav, handler.className + '-sidebar-addtofav-added');         
+            addToFav.title = KellyLoc.s('Удалить из избранного', 'remove_from_fav_tip');
+            
+            addToFav.onclick = function() { 
+            
+                handler.fav.showRemoveFromFavDialog(inFav, function() {
+                    if (handler.fav.getGlobal('fav').coptions.syncByAdd) syncFav(postBlock, false);
+                    
+                    handler.fav.closeSidebar(); 
+                }); 
+                
+                return false; 
+            };
+            
+        } else {
+                        
+            KellyTools.classList('remove', addToFav, handler.className + '-sidebar-addtofav-added');  
+            addToFav.title = KellyLoc.s('Добавить в избранное', 'add_to_fav_tip');
+            
+            addToFav.onclick = function() { 
+                
+                handler.fav.showAddToFavDialog(postBlock, false, function(selectedPost, selectedComment, selectedImages) {                    
+                    
+                    if (!selectedComment && handler.fav.getGlobal('fav').coptions.syncByAdd) {
+                        syncFav(selectedPost, true);
+                    }                     
+                });
+                
+                return false; 
+            };
+            
+        }
+        
+        return addToFav;
+    }
+    
     this.formatPostContainer = function(postBlock) {
         
         var coptions = handler.fav.getGlobal('fav').coptions;
@@ -12588,9 +12631,22 @@ function kellyProfileJoyreactor() {
             }
         }
         
-        var censored = postBlock.innerHTML.indexOf('/images/censorship') != -1 ? true : false;
+        var shareButtonsBlock = KellyTools.getElementByClass(postBlock, 'share_buttons');
         
-        if (!updatePostFavButton(postBlock)) return false;    
+        if (!shareButtonsBlock) {
+            KellyTools.log('formatPostContainer : cant find placeholder for append "Add to fav button"'); 
+            return false;
+        }
+        
+        var fastSave = updateFastSaveButton(postBlock, shareButtonsBlock, coptions.fastsave.enabled);        
+        var addToFav = updateAddToFavButton(postBlock, shareButtonsBlock);
+        
+        if (!addToFav) {
+            if (fastSave) {
+                fastSave.parentNode.removeChild(fastSave);
+            }
+            return false;
+        }
         
         var toogleCommentsButton = postBlock.getElementsByClassName('toggleComments');
 
@@ -12627,59 +12683,13 @@ function kellyProfileJoyreactor() {
         }
         
         handler.formatComments(postBlock);     
-            
-        var shareButtonsBlock = KellyTools.getElementByClass(postBlock, 'share_buttons');
-        if (shareButtonsBlock) {
-            
-            var fastSave = KellyTools.getElementByClass(postBlock,  handler.className + '-fast-save');
-            if (!censored && coptions.fastsave.enabled) {
                 
-                if (!fastSave) {
-                    fastSave = document.createElement('DIV');                    
-                    shareButtonsBlock.appendChild(fastSave); 
-                        
-                    var fastSaveBaseClass =  handler.hostClass + ' ' + handler.className + '-fast-save ' + handler.className + '-icon-diskete ';
-                
-                    fastSave.className = fastSaveBaseClass + handler.className + '-fast-save-unchecked';
-                    fastSave.onclick = function() {
-                        
-                        if (this.className.indexOf('unavailable') != -1) return false;
-                        
-                        if (this.className.indexOf('loading') != -1) {
-                            
-                            handler.fav.getFastSave().downloadCancel();
-                            fastSave.classList.remove(handler.className + '-fast-save-loading');                          
-                            
-                        } else {
-                                    
-                            var downloadEnabled = handler.fav.getFastSave().downloadPostData(postBlock, function(success) {
-                                fastSave.classList.remove(handler.className + '-fast-save-loading');
-                                fastSave.className = fastSaveBaseClass + handler.className + '-fast-save-' + (success ? '' : 'not') + 'downloaded';
-                            });
-                            
-                            if (downloadEnabled) {
-                                fastSave.classList.remove(handler.className + '-fast-save-unchecked');
-                                fastSave.classList.add(handler.className + '-fast-save-loading');
-                            }
-                        }
-                        
-                        return false;
-                    }  
-                } 
-                
-            } else {
-                if (fastSave) {
-                    fastSave.parentNode.removeChild(fastSave);
-                }
-            }
-            
-            if (coptions.hideSoc) {
-                var shareButtons = shareButtonsBlock.childNodes;
-                for (var i = 0; i < shareButtons.length; i++) {            
-                    if (shareButtons[i].tagName == 'A' && shareButtons[i].className.indexOf('share') != -1) {
-                        // keep technically alive
-                        shareButtons[i].setAttribute('style', 'height : 0px; width : 0px; opacity : 0; margin : 0px; padding : 0px; display : block; overflow : hidden;');
-                    }
+        if (coptions.hideSoc) {
+            var shareButtons = shareButtonsBlock.childNodes;
+            for (var i = 0; i < shareButtons.length; i++) {            
+                if (shareButtons[i].tagName == 'A' && shareButtons[i].className.indexOf('share') != -1) {
+                    // keep technically alive
+                    shareButtons[i].setAttribute('style', 'height : 0px; width : 0px; opacity : 0; margin : 0px; padding : 0px; display : block; overflow : hidden;');
                 }
             }
         }

@@ -4,6 +4,9 @@
     },
     "add_to_fav":{  
         "message":"to favourite"
+    },    
+    "add_to_fav_tip":{  
+        "message":"Add to favourite"
     },
     "add_to_fav_comment":{  
         "message":"to favourite"
@@ -520,6 +523,9 @@
     },
     "remove_from_fav_comment":{  
         "message":"remove from favourite"
+    },  
+    "remove_from_fav_tip":{  
+        "message":"Remove from favourite"
     },
     "removed_cat":{  
         "message":"Removed category"
