@@ -3775,6 +3775,7 @@ function KellyThreadWork(cfg) {
     var events = { onProcess : false, onEnd : false };
     var handler = this;
     var threadId = 1;
+    var applayJobTimer = false;
     
     
     function constructor(cfg) {
@@ -3899,7 +3900,16 @@ function KellyThreadWork(cfg) {
         
         threads = [];
         jobs = [];
+        
         KellyTools.log('clean job', 'KellyThreadWork');
+        
+        if (applayJobTimer) {
+            clearTimeout(applayJobTimer);
+            applayJobTimer = false;
+        }
+        
+        if (events.onEnd) events.onEnd('stop', true);
+            
     }
         
     // todo add watch dog with timeout for long jobs
@@ -3928,7 +3938,7 @@ function KellyThreadWork(cfg) {
         
         if (!jobs.length && !threads.length) {   
         
-            if (events.onEnd) events.onEnd();
+            if (events.onEnd) events.onEnd('onJobEnd');
             
         } else {
             
@@ -3947,9 +3957,8 @@ function KellyThreadWork(cfg) {
                     
                 }
             }
-            
-            // clean timer ?
-            setTimeout(function() {        
+                        
+            applayJobTimer = setTimeout(function() {        
                  applayJob();
             }, timeout * 1000);
         }
@@ -3973,7 +3982,7 @@ function KellyThreadWork(cfg) {
     
         if (threads.length >= maxThreads) return false;
         if (!jobs.length && !threads.length) {            
-            if (events.onEnd) events.onEnd();
+            if (events.onEnd) events.onEnd('applayJob');
             return false;
         }
         
@@ -3994,14 +4003,14 @@ function KellyThreadWork(cfg) {
             request.open('GET', thread.job.url, true);
 
             request.onload = function() {
-              if (this.status == 200) {		  
-                thread.response = validateResponse(this.response);
-              } else {
-                thread.response = 0;
-                thread.error = 'XMLHttpRequest : bad response status ' + this.status;
-              }
-              
-              handler.onJobEnd(thread);
+                if (this.status == 200) {		  
+                    thread.response = validateResponse(this.response);
+                } else {
+                    thread.response = 0;
+                    thread.error = 'XMLHttpRequest : bad response status ' + this.status;
+                }
+
+                handler.onJobEnd(thread);
             };
 
             request.onerror = function() {
@@ -4035,7 +4044,7 @@ function KellyThreadWork(cfg) {
         if (beasy) return false;
         
         if (!jobs.length) {            
-            if (events.onEnd) events.onEnd();
+            if (events.onEnd) events.onEnd('exec');
             return false;
         }
         
@@ -6566,6 +6575,14 @@ KellyTools.getPrintValues = function(print, reverse, limitFrom, limitTo) {
     var itemsToSelect = [];
     var options = print.split(',');
     
+    if (typeof limitTo == 'undefined') {
+        limitTo = false;
+    } 
+    
+    if (typeof limitFrom == 'undefined') {
+        limitFrom = false;
+    }
+    
     for (var i = 0; i < options.length; i++) {
 
         var option = options[i].trim().split('-');
@@ -6592,14 +6609,14 @@ KellyTools.getPrintValues = function(print, reverse, limitFrom, limitTo) {
             }
 
             for (var b = option[0]; b <= option[1]; b++) {
-                if (typeof limitTo != 'undefined' && b > limitTo) continue;
-                if (typeof limitFrom != 'undefined' && b < limitFrom) continue;
+                if (limitTo !== false && b > limitTo) continue;
+                if (limitFrom !== false && b < limitFrom) continue;
                 if (itemsToSelect.indexOf(b) == -1) itemsToSelect[itemsToSelect.length] = b;
             }
 
         } else {
-            if (typeof limitTo != 'undefined' && option[0] > limitTo) continue; 
-            if (typeof limitFrom != 'undefined' && option[0] < limitFrom) continue;            
+            if (limitTo !== false && option[0] > limitTo) continue; 
+            if (limitFrom !== false && option[0] < limitFrom) continue;            
             if (itemsToSelect.indexOf(option[0]) == -1) itemsToSelect[itemsToSelect.length] = option[0];
         }
 
@@ -11289,18 +11306,29 @@ function KellyFavItems()
     }
     
     
-    this.onDownloadNativeFavPagesEnd = function() {
-    
+    this.onDownloadNativeFavPagesEnd = function(stage, canceled) {
+        
+        log(stage);
+        
+        var notice = KellyTools.getElementByClass(document, env.className + '-exporter-process');
+        if (notice) {
+            notice.innerText = canceled ? lng.s('', 'download_partly') : '';            
+        }
+        
         var downloadBtn = KellyTools.getElementByClass(document, env.className + '-DownloadFav');
         if (downloadBtn) downloadBtn.innerText = lng.s('Запустить скачивание страниц', 'download_start');	
             
         if (!favNativeParser || !favNativeParser.collectedData.items.length) return false;
         
         // todo - notify about auto download ?
+        log('onDownloadNativeFavPagesEnd : ' + (canceled ? ' canceled' : 'job finished successfull'));
         
-        if (fav.coptions.downloader.autosaveEnabled) { //  && favNativeParser.jobSaved > favNativeParser.jobAutosave 
+        if (!canceled &&
+            fav.coptions.downloader.autosaveEnabled && 
+            (favNativeParser.jobSaved || !favNativeParser.jobBeforeAutosave)
+        ) { 
             favNativeParser.jobSaved += favNativeParser.jobAutosave - favNativeParser.jobBeforeAutosave;
-            favNativeParser.saveData(true);            
+            favNativeParser.saveData(true, 'onDownloadNativeFavPagesEnd');            
         } else {
             KellyTools.getElementByClass(document, env.className + '-Save').style.display = 'block';
         }
@@ -11536,7 +11564,7 @@ function KellyFavItems()
             
             worker.jobBeforeAutosave = worker.jobAutosave ? worker.jobAutosave : 1000;
             worker.jobSaved = worker.jobSaved ? worker.jobSaved+worker.jobAutosave : worker.jobAutosave;
-            worker.saveData(true);
+            worker.saveData(true, 'onDownloadNativeFavPage');
             
         }
     
@@ -11557,8 +11585,6 @@ function KellyFavItems()
         if (favNativeParser.getJobs().length) {
         
             favNativeParser.stop();
-            handler.onDownloadNativeFavPagesEnd();
-            
             return false;
         }
                         
@@ -11578,11 +11604,7 @@ function KellyFavItems()
             fav.coptions.downloader.autosaveEnabled = autosaveEnabled;
             
         }
-        
-        log(autosaveEnabled);
-        log(fav.coptions.downloader.autosaveEnabled);
-        log(updateOptions);
-        
+                
         if (autosaveEnabled) {
             
             var autosaveInput = KellyTools.getElementByClass(document, env.className + '-PageAutosave');
@@ -11611,6 +11633,30 @@ function KellyFavItems()
             
         }
         
+        var customUrl = false;
+        var customUrlEl = KellyTools.getElementByClass(document, env.className +'-downloader-option-url');  
+        
+        if (customUrlEl && customUrlEl.value) {
+            var customUrl = KellyTools.val(customUrlEl.value, 'longtext');
+            
+            if (customUrl) {
+                
+                if (customUrl.indexOf(window.location.origin) !== 0) {
+                    
+                    if (customUrl[0] != '/') customUrl = '/' + customUrl;
+                    
+                    customUrl = window.location.origin + customUrl;                    
+                }
+                
+                customUrlEl.value = customUrl;    
+                
+                if (favInfo.url != customUrl) {
+                    favInfo.url = customUrl;
+                } else customUrl = false;
+                
+            } else customUrl = false;
+        }
+        
         var skipEmpty = KellyTools.getElementByClass(document, env.className + '-exporter-skip-empty');
             skipEmpty = skipEmpty && skipEmpty.checked ? true : false;
         
@@ -11624,8 +11670,9 @@ function KellyFavItems()
         var message = KellyTools.getElementByClass(document, env.className + '-exporter-process');
         
         if (pages && pages.value.length) {
+           
+            pagesList = KellyTools.getPrintValues(pages.value, true, 1, customUrl ? false : favInfo.pages);
             
-            pagesList = KellyTools.getPrintValues(pages.value, true, 1, favInfo.pages);
         } else { 
         
             pagesList = KellyTools.getPrintValues('1-' + favInfo.pages, true);
@@ -11668,7 +11715,6 @@ function KellyFavItems()
                 if (!optionVal) continue;
                 optionVal.value = downloaderOptions[k];
             }
-            
         }
         
         for (var i = 0; i < pagesList.length; i++) {
@@ -11788,9 +11834,11 @@ function KellyFavItems()
                 favNativeParser.setEvent('onEnd', handler.onDownloadNativeFavPagesEnd);                
         
                 favNativeParser.maxPagesPerExport = 1000;
-                favNativeParser.saveData = function(autosave) {
+                favNativeParser.saveData = function(autosave, source) {
                     
                     log('favNativeParser : save current progress : ' + (autosave ? 'autosave - saved ' + favNativeParser.jobSaved  : 'click'));
+                    
+                    if (source) log('favNativeParser : source ' + source );
                     
                     if (favNativeParser.collectedData.selected_cats_ids) {
                         delete favNativeParser.collectedData.selected_cats_ids;
@@ -11863,11 +11911,16 @@ function KellyFavItems()
             
             var downloaderOptions = favNativeParser.getCfg();
             
-            var dhtml = '';
+            // настройки для отладки \ скрытые настройки
+                        
+            var dhtml = '<table><tbody>';
             
             for (var k in downloaderOptions){
-                 dhtml += '<p>' + k + ' : <input value="' + downloaderOptions[k]+ '" class="' + env.className +'-downloader-option-' + k + '"></p>';
+                 dhtml += '<tr><td>' + k + ' :</td><td><input type="text" value="' + downloaderOptions[k]+ '" class="' + env.className +'-downloader-option-' + k + '"></td></tr>';
             }   
+            
+            dhtml +=  '<tr><td>Ссылка :</td><td><input type="text" value="' + favPageInfo.url + '" class="' + env.className + '-downloader-option-url"></td></tr>';
+            dhtml += '</tbody></table>';
             
             var autosaveHtml = '\
                         <label>\

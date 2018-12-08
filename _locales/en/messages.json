@@ -193,6 +193,9 @@
     },   
     "download_limitpages":{  
         "message":"Selection hit limit (__CURRENTPAGESPERIMPORT__). Please set export pages manualy (not more then __MAXPAGESPERIMPORT__ pages per one operation)"
+    },    
+    "download_partly":{  
+        "message":"Only part of data was loaded (see log for more info). You still can download loaded data as profile"
     },
     "edit_mode":{  
         "message":"Edit mode"

@@ -1058,6 +1058,20 @@
     border : 0px;
 }
 
+.__BASECLASS__-tech-options td input[type=text] {
+    width : 100%;
+    height : 28px;
+    padding-left : 6px;
+}
+
+.__BASECLASS__-tech-options table {
+    width : 100%;
+}
+
+.__BASECLASS__-tech-options table > tbody > tr > td:first-child {
+    width: 20%;
+}
+
 .__BASECLASS__-tech-options.active,
 .__BASECLASS__-exporter-container.active {
     opacity : 1;
