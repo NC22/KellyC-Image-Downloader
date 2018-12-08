@@ -393,7 +393,7 @@ function kellyProfileJoyreactor() {
                 
                 placeholder.appendChild(fastSave); 
                     
-                var fastSaveBaseClass =  handler.hostClass + ' ' + handler.className + '-fast-save ' + handler.className + '-icon-diskete-yellow ';
+                var fastSaveBaseClass =  handler.hostClass + ' ' + handler.className + '-fast-save ' + handler.className + '-icon-download ';
             
                 fastSave.className = fastSaveBaseClass + handler.className + '-fast-save-unchecked';
                 fastSave.onclick = function() {

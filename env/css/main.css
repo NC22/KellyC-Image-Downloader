@@ -913,6 +913,10 @@
     background-image : url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAYCAYAAAAPtVbGAAADz0lEQVRIiaXWz29UVRQH8M+bTjtzaSEdCAuEHf4FxBDEGKFiWLhWoywwTVwQYGNKAhY3CClqd6hdSEyQQGKMiUZdmEj5kRQbFsa4M5GwkEoCoa1l6Jtphz4X970yHURMPMnNvHfvO+d77vmeHyPLMo9bhQxTO8Y8smIdY36YmidIlmVKSZJoX4eSJBxKkpAkCRgirOF6L+H2ANO7uD1Ab74/RCgMDhHa3wspt78MU1vD9XJ83tyM2wmqAeufzTVahHHuURUNq1Bdy/VWrnuCmcJu0gmwitqB8VNuTf724Ow7H2VlyhXsPyKaLKTBxyM0SVvow2s7hHOXaDAzlwNlWRZvUoQkUDvwy9eUl2yYP9i1Gq/uJPSgpyMGPQzuptkSvhznrcPxloNdfHZBTQzlRqRJAbKBu2+PnwrWP8V3e1mo06D5K5UtKP0Lu0ttgW9x9wpnLktvse7DLEuXVVs0Tg0c5MZVGvW4WaXyTASYm+TeBPWJ+Ds3mSuWOphtcf5ytPc4TqZ6CYO7CdvavG+weoSj6MYijuNeJ08txt7jHukcGwvyS0W4mjngA7EQlsPQYGyEw6RZJDnNSA+Tjo3Ec0srIwer+XOYtZC0pW21TBh8kb7tEb4+wZkfmcUsT3uYlilCPzf7CXt30fdcPKhP8M0V7i48zLLyGqbKhMGX6O6hd4vlWigAjkYHZzDdFpyA6nHxu/15DfU9z8tJDMnn42qYKmWEEvo/+Fbv+99TeWhlMXKQbo2p2A4A01vZ3E222HHQv51KhT07Kef2o3RX4vpnaT5m/y9tWdQprdzRUhLjS3OBZnMFiXkmhWtc92hPCtf4fZHQ3Wl9iftNNl2UNjm/THyVaonwZgeJOS/pLJsUDuUgjxBfiu7Xr3L6AveZmWXjcsUjrOdmL2H/uyL5S1iIKTxN2pXbWRJTfS1h3xGx5eQH85Oc/oFGXiuBmRKMklby8ljRPUqosu8IJwkJoZz/niwAqiuVEnTlz00aR/M9Q/EWU4Hawc4qzmM8N0nyICpkyLpYs63ju+KaC3wyIr3BulHS5a5TpvrGCx7pQ4WXjxjMwZs/s9ik1MWqrbl+mdd3MruW0a/aTLZonLssDJbzim/x6UleGaBS7uhlOcD8NdIFzl2MW4Mt+rZRn+TsRf5oCyEeDq0qtT07+OKStJ47ViE8aWiJx2HPDorBdYeNo8U86QQqYzqO34Y861YT9g1bbjljJ2K3vZOndoVq0QNbNObaRvCKGX+CmXyaGc1rYij3OyXc+YlyidbScsE0kObfpoVuu/5/lv/zlwj+Bj5ff0CCjHTwAAAAAElFTkSuQmCC');
 }
 
+.__BASECLASS__-icon-download {
+    background-image : url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAgCAYAAAAFQMh/AAAAvUlEQVRIie2X0RGDIBBE9xyrSRE2YRFJSVJEaiQfziaj5oDLCNxMfL8oyxPmOAUAYozQeN4E8wT9ge9IcjAAQ26GeTJGFjKqI4/koisEVw48BjcKJEOP0E9wB67gZvBUWytTjtx88n+fuvses4Kcvdd73pWquzGpZX6oyW6MyVnm6u3jzpj8ap69Z90ak1Lz4o7CvTHRzM29kwPjpfDgro2hmN7ZE2SdIPULowRvMS5AhMH36rfSNjhcHUhDXif2HMDvUkxoAAAAAElFTkSuQmCC');
+}
+
 .__BASECLASS__-fast-save, .__BASECLASS__-sidebar-addtofav {
     width: 28px;
     height: 28px;
@@ -956,7 +960,7 @@
 }
 
 .__BASECLASS__-fast-save-notdownloaded:after {
-    background: rgba(219, 219, 219, 0.91);
+    background: transparent; /*rgba(219, 219, 219, 0.91);*/
 }
 
 .__BASECLASS__-fast-save-loading {

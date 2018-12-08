@@ -6267,6 +6267,9 @@ function KellyFastSave(cfg) {
                 }
                 
                 if (response && response.matchResults && response.matchResults[0].match) {
+                                        
+                    KellyTools.log(response, 'KellyFastSave | downloadCheckState');   
+                    
                     onGetState('downloaded');
                 } else {
                     // error \ timeout or not downloaded
@@ -12510,7 +12513,7 @@ function kellyProfileJoyreactor() {
                 
                 placeholder.appendChild(fastSave); 
                     
-                var fastSaveBaseClass =  handler.hostClass + ' ' + handler.className + '-fast-save ' + handler.className + '-icon-diskete-yellow ';
+                var fastSaveBaseClass =  handler.hostClass + ' ' + handler.className + '-fast-save ' + handler.className + '-icon-download ';
             
                 fastSave.className = fastSaveBaseClass + handler.className + '-fast-save-unchecked';
                 fastSave.onclick = function() {
