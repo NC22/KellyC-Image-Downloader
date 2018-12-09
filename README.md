@@ -12,7 +12,7 @@ Store you personal favourite publications for JoyReactor localy
 <p>
 <ul>
     <li>Allow user to save liked data without registartion \ logged in to site</li>
-    <li>Store \ manage \ export \ import publications and comments that user like. (throw "Save" icon and "Options" button placed in header menu of site)</li>
+    <li>Store \ manage \ export \ import publications and comments that user like. ("Save" icon and "Options" button placed in header menu of site)</li>
     <li>Export site favourites of selected user to local profile (from pages like http://safereactor.cc/user/Радиоволна/favorite)</li>
     <li>Batch download of images from filtered publications in local profile (select range, number of threads, etc) *</li>
 </ul>
