@@ -583,7 +583,7 @@ KellyTooltip.addTipToEl = function(el, message, cfg, delay, onShow) {
    @description    image view widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.0.8 24.09.18
+   @version        v 1.0.9 24.09.18
    
    ToDo : 
    
@@ -632,7 +632,7 @@ function KellyTileGrid(cfg) {
         // getScaleElement
         onBadBounds : false, // (handler, data[errorCode, error, tile, boundEl]) element is loaded, but bounds is unsetted or loaded with error 
         onResize : false, // (handler) window resize
-        onLoadBounds : false, // (handler, boundEl, errorTriger) some of unknown bounds element is ready
+        onLoadBounds : false, // (handler, boundEl, errorTriger) some of unknown bounds element is ready, todo - return tile
         onResizeImage : false, // (handler, tileResizedInfo[origHeight, origWidth, width, height])
     };
     
@@ -814,6 +814,18 @@ function KellyTileGrid(cfg) {
     this.getResizableElement = function(tile) {
         if (events.getResizableElement) return events.getResizableElement(handler, tile);
         return tile;
+    }
+
+    this.getTileByBoundElement = function(boundEl) {
+        
+        if (!tilesBlock) return false;
+        tiles = handler.getTiles();
+        
+        for (var i = 0; i < tiles.length; i++) {
+            if (handler.getBoundElement(tiles[i]) === boundEl) {
+                return tiles[i];
+            }
+        }
     }
     
     this.clearEvents = function() {
@@ -7758,7 +7770,7 @@ function KellyOptions(cfg) {
 
 function KellyFavItems() 
 {
-    this.PROGNAME = 'KellyFavItems v1.1.1.4';
+    this.PROGNAME = 'KellyFavItems v1.1.1.6';
     
     var handler = this;	
         
@@ -7865,7 +7877,7 @@ function KellyFavItems()
             log('get width and height for ' + this.src);
             log(dimensions);
             
-            updateSidebarPosition(); 
+            onSideBarUpdate(); 
             return false; 
         },
                  
@@ -7874,8 +7886,12 @@ function KellyFavItems()
         
         onLoadFavGalleryImage : function(imgElement, error) {
             
-            if (error) return false;
-                        
+            if (error) {
+                
+                KellyTools.classList('add', imageGrid.getTileByBoundElement(imgElement), env.className + '-FavItem-error');
+                return false;
+            }
+            
             var favItemIndex = parseInt(imgElement.getAttribute('itemIndex'));
             if (!fav.items[favItemIndex] || !fav.items[favItemIndex].pImage) {
                 
@@ -8448,6 +8464,8 @@ function KellyFavItems()
             
         //}, 200);
         
+        // todo add button goto up or auto ? window.scrollTo(x, y);
+        
         return true;
     }
     
@@ -8714,7 +8732,7 @@ function KellyFavItems()
             
             if (env.events.onWindowResize && env.events.onWindowResize(e)) return;
             
-            updateSidebarPosition();
+            onSideBarUpdate();
             
         }, '_fav_dialog');
         
@@ -8722,7 +8740,7 @@ function KellyFavItems()
             
             if (env.events.onWindowScroll && env.events.onWindowScroll(e)) return;
             
-            updateSidebarPosition();
+            onSideBarUpdate();
             
         }, '_fav_dialog');
         
@@ -9532,6 +9550,13 @@ function KellyFavItems()
         
         var html = '';
         
+        var text = '';
+        
+        if (selectedComment) {
+            
+            text = env.getCommentText(selectedComment);
+        }
+        
         if (selectedImages.length > 1) {
             html += '<p>' + lng.s('Основное изображение', 'image_main') + '</p>' +
                    '<p class="' + env.className + '-ModalBox-controll-buttons">' + 
@@ -9543,6 +9568,12 @@ function KellyFavItems()
         if (selectedImages.length) {
             
             html += '<div class="' + env.className + '-PreviewImage-container"><img src="' + env.getStaticImage(selectedImages[0]) + '" class="' + env.className + '-PreviewImage"></div>';
+        } else {
+            
+            if (text) {
+                text = text.length > 250 ? text.substring(0, 250) + '...' : text;
+                html += '<div class="' + env.className + '-PreviewText-container">' + text + '</div>';
+            }
         }
         
         KellyTools.setHTMLData(controlls, html);
@@ -10291,7 +10322,7 @@ function KellyFavItems()
                     downloaderBox.modal.className = downloaderBox.modal.className.replace('hidden', 'active');                    
                 }
                 
-                updateSidebarPosition();
+                onSideBarUpdate();
             }
                    
             var download = editButton.cloneNode();
@@ -10425,6 +10456,8 @@ function KellyFavItems()
             siteSideBlock.style.visibility = 'visible';
             siteSideBlock.style.opacity = '1';
         }
+        
+        if (env.events.onSideBarShow) env.events.onSideBarShow(sideBarWrap, true);
     }
     
     this.showSidebarMessage = function(message, error) {
@@ -10438,10 +10471,6 @@ function KellyFavItems()
             KellyTools.setHTMLData(modalBoxMessage, message);
             if (error) modalBoxMessage.className += ' ' + env.className + '-ModalBox-message-error';
         }
-    }
-    
-    this.getSidebar = function() {
-        return sideBarWrap;
     }
     
     function clearSidebarLoadEvents() {
@@ -10487,12 +10516,12 @@ function KellyFavItems()
             siteSideBlock.style.opacity = '0'; 
         }
         
-        updateSidebarPosition();        
-        if (env.events.onSideBarShow) env.events.onSideBarShow();
+        onSideBarUpdate();        
+        if (env.events.onSideBarShow) env.events.onSideBarShow(sideBarWrap, false);
     }
     
-    function updateSidebarPosition() {
-        if (env.updateSidebarPosition && env.updateSidebarPosition(sideBarLock)) return;        
+    function onSideBarUpdate() {
+        if (env.events.onSideBarUpdate && env.events.onSideBarUpdate(sideBarWrap, sideBarLock)) return;        
     }
     
     // preview dimensions, preview jpg for gif media 
@@ -10605,7 +10634,7 @@ function KellyFavItems()
         }
         
         handler.showSidebar(false, onCancelCommon);
-        updateSidebarPosition();
+        onSideBarUpdate();
         return false;
     }
     
@@ -10750,7 +10779,7 @@ function KellyFavItems()
         }
         
         handler.showSidebar(false, onCancelCommon);
-        updateSidebarPosition();
+        onSideBarUpdate();
         return false;
     }
     
@@ -10833,7 +10862,8 @@ function KellyFavItems()
         
         // dimensions can be already initialized throw getAllMedia method
         var loadDimensions = selectedInfo && selectedInfo['dimensions'] ? false : true;
-                
+        
+        // selected preview + controlls
         var controlls = getSelectedPostMediaControlls(loadDimensions);
         
         var hidePreview = KellyTools.getElementByClass(modalBox, env.className + '-ModalBox-hide-preview');
@@ -10936,7 +10966,7 @@ function KellyFavItems()
             
         }            
         
-        updateSidebarPosition();
+        onSideBarUpdate();
         return false;
     }
     
@@ -12207,7 +12237,7 @@ function kellyProfileJoyreactor() {
         },
         
         onWindowResize : function() {
-            
+                       
             return false;
         },
         
@@ -12283,39 +12313,23 @@ function kellyProfileJoyreactor() {
             handler.fav.showNativeFavoritePageInfo();
         },
         
-        onSideBarShow : function() {
+        onSideBarShow : function(sideBarWrap, close) {
+                       
+            if (!sideBarWrap) return;
             
-            var sideBarWrap = handler.fav.getSidebar();            
-            if (!sideBarWrap || sideBarWrap.className.indexOf('hidden') !== -1) return false;
-            
-            var filters = KellyTools.getElementByClass(sideBarWrap, handler.className + '-FiltersMenu');     
-            
-            if (filters && filters.offsetHeight > 440 && filters.className.indexOf('calculated') == -1) {
-                
-                var filtersBlock = KellyTools.getElementByClass(sideBarWrap, handler.className + '-FiltersMenu-container');
-                    
-                filtersBlock.style.maxHeight = '0';
-                filtersBlock.style.overflow = 'hidden';
-                
-                var modalBox = KellyTools.getElementByClass(document, handler.className + '-ModalBox-main');						
-                    modalBox.style.minHeight = '0';
-
-                var modalBoxHeight = modalBox.getBoundingClientRect().height;       
-                
-                var viewport = KellyTools.getViewport();
-                if (viewport.screenHeight < modalBoxHeight + filters.offsetHeight + sideBarPaddingTop) {
-                    filtersBlock.style.maxHeight = (viewport.screenHeight - modalBoxHeight - sideBarPaddingTop - 44 - sideBarPaddingTop) + 'px';
-                    filtersBlock.style.overflowY = 'scroll';
-
-                } else {
-                        
-                    filtersBlock.style.maxHeight = 'none';
-                    filtersBlock.style.overflow = 'auto';
-                }
-                
-                filters.className += ' calculated';
+            if (close) {
+                sideBarWrap.style.top = '50px';
+                return;
             }
-        }
+            
+            updateSidebarProportions(sideBarWrap);
+            
+        },
+        
+        onSideBarUpdate : function(sideBarWrap, fixed) {
+            
+            updateSidebarPosition(sideBarWrap, fixed);
+        },
     
     }
     
@@ -12453,15 +12467,230 @@ function kellyProfileJoyreactor() {
             updatePublicationFastButton(publications[i]);                    
         }
     }
+
+    function updateFastSaveButton(postBlock, placeholder, showButton) {
+        
+        var fastSave = KellyTools.getElementByClass(placeholder,  handler.className + '-fast-save');
+        
+        var censored = postBlock.innerHTML.indexOf('/images/censorship') != -1 ? true : false;
+        
+        if (!censored && showButton) {
+            
+            if (!fastSave) {
+                
+                fastSave = document.createElement('DIV'); 
+                fastSave.title = KellyLoc.s('', 'fast_download');     
+                
+                placeholder.appendChild(fastSave); 
+                    
+                var fastSaveBaseClass =  handler.hostClass + ' ' + handler.className + '-fast-save ' + handler.className + '-icon-download ';
+            
+                fastSave.className = fastSaveBaseClass + handler.className + '-fast-save-unchecked';
+                fastSave.onclick = function() {
+                    
+                    if (this.className.indexOf('unavailable') != -1) return false;
+                    
+                    if (this.className.indexOf('loading') != -1) {
+                        
+                        handler.fav.getFastSave().downloadCancel();
+                        fastSave.classList.remove(handler.className + '-fast-save-loading');                          
+                        
+                    } else {
+                                
+                        var downloadEnabled = handler.fav.getFastSave().downloadPostData(postBlock, function(success) {
+                            fastSave.classList.remove(handler.className + '-fast-save-loading');
+                            fastSave.className = fastSaveBaseClass + handler.className + '-fast-save-' + (success ? '' : 'not') + 'downloaded';
+                        });
+                        
+                        if (downloadEnabled) {
+                            fastSave.classList.remove(handler.className + '-fast-save-unchecked');
+                            fastSave.classList.add(handler.className + '-fast-save-loading');
+                        }
+                    }
+                    
+                    return false;
+                }  
+            } 
+            
+        } else {
+            
+            if (fastSave) {
+                fastSave.parentNode.removeChild(fastSave);
+            }
+                        
+            fastSave = false;
+        }
+        
+        return fastSave;
+    }
+
+    function updateSidebarProportions(sideBarWrap) {
+        
+        var filters = KellyTools.getElementByClass(sideBarWrap, handler.className + '-FiltersMenu');     
+            
+        if (filters && filters.offsetHeight > 440 && filters.className.indexOf('calculated') == -1) {
+            
+            var filtersBlock = KellyTools.getElementByClass(sideBarWrap, handler.className + '-FiltersMenu-container');
+                
+            filtersBlock.style.maxHeight = '0';
+            filtersBlock.style.overflow = 'hidden';
+            
+            var modalBox = KellyTools.getElementByClass(document, handler.className + '-ModalBox-main');						
+                modalBox.style.minHeight = '0';
+
+            var modalBoxHeight = modalBox.getBoundingClientRect().height;       
+            
+            var viewport = KellyTools.getViewport();
+            if (viewport.screenHeight < modalBoxHeight + filters.offsetHeight + sideBarPaddingTop) {
+                filtersBlock.style.maxHeight = (viewport.screenHeight - modalBoxHeight - sideBarPaddingTop - 44 - sideBarPaddingTop) + 'px';
+                filtersBlock.style.overflowY = 'scroll';
+
+            } else {
+                    
+                filtersBlock.style.maxHeight = 'none';
+                filtersBlock.style.overflow = 'auto';
+            }
+            
+            filters.className += ' calculated';
+        }
+    }
+    
+    function updateSidebarPosition(sideBarWrap, fixed) {
+    
+        
+        if (!handler.fav) return false;
+        
+        if (!sideBarWrap || sideBarWrap.className.indexOf('hidden') !== -1) return false;
+        
+        var sideBlock = handler.getMainContainers().sideBlock;        
+        var sideBlockBounds = sideBlock.getBoundingClientRect();
+        
+        var scrollTop = KellyTools.getScrollTop();
+        var scrollLeft = KellyTools.getScrollLeft();
+        
+        var top = 0;
+        
+        if (sideBlock) {
+            top = sideBlockBounds.top + scrollTop;
+        }
+                    
+        // screen.height / 2  - (sideBarWrap.getBoundingClientRect().height / 2) - 24
+        
+        if (!fixed && sideBarPaddingTop + scrollTop > top) top = sideBarPaddingTop + scrollTop;
+                
+        sideBarWrap.style.top = top + 'px';
+       
+        var widthBase = 0;
+        
+        if (window.location.host.indexOf('old.') == -1) {
+            widthBase = 24;
+        }
+        
+        if (sideBlock) {
+            sideBarWrap.style.right = 'auto';
+            sideBarWrap.style.left = Math.round(sideBlockBounds.left + scrollLeft) + 'px';
+            sideBarWrap.style.width = Math.round(sideBlockBounds.width + widthBase) + 'px';
+        } else {
+            sideBarWrap.right = '0px';
+        }		
+        
+        var tagList = handler.getMainContainers().tagList;
+        if (tagList) {
+            
+            var sideBarWrapBounds = sideBarWrap.getBoundingClientRect();
+            var bottomLimit = tagList.getBoundingClientRect().top + scrollTop;
+            
+            if (sideBarWrapBounds.height + sideBarWrapBounds.top + scrollTop >= bottomLimit) {
+                
+                // console.log(sideBarWrapBounds.height + scrollTop)
+                sideBarWrap.style.top = (bottomLimit - sideBarWrapBounds.height) + 'px';
+            }
+        }
+        
+        // tagList
+    }
+    
+    function updateAddToFavButton(postBlock, placeholder) {
+         
+        var link = getPostLinkEl(postBlock);
+        
+        if (!link) {            
+            KellyTools.log('empty post link element', 'profile updatePostFavButton');
+            return false;        
+        }
+        
+        var linkUrl = handler.getPostLink(postBlock, link);
+        if (!linkUrl) {
+            KellyTools.log('bad post url', 'profile updatePostFavButton');
+            return false;  
+        }
+              
+        var addToFav = KellyTools.getElementByClass(placeholder,  handler.className + '-sidebar-addtofav');
+        
+        if (!addToFav) {
+            
+            addToFav = document.createElement('DIV'); 
+            addToFav.className = handler.hostClass + ' ' + handler.className + '-icon-diskete ' + handler.className +'-sidebar-addtofav';
+                 
+            placeholder.appendChild(addToFav);    
+        }         
+        
+        var inFav = handler.fav.getStorageManager().searchItem(handler.fav.getGlobal('fav'), {link : linkUrl, commentLink : false});
+                
+        // update title
+        
+        if (inFav !== false) {
+            
+            KellyTools.classList('add', addToFav, handler.className + '-sidebar-addtofav-added');         
+            addToFav.title = KellyLoc.s('Удалить из избранного', 'remove_from_fav_tip');
+            
+            addToFav.onclick = function() { 
+            
+                handler.fav.showRemoveFromFavDialog(inFav, function() {
+                    if (handler.fav.getGlobal('fav').coptions.syncByAdd) syncFav(postBlock, false);
+                    
+                    handler.fav.closeSidebar(); 
+                }); 
+                
+                return false; 
+            };
+            
+        } else {
+                        
+            KellyTools.classList('remove', addToFav, handler.className + '-sidebar-addtofav-added');  
+            addToFav.title = KellyLoc.s('Добавить в избранное', 'add_to_fav_tip');
+            
+            addToFav.onclick = function() { 
+                
+                handler.fav.showAddToFavDialog(postBlock, false, function(selectedPost, selectedComment, selectedImages) {                    
+                    
+                    if (!selectedComment && handler.fav.getGlobal('fav').coptions.syncByAdd) {
+                        syncFav(selectedPost, true);
+                    }                     
+                });
+                
+                return false; 
+            };
+            
+        }
+        
+        return addToFav;
+    }
+    
+    // todo get post text?
     
     this.getCommentText = function(comment) {
     
-        var contentContainer = KellyTools.getElementByClass(comment, 'txt');
+        var contentContainer = comment.querySelector('.txt > div');        
+        if (!contentContainer || contentContainer.className) {
+            contentContainer = comment.querySelector('.txt > span');  // banned comment after expand  
+            
+            if (!contentContainer || contentContainer.className) {
+                return '';
+            }
+        }
         
-        if (!contentContainer) return '';
-        
-        var textContainer = contentContainer.childNodes[0];
-        return textContainer.textContent || textContainer.innerText || '';
+        return contentContainer.textContent || contentContainer.innerText || '';
     }
         
     this.formatComments = function(block) {
@@ -12550,130 +12779,7 @@ function kellyProfileJoyreactor() {
         
         KellyTools.log('formatComments : ' + comments.length + ' - '+ block.id);
     }    
-    
-    function updateFastSaveButton(postBlock, placeholder, showButton) {
         
-        var fastSave = KellyTools.getElementByClass(placeholder,  handler.className + '-fast-save');
-        
-        var censored = postBlock.innerHTML.indexOf('/images/censorship') != -1 ? true : false;
-        
-        if (!censored && showButton) {
-            
-            if (!fastSave) {
-                
-                fastSave = document.createElement('DIV'); 
-                fastSave.title = KellyLoc.s('', 'fast_download');     
-                
-                placeholder.appendChild(fastSave); 
-                    
-                var fastSaveBaseClass =  handler.hostClass + ' ' + handler.className + '-fast-save ' + handler.className + '-icon-download ';
-            
-                fastSave.className = fastSaveBaseClass + handler.className + '-fast-save-unchecked';
-                fastSave.onclick = function() {
-                    
-                    if (this.className.indexOf('unavailable') != -1) return false;
-                    
-                    if (this.className.indexOf('loading') != -1) {
-                        
-                        handler.fav.getFastSave().downloadCancel();
-                        fastSave.classList.remove(handler.className + '-fast-save-loading');                          
-                        
-                    } else {
-                                
-                        var downloadEnabled = handler.fav.getFastSave().downloadPostData(postBlock, function(success) {
-                            fastSave.classList.remove(handler.className + '-fast-save-loading');
-                            fastSave.className = fastSaveBaseClass + handler.className + '-fast-save-' + (success ? '' : 'not') + 'downloaded';
-                        });
-                        
-                        if (downloadEnabled) {
-                            fastSave.classList.remove(handler.className + '-fast-save-unchecked');
-                            fastSave.classList.add(handler.className + '-fast-save-loading');
-                        }
-                    }
-                    
-                    return false;
-                }  
-            } 
-            
-        } else {
-            
-            if (fastSave) {
-                fastSave.parentNode.removeChild(fastSave);
-            }
-                        
-            fastSave = false;
-        }
-        
-        return fastSave;
-    }
-    
-    function updateAddToFavButton(postBlock, placeholder) {
-         
-        var link = getPostLinkEl(postBlock);
-        
-        if (!link) {            
-            KellyTools.log('empty post link element', 'profile updatePostFavButton');
-            return false;        
-        }
-        
-        var linkUrl = handler.getPostLink(postBlock, link);
-        if (!linkUrl) {
-            KellyTools.log('bad post url', 'profile updatePostFavButton');
-            return false;  
-        }
-              
-        var addToFav = KellyTools.getElementByClass(placeholder,  handler.className + '-sidebar-addtofav');
-        
-        if (!addToFav) {
-            
-            addToFav = document.createElement('DIV'); 
-            addToFav.className = handler.hostClass + ' ' + handler.className + '-icon-diskete ' + handler.className +'-sidebar-addtofav';
-                 
-            placeholder.appendChild(addToFav);    
-        }         
-        
-        var inFav = handler.fav.getStorageManager().searchItem(handler.fav.getGlobal('fav'), {link : linkUrl, commentLink : false});
-                
-        // update title
-        
-        if (inFav !== false) {
-            
-            KellyTools.classList('add', addToFav, handler.className + '-sidebar-addtofav-added');         
-            addToFav.title = KellyLoc.s('Удалить из избранного', 'remove_from_fav_tip');
-            
-            addToFav.onclick = function() { 
-            
-                handler.fav.showRemoveFromFavDialog(inFav, function() {
-                    if (handler.fav.getGlobal('fav').coptions.syncByAdd) syncFav(postBlock, false);
-                    
-                    handler.fav.closeSidebar(); 
-                }); 
-                
-                return false; 
-            };
-            
-        } else {
-                        
-            KellyTools.classList('remove', addToFav, handler.className + '-sidebar-addtofav-added');  
-            addToFav.title = KellyLoc.s('Добавить в избранное', 'add_to_fav_tip');
-            
-            addToFav.onclick = function() { 
-                
-                handler.fav.showAddToFavDialog(postBlock, false, function(selectedPost, selectedComment, selectedImages) {                    
-                    
-                    if (!selectedComment && handler.fav.getGlobal('fav').coptions.syncByAdd) {
-                        syncFav(selectedPost, true);
-                    }                     
-                });
-                
-                return false; 
-            };
-            
-        }
-        
-        return addToFav;
-    }
-    
     this.formatPostContainer = function(postBlock) {
         
         var coptions = handler.fav.getGlobal('fav').coptions;
@@ -12693,17 +12799,13 @@ function kellyProfileJoyreactor() {
             KellyTools.log('formatPostContainer : cant find placeholder for append "Add to fav button"'); 
             return false;
         }
-        
-        var fastSave = updateFastSaveButton(postBlock, shareButtonsBlock, coptions.fastsave.enabled);        
-        var addToFav = updateAddToFavButton(postBlock, shareButtonsBlock);
-        
+                  
+        var addToFav = updateAddToFavButton(postBlock, shareButtonsBlock);        
         if (!addToFav) {
-            if (fastSave) {
-                fastSave.parentNode.removeChild(fastSave);
-            }
             return false;
         }
         
+        var fastSave = updateFastSaveButton(postBlock, shareButtonsBlock, coptions.fastsave.enabled);      
         var toogleCommentsButton = postBlock.getElementsByClassName('toggleComments');
 
         if (toogleCommentsButton.length) {
@@ -12844,64 +12946,6 @@ function kellyProfileJoyreactor() {
         }
         
         return '';
-    }
-    
-    /* not imp */
-    
-    this.updateSidebarPosition = function(lock) {
-    
-        if (!handler.fav) return false;
-        
-        var sideBarWrap = handler.fav.getView('sidebar');
-        
-        if (!sideBarWrap || sideBarWrap.className.indexOf('hidden') !== -1) return false;
-    
-        var sideBlock = handler.getMainContainers().sideBlock;        
-        var sideBlockBounds = sideBlock.getBoundingClientRect();
-        
-        var scrollTop = KellyTools.getScrollTop();
-        var scrollLeft = KellyTools.getScrollLeft();
-        
-        var top = 0;
-        
-        if (sideBlock) {
-            top = sideBlockBounds.top + scrollTop;
-        }
-                    
-        // screen.height / 2  - (sideBarWrap.getBoundingClientRect().height / 2) - 24
-        
-        if (!lock && sideBarPaddingTop + scrollTop > top) top = sideBarPaddingTop + scrollTop;
-                
-        sideBarWrap.style.top = top + 'px';
-       
-        var widthBase = 0;
-        
-        if (window.location.host.indexOf('old.') == -1) {
-            widthBase = 24;
-        }
-        
-        if (sideBlock) {
-            sideBarWrap.style.right = 'auto';
-            sideBarWrap.style.left = Math.round(sideBlockBounds.left + scrollLeft) + 'px';
-            sideBarWrap.style.width = Math.round(sideBlockBounds.width + widthBase) + 'px';
-        } else {
-            sideBarWrap.right = '0px';
-        }		
-        
-        var tagList = handler.getMainContainers().tagList;
-        if (tagList) {
-            
-            var sideBarWrapBounds = sideBarWrap.getBoundingClientRect();
-            var bottomLimit = tagList.getBoundingClientRect().top + scrollTop;
-            
-            if (sideBarWrapBounds.height + sideBarWrapBounds.top + scrollTop >= bottomLimit) {
-                
-                // console.log(sideBarWrapBounds.height + scrollTop)
-                sideBarWrap.style.top = (bottomLimit - sideBarWrapBounds.height) + 'px';
-            }
-        }
-        
-        // tagList
     }
     
     /* imp */

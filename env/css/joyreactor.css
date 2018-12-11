@@ -8,6 +8,10 @@
     display : none;
 }
 
+.__BASECLASS__-addToFavComment {
+    margin-left : 22px !important;
+}
+
 .old_reactor_cc.__BASECLASS__-fast-save, .old_reactor_cc.__BASECLASS__-sidebar-addtofav {
    
     display : inline-block;

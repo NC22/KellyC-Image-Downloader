@@ -5,7 +5,7 @@
    @description    image view widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.0.8 24.09.18
+   @version        v 1.0.9 24.09.18
    
    ToDo : 
    
@@ -54,7 +54,7 @@ function KellyTileGrid(cfg) {
         // getScaleElement
         onBadBounds : false, // (handler, data[errorCode, error, tile, boundEl]) element is loaded, but bounds is unsetted or loaded with error 
         onResize : false, // (handler) window resize
-        onLoadBounds : false, // (handler, boundEl, errorTriger) some of unknown bounds element is ready
+        onLoadBounds : false, // (handler, boundEl, errorTriger) some of unknown bounds element is ready, todo - return tile
         onResizeImage : false, // (handler, tileResizedInfo[origHeight, origWidth, width, height])
     };
     
@@ -236,6 +236,18 @@ function KellyTileGrid(cfg) {
     this.getResizableElement = function(tile) {
         if (events.getResizableElement) return events.getResizableElement(handler, tile);
         return tile;
+    }
+
+    this.getTileByBoundElement = function(boundEl) {
+        
+        if (!tilesBlock) return false;
+        tiles = handler.getTiles();
+        
+        for (var i = 0; i < tiles.length; i++) {
+            if (handler.getBoundElement(tiles[i]) === boundEl) {
+                return tiles[i];
+            }
+        }
     }
     
     this.clearEvents = function() {
