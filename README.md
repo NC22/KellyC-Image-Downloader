@@ -1,4 +1,4 @@
-<h1><img src="https://catface.ru/userfiles/media/udata_1544561322_rgfxurjm.png" width="52" style="vertical-align : middle;"> KellyCFavourites</h1>
+<h1><img src="https://catface.ru/userfiles/media/udata_1544561629_uixtxchu.png"> KellyCFavourites</h1>
 Store you personal favourite publications for JoyReactor localy
 <br>
 <br>
