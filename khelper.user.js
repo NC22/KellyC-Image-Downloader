@@ -7786,7 +7786,7 @@ function KellyOptions(cfg) {
 
 function KellyFavItems() 
 {
-    this.PROGNAME = 'KellyFavItems v1.1.1.6';
+    this.PROGNAME = 'KellyFavItems v1.1.1.7';
     
     var handler = this;	
         
