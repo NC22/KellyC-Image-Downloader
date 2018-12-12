@@ -2,7 +2,7 @@
    @encoding utf-8
    @name           KellyTooltip
    @namespace      Kelly
-   @description    image view widget
+   @description    creates tooltip elements (attaches to an element or screen) widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
    @version        v 1.0.0 24.09.18
