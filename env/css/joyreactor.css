@@ -18,6 +18,24 @@
     margin-top : 0px;
 }
 
+.old_reactor_cc .__BASECLASS__-tab-list ul li {
+    background : #fff1bc;
+}
+
+.old_reactor_cc .__BASECLASS__-tab-list ul li.active {
+    background : #ffcf78;
+}
+
+.old_reactor_cc .__BASECLASS__-tab-list a {
+    color : #952b06;
+}
+
+
+.old_reactor_cc .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll td {
+    padding-bottom : 4px;
+    padding-top : 4px;
+}
+
 .old_reactor_cc.__BASECLASS__-fast-save, .old_reactor_cc.__BASECLASS__-sidebar-addtofav {
     width: 16px;
     height: 16px;

@@ -1,9 +1,6 @@
 // part of KellyFavItems extension
 // JoyReactor environment driver
 
-// default profile driver must be assign to K_DEFAULT_ENVIRONMENT variable
-// todo environment only ui methods
-
 function kellyProfileJoyreactor() {
         
     var handler = this;
@@ -26,17 +23,6 @@ function kellyProfileJoyreactor() {
     
     this.fav = false;        
     this.events = {
-
-        onWindowScroll : function() {
-            
-            updateFastSaveButtonsState();
-            return false;
-        },
-        
-        onWindowResize : function() {
-                       
-            return false;
-        },
         
         /* 
             calls on document.ready, or if getPosts find some data
@@ -58,11 +44,27 @@ function kellyProfileJoyreactor() {
         onInitWorktop : function() {
             
             updateFastSaveButtonsState();
+            
+            handler.fav.addEventPListener(window, "resize", function (e) {
+                
+                updateSidebarPosition();
+                
+            }, '_fav_dialog');
+            
+            handler.fav.addEventPListener(window, "scroll", function (e) {
+                
+                updateSidebarPosition();                
+                updateFastSaveButtonsState();
+                
+            }, '_fav_dialog');
+            
             return false;
         },
         
         onExtensionReady : function() {
-                     
+            
+            // get fandom css for buttons
+            
             if (window.location.host == handler.mainDomain || window.location.host.indexOf('old.') == -1) {
 
                 var bar = document.getElementById('searchBar');
@@ -72,40 +74,75 @@ function kellyProfileJoyreactor() {
                     btn : false,
                 };
                 
+                var applyStyle = function() {
+                    
+                    css = "\n\r\n\r\n\r" + '/* ' +  handler.profile + '-dynamic */' + "\n\r\n\r\n\r";
+                    
+                    if (style.btn && style.btn.indexOf('0, 0, 0, 0') == -1) {
+                        css += '.' + handler.className + '-basecolor-dynamic {';
+                        css += 'background-color : ' + style.btn + '!important;';
+                        css += '}';
+                    }
+                    
+                    if (style.bg && style.bg.indexOf('0, 0, 0, 0') == -1) {
+                    
+                        css += '.active .' + handler.className + '-buttoncolor-dynamic, \
+                                .active.' + handler.className + '-buttoncolor-dynamic, \
+                                .' + handler.className + '-ahover-dynamic:hover .' + handler.className + '-buttoncolor-dynamic, \
+                                .' + handler.className + '-ahover-dynamic .' + handler.className + '-buttoncolor-dynamic:hover \
+                                {';
+                                
+                        css += 'background-color : ' + style.btn + '!important;';
+                        css += '}';
+                                            
+                        css += '.' + handler.className + '-buttoncolor-any-dynamic {';
+                        css += 'background-color : ' + style.btn + '!important;';
+                        css += '}';
+                    }
+                                   
+                    handler.fav.addCss(css);
+                    
+                }
+                
                 if (bar) {
                     style.bg = window.getComputedStyle(bar).backgroundColor;
                     
                     var btn = bar.querySelector('.submenuitem.active a');
                     if (btn) {
+                        
                         style.btn = window.getComputedStyle(btn).backgroundColor;
-                    }
-                }
-                
-                css = "\n\r\n\r\n\r" + '/* ' +  handler.profile + '-dynamic */' + "\n\r\n\r\n\r";
-                if (style.btn && style.btn.indexOf('0, 0, 0, 0') == -1) {
-                    css += '.' + handler.className + '-basecolor-dynamic {';
-                    css += 'background-color : ' + style.btn + '!important;';
-                    css += '}';
-                }
-                
-                if (style.bg && style.bg.indexOf('0, 0, 0, 0') == -1) {
-                
-                    css += '.active .' + handler.className + '-buttoncolor-dynamic, \
-                            .active.' + handler.className + '-buttoncolor-dynamic, \
-                            .' + handler.className + '-ahover-dynamic:hover .' + handler.className + '-buttoncolor-dynamic, \
-                            .' + handler.className + '-ahover-dynamic .' + handler.className + '-buttoncolor-dynamic:hover \
-                            {';
+                        applyStyle();
+                        
+                    } else {
+                        
+                        // create subitem to detect background color for items
+                        bar = bar.querySelector('#submenu > div');
+                        
+                        if (bar) {
                             
-                    css += 'background-color : ' + style.btn + '!important;';
-                    css += '}';
-                                        
-                    css += '.' + handler.className + '-buttoncolor-any-dynamic {';
-                    css += 'background-color : ' + style.btn + '!important;';
-                    css += '}';
-                }
-                
-                handler.fav.addCss(css);
+                            var subMenuItem = document.createElement('div');
+                                subMenuItem.style.opacity = 0;
+                                subMenuItem.className = 'submenuitem active';
+                            
+                            KellyTools.setHTMLData(subMenuItem, '<a href="#">test</a>');
+                            
+                            bar.appendChild(subMenuItem);
+                            btn = subMenuItem.childNodes[0];
+                            
+                            setTimeout(function() {
+                                
+                                style.btn = window.getComputedStyle(btn).backgroundColor;
+                                
+                                subMenuItem.parentElement.removeChild(subMenuItem);
+                                
+                                applyStyle();
+                                
+                            }, 100);                        
+                        }
+                    }
+                }               
             }
+            
             
             handler.fav.showNativeFavoritePageInfo();
         },
@@ -113,19 +150,25 @@ function kellyProfileJoyreactor() {
         onSideBarShow : function(sideBarWrap, close) {
                        
             if (!sideBarWrap) return;
-            
+                                    
+            var siteSideBlock = handler.getMainContainers().sideBlock;		
+            if (siteSideBlock) {	
+                siteSideBlock.style.visibility = close ? 'visible' : 'hidden';
+                siteSideBlock.style.opacity = close ? '1' : '0'; 
+            }
+                
             if (close) {
                 sideBarWrap.style.top = '50px';
                 return;
             }
-            
+        
             updateSidebarProportions(sideBarWrap);
             
         },
         
-        onSideBarUpdate : function(sideBarWrap, fixed) {
+        onSideBarUpdate : function() {
             
-            updateSidebarPosition(sideBarWrap, fixed);
+            updateSidebarPosition();
         },
     
     }
@@ -222,8 +265,8 @@ function kellyProfileJoyreactor() {
     function getCommentUserName(comment) {
         var nameContainer = KellyTools.getElementByClass(comment, 'reply-link');
         if (nameContainer) {   
-                var a = KellyTools.getElementByTag(nameContainer, 'A');
-                if (a) return a.textContent || a.innerText || '';
+            var a = KellyTools.getElementByTag(nameContainer, 'A');
+            if (a) return a.textContent || a.innerText || '';
         }
         
         return false;
@@ -352,10 +395,11 @@ function kellyProfileJoyreactor() {
         }
     }
     
-    function updateSidebarPosition(sideBarWrap, fixed) {
-    
+    function updateSidebarPosition() {    
         
         if (!handler.fav) return false;
+        
+        var sideBarWrap = handler.fav.getView('sidebar');
         
         if (!sideBarWrap || sideBarWrap.className.indexOf('hidden') !== -1) return false;
         
@@ -373,7 +417,7 @@ function kellyProfileJoyreactor() {
                     
         // screen.height / 2  - (sideBarWrap.getBoundingClientRect().height / 2) - 24
         
-        if (!fixed && sideBarPaddingTop + scrollTop > top) top = sideBarPaddingTop + scrollTop;
+        if (!handler.fav.sideBarLock && sideBarPaddingTop + scrollTop > top) top = sideBarPaddingTop + scrollTop;
                 
         sideBarWrap.style.top = top + 'px';
        
@@ -407,7 +451,7 @@ function kellyProfileJoyreactor() {
         // tagList
     }
     
-    function updateAddToFavButton(postBlock, placeholder) {
+    function updateAddToFavButton(postBlock, shareButtonsBlock, side) {
          
         var link = getPostLinkEl(postBlock);
         
@@ -421,15 +465,39 @@ function kellyProfileJoyreactor() {
             KellyTools.log('bad post url', 'profile updatePostFavButton');
             return false;  
         }
-              
-        var addToFav = KellyTools.getElementByClass(placeholder,  handler.className + '-sidebar-addtofav');
+        
+        var old = postBlock.getElementsByClassName(handler.className + '-base');
+        if (old) {
+            for (var i = 0; i < old.length; i++) {
+                old[i].parentElement.removeChild(old[i]);                
+            }
+        }
+        
+        var sideName = side ? 'sidebar' : 'post';
+        var className = handler.className + '-base ' + handler.className + '-' + sideName + '-addtofav';
+       
+        var addToFav = KellyTools.getElementByClass(postBlock, className);
         
         if (!addToFav) {
             
-            addToFav = document.createElement('DIV'); 
-            addToFav.className = handler.hostClass + ' ' + handler.className + '-icon-diskete ' + handler.className +'-sidebar-addtofav';
-                 
-            placeholder.appendChild(addToFav);    
+            if (side) {
+                addToFav = document.createElement('DIV'); 
+                addToFav.className = handler.hostClass + ' ' + handler.className + '-icon-diskete ' + className;
+                     
+                shareButtonsBlock.appendChild(addToFav);
+            } else {
+                
+                addToFav = document.createElement('span');
+                addToFav.className = className + '-link';
+                
+                // keep same url as main button, to dont loose getPostLink method functional and keep similar environment
+                
+                KellyTools.setHTMLData(addToFav, '<a href="#" class="' + className + '" href="' + link.href + '"></a>');
+                               
+                link.parentElement.parentElement.insertBefore(addToFav, link.parentElement); 
+                addToFav = KellyTools.getElementByClass(addToFav, className);
+                
+            }           
         }         
         
         var inFav = handler.fav.getStorageManager().searchItem(handler.fav.getGlobal('fav'), {link : linkUrl, commentLink : false});
@@ -438,9 +506,11 @@ function kellyProfileJoyreactor() {
         
         if (inFav !== false) {
             
-            KellyTools.classList('add', addToFav, handler.className + '-sidebar-addtofav-added');         
-            addToFav.title = KellyLoc.s('Удалить из избранного', 'remove_from_fav_tip');
+            KellyTools.classList('add', addToFav, handler.className + '-' + sideName + '-addtofav-added');  
             
+            if (side) addToFav.title = KellyLoc.s('Удалить из избранного', 'remove_from_fav_tip');
+            else addToFav.innerText = KellyLoc.s('Удалить из избранного', 'remove_from_fav');
+                
             addToFav.onclick = function() { 
             
                 handler.fav.showRemoveFromFavDialog(inFav, function() {
@@ -454,8 +524,10 @@ function kellyProfileJoyreactor() {
             
         } else {
                         
-            KellyTools.classList('remove', addToFav, handler.className + '-sidebar-addtofav-added');  
-            addToFav.title = KellyLoc.s('Добавить в избранное', 'add_to_fav_tip');
+            KellyTools.classList('remove', addToFav, handler.className + '-' + sideName + '-addtofav-added');  
+            
+            if (side) addToFav.title = KellyLoc.s('Добавить в избранное', 'add_to_fav_tip');
+            else addToFav.innerText = KellyLoc.s('Добавить в избранное', 'add_to_fav');
             
             addToFav.onclick = function() { 
                 
@@ -477,17 +549,24 @@ function kellyProfileJoyreactor() {
     // todo get post text?
     
     this.getCommentText = function(comment) {
-    
-        var contentContainer = comment.querySelector('.txt > div');        
-        if (!contentContainer || contentContainer.className) {
-            contentContainer = comment.querySelector('.txt > span');  // banned comment after expand  
-            
-            if (!contentContainer || contentContainer.className) {
-                return '';
+        
+        var contentContainer = comment.querySelector('.txt > div');  
+
+        if (contentContainer && !contentContainer.className) return contentContainer.textContent || contentContainer.innerText || '';
+        
+        var contentContainer = comment.querySelector('.txt > span');  
+
+        if (contentContainer && !contentContainer.className) return contentContainer.textContent || contentContainer.innerText || '';
+        
+        for (var i = 0; i < comment.childNodes.length; i++) {
+            if (comment.childNodes[i].tagName && 
+                ['div', 'span'].indexOf(comment.childNodes[i].tagName.toLowerCase()) != -1 &&
+                !comment.childNodes[i].className
+            ) {
+               return comment.childNodes[i].textContent || comment.childNodes[i].innerText || '';
             }
         }
-        
-        return contentContainer.textContent || contentContainer.innerText || '';
+             
     }
         
     this.formatComments = function(block) {
@@ -597,7 +676,7 @@ function kellyProfileJoyreactor() {
             return false;
         }
                   
-        var addToFav = updateAddToFavButton(postBlock, shareButtonsBlock);        
+        var addToFav = updateAddToFavButton(postBlock, shareButtonsBlock, coptions.addToFavSide);        
         if (!addToFav) {
             return false;
         }
@@ -660,13 +739,17 @@ function kellyProfileJoyreactor() {
     
     this.getMainContainers = function() {
         
+        // todo move create buttons methods from faitems core
+        
         if (!mainContainers) {
             mainContainers = {
                 
                 // public
                 
                 body : document.getElementById('container'), // place where to put all dynamic absolute position elements
-                content : document.getElementById('contentinner'), // place where to put main extension container
+                siteContent : document.getElementById('contentinner'), // site main container
+                favContent : false, // main extension container - image grid \ options block
+                sideBar : false,  // place where to put extension sidebar (add post \ filters menu)
                 
                 // private
                 
@@ -674,6 +757,26 @@ function kellyProfileJoyreactor() {
                 menu : document.getElementById('submenu'),
                 tagList : document.getElementById('tagList'), // or check pageInner
             };
+            
+            mainContainers.sideBar = mainContainers.body;
+            
+            if (mainContainers.siteContent) {
+                
+                mainContainers.favContent = document.createElement('div');
+                mainContainers.favContent.className = handler.className + '-FavContainer ' + handler.hostClass;            
+                
+                mainContainers.siteContent.parentNode.insertBefore(mainContainers.favContent, mainContainers.siteContent);                
+            }
+            
+            if (!mainContainers.body) {
+                KellyTools.log('getMainContainers : body container not found', KellyTools.E_ERROR); 
+                return false;  
+            }
+            
+            if (!mainContainers.favContent) {
+                KellyTools.log('getMainContainers : cant create favContent container, check siteContent selector', KellyTools.E_ERROR);
+                return false;               
+            }
         }
         
         return mainContainers;

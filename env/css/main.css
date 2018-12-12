@@ -22,7 +22,15 @@
     position : relative;
 }
 
-.__BASECLASS__-addToFavComment:after {
+.__BASECLASS__-post-addtofav {
+    margin-left: 20px;
+    position: relative;
+    margin-right: 10px;
+    font-weight: 700;
+    color: #586263;
+}
+
+.__BASECLASS__-addToFavComment:after, .__BASECLASS__-post-addtofav:after  {
     content: " ";
     position: absolute;
     background: rgba(255, 120, 42, 0.51);
@@ -300,13 +308,15 @@
 }
 
 .__BASECLASS__-FavItem-error:after {
-    content: " /\\_/\\ \A  ='_'= 404? \A  |    \\ / \A  |..__ \/";
+    content: " /\\_/\\ [X] \A  ='_'= 404? \A  |    \\ / \A  |..__ \/";
     left: 40%;
     bottom: 10px;
     position: absolute;
     font-family: monospace;
     white-space: pre;
     line-height: 1.2;
+    color : #1d1515;
+    font-weight : bold;
 }
 
 .__BASECLASS__-FavItem-error img.__BASECLASS__-preview {
@@ -872,6 +882,11 @@
     height : 30px;
     margin-top: 12px;
     margin-bottom: 12px;
+}
+
+.__BASECLASS__-options-table .__BASECLASS__-cfg-buttons {
+    padding-top : 24px;
+    padding-bottom : 12px;
 }
 
 .__BASECLASS__-tab {

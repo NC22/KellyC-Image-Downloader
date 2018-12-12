@@ -7,6 +7,9 @@
     },    
     "add_to_fav_tip":{  
         "message":"Add to favourite"
+    },   
+    "add_to_fav_side":{  
+        "message":"Move \"Add to favourite\" button for publication to social networks block"
     },
     "add_to_fav_comment":{  
         "message":"to favourite"
