@@ -98,6 +98,18 @@ KellyTools.val = function(value, type) {
     }
 }
 
+KellyTools.getElementText = function(el) {
+    
+    if (el) {
+         return el.innerText || el.textContent || '';
+    }
+    
+    return '';
+}
+
+KellyTools.nlToBr = function(text) {
+    return text.replace(/(?:\r\n|\r|\n)/g, '<br>');
+}
 
 // also some interesting design can be found here
 // https://stackoverflow.com/questions/7370943/retrieving-binary-file-content-using-javascript-base64-encode-it-and-reverse-de

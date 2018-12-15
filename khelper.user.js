@@ -2626,6 +2626,15 @@ function KellyFavStorageManager(cfg) {
     var MAX_TOTAL_PER_DB = 28; // mb ~60000 images
     var MAX_CONFIG_SIZE = 2; // mb
     
+    // from root = Downloads/[profile name]/
+    this.dir = {
+        exportProfile : 'Storage/ExportedProfiles/',
+        exportFiltered : 'Storage/FilteredProfiles/',
+        exportBookmark : 'Storage/ExportedBookmarks/',
+        logs : 'Storage/Logs/',
+        cfgs : 'Storage/ExportedCfgs/',
+    }
+    
     // todo - more options for "add data to db" function (import only images without categories)
     // prefixes can be modified by environment on init, relative to current site environment file
         
@@ -2765,7 +2774,7 @@ function KellyFavStorageManager(cfg) {
                             return false;							
                         }
                         
-                        var path = handler.fav.getGlobal('env').profile + '/Storage/ExportedDBs/' + dbName + '_' + KellyTools.getTimeStamp() + '.' + handler.format;
+                        var path = handler.fav.getGlobal('env').profile + '/' + handler.dir.exportProfile + dbName + '_' + KellyTools.getTimeStamp() + '.' + handler.format;
                             path = KellyTools.validateFolderPath(path);
                             
                         handler.fav.getDownloadManager().createAndDownloadFile(JSON.stringify(db), path);	
@@ -2868,7 +2877,7 @@ function KellyFavStorageManager(cfg) {
             var downloadButton = KellyTools.getElementByClass(handler.storageContainer, handler.className + '-io-import');
                 downloadButton.onclick = function() {
                  
-                    var path = handler.fav.getGlobal('env').profile + '/Storage/ExportedCfgs/config_' + KellyTools.getTimeStamp() + '.' + handler.format;
+                    var path = handler.fav.getGlobal('env').profile + '/' + handler.dir.cfgs + 'config_' + KellyTools.getTimeStamp() + '.' + handler.format;
                         path = KellyTools.validateFolderPath(path);
                     
                     var currentSession = handler.fav.getGlobal('fav');
@@ -4827,7 +4836,7 @@ function KellyGrabber(cfg) {
     
     function downloadLog() {
     
-        var fname = fav.getGlobal('env').profile + '/Storage/Logs/';
+        var fname = fav.getGlobal('env').profile + '/' + fav.getStorageManager().dir.logs;
             fname += 'download_log_' + KellyTools.getTimeStamp() + '.log';
             fname = KellyTools.validateFolderPath(fname);
             
@@ -6529,6 +6538,18 @@ KellyTools.val = function(value, type) {
     }
 }
 
+KellyTools.getElementText = function(el) {
+    
+    if (el) {
+         return el.innerText || el.textContent || '';
+    }
+    
+    return '';
+}
+
+KellyTools.nlToBr = function(text) {
+    return text.replace(/(?:\r\n|\r|\n)/g, '<br>');
+}
 
 // also some interesting design can be found here
 // https://stackoverflow.com/questions/7370943/retrieving-binary-file-content-using-javascript-base64-encode-it-and-reverse-de
@@ -7384,7 +7405,10 @@ function KellyOptions(cfg) {
       
         output += '<tr><td colspan="2"><label><input type="checkbox" value="1" class="' + env.className + 'SyncByAdd" ' + (fav.coptions.syncByAdd ? 'checked' : '') + '> ' + lng.s('Дублировать в основное избранное пользователя если авторизован', 'sync_by_add') + '</label></td></tr>';
         output += '<tr><td colspan="2"><label><input type="checkbox" value="1" class="' + env.className + 'HideSoc" ' + (fav.coptions.hideSoc ? 'checked' : '') + '> ' + lng.s('Скрывать кнопки соц. сетей из публикаций', 'hide_soc') + '</label></td></tr>';
-        
+              
+        output += '<tr><td colspan="2"><label><input type="checkbox" value="1" class="' + env.className + 'addToFavSide" ' + (fav.coptions.addToFavSide ? 'checked' : '') + '> \
+               ' + lng.s('Перенести кнопку "добавить в избранное" для публикаций в блок соц. сетей', 'add_to_fav_side') + '</label></td></tr>';
+       
         output += '</table>';
         
         if (handler.favEnv.isDownloadSupported) {
@@ -7662,10 +7686,7 @@ function KellyOptions(cfg) {
         output = '<table>';        
         output += '<tr><td colspan="2"><label><input type="checkbox" value="1" class="' + env.className + 'OptionsSide" ' + (fav.coptions.optionsSide ? 'checked' : '') + '> \
                ' + lng.s('Перенести кнопку настроек из основного в боковое меню фильтров', 'options_side') + '</label></td></tr>';
-               
-        output += '<tr><td colspan="2"><label><input type="checkbox" value="1" class="' + env.className + 'addToFavSide" ' + (fav.coptions.addToFavSide ? 'checked' : '') + '> \
-               ' + lng.s('Перенести кнопку "добавить в избранное" для публикаций в блок соц. сетей', 'add_to_fav_side') + '</label></td></tr>';
-       
+         
         output += '<tr><td>' + lng.s('Игнорировать комментарии', 'ignore_comments') + ' :</td>\
                         <td><input type="text" class="kellyBlockcomments" value="' + KellyTools.varListToStr(fav.coptions.comments_blacklist) + '"></td>\
                    </tr>';
@@ -9390,7 +9411,7 @@ function KellyFavItems()
             storage.items[storage.items.length] = item;			
         }
   
-        var fname = env.profile + '/Storage/FilteredFavourites/';
+        var fname = env.profile + '/' + handler.getStorageManager().dir.exportFiltered;
             fname += fav.coptions.storage + '_filtered_' + KellyTools.getTimeStamp() + '.' + handler.getStorageManager().format;
             fname = KellyTools.validateFolderPath(fname);
             
@@ -9461,7 +9482,7 @@ function KellyFavItems()
             
             if (freeSpace > 0 && item.text) {
                 var ctext = item.text.length > freeSpace ? item.text.substring(0, freeSpace) + '...' : item.text;
-                text += '<div class="' + env.className + '-preview-text-ctext">' + item.text + '</div>';
+                text += '<div class="' + env.className + '-preview-text-ctext">' + KellyTools.nlToBr(item.text) + '</div>';
             }
                                   
             var size = Math.ceil(text.length / 100) * 50;
@@ -9692,7 +9713,7 @@ function KellyFavItems()
             
             if (text) {
                 text = text.length > 250 ? text.substring(0, 250) + '...' : text;
-                html += '<div class="' + env.className + '-PreviewText-container">' + text + '</div>';
+                html += '<div class="' + env.className + '-PreviewText-container">' + KellyTools.nlToBr(text) + '</div>';
             }
         }
         
@@ -11987,7 +12008,7 @@ function KellyFavItems()
                         delete favNativeParser.collectedData.selected_cats_ids;
                     }
                     
-                    var fname = env.profile + '/Storage/ExportedFavourites/';
+                    var fname = env.profile + '/' + handler.getStorageManager().dir.exportBookmark;
                         fname += 'db_';
                         
                     var pageInfo = env.getFavPageInfo();					
@@ -12873,18 +12894,18 @@ function kellyProfileJoyreactor() {
         
         var contentContainer = comment.querySelector('.txt > div');  
 
-        if (contentContainer && !contentContainer.className) return contentContainer.textContent || contentContainer.innerText || '';
+        if (contentContainer && !contentContainer.className) return KellyTools.getElementText(contentContainer);
         
         var contentContainer = comment.querySelector('.txt > span');  
 
-        if (contentContainer && !contentContainer.className) return contentContainer.textContent || contentContainer.innerText || '';
+        if (contentContainer && !contentContainer.className) return KellyTools.getElementText(contentContainer);
         
         for (var i = 0; i < comment.childNodes.length; i++) {
             if (comment.childNodes[i].tagName && 
                 ['div', 'span'].indexOf(comment.childNodes[i].tagName.toLowerCase()) != -1 &&
                 !comment.childNodes[i].className
             ) {
-               return comment.childNodes[i].textContent || comment.childNodes[i].innerText || '';
+                return KellyTools.getElementText(comment);
             }
         }
              

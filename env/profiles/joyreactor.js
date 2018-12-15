@@ -558,18 +558,18 @@ function kellyProfileJoyreactor() {
         
         var contentContainer = comment.querySelector('.txt > div');  
 
-        if (contentContainer && !contentContainer.className) return contentContainer.textContent || contentContainer.innerText || '';
+        if (contentContainer && !contentContainer.className) return KellyTools.getElementText(contentContainer);
         
         var contentContainer = comment.querySelector('.txt > span');  
 
-        if (contentContainer && !contentContainer.className) return contentContainer.textContent || contentContainer.innerText || '';
+        if (contentContainer && !contentContainer.className) return KellyTools.getElementText(contentContainer);
         
         for (var i = 0; i < comment.childNodes.length; i++) {
             if (comment.childNodes[i].tagName && 
                 ['div', 'span'].indexOf(comment.childNodes[i].tagName.toLowerCase()) != -1 &&
                 !comment.childNodes[i].className
             ) {
-               return comment.childNodes[i].textContent || comment.childNodes[i].innerText || '';
+                return KellyTools.getElementText(comment);
             }
         }
              
