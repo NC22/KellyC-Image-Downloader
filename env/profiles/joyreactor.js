@@ -163,7 +163,7 @@ function kellyProfileJoyreactor() {
             }
         
             updateSidebarProportions(sideBarWrap);
-            
+            updateSidebarPosition();
         },
         
         onSideBarUpdate : function() {
@@ -410,9 +410,11 @@ function kellyProfileJoyreactor() {
         var scrollLeft = KellyTools.getScrollLeft();
         
         var top = 0;
-        
+        var topMax = 0;
+       
         if (sideBlock) {
-            top = sideBlockBounds.top + scrollTop;
+            topMax = sideBlockBounds.top + scrollTop;
+            top = topMax;
         }
                     
         // screen.height / 2  - (sideBarWrap.getBoundingClientRect().height / 2) - 24
@@ -443,8 +445,12 @@ function kellyProfileJoyreactor() {
             
             if (sideBarWrapBounds.height + sideBarWrapBounds.top + scrollTop >= bottomLimit) {
                 
-                // console.log(sideBarWrapBounds.height + scrollTop)
-                sideBarWrap.style.top = (bottomLimit - sideBarWrapBounds.height) + 'px';
+                var newTop = bottomLimit - sideBarWrapBounds.height;
+                
+                if (topMax < newTop) {
+                    // console.log(sideBarWrapBounds.height + scrollTop)
+                    sideBarWrap.style.top = newTop + 'px';
+                }
             }
         }
         

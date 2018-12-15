@@ -113,6 +113,9 @@
     "cgrid_imageview_preview":{  
         "message":"Open preview image"
     },      
+    "cgrid_lazy":{  
+        "message":"Load images only when they in visible area of screen (beta)"
+    }, 
     "change":{  
         "message":"Change"
     },
@@ -199,6 +202,9 @@
     },    
     "download_partly":{  
         "message":"Only part of data was loaded (see log for more info). You still can download loaded data as profile"
+    },
+    "download_empty":{  
+        "message":"List of found publications is empty (see log for more info)"
     },
     "edit_mode":{  
         "message":"Edit mode"

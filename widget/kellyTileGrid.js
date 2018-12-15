@@ -5,7 +5,7 @@
    @description    image view widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.0.9 24.09.18
+   @version        v 1.1.0 14.12.18
    
    ToDo : 
    
@@ -20,10 +20,11 @@ function KellyTileGrid(cfg) {
     var loadTimer = false;
     
     var tiles = false;
-    var tilesLoadState = false;
+    var tilesBoundsEls = false;
+    var tilesLoadState = false; // is proportions loaded, todo rename
     var tilesLoaded = false;
     
-    var currentTileRow = false;
+    var currentTileRow = [];
     var requiredWidth = false;
     var hideUnfited = false;
     
@@ -36,16 +37,17 @@ function KellyTileGrid(cfg) {
         heightDiff : 10, // допустимая погрешность по высоте для текущей строки элементов
         heightDiffLast : 20, // допустимая погрешность для последнего ряда
         unfitedExtendMin : 2, // для последнего ряда - подгоняем по ширине не обращая внимания на требуемую высоту если осталось указанное кол-во изображений невместифшихся в сетку с требуемой высотой
-        dontWait : false,
-        fixed : false,
-        tmpBounds : false,
+        fixed : false, // фиксированное кол-во элементов на строку (если = true - игнорирует опции heightDiffLast\ heightDiff \ rowHeight)
+        tmpBounds : false, // временные пропорции до тех пор пока изображение не загружено. на время загрузки к тайлу добавляется класс tileClass + "-tmp-bounds" 
+        lazy : false, // загружать только изображения в области видимости. Если для изображения не определены пропорции оно будет загружено сразу
+        loadLimit : 10, // работает только в режиме lazy = true, максимальное кол-во загружаемых единовременно элементов
         minAspectRatio : 0.2, // картинка маркируется классом oversized, вызывается событие onBadBounds, при отсутствии пользовательского обработчика возвращающего пропорции, картинка скрывается         
         recheckAlways : false, // (если данные из недоверенного источника) вызывать события загрузки пропорций изображения даже если есть предварительно заданные через атрибуты данные о пропорция для их пост валидации
     };
     
     var handler = this;
     var events = { 
-        onGridUpdated : false, // (handler) after updateTileGrid method
+        onGridUpdated : false, // (handler, isAllBoundsLoaded) after updateTileGrid method
         
         getResizableElement : false, // (handler, tile) если метод задан - возвращать элемент к которому в тайле будет применены атрибуты width \ height, по умолчанию сам тайл
         getBoundElement : false, // (handler, tile) если метод задан - возвращать элемент из которого можно получить данные о пропорция тайла (свойства data-width \ data-height) , по умолчанию сам тайл
@@ -54,9 +56,14 @@ function KellyTileGrid(cfg) {
         // getScaleElement
         onBadBounds : false, // (handler, data[errorCode, error, tile, boundEl]) element is loaded, but bounds is unsetted or loaded with error 
         onResize : false, // (handler) window resize
-        onLoadBounds : false, // (handler, boundEl, errorTriger) some of unknown bounds element is ready, todo - return tile
+        onLoadBounds : false, // (handler, boundEl, errorTriger) some of bounds element is ready, if user function return true tilegrid will not refresh, todo - return tile
         onResizeImage : false, // (handler, tileResizedInfo[origHeight, origWidth, width, height])
     };
+    
+    var lazyEvent = false;
+    var loading = 0;
+    
+    this.eventsChecked = false;
     
     var imgEvents = {
         onLoadBoundsError : function(e) {
@@ -69,6 +76,8 @@ function KellyTileGrid(cfg) {
     
     function constructor(cfg) {
         handler.updateConfig(cfg);
+        
+        window.addEventListener('resize', onResize);	
     }
     
     this.updateConfig = function(cfg) {
@@ -76,13 +85,12 @@ function KellyTileGrid(cfg) {
         if (!cfg) return false;
                 
         if (typeof cfg.tilesBlock != 'undefined') {
-        
+            
             tilesBlock = cfg.tilesBlock;
             
             if (typeof tilesBlock == 'string') {
-                var el = document.getElementById(tilesBlock.trim());
-                if (el) tilesBlock = document.getElementById(tilesBlock.trim());
-            }
+                tilesBlock = document.getElementById(tilesBlock.trim());
+            }            
         }
         
         if (cfg.rowHeight) {
@@ -98,6 +106,21 @@ function KellyTileGrid(cfg) {
             }
         }
         
+        if (rules.lazy && !lazyEvent) {
+    
+            lazyEvent = function() {
+                updateTileGridEvents();
+            }
+    
+            window.addEventListener('scroll', lazyEvent);
+        }
+        
+        if (!rules.lazy && lazyEvent) {
+            
+            window.removeEventListener('scroll',  lazyEvent);	
+            lazyEvent = false;
+        }
+        
         if (cfg.tileClass) {
             tileClass = cfg.tileClass;
         }
@@ -106,6 +129,12 @@ function KellyTileGrid(cfg) {
             hideUnfited = true;
         } else {
             hideUnfited = false;
+        }
+        
+        // some synonyms for rules section
+        
+        if (cfg.type && cfg.type != 'fixed') {
+            rules.fixed = false;
         }
         
         if (cfg.events) {
@@ -117,7 +146,6 @@ function KellyTileGrid(cfg) {
             }
         }
         
-        window.addEventListener('resize', onResize);	
         return true;
     }
     
@@ -128,12 +156,16 @@ function KellyTileGrid(cfg) {
             return true;
         } 
         
-        delayUpdateTileGrid(true);
+        delayUpdateTileGrid();
+        handler.reset();
     }
     
-   function isBoundsLoaded(tile) {
-   
-        var boundEl = handler.getBoundElement(tile);
+   function isBoundsLoaded(tile, boundEl) {
+        
+        if (!boundEl) {
+            boundEl = handler.getBoundElement(tile);
+        }
+        
         if (!boundEl) return true;
                 
         if (events.isBoundsLoaded && events.isBoundsLoaded(handler, tile, boundEl)) {
@@ -143,6 +175,7 @@ function KellyTileGrid(cfg) {
         if (boundEl.tagName != 'IMG') return true;  // text previews without image or some thing like that
         if (boundEl.getAttribute('error')) return true;
         if (boundEl.getAttribute('data-width')) return true;
+        if (boundEl.getAttribute('data-src')) return false; // prevent detection of 1x1 holder
         
         if (!boundEl.src) {
             boundEl.setAttribute('error', '1');
@@ -178,41 +211,55 @@ function KellyTileGrid(cfg) {
     
     function onLoadBounds(boundEl, state) {
         
+        loading--;
+        
         if (boundEl.tagName != 'IMG' && (!boundEl.naturalWidth || !boundEl.naturalHeight)) {
             state = 'error';
-        }
-        
+            // something not standard
+        } 
+                
         if (events.onLoadBounds && events.onLoadBounds(handler, boundEl, state)) {
             return true;
         } 
-        
+                 
         if (state == 'error') {
             boundEl.setAttribute('error', '1');
-        }        
+        } else {            
+        
+            // original naturalWidth \ height may be lost after resize operations
+            
+            if (boundEl.tagName = 'IMG' && !boundEl.getAttribute('data-width')) {
+                boundEl.setAttribute('data-width', boundEl.naturalWidth);
+                boundEl.setAttribute('data-height', boundEl.naturalHeight); 
+                
+                var tile = handler.getTileByBoundElement(boundEl);
+                if (tile && tile.getAttribute('data-rowItem-rendered')) {
+                    tile.setAttribute('data-rowItem-rendered', '');
+                }                
+            }
+        }       
         
         delayUpdateTileGrid();
     }
 
-    function delayUpdateTileGrid(resize) {
+    function delayUpdateTileGrid() {
         
         if (!updateAnimationFrame) return false;        
         updateAnimationFrame = false;
         
         window.requestAnimationFrame(function(){            
             updateAnimationFrame = true;
-            handler.updateTileGrid(resize);
+            handler.updateTileGrid();
         });      
     }
     
     function getResizedInfo(resizeTo, info, resizeBy) 
-    {		 
-        var k;
-        
+    {	
         if (resizeBy == 'width') {
-            k = info[resizeBy] / resizeTo;
+            var k = info[resizeBy] / resizeTo;
             info.height = Math.ceil(info.height / k);
         } else {
-            k = info[resizeBy] / resizeTo;
+            var k = info[resizeBy] / resizeTo;
             info.width = Math.ceil(info.width / k);
         }
         
@@ -250,99 +297,179 @@ function KellyTileGrid(cfg) {
         }
     }
     
-    this.clearEvents = function() {
-        
-        if (!tilesBlock) return false;
-        tiles = handler.getTiles();
-        
-        for (var i = 0; i < tiles.length; i++) {
-            var boundEl = handler.getBoundElement(tiles[i]);
-            if (boundEl.tagName == 'IMG' && tiles[i].getAttribute('data-load-eventInit')) {
-                
-                boundEl.removeEventListener('error', imgEvents.onLoadBoundsError);
-                boundEl.removeEventListener('load',  imgEvents.onLoadBoundsSuccess);				
-                tiles[i].setAttribute('data-load-eventInit', '0');
-            }
-        }
-    }
-        
-    this.stopLoad = function() {
-    
-        // останавливаем загрузку если что-то не успело загрузится. При сценариях - смена страницы \ закрытие блока с тайлами и т.п.
-   
-        if (!tilesBlock) return false;
-        for (var i = 0; i < tiles.length; i++) {
-            var boundEl = handler.getBoundElement(tiles[i]);
-            if (boundEl.tagName == 'IMG') {
-                boundEl.src = ''; 
-            }
-        }
-    }
+    // stops all in-progress images and clear tileblock
     
     this.close = function() {
-        handler.clearEvents();
-        handler.stopLoad();
+        
+        handler.reset();
+        if (tilesBlock) {
+            
+            tiles = handler.getTiles();
+            
+            // останавливаем загрузку если что-то не успело загрузится. При сценариях - смена страницы \ закрытие блока с тайлами и т.п.
+   
+            for (var i = 0; i < tiles.length; i++) {
+                var boundEl = handler.getBoundElement(tiles[i]);
+                if (boundEl.tagName == 'IMG') {
+                    boundEl.src = ''; 
+                }
+            }
+            
+            while (tilesBlock.firstChild) {
+                tilesBlock.removeChild(tilesBlock.firstChild);
+            }
+        }        
     }
     
     this.isWaitLoad = function() {
         return tilesLoaded == tiles.length ? false : true;
     }
     
-    function markRowAsRendered() {
-    
-        for (var i=0; i <= currentTileRow.length-1; i++) { 
-            currentTileRow[i].tile.setAttribute('data-rowItem-rendered', '1');
-        }
-    }
+    // clear events, addition classes if tiles exist
 
-    function clearRowRenderMarks() {
+    this.reset = function() {
         
-        for (var i=0; i <= tiles.length-1; i++){ 
+        handler.eventsChecked = false;
+        loading = 0;
+        
+        if (tilesBlock) {
+            
+            tiles = handler.getTiles();
+            
+            for (var i=0; i <= tiles.length-1; i++){ 
                 
-            if (tiles[i].getAttribute('data-rowItem-rendered')) {
-                tiles[i].setAttribute('data-rowItem-rendered', '');
+                var rElement = handler.getResizableElement(tiles[i]);
+                removeClass(rElement, 'grid-first');
+                removeClass(rElement, 'grid-last');
+                
+                var boundEl = handler.getBoundElement(tiles[i]);
+                if (boundEl.tagName == 'IMG' && tiles[i].getAttribute('data-load-eventInit')) {
+                    
+                    boundEl.removeEventListener('error', imgEvents.onLoadBoundsError);
+                    boundEl.removeEventListener('load',  imgEvents.onLoadBoundsSuccess);
+                    
+                    tiles[i].setAttribute('data-load-eventInit', '0');
+                }
             }
         }
     }
     
-    this.updateTileGridState = function() {
+    function updateTileGridEvents() {
         
-        if (!tilesBlock) return false;
+        if (!tilesBlock || !tilesBoundsEls.length || handler.eventsChecked) return false;        
+     
+        if (rules.lazy) {
+            var scrollTop = (window.pageYOffset || document.documentElement.scrollTop) - (document.documentElement.clientTop || 0);
+            var screenBoundEl = (document.compatMode === "CSS1Compat") ? document.documentElement : document.body;
+            var screenBounds = { width : screenBoundEl.clientWidth, height : screenBoundEl.clientHeight};
+            
+            var isElInView = function(el) {
+                    
+                var bounds = el.getBoundingClientRect();
+           
+                if (screenBounds.height + scrollTop > scrollTop + bounds.top && scrollTop < scrollTop + bounds.bottom ) {
+                    
+                    return true;
+                }
+                
+                return false;
+            }
+        }
         
         tiles = handler.getTiles();
-        tilesLoaded = 0;        
-        tilesLoadState = [];
+        var skipped = 0;
         
         for (var i = 0; i < tiles.length; i++) {
+               
+            // lazyLoad disabled for elements without bounds data
             
-            tilesLoadState[i] = isBoundsLoaded(tiles[i]);
-            
-            if (tilesLoadState[i]) {
-                tilesLoaded++;                
-            } 
+            if (rules.lazy) {
+                if (tilesBoundsEls[i].getAttribute('data-src')) {
+                    
+                    if (!tilesLoadState[i]) {
+                        if (rules.loadLimit && loading >= rules.loadLimit) {
+                            
+                            break; 
+                        }
+                    }
+                    
+                    if (!tilesLoadState[i] || isElInView(tilesBoundsEls[i])) {
+                        tilesBoundsEls[i].src = tilesBoundsEls[i].getAttribute('data-src');
+                        tilesBoundsEls[i].setAttribute('data-src', '');
+                    } else {
+                            
+                        skipped++;
+                        continue;
+                    }
+                    
+                }
+            }
             
             if (!tilesLoadState[i] || rules.recheckAlways) {
-                
-                var boundEl = handler.getBoundElement(tiles[i]);
-                if (boundEl.tagName == 'IMG' && !tiles[i].getAttribute('data-load-eventInit')) {
+                                
+                if (tilesBoundsEls[i].tagName == 'IMG' && !tiles[i].getAttribute('data-load-eventInit')) {
                     
                     // test error states
                     /*
                         var testError = Math.floor(Math.random() * Math.floor(50));
                         if (testError > 25) {
-                            boundEl.src = boundEl.src.replace('.', 'test.d');
+                            tilesBoundsEls[i].src = tilesBoundsEls[i].src.replace('.', 'test.d');
                         }
                     */
                     
-                    boundEl.addEventListener('error', imgEvents.onLoadBoundsError);
-                    boundEl.addEventListener('load',  imgEvents.onLoadBoundsSuccess);
+                    // addClass(tiles[i], 'tile-loading');
+                    
+                    tilesBoundsEls[i].addEventListener('error', imgEvents.onLoadBoundsError);
+                    tilesBoundsEls[i].addEventListener('load',  imgEvents.onLoadBoundsSuccess);
                     
                     tiles[i].setAttribute('data-load-eventInit', '1');
+                    
+                    loading++;
                 }
             }
         }
         
+        if (tilesLoaded == tiles.length && !skipped) {
+            handler.eventsChecked = true;
+        }
+        
+        return true;     
+    }
+        
+    function updateTileGridState() {
+        
+        if (!tilesBlock) return false;
+        
+        
+        tiles = handler.getTiles();
+        tilesLoaded = 0;
+        tilesBoundsEls = [];
+        tilesLoadState = [];
+        
+        for (var i = 0; i < tiles.length; i++) {
+            
+            tilesBoundsEls[i] = handler.getBoundElement(tiles[i]);
+            tilesLoadState[i] = isBoundsLoaded(tiles[i], tilesBoundsEls[i]);
+            
+            if (tilesLoadState[i]) {
+                tilesLoaded++;                
+            }
+            
+        }
+        
         return true;
+    }
+    
+    function removeClass(el, name) {        
+        if (el) {
+            el.classList.remove(tileClass + '-' + name);
+        }
+    }
+    
+    function addClass(el, name) {
+        if (el) {
+            el.classList.add(tileClass + '-' + name);
+        }
     }
     
     function getBoundElementData(boundEl, type) {
@@ -358,15 +485,19 @@ function KellyTileGrid(cfg) {
         return parseInt(dataValue);
     }
     
-    this.updateTileGrid = function(resize) {		
+    this.updateTileGrid = function() {		
         
-        if (!handler.updateTileGridState()) return false;
+        if (!updateTileGridState()) return false;
         
-        if (resize) {
-            clearRowRenderMarks();
+        var isAllBoundsLoaded = tilesLoaded == tiles.length;
+        
+        if (!isAllBoundsLoaded) {
+            addClass(tilesBlock, 'loading');
+        } else {
+            removeClass(tilesBlock, 'loading');
         }
         
-        if (tilesLoaded == tiles.length || (rules.dontWait && tilesLoaded >= rules.dontWait)) {
+        if (isAllBoundsLoaded || rules.tmpBounds) {
         
             landscape = 0;
             portrait = 0;
@@ -384,19 +515,13 @@ function KellyTileGrid(cfg) {
             }
                
             for (var i=0; i <= tiles.length-1; i++){ 
-                
-                // если понадобятся lazy load \ порядок загрузки изображений, лучше вынести в отдельное решение при необходимости, 
-                // здесь нужен только контроль текущего состояния пропорций элементов
-                
-                if (tilesLoaded != tiles.length && rules.dontWait && tiles[i].getAttribute('data-rowItem-rendered')) continue;
-                if (!tilesLoadState[i] && !rules.tmpBounds) break;
-                                    
-                var tileMainEl = this.getBoundElement(tiles[i]);
+                            
+                var tileMainEl = handler.getBoundElement(tiles[i]);
                 var alternativeBounds = false;					
                 
                 var imageInfo = {
                     portrait : false,
-                    image : this.getResizableElement(tiles[i]),
+                    image : handler.getResizableElement(tiles[i]),
                     width : 0,
                     height : 0,
                     tile : tiles[i],
@@ -404,8 +529,8 @@ function KellyTileGrid(cfg) {
                 
                 if (tilesLoadState[i]) {
                 
-                    if (rules.dontWait && rules.tmpBounds && tiles[i].className.indexOf(tileClass + '-tmp-bounds') !== -1) {
-                        tiles[i].className = tiles[i].className.replace(tileClass + '-tmp-bounds', '');
+                    if (rules.tmpBounds) {
+                        removeClass(tiles[i], 'tmp-bounds');
                     }
                     
                     if (!tileMainEl) {							
@@ -452,10 +577,7 @@ function KellyTileGrid(cfg) {
                     
                 } else {
                     
-                    if (tiles[i].className.indexOf(tileClass + '-tmp-bounds') == -1) {
-                        tiles[i].className += ' ' + tileClass + '-tmp-bounds';
-                    }
-                    
+                    addClass(tiles[i], 'tmp-bounds');
                     imageInfo.width = rules.tmpBounds.width;
                     imageInfo.height = rules.tmpBounds.height;
                 }
@@ -484,12 +606,8 @@ function KellyTileGrid(cfg) {
                         if (alternativeBounds.height) imageInfo.height = alternativeBounds.height;
                         else imageInfo.height = imageInfo.width;
                         
-                        if (tiles[i].className.indexOf(tileClass + '-oversized-bounds') == -1) {
-                            tiles[i].className += ' ' + tileClass + '-oversized-bounds';
-                        }
+                        addClass(tiles[i], 'oversized-bounds');
                     }
-                    
-                    
                 }				
                     
                 if (imageInfo.width < imageInfo.height) imageInfo.portrait = true;   
@@ -516,7 +634,6 @@ function KellyTileGrid(cfg) {
                 // console.log(imageInfo);
                 // console.log(currentTileRow);
                 
-                markRowAsRendered();
                 resizeImagesRow();
             }
                            
@@ -526,7 +643,7 @@ function KellyTileGrid(cfg) {
                     
                     if (hideUnfited) {
                         
-                        for (var i=0; i <= currentTileRow.length-1; ++i){ 
+                        for (var i=0; i <= currentTileRow.length-1; i++){ 
                             currentTileRow[i].image.style.display = 'none';
                         }
                         
@@ -546,17 +663,19 @@ function KellyTileGrid(cfg) {
             }
 
             var clear = tilesBlock.getElementsByClassName(tileClass + '-clear-both');
+            
             if (clear.length) clear[0].parentNode.appendChild(clear[0]);
             else {
                 clear = document.createElement('div');
-                clear.className = tileClass + '-clear-both';
+                addClass(clear, 'clear-both');
                 clear.setAttribute('style', 'clear : both;');
                 tilesBlock.appendChild(clear);                        
-            }
-
-            if (events.onGridUpdated) events.onGridUpdated(handler);
-            
+            }   
         } 
+    
+        updateTileGridEvents();
+        
+        if (events.onGridUpdated) events.onGridUpdated(handler, isAllBoundsLoaded);
     }
     
     function getCurrentRowWidth() {
@@ -615,17 +734,14 @@ function KellyTileGrid(cfg) {
                 currentTileRow[i].width = currentTileRow[i].width - (currentRowWidth - requiredWidth); // correct after float operations
             }
             
-            if (currentTileRow[i].image.className.indexOf(tileClass + '-grid-resized') == -1) {
-                currentTileRow[i].image.className += ' ' + tileClass + '-grid-resized';
+            addClass(currentTileRow[i].image, 'grid-resized');
+            
+            if (i == 0) {
+                addClass(currentTileRow[i].image, 'grid-first');
             }
             
-            if (i == 0 && currentTileRow[i].image.className.indexOf(tileClass + '-grid-first') == -1) {
-                //currentTileRow[i].image.className = currentTileRow[i].image.className.replace(tileClass + '-grid-first', '');
-                currentTileRow[i].image.className += ' ' + tileClass + '-grid-first';                
-            }
-            
-            if (i == currentTileRow.length-1 && currentTileRow[i].image.className.indexOf(tileClass + '-grid-last') == -1 ) {            
-                currentTileRow[i].image.className += ' ' + tileClass + '-grid-last';                
+            if (i == currentTileRow.length-1) {     
+                addClass(currentTileRow[i].image, 'grid-last');
             }
                     
             if (events.onResizeImage && events.onResizeImage(handler, currentTileRow[i])) {
@@ -641,7 +757,7 @@ function KellyTileGrid(cfg) {
         
         portrait = 0;
         landscape = 0;
-        currentTileRow = new Array();
+        currentTileRow = [];
     }
     
     constructor(cfg);

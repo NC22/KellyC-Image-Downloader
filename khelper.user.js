@@ -10,7 +10,7 @@
    @encoding utf-8
    @name           KellyTooltip
    @namespace      Kelly
-   @description    image view widget
+   @description    creates tooltip elements (attaches to an element or screen) widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
    @version        v 1.0.0 24.09.18
@@ -583,7 +583,7 @@ KellyTooltip.addTipToEl = function(el, message, cfg, delay, onShow) {
    @description    image view widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.0.9 24.09.18
+   @version        v 1.1.0 14.12.18
    
    ToDo : 
    
@@ -598,10 +598,11 @@ function KellyTileGrid(cfg) {
     var loadTimer = false;
     
     var tiles = false;
-    var tilesLoadState = false;
+    var tilesBoundsEls = false;
+    var tilesLoadState = false; // is proportions loaded, todo rename
     var tilesLoaded = false;
     
-    var currentTileRow = false;
+    var currentTileRow = [];
     var requiredWidth = false;
     var hideUnfited = false;
     
@@ -614,16 +615,17 @@ function KellyTileGrid(cfg) {
         heightDiff : 10, // допустимая погрешность по высоте для текущей строки элементов
         heightDiffLast : 20, // допустимая погрешность для последнего ряда
         unfitedExtendMin : 2, // для последнего ряда - подгоняем по ширине не обращая внимания на требуемую высоту если осталось указанное кол-во изображений невместифшихся в сетку с требуемой высотой
-        dontWait : false,
-        fixed : false,
-        tmpBounds : false,
+        fixed : false, // фиксированное кол-во элементов на строку (если = true - игнорирует опции heightDiffLast\ heightDiff \ rowHeight)
+        tmpBounds : false, // временные пропорции до тех пор пока изображение не загружено. на время загрузки к тайлу добавляется класс tileClass + "-tmp-bounds" 
+        lazy : false, // загружать только изображения в области видимости. Если для изображения не определены пропорции оно будет загружено сразу
+        loadLimit : 10, // работает только в режиме lazy = true, максимальное кол-во загружаемых единовременно элементов
         minAspectRatio : 0.2, // картинка маркируется классом oversized, вызывается событие onBadBounds, при отсутствии пользовательского обработчика возвращающего пропорции, картинка скрывается         
         recheckAlways : false, // (если данные из недоверенного источника) вызывать события загрузки пропорций изображения даже если есть предварительно заданные через атрибуты данные о пропорция для их пост валидации
     };
     
     var handler = this;
     var events = { 
-        onGridUpdated : false, // (handler) after updateTileGrid method
+        onGridUpdated : false, // (handler, isAllBoundsLoaded) after updateTileGrid method
         
         getResizableElement : false, // (handler, tile) если метод задан - возвращать элемент к которому в тайле будет применены атрибуты width \ height, по умолчанию сам тайл
         getBoundElement : false, // (handler, tile) если метод задан - возвращать элемент из которого можно получить данные о пропорция тайла (свойства data-width \ data-height) , по умолчанию сам тайл
@@ -632,9 +634,14 @@ function KellyTileGrid(cfg) {
         // getScaleElement
         onBadBounds : false, // (handler, data[errorCode, error, tile, boundEl]) element is loaded, but bounds is unsetted or loaded with error 
         onResize : false, // (handler) window resize
-        onLoadBounds : false, // (handler, boundEl, errorTriger) some of unknown bounds element is ready, todo - return tile
+        onLoadBounds : false, // (handler, boundEl, errorTriger) some of bounds element is ready, if user function return true tilegrid will not refresh, todo - return tile
         onResizeImage : false, // (handler, tileResizedInfo[origHeight, origWidth, width, height])
     };
+    
+    var lazyEvent = false;
+    var loading = 0;
+    
+    this.eventsChecked = false;
     
     var imgEvents = {
         onLoadBoundsError : function(e) {
@@ -647,6 +654,8 @@ function KellyTileGrid(cfg) {
     
     function constructor(cfg) {
         handler.updateConfig(cfg);
+        
+        window.addEventListener('resize', onResize);	
     }
     
     this.updateConfig = function(cfg) {
@@ -654,13 +663,12 @@ function KellyTileGrid(cfg) {
         if (!cfg) return false;
                 
         if (typeof cfg.tilesBlock != 'undefined') {
-        
+            
             tilesBlock = cfg.tilesBlock;
             
             if (typeof tilesBlock == 'string') {
-                var el = document.getElementById(tilesBlock.trim());
-                if (el) tilesBlock = document.getElementById(tilesBlock.trim());
-            }
+                tilesBlock = document.getElementById(tilesBlock.trim());
+            }            
         }
         
         if (cfg.rowHeight) {
@@ -676,6 +684,21 @@ function KellyTileGrid(cfg) {
             }
         }
         
+        if (rules.lazy && !lazyEvent) {
+    
+            lazyEvent = function() {
+                updateTileGridEvents();
+            }
+    
+            window.addEventListener('scroll', lazyEvent);
+        }
+        
+        if (!rules.lazy && lazyEvent) {
+            
+            window.removeEventListener('scroll',  lazyEvent);	
+            lazyEvent = false;
+        }
+        
         if (cfg.tileClass) {
             tileClass = cfg.tileClass;
         }
@@ -684,6 +707,12 @@ function KellyTileGrid(cfg) {
             hideUnfited = true;
         } else {
             hideUnfited = false;
+        }
+        
+        // some synonyms for rules section
+        
+        if (cfg.type && cfg.type != 'fixed') {
+            rules.fixed = false;
         }
         
         if (cfg.events) {
@@ -695,7 +724,6 @@ function KellyTileGrid(cfg) {
             }
         }
         
-        window.addEventListener('resize', onResize);	
         return true;
     }
     
@@ -706,12 +734,16 @@ function KellyTileGrid(cfg) {
             return true;
         } 
         
-        delayUpdateTileGrid(true);
+        delayUpdateTileGrid();
+        handler.reset();
     }
     
-   function isBoundsLoaded(tile) {
-   
-        var boundEl = handler.getBoundElement(tile);
+   function isBoundsLoaded(tile, boundEl) {
+        
+        if (!boundEl) {
+            boundEl = handler.getBoundElement(tile);
+        }
+        
         if (!boundEl) return true;
                 
         if (events.isBoundsLoaded && events.isBoundsLoaded(handler, tile, boundEl)) {
@@ -721,6 +753,7 @@ function KellyTileGrid(cfg) {
         if (boundEl.tagName != 'IMG') return true;  // text previews without image or some thing like that
         if (boundEl.getAttribute('error')) return true;
         if (boundEl.getAttribute('data-width')) return true;
+        if (boundEl.getAttribute('data-src')) return false; // prevent detection of 1x1 holder
         
         if (!boundEl.src) {
             boundEl.setAttribute('error', '1');
@@ -756,41 +789,55 @@ function KellyTileGrid(cfg) {
     
     function onLoadBounds(boundEl, state) {
         
+        loading--;
+        
         if (boundEl.tagName != 'IMG' && (!boundEl.naturalWidth || !boundEl.naturalHeight)) {
             state = 'error';
-        }
-        
+            // something not standard
+        } 
+                
         if (events.onLoadBounds && events.onLoadBounds(handler, boundEl, state)) {
             return true;
         } 
-        
+                 
         if (state == 'error') {
             boundEl.setAttribute('error', '1');
-        }        
+        } else {            
+        
+            // original naturalWidth \ height may be lost after resize operations
+            
+            if (boundEl.tagName = 'IMG' && !boundEl.getAttribute('data-width')) {
+                boundEl.setAttribute('data-width', boundEl.naturalWidth);
+                boundEl.setAttribute('data-height', boundEl.naturalHeight); 
+                
+                var tile = handler.getTileByBoundElement(boundEl);
+                if (tile && tile.getAttribute('data-rowItem-rendered')) {
+                    tile.setAttribute('data-rowItem-rendered', '');
+                }                
+            }
+        }       
         
         delayUpdateTileGrid();
     }
 
-    function delayUpdateTileGrid(resize) {
+    function delayUpdateTileGrid() {
         
         if (!updateAnimationFrame) return false;        
         updateAnimationFrame = false;
         
         window.requestAnimationFrame(function(){            
             updateAnimationFrame = true;
-            handler.updateTileGrid(resize);
+            handler.updateTileGrid();
         });      
     }
     
     function getResizedInfo(resizeTo, info, resizeBy) 
-    {		 
-        var k;
-        
+    {	
         if (resizeBy == 'width') {
-            k = info[resizeBy] / resizeTo;
+            var k = info[resizeBy] / resizeTo;
             info.height = Math.ceil(info.height / k);
         } else {
-            k = info[resizeBy] / resizeTo;
+            var k = info[resizeBy] / resizeTo;
             info.width = Math.ceil(info.width / k);
         }
         
@@ -828,99 +875,179 @@ function KellyTileGrid(cfg) {
         }
     }
     
-    this.clearEvents = function() {
-        
-        if (!tilesBlock) return false;
-        tiles = handler.getTiles();
-        
-        for (var i = 0; i < tiles.length; i++) {
-            var boundEl = handler.getBoundElement(tiles[i]);
-            if (boundEl.tagName == 'IMG' && tiles[i].getAttribute('data-load-eventInit')) {
-                
-                boundEl.removeEventListener('error', imgEvents.onLoadBoundsError);
-                boundEl.removeEventListener('load',  imgEvents.onLoadBoundsSuccess);				
-                tiles[i].setAttribute('data-load-eventInit', '0');
-            }
-        }
-    }
-        
-    this.stopLoad = function() {
-    
-        // останавливаем загрузку если что-то не успело загрузится. При сценариях - смена страницы \ закрытие блока с тайлами и т.п.
-   
-        if (!tilesBlock) return false;
-        for (var i = 0; i < tiles.length; i++) {
-            var boundEl = handler.getBoundElement(tiles[i]);
-            if (boundEl.tagName == 'IMG') {
-                boundEl.src = ''; 
-            }
-        }
-    }
+    // stops all in-progress images and clear tileblock
     
     this.close = function() {
-        handler.clearEvents();
-        handler.stopLoad();
+        
+        handler.reset();
+        if (tilesBlock) {
+            
+            tiles = handler.getTiles();
+            
+            // останавливаем загрузку если что-то не успело загрузится. При сценариях - смена страницы \ закрытие блока с тайлами и т.п.
+   
+            for (var i = 0; i < tiles.length; i++) {
+                var boundEl = handler.getBoundElement(tiles[i]);
+                if (boundEl.tagName == 'IMG') {
+                    boundEl.src = ''; 
+                }
+            }
+            
+            while (tilesBlock.firstChild) {
+                tilesBlock.removeChild(tilesBlock.firstChild);
+            }
+        }        
     }
     
     this.isWaitLoad = function() {
         return tilesLoaded == tiles.length ? false : true;
     }
     
-    function markRowAsRendered() {
-    
-        for (var i=0; i <= currentTileRow.length-1; i++) { 
-            currentTileRow[i].tile.setAttribute('data-rowItem-rendered', '1');
-        }
-    }
+    // clear events, addition classes if tiles exist
 
-    function clearRowRenderMarks() {
+    this.reset = function() {
         
-        for (var i=0; i <= tiles.length-1; i++){ 
+        handler.eventsChecked = false;
+        loading = 0;
+        
+        if (tilesBlock) {
+            
+            tiles = handler.getTiles();
+            
+            for (var i=0; i <= tiles.length-1; i++){ 
                 
-            if (tiles[i].getAttribute('data-rowItem-rendered')) {
-                tiles[i].setAttribute('data-rowItem-rendered', '');
+                var rElement = handler.getResizableElement(tiles[i]);
+                removeClass(rElement, 'grid-first');
+                removeClass(rElement, 'grid-last');
+                
+                var boundEl = handler.getBoundElement(tiles[i]);
+                if (boundEl.tagName == 'IMG' && tiles[i].getAttribute('data-load-eventInit')) {
+                    
+                    boundEl.removeEventListener('error', imgEvents.onLoadBoundsError);
+                    boundEl.removeEventListener('load',  imgEvents.onLoadBoundsSuccess);
+                    
+                    tiles[i].setAttribute('data-load-eventInit', '0');
+                }
             }
         }
     }
     
-    this.updateTileGridState = function() {
+    function updateTileGridEvents() {
         
-        if (!tilesBlock) return false;
+        if (!tilesBlock || !tilesBoundsEls.length || handler.eventsChecked) return false;        
+     
+        if (rules.lazy) {
+            var scrollTop = (window.pageYOffset || document.documentElement.scrollTop) - (document.documentElement.clientTop || 0);
+            var screenBoundEl = (document.compatMode === "CSS1Compat") ? document.documentElement : document.body;
+            var screenBounds = { width : screenBoundEl.clientWidth, height : screenBoundEl.clientHeight};
+            
+            var isElInView = function(el) {
+                    
+                var bounds = el.getBoundingClientRect();
+           
+                if (screenBounds.height + scrollTop > scrollTop + bounds.top && scrollTop < scrollTop + bounds.bottom ) {
+                    
+                    return true;
+                }
+                
+                return false;
+            }
+        }
         
         tiles = handler.getTiles();
-        tilesLoaded = 0;        
-        tilesLoadState = [];
+        var skipped = 0;
         
         for (var i = 0; i < tiles.length; i++) {
+               
+            // lazyLoad disabled for elements without bounds data
             
-            tilesLoadState[i] = isBoundsLoaded(tiles[i]);
-            
-            if (tilesLoadState[i]) {
-                tilesLoaded++;                
-            } 
+            if (rules.lazy) {
+                if (tilesBoundsEls[i].getAttribute('data-src')) {
+                    
+                    if (!tilesLoadState[i]) {
+                        if (rules.loadLimit && loading >= rules.loadLimit) {
+                            
+                            break; 
+                        }
+                    }
+                    
+                    if (!tilesLoadState[i] || isElInView(tilesBoundsEls[i])) {
+                        tilesBoundsEls[i].src = tilesBoundsEls[i].getAttribute('data-src');
+                        tilesBoundsEls[i].setAttribute('data-src', '');
+                    } else {
+                            
+                        skipped++;
+                        continue;
+                    }
+                    
+                }
+            }
             
             if (!tilesLoadState[i] || rules.recheckAlways) {
-                
-                var boundEl = handler.getBoundElement(tiles[i]);
-                if (boundEl.tagName == 'IMG' && !tiles[i].getAttribute('data-load-eventInit')) {
+                                
+                if (tilesBoundsEls[i].tagName == 'IMG' && !tiles[i].getAttribute('data-load-eventInit')) {
                     
                     // test error states
                     /*
                         var testError = Math.floor(Math.random() * Math.floor(50));
                         if (testError > 25) {
-                            boundEl.src = boundEl.src.replace('.', 'test.d');
+                            tilesBoundsEls[i].src = tilesBoundsEls[i].src.replace('.', 'test.d');
                         }
                     */
                     
-                    boundEl.addEventListener('error', imgEvents.onLoadBoundsError);
-                    boundEl.addEventListener('load',  imgEvents.onLoadBoundsSuccess);
+                    // addClass(tiles[i], 'tile-loading');
+                    
+                    tilesBoundsEls[i].addEventListener('error', imgEvents.onLoadBoundsError);
+                    tilesBoundsEls[i].addEventListener('load',  imgEvents.onLoadBoundsSuccess);
                     
                     tiles[i].setAttribute('data-load-eventInit', '1');
+                    
+                    loading++;
                 }
             }
         }
         
+        if (tilesLoaded == tiles.length && !skipped) {
+            handler.eventsChecked = true;
+        }
+        
+        return true;     
+    }
+        
+    function updateTileGridState() {
+        
+        if (!tilesBlock) return false;
+        
+        
+        tiles = handler.getTiles();
+        tilesLoaded = 0;
+        tilesBoundsEls = [];
+        tilesLoadState = [];
+        
+        for (var i = 0; i < tiles.length; i++) {
+            
+            tilesBoundsEls[i] = handler.getBoundElement(tiles[i]);
+            tilesLoadState[i] = isBoundsLoaded(tiles[i], tilesBoundsEls[i]);
+            
+            if (tilesLoadState[i]) {
+                tilesLoaded++;                
+            }
+            
+        }
+        
         return true;
+    }
+    
+    function removeClass(el, name) {        
+        if (el) {
+            el.classList.remove(tileClass + '-' + name);
+        }
+    }
+    
+    function addClass(el, name) {
+        if (el) {
+            el.classList.add(tileClass + '-' + name);
+        }
     }
     
     function getBoundElementData(boundEl, type) {
@@ -936,15 +1063,19 @@ function KellyTileGrid(cfg) {
         return parseInt(dataValue);
     }
     
-    this.updateTileGrid = function(resize) {		
+    this.updateTileGrid = function() {		
         
-        if (!handler.updateTileGridState()) return false;
+        if (!updateTileGridState()) return false;
         
-        if (resize) {
-            clearRowRenderMarks();
+        var isAllBoundsLoaded = tilesLoaded == tiles.length;
+        
+        if (!isAllBoundsLoaded) {
+            addClass(tilesBlock, 'loading');
+        } else {
+            removeClass(tilesBlock, 'loading');
         }
         
-        if (tilesLoaded == tiles.length || (rules.dontWait && tilesLoaded >= rules.dontWait)) {
+        if (isAllBoundsLoaded || rules.tmpBounds) {
         
             landscape = 0;
             portrait = 0;
@@ -962,19 +1093,13 @@ function KellyTileGrid(cfg) {
             }
                
             for (var i=0; i <= tiles.length-1; i++){ 
-                
-                // если понадобятся lazy load \ порядок загрузки изображений, лучше вынести в отдельное решение при необходимости, 
-                // здесь нужен только контроль текущего состояния пропорций элементов
-                
-                if (tilesLoaded != tiles.length && rules.dontWait && tiles[i].getAttribute('data-rowItem-rendered')) continue;
-                if (!tilesLoadState[i] && !rules.tmpBounds) break;
-                                    
-                var tileMainEl = this.getBoundElement(tiles[i]);
+                            
+                var tileMainEl = handler.getBoundElement(tiles[i]);
                 var alternativeBounds = false;					
                 
                 var imageInfo = {
                     portrait : false,
-                    image : this.getResizableElement(tiles[i]),
+                    image : handler.getResizableElement(tiles[i]),
                     width : 0,
                     height : 0,
                     tile : tiles[i],
@@ -982,8 +1107,8 @@ function KellyTileGrid(cfg) {
                 
                 if (tilesLoadState[i]) {
                 
-                    if (rules.dontWait && rules.tmpBounds && tiles[i].className.indexOf(tileClass + '-tmp-bounds') !== -1) {
-                        tiles[i].className = tiles[i].className.replace(tileClass + '-tmp-bounds', '');
+                    if (rules.tmpBounds) {
+                        removeClass(tiles[i], 'tmp-bounds');
                     }
                     
                     if (!tileMainEl) {							
@@ -1030,10 +1155,7 @@ function KellyTileGrid(cfg) {
                     
                 } else {
                     
-                    if (tiles[i].className.indexOf(tileClass + '-tmp-bounds') == -1) {
-                        tiles[i].className += ' ' + tileClass + '-tmp-bounds';
-                    }
-                    
+                    addClass(tiles[i], 'tmp-bounds');
                     imageInfo.width = rules.tmpBounds.width;
                     imageInfo.height = rules.tmpBounds.height;
                 }
@@ -1062,12 +1184,8 @@ function KellyTileGrid(cfg) {
                         if (alternativeBounds.height) imageInfo.height = alternativeBounds.height;
                         else imageInfo.height = imageInfo.width;
                         
-                        if (tiles[i].className.indexOf(tileClass + '-oversized-bounds') == -1) {
-                            tiles[i].className += ' ' + tileClass + '-oversized-bounds';
-                        }
+                        addClass(tiles[i], 'oversized-bounds');
                     }
-                    
-                    
                 }				
                     
                 if (imageInfo.width < imageInfo.height) imageInfo.portrait = true;   
@@ -1094,7 +1212,6 @@ function KellyTileGrid(cfg) {
                 // console.log(imageInfo);
                 // console.log(currentTileRow);
                 
-                markRowAsRendered();
                 resizeImagesRow();
             }
                            
@@ -1104,7 +1221,7 @@ function KellyTileGrid(cfg) {
                     
                     if (hideUnfited) {
                         
-                        for (var i=0; i <= currentTileRow.length-1; ++i){ 
+                        for (var i=0; i <= currentTileRow.length-1; i++){ 
                             currentTileRow[i].image.style.display = 'none';
                         }
                         
@@ -1124,17 +1241,19 @@ function KellyTileGrid(cfg) {
             }
 
             var clear = tilesBlock.getElementsByClassName(tileClass + '-clear-both');
+            
             if (clear.length) clear[0].parentNode.appendChild(clear[0]);
             else {
                 clear = document.createElement('div');
-                clear.className = tileClass + '-clear-both';
+                addClass(clear, 'clear-both');
                 clear.setAttribute('style', 'clear : both;');
                 tilesBlock.appendChild(clear);                        
-            }
-
-            if (events.onGridUpdated) events.onGridUpdated(handler);
-            
+            }   
         } 
+    
+        updateTileGridEvents();
+        
+        if (events.onGridUpdated) events.onGridUpdated(handler, isAllBoundsLoaded);
     }
     
     function getCurrentRowWidth() {
@@ -1193,17 +1312,14 @@ function KellyTileGrid(cfg) {
                 currentTileRow[i].width = currentTileRow[i].width - (currentRowWidth - requiredWidth); // correct after float operations
             }
             
-            if (currentTileRow[i].image.className.indexOf(tileClass + '-grid-resized') == -1) {
-                currentTileRow[i].image.className += ' ' + tileClass + '-grid-resized';
+            addClass(currentTileRow[i].image, 'grid-resized');
+            
+            if (i == 0) {
+                addClass(currentTileRow[i].image, 'grid-first');
             }
             
-            if (i == 0 && currentTileRow[i].image.className.indexOf(tileClass + '-grid-first') == -1) {
-                //currentTileRow[i].image.className = currentTileRow[i].image.className.replace(tileClass + '-grid-first', '');
-                currentTileRow[i].image.className += ' ' + tileClass + '-grid-first';                
-            }
-            
-            if (i == currentTileRow.length-1 && currentTileRow[i].image.className.indexOf(tileClass + '-grid-last') == -1 ) {            
-                currentTileRow[i].image.className += ' ' + tileClass + '-grid-last';                
+            if (i == currentTileRow.length-1) {     
+                addClass(currentTileRow[i].image, 'grid-last');
             }
                     
             if (events.onResizeImage && events.onResizeImage(handler, currentTileRow[i])) {
@@ -1219,7 +1335,7 @@ function KellyTileGrid(cfg) {
         
         portrait = 0;
         landscape = 0;
-        currentTileRow = new Array();
+        currentTileRow = [];
     }
     
     constructor(cfg);
@@ -1498,7 +1614,7 @@ function KellyImgView(cfg) {
         var loader = getEl('loader');
         if (loader) {
             if (hide) addClass(loader, 'loader-hidden');
-            else deleteClass(loader, 'loader-hidden');
+            else removeClass(loader, 'loader-hidden');
         }
     }
     
@@ -1627,15 +1743,15 @@ function KellyImgView(cfg) {
         }
     }
     
-    function deleteClass(el, name) {        
-        if (el && el.className.indexOf(commClassName + '-' + name) != -1) {
-            el.className = el.className.replace(commClassName + '-' + name, '').trim();
+    function removeClass(el, name) {        
+        if (el) {
+            el.classList.remove(commClassName + '-' + name);
         }
     }
     
     function addClass(el, name) {
-        if (el && el.className.indexOf(commClassName + '-' + name) == -1) {
-            el.className += ' ' + commClassName + '-' + name;
+        if (el) {
+            el.classList.add(commClassName + '-' + name);
         }
     }
     
@@ -1699,7 +1815,7 @@ function KellyImgView(cfg) {
             }
             
             addClass(block, 'active');
-            deleteClass(block, 'fade');
+            removeClass(block, 'fade');
             
             block.onclick = function(e) { 
                 
@@ -1767,8 +1883,8 @@ function KellyImgView(cfg) {
                     disableMoveContainer(false);
                 } 
                 
-                deleteClass(block, 'active');
-                deleteClass(block, 'fade');              
+                removeClass(block, 'active');
+                removeClass(block, 'fade');              
                 handler.removeEventPListener(window, "scroll", 'img_view_');
                 blockShown = false;
                 
@@ -2919,16 +3035,16 @@ function KellyFavStorageManager(cfg) {
                         if (!error) {
                             
                             var noticeName = 'storage_create_ok_mcancel';
-                            if (db && mode == 'add') {
-                                
+                            
+                            if (mode == 'add') {                                
                                 noticeName = 'storage_create_ok_madd';
+                            }
+                            
+                            if (dbName == handler.fav.getGlobal('fav').coptions.storage) {
                                 
-                                if (dbName == handler.fav.getGlobal('fav').coptions.storage) {
-                                    
-                                    handler.fav.load('items', function() {
-                                        handler.fav.updateFavCounter();
-                                    });	
-                                }
+                                handler.fav.load('items', function() {
+                                    handler.fav.updateFavCounter();
+                                });	
                             }
                             
                             handler.getStorageList(handler.showStorageList);							
@@ -3502,6 +3618,7 @@ function KellyFavStorageManager(cfg) {
                 perPage : 60,
                 type : 'dynamic',
                 viewerShowAs : 'hd',
+                lazy : false, // not fully tested, dont enabled by default
             };
         }  
           
@@ -6682,6 +6799,7 @@ KellyTools.varListToStr = function(varlist) {
 }
     
 KellyTools.parseTagsList = function(text) {
+    
     var text = text.split(','); 
     
     var tagList = {
@@ -6704,33 +6822,16 @@ KellyTools.parseTagsList = function(text) {
         if (!tagName) {
             continue;
         }
-        
+
+		if (tagList.exclude.indexOf(tagName) != -1 || tagList.include.indexOf(tagName) != -1) {
+			continue;
+		}     
+
         if (exclude) {
             tagList.exclude[tagList.exclude.length] = tagName;
         } else {
             tagList.include[tagList.include.length] = tagName;
         }
-    }
-    
-    var getUniq = function(arr) {
-            
-        var uniq = [];
-
-        for (var i=0; i < arr.length; i++) {
-            if (uniq.indexOf(arr[i]) == -1) {
-                uniq.push(arr[i]);
-            }
-        }
-        
-        return uniq;
-    }
-    
-    if (tagList.exclude.length > 1) {
-        tagList.exclude = getUniq(tagList.exclude);
-    }
-    
-    if (tagList.include.length > 1) {
-        tagList.include = getUniq(tagList.include);
     }
     
     if (!tagList.exclude.length && !tagList.include.length) return false;
@@ -7099,6 +7200,14 @@ KellyTools.dispatchEvent = function(target, name) {
     target.dispatchEvent(event);
 }
 
+KellyTools.PROGNAME = '';
+
+KellyTools.getProgName = function() { 
+    if (this.PROGNAME) return this.PROGNAME;
+    this.PROGNAME = KellyLoc.s('', 'ext_name') + ' v' + (this.getBrowser() && this.getBrowser().runtime.getManifest ? this.getBrowser().runtime.getManifest().version : '');
+    return this.PROGNAME ;
+}
+
 // params - paginationContainer, curPage, onGoTo, classPrefix, pageItemsNum, itemsNum, perPage
 
 KellyTools.showPagination = function(params) {
@@ -7232,7 +7341,7 @@ function KellyOptions(cfg) {
         
         if (!handler.wrap) return;
         
-        handler.favEnv.getImageGrid().updateConfig({tilesBlock : false});
+        handler.favEnv.getImageGrid().close();
         
         var favContent = handler.wrap;
         var fav = handler.favEnv.getGlobal('fav');
@@ -7314,7 +7423,13 @@ function KellyOptions(cfg) {
                         <input type="checkbox" value="1" class="' + env.className + 'NewFirst" ' + (fav.coptions.newFirst ? 'checked' : '') + '> \
                         ' + lng.s('Новые в начало', 'cgrid_new_to_begin') + '\
                     </lablel>\
-                  </td></tr>';   
+                  </td></tr>'; 
+        output += '<tr><td colspan="2">\
+                    <label>\
+                        <input type="checkbox" value="1" class="' + env.className + 'Lazy" ' + (fav.coptions.grid.lazy ? 'checked' : '') + '> \
+                        ' + lng.s('Загружать картинки только когда они будут в видимой области (lazyLoad)', 'cgrid_lazy') + '\
+                    </lablel>\
+                  </td></tr>';                   
         output += '<tr><td colspan="2">' + lng.s('Режим просмотра', 'cgrid_imageview') + '</td></tr>';
         output += '<tr class="radioselect"><td colspan="2">\
                     \
@@ -7350,7 +7465,7 @@ function KellyOptions(cfg) {
             
         output += '<tr class="' + classRow + '"><td>' + lng.s('Фиксированное кол-во элементов на строку', 'cgrid_fixed') + '</td> <td><input type="text" class="' + env.className + 'GridFixed" value="' +  (!fav.coptions.grid.fixed ? '4' : fav.coptions.grid.fixed) + '"></td></tr>';
         
-        output += '<tr><td>' + lng.s('Стиль по умолчанию для элемента строки', 'cgrid_default_rowst') + '</td> <td><input type="text" class="' + env.className + 'GridCssItem" value="' +  fav.coptions.grid.cssItem + '"></td></tr>';
+        // output += '<tr><td>' + lng.s('Стиль по умолчанию для элемента строки', 'cgrid_default_rowst') + '</td> <td><input type="text" class="' + env.className + 'GridCssItem" value="' +  fav.coptions.grid.cssItem + '"></td></tr>';
         
                
         output += '</table>';
@@ -7558,7 +7673,7 @@ function KellyOptions(cfg) {
                         <td><input type="text" class="kellyBlockposts" value="' + KellyTools.varListToStr(fav.coptions.posts_blacklist) + '"></td>\
                    </tr>';
         output += '<tr><td colspan="2"><label><input type="checkbox" class="' + env.className + 'OptionsDebug" ' + (fav.coptions.debug ? 'checked' : '') + '> ' + lng.s('Режим отладки', 'debug') + '</label></td></tr>';
-        output += '<tr><td colspan="2"><label>' + lng.s('Версия', 'ext_ver') + ' : ' + handler.favEnv.PROGNAME + '</label></td></tr>';
+        output += '<tr><td colspan="2"><label>' + lng.s('Версия', 'ext_ver') + ' : ' + KellyTools.getProgName() + '</label></td></tr>';
                   
         output += '</table>';
         output += '<div><input type="submit" value="' + lng.s('Сохранить', 'save') + '" class="' + env.className + '-OptionsSave"></div>';
@@ -7675,6 +7790,11 @@ function KellyOptions(cfg) {
             fav.coptions.newFirst = true;
         }
         
+        fav.coptions.grid.lazy = false;
+        if (KellyTools.getElementByClass(favContent, env.className + 'Lazy').checked) {
+            fav.coptions.grid.lazy = true;
+        }
+        
         fav.coptions.syncByAdd = false;
         if (KellyTools.getElementByClass(favContent, env.className + 'SyncByAdd').checked) {
             fav.coptions.syncByAdd = true;
@@ -7786,8 +7906,6 @@ function KellyOptions(cfg) {
 
 function KellyFavItems() 
 {
-    this.PROGNAME = 'KellyFavItems v1.1.1.7';
-    
     var handler = this;	
         
     var env = false;
@@ -7883,6 +8001,17 @@ function KellyFavItems()
     var imageGridProportions = []; // ids of updated fav items if some of ratio data deprecated
     var imageEvents = {
         
+        saveImageProportions : function() {
+             
+            if (imageGridProportions.length) {
+                
+                log('save new proportions for items');  
+                
+                imageGridProportions = [];
+                handler.save('items');
+            }
+        },
+        
         onLoadPreviewImage : function() {
         
             var dimensions = {width : parseInt(this.naturalWidth), height : parseInt(this.naturalHeight)};
@@ -7900,6 +8029,8 @@ function KellyFavItems()
                  
         // fires when fav element preview dimensions loaded
         // also dimensions can be catched by setSelectionInfo method in showAddToFavDialog
+        
+        // return false - initiate tilegrid UpdateTileGrid method - new or changed proportions
         
         onLoadFavGalleryImage : function(imgElement, error) {
             
@@ -7952,6 +8083,9 @@ function KellyFavItems()
                 return false;
             } 
             
+            if (!imgElement.getAttribute('data-width')) {
+                return false;            
+            }
             
             return true;
         }
@@ -7996,7 +8130,7 @@ function KellyFavItems()
         
         if (isMediaResource()) {
             
-            log(handler.PROGNAME + ' load as media item helper | profile ' + env.profile);
+            log(KellyTools.getProgName() + ' load as media item helper | profile ' + env.profile);
             
         } else {
             
@@ -8021,7 +8155,7 @@ function KellyFavItems()
                 return;
             } 
             
-            log(handler.PROGNAME + ' init | loaded in ' + action + ' mode | profile ' + env.profile + ' | DEBUG ' + (KellyTools.DEBUG ? 'enabled' : 'disabled'));           
+            log(KellyTools.getProgName() + ' init | loaded in ' + action + ' mode | profile ' + env.profile + ' | DEBUG ' + (KellyTools.DEBUG ? 'enabled' : 'disabled'));           
         }
         
         handler.addEventPListener(window, "message", function (e) {
@@ -8108,7 +8242,6 @@ function KellyFavItems()
             
             
             rules : {
-                dontWait : true,
                 fixed : 2,
                 tmpBounds : { width : 200, height : 200},
                 recheckAlways : true,
@@ -8125,20 +8258,27 @@ function KellyFavItems()
                     
                 },
                 
-                // для картинки неизвестны пропорции и картинка была удалена с сервера \ ошибка подключения
-                
                 onBadBounds : function(self, data) {
                     
                     log(data.error);
                     log(data.tile);
                     
+                    // картинка была удалена с сервера \ ошибка загрузки \ нарушены пропорции
+                    
                     if (data.errorCode == 2 || data.errorCode == 3 || data.errorCode == 4) {
                         
-                        data.boundEl.setAttribute('data-width', 200);
-                        data.boundEl.setAttribute('data-height', 200);
+                        var altBounds = {width : 200, height : 200};
+                        
+                        if (data.errorCode == 2 && data.boundEl.getAttribute('data-width')) {
+                            altBounds.width = data.boundEl.getAttribute('data-width');
+                            altBounds.height = data.boundEl.getAttribute('data-height');
+                        }
+                        
+                        data.boundEl.setAttribute('data-width', altBounds.width);
+                        data.boundEl.setAttribute('data-height', altBounds.height);
                         data.boundEl.style.display = 'inline-block';
                         
-                        return {width : 200, height : 200};
+                        return altBounds;
                         
                     } else {
                         
@@ -8151,8 +8291,11 @@ function KellyFavItems()
                     return tile;
                 },
                 
-                onGridUpdated : function(self) {
+                onGridUpdated : function(self, isAllBoundsLoaded) {
                     
+                    if (isAllBoundsLoaded) {
+                        imageEvents.saveImageProportions();
+                    }
                     // if fav.coptions.imagegrid.padding
                     /*
                         var grid = imagesBlock.getElementsByClassName(env.className + '-FavItem-grid-resized');
@@ -8441,13 +8584,7 @@ function KellyFavItems()
         var totalPages = handler.getFavPageListCount();
         if (!totalPages) return false;
                         
-        if (imageGridProportions.length) {
-            
-            log('save new proportions for items');
-            imageGridProportions = [];
-            
-            handler.save('items');
-        }        
+        imageEvents.saveImageProportions();     
            
         if (newPage == 'next') newPage = page+1;
         else if (newPage == 'previuse' || newPage == 'prev' ) newPage = page-1;
@@ -8469,18 +8606,9 @@ function KellyFavItems()
         
         handler.showSidebarMessage(false);
         
-        //imagesBlock.className = imagesBlock.className.replace('active', 'hidden');
-        
-        //setTimeout(function() {
-            
-        //    imagesBlock.className = imagesBlock.className.replace('hidden', 'active');
-        imageGrid.close();
-        
         handler.updateImagesBlock();
         handler.updateImageGrid();
             
-        //}, 200);
-        
         // todo add button goto up or auto ? window.scrollTo(x, y);
         
         return true;
@@ -9395,13 +9523,18 @@ function KellyFavItems()
                 coverImage = env.getStaticImage(coverImage);
             }
             
+            var src = 'src="' + coverImage + '"';
+            
+            if (fav.coptions.grid.lazy) {
+                src = 'src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-' + src;                
+            }
+            
             var html = '\
                 <img style="' + fav.coptions.grid.cssItem + '" \
                      class="' + env.className + '-preview" \
                      kellyGalleryIndex="' + (galleryImagesData.indexOf(item) + subItem) + '" \
                      kellyGallery="fav-images" \
-                     itemIndex="' + index + '"' + pInfo + additionAtributes + '\
-                     src="' + coverImage + '" \
+                     itemIndex="' + index + '"' + pInfo + additionAtributes + src + ' \
                 >';
                             
             KellyTools.setHTMLData(itemBlock, html);       
@@ -9499,13 +9632,8 @@ function KellyFavItems()
             return false;
         }
         
-        // clear elements if update during page listing
-        if (!noClear) {
-            while (imagesBlock.firstChild) {
-                imagesBlock.removeChild(imagesBlock.firstChild);
-            }
-        }
-        
+        noClear ? imageGrid.reset() : imageGrid.close();
+                
         var startItem = (page - 1) * fav.coptions.grid.perPage;
         var end = startItem + fav.coptions.grid.perPage - 1;         
         if (end > displayedItems.length-1) end = displayedItems.length-1;
@@ -9942,11 +10070,7 @@ function KellyFavItems()
             handler.getTooltip().show(false);
         }
         
-        if (imageGridProportions.length) {
-            log('save new proportions for items');            
-            imageGridProportions = [];
-            handler.save('items');
-        }
+        imageEvents.saveImageProportions();
         
         // todo save downloadManager config options by onConfigChanged event (currently event not exist, and config saved after click on Download button)
         
@@ -9970,13 +10094,8 @@ function KellyFavItems()
     this.showFavouriteImages = function() {
         
         imageGrid.close();		
-        imageGrid.updateConfig({rowHeight : fav.coptions.grid.rowHeight, rules : fav.coptions.grid});
-        
-        
-        if (fav.coptions.grid.type != 'fixed') {
-            imageGrid.updateConfig({rules : {fixed : false}});
-        }
-        
+        imageGrid.updateConfig({rowHeight : fav.coptions.grid.rowHeight, rules : fav.coptions.grid, type : fav.coptions.grid.type});
+                
         if (mode != 'fav') {
             // moved to reset button
             // catFilters = [];
@@ -11328,11 +11447,18 @@ function KellyFavItems()
         
         var downloadBtn = KellyTools.getElementByClass(document, env.className + '-DownloadFav');
         if (downloadBtn) downloadBtn.innerText = lng.s('Запустить скачивание страниц', 'download_start');	
-            
-        if (!favNativeParser || !favNativeParser.collectedData.items.length) return false;
         
         // todo - notify about auto download ?
         log('onDownloadNativeFavPagesEnd : ' + (canceled ? ' canceled' : 'job finished successfull'));
+            
+        if (!favNativeParser || !favNativeParser.collectedData.items.length) {
+            
+            if (notice) {
+                notice.innerText = canceled ? lng.s('', 'download_empty') : '';            
+            }  
+            
+            return false;
+        }
         
         if (!canceled &&
             fav.coptions.downloader.autosaveEnabled && 
@@ -11355,18 +11481,6 @@ function KellyFavItems()
     this.onDownloadNativeFavPage = function(worker, thread, jobsLength) {
         
         var error = '';
-        
-        var logEl = KellyTools.getElementByClass(document, env.className + '-exporter-log');
-        var logNewLine = document.createElement('br');
-        
-        var logNum = parseInt(logEl.getAttribute('data-lines'));
-        if (!logNum) logNum = 0;
-        
-        if (logNum > 1000) {
-            logEl.innerHTML = '';
-            logNum = 0;
-            logEl.setAttribute('data-lines', 0);
-        }
         
         KellyTools.getElementByClass(document, env.className + '-exporter-process').innerText = lng.s('Страниц в очереди __PAGESN__', 'download_pages_left', {PAGESN : jobsLength});
      
@@ -11396,14 +11510,8 @@ function KellyFavItems()
             if (!posts) {
             
                 error = 'Отсутствуют публикации для страницы ' + thread.job.data.page;
-            } else {
-                logNum++;
-                
-                var text = document.createTextNode('[' + KellyTools.getTime() + '] Страница : ' + thread.job.data.page + ' найдено ' + posts.length + ' элементов');
-                
-                logEl.appendChild(text);
-                logEl.appendChild(logNewLine);                
-                logEl.setAttribute('data-lines', logNum+1);
+            } else {               
+                favNativeParser.addToLog('Страница : ' + thread.job.data.page + ' найдено ' + posts.length + ' элементов');
             }
             
             worker.jobBeforeAutosave--;
@@ -11412,13 +11520,7 @@ function KellyFavItems()
         if (error) {
         
             worker.errors += error;		
-            
-            var text = document.createTextNode('[' + KellyTools.getTime() + ']' + error);
-            
-            logEl.appendChild(text);
-            logEl.appendChild(logNewLine);                
-            logEl.setAttribute('data-lines', logNum+1);
-            
+            favNativeParser.addToLog(error);
             return;
         }
                 
@@ -11567,8 +11669,9 @@ function KellyFavItems()
             cleared++;
         }
         
+        favNativeParser.addToLog('добавлено ' + pageInfo.itemsNum + ' элементов');
+        
         log(pageInfo.page + ' | ' + pageInfo.itemsNum + ' | cleared res : ' + cleared);
-        // console.log(fav.native_tags);
         log('--');        
     
         if (fav.coptions.downloader.autosaveEnabled && !worker.jobBeforeAutosave) {
@@ -11807,10 +11910,7 @@ function KellyFavItems()
             handler.save('cfg');
         }
         
-        var logEl = KellyTools.getElementByClass(document, env.className + '-exporter-log');
-        
-        KellyTools.setHTMLData(logEl, '[' + KellyTools.getTime() + '] Инициализация...' + "<br>");
-
+        favNativeParser.addToLog('Инициализация...', true);
         el.innerText = lng.s('Загрузка... (Отменить)', 'download_started_cancel');  
         
         log('download native page started');
@@ -11845,6 +11945,38 @@ function KellyFavItems()
                 favNativeParser.setEvent('onEnd', handler.onDownloadNativeFavPagesEnd);                
         
                 favNativeParser.maxPagesPerExport = 1000;
+                favNativeParser.addToLog = function(txt, clear) {
+                    
+                    txt = '[' + KellyTools.getTime() + '] ' + txt;
+                    
+                    var logEl = KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-log');
+                    if (clear) {
+                        
+                        KellyTools.setHTMLData(logEl, txt + '<br>');
+                        logEl.setAttribute('data-lines', 0);
+                        
+                    } else {
+                        
+                        var text = document.createTextNode(txt);
+                        var logNewLine = document.createElement('br');
+                        
+                        var logNum = parseInt(logEl.getAttribute('data-lines'));
+                        if (!logNum) logNum = 0;
+                        
+                        if (logNum > 1000) {
+                            
+                            logEl.innerHTML = '';
+                            logNum = 0;
+                            
+                            logEl.setAttribute('data-lines', 0);
+                        }
+                                            
+                        logEl.appendChild(text);
+                        logEl.appendChild(logNewLine);                
+                        logEl.setAttribute('data-lines', logNum+1);
+                    }
+                }
+                
                 favNativeParser.saveData = function(autosave, source) {
                     
                     log('favNativeParser : save current progress : ' + (autosave ? 'autosave - saved ' + favNativeParser.jobSaved  : 'click'));
@@ -12346,7 +12478,7 @@ function kellyProfileJoyreactor() {
             }
         
             updateSidebarProportions(sideBarWrap);
-            
+            updateSidebarPosition();
         },
         
         onSideBarUpdate : function() {
@@ -12593,9 +12725,11 @@ function kellyProfileJoyreactor() {
         var scrollLeft = KellyTools.getScrollLeft();
         
         var top = 0;
-        
+        var topMax = 0;
+       
         if (sideBlock) {
-            top = sideBlockBounds.top + scrollTop;
+            topMax = sideBlockBounds.top + scrollTop;
+            top = topMax;
         }
                     
         // screen.height / 2  - (sideBarWrap.getBoundingClientRect().height / 2) - 24
@@ -12626,8 +12760,12 @@ function kellyProfileJoyreactor() {
             
             if (sideBarWrapBounds.height + sideBarWrapBounds.top + scrollTop >= bottomLimit) {
                 
-                // console.log(sideBarWrapBounds.height + scrollTop)
-                sideBarWrap.style.top = (bottomLimit - sideBarWrapBounds.height) + 'px';
+                var newTop = bottomLimit - sideBarWrapBounds.height;
+                
+                if (topMax < newTop) {
+                    // console.log(sideBarWrapBounds.height + scrollTop)
+                    sideBarWrap.style.top = newTop + 'px';
+                }
             }
         }
         

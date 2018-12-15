@@ -266,7 +266,7 @@ function KellyImgView(cfg) {
         var loader = getEl('loader');
         if (loader) {
             if (hide) addClass(loader, 'loader-hidden');
-            else deleteClass(loader, 'loader-hidden');
+            else removeClass(loader, 'loader-hidden');
         }
     }
     
@@ -395,15 +395,15 @@ function KellyImgView(cfg) {
         }
     }
     
-    function deleteClass(el, name) {        
-        if (el && el.className.indexOf(commClassName + '-' + name) != -1) {
-            el.className = el.className.replace(commClassName + '-' + name, '').trim();
+    function removeClass(el, name) {        
+        if (el) {
+            el.classList.remove(commClassName + '-' + name);
         }
     }
     
     function addClass(el, name) {
-        if (el && el.className.indexOf(commClassName + '-' + name) == -1) {
-            el.className += ' ' + commClassName + '-' + name;
+        if (el) {
+            el.classList.add(commClassName + '-' + name);
         }
     }
     
@@ -467,7 +467,7 @@ function KellyImgView(cfg) {
             }
             
             addClass(block, 'active');
-            deleteClass(block, 'fade');
+            removeClass(block, 'fade');
             
             block.onclick = function(e) { 
                 
@@ -535,8 +535,8 @@ function KellyImgView(cfg) {
                     disableMoveContainer(false);
                 } 
                 
-                deleteClass(block, 'active');
-                deleteClass(block, 'fade');              
+                removeClass(block, 'active');
+                removeClass(block, 'fade');              
                 handler.removeEventPListener(window, "scroll", 'img_view_');
                 blockShown = false;
                 

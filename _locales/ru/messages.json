@@ -113,6 +113,9 @@
     "cgrid_imageview_preview":{  
         "message":"Открывать превью"
     },  
+    "cgrid_lazy":{  
+        "message":"Загружать картинки только когда они будут в видимой области (beta)"
+    },  
     "change":{  
         "message":"Применить"
     },
@@ -199,15 +202,15 @@
     },
     "download_partly":{  
         "message":"Данные загружены частично. Можно скачать обработанные страницы (см. лог)"
+    }, 
+    "download_empty":{  
+        "message":"Список найденных публикаций пуст (см. лог)"
     },
     "edit_mode":{  
         "message":"Режим редактирования"
     },
     "ext_description":{  
         "message":"Сохраняйте понравившиеся публикации на ресурсах локально."
-    },
-    "ext_name":{  
-        "message":"KellyC Favorites"
     },     
     "ext_ver":{  
         "message":"Версия"
