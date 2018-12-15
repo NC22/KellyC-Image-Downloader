@@ -433,7 +433,7 @@ KellyTools.validateFloatString = function(val) {
     return val;    
 }
 
-// bring string to regular expression match template like /sdfsdf/sf/sd/fs/f/test.ttt 
+// escape regExp characters. Bring string to regular expression match template like /sdfsdf/sf/sd/fs/f/test.ttt 
 
 KellyTools.folderPatchToRegularExpression = function(folder) {
     
@@ -441,19 +441,26 @@ KellyTools.folderPatchToRegularExpression = function(folder) {
     folder = folder.trim();
     
     if (!folder) return '';
-    // [\\(] [\\)]
 
-    folder = KellyTools.replaceAll(folder, '\\(', '__CCCC__');    
-    folder = KellyTools.replaceAll(folder, '\\)', '__DDDD__');
-    folder = KellyTools.replaceAll(folder, '\\\\', '/');
-    folder = KellyTools.replaceAll(folder, '\\\\', '(\\\\\\\\|/)');
-    folder = KellyTools.replaceAll(folder, '/', '(\\\\\\\\|/)');
-    folder = KellyTools.replaceAll(folder, '__CCCC__', '[\(]');    
-    folder = KellyTools.replaceAll(folder, '__DDDD__', '[\)]');
-    
-    // todo check special characters 
-    
-    return folder;
+	var folderEsc = '';
+    for (var i = 0; i < folder.length; i++) {
+        
+        if (['?', '[', ']', ',', '*', '(', ')', '\\', '/'].indexOf(folder.charAt(i)) != -1) {
+			if (folder.charAt(i) == '(') {
+				folderEsc += '[\(]';
+            } else if (folder.charAt(i) == ')') {
+				folderEsc += '[\)]';
+            } else if (folder.charAt(i) == '/' || folder.charAt(i) == '\\') {
+				folderEsc += "(\\\\|/)";
+            } else {
+            	folderEsc += '\\' + folder.charAt(i);
+			}
+        } else {
+			folderEsc += folder.charAt(i);
+		}
+    }    
+
+    return folderEsc;
 }
 
 // input - any string that suppose to be file path or directory -> output - dir/dir2/dir3/file.ext, dir/dir2, dir/dir2/dir3 ...
@@ -908,16 +915,59 @@ KellyTools.showPagination = function(params) {
 // KellyTools.getBrowser().downloads - не поддерживается Edge
 
 var KellyEDispetcher = new Object;
-    KellyEDispetcher.tabEvents = {};
-    KellyEDispetcher.tabList = []; // all active tabs that request resources at list once
-    
     KellyEDispetcher.eventsAccepted = false;
     KellyEDispetcher.envDir = 'env/';
     KellyEDispetcher.api = KellyTools.getBrowser();
     
     // bg subscriptions to API
     KellyEDispetcher.initEvents = {
-        onChanged : false,
+        onChanged :  function(downloadDelta) {
+            
+            // Clean up 
+                                 
+            if (downloadDelta && downloadDelta.state) {
+                
+                if (downloadDelta.state.current == "interrupted" || downloadDelta.state.current == "complete") {
+                    
+                    
+                    if (KellyEDispetcher.blobData[downloadDelta.id]) {
+                        
+                        URL.revokeObjectURL(KellyEDispetcher.blobData[downloadDelta.id]);
+                        delete KellyEDispetcher.blobData[downloadDelta.id];
+                    }                   
+                }
+            }
+            
+            // Notify tabs
+            
+            KellyEDispetcher.sendNotification({method: "onChanged", downloadDelta : downloadDelta});
+        },
+    }
+    
+    // todo - check any way to keep temporary alive connection with tab in [persistent = false] mode
+    // currently background process die after ~15sec of wait
+    
+    KellyEDispetcher.sendNotification = function(data) {
+        
+        if (!data || !data.method) return;
+        
+        var query = {};
+
+        if (KellyEDispetcher.api && KellyEDispetcher.api.runtime.getManifest) {
+            var query = {url : KellyEDispetcher.api.runtime.getManifest().content_scripts[0].matches};
+        }
+        
+        chrome.tabs.query(query, function(tabs){     
+            for (var i=0; i <= tabs.length-1; i++) {
+                
+                KellyTools.log('notify ' + tabs[i].url + ' method : ' + data.method, 'KellyEDispetcher');
+                
+                KellyEDispetcher.api.tabs.sendMessage(tabs[i].id, data, function(response) {
+                 
+                });
+            }
+            
+        });
     }
     
     KellyEDispetcher.blobData = [];
@@ -931,20 +981,13 @@ var KellyEDispetcher = new Object;
         return true;
     }
     
-    KellyEDispetcher.subscribeTab = function (tabId, event) {
-
-        if (typeof this.tabEvents[event] == 'undefined') this.tabEvents[event] = [];
-
-        if (this.tabEvents[event].indexOf(tabId) == -1) this.tabEvents[event].push(tabId);
-        
-        return tabId;
-    }
-    
     KellyEDispetcher.init = function() {
     
         if (this.eventsAccepted) return true;
         
-        KellyTools.getBrowser().runtime.onMessage.addListener(this.onMessage);
+        this.api.runtime.onMessage.addListener(this.onMessage);        
+        this.api.downloads.onChanged.addListener( this.initEvents.onChanged );
+                
         this.eventsAccepted = true;
         
         return true;
@@ -1069,12 +1112,13 @@ var KellyEDispetcher = new Object;
                     
                     chrome.downloads.search({filenameRegex: regExp}, onSearchResult);
                 }
-
+                
+                // multiple callbacks untested
+                
                 for (var i = 0; i < request.filenames.length; i++) {
                                         
                     var badExpression = false;
                     
-                    // really can naebnutsya here
                     try {
                         
                         requsetSearch(request.filenames[i]);
@@ -1095,52 +1139,6 @@ var KellyEDispetcher = new Object;
                 }
             }
                
-        } else if (request.method == "onChanged.keepAliveListener") {
-        
-            KellyEDispetcher.subscribeTab(sender.tab.id, 'onChanged');
-            
-            // alternative way if this will be bad
-            // chrome.downloads.search({id : downloadId}, function(array of DownloadItem results) {...})
-            
-            if (!KellyEDispetcher.initEvents.onChanged) {
-                
-                
-                KellyEDispetcher.initEvents.onChanged = function(downloadDelta) {
-                                      
-                        // Clean up 
-                                             
-                        if (downloadDelta && downloadDelta.state) {
-                            
-                            if (downloadDelta.state.current == "interrupted" || downloadDelta.state.current == "complete") {
-                                
-                                
-                                if (KellyEDispetcher.blobData[downloadDelta.id]) {
-                                    
-                                    URL.revokeObjectURL(KellyEDispetcher.blobData[downloadDelta.id]);
-                                    delete KellyEDispetcher.blobData[downloadDelta.id];
-                                }
-                                
-                                
-                            }
-
-                        }
-                        
-                        // Notify tabs
-                        
-                        for (var i=0; i <= KellyEDispetcher.tabEvents['onChanged'].length-1; ++i) {
-                            
-                            KellyEDispetcher.api.tabs.sendMessage(KellyEDispetcher.tabEvents['onChanged'][i], {method: "onChanged", downloadDelta : downloadDelta}, function(response) {});
-                        }
-                    };
-                
-                KellyEDispetcher.api.downloads.onChanged.addListener( KellyEDispetcher.initEvents.onChanged );
-                
-            } else {
-                                                
-                KellyEDispetcher.api.downloads.onChanged.removeListener( KellyEDispetcher.initEvents.onChanged );
-                KellyEDispetcher.api.downloads.onChanged.addListener( KellyEDispetcher.initEvents.onChanged );
-            }
-            
         } else if (request.method == "getLocalStorageList") {
             
             var prefix = request.prefix;
@@ -1362,12 +1360,7 @@ var KellyEDispetcher = new Object;
                 
                     KellyTools.readUrl(css, onSuccess, onFail, 'GET', true, "text/css"); 
                 }
-            }            
-           
-            // identify requester, save for future notifications
-            if (KellyEDispetcher.tabList.indexOf(sender.tab.id) == -1) {
-                KellyEDispetcher.tabList.push(sender.tab.id);
-            }
+            }  
             
             return true; // async mode
             

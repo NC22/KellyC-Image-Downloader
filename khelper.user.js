@@ -3609,7 +3609,7 @@ function KellyFavStorageManager(cfg) {
         if (!data.coptions.grabber) {
             
             data.coptions.grabber = {
-                nameTemplate : '#number#_#filename#', // '#category_1#/#number#_#filename#'
+                nameTemplate : '#id#_#filename#', // '#category_1#/#number#_#filename#'
                 baseFolder : env.profile + '/' + 'Downloads',
                 invertNumeration : true,
                 quality : 'hd',
@@ -4220,11 +4220,14 @@ function KellyThreadWork(cfg) {
 
 // part of KellyFavItems extension
 // config saved onChangeState
+
 // todo 
+
 // - check dublicates during one task
 // - ignore downloaded option
 //   KellyTools.getBrowser().runtime.sendMessage({method: "isFilesDownloaded", filenames : [KellyTools.getUrlFileName(env.getImageDownloadLink(postMedia[0]))]}, onSearch);
 // - revers numbers option
+// for proper use need call - handler.getDownloadManager().onDownloadProcessChanged by chrome.api.downloads.onChanged
 
 function KellyGrabber(cfg) {
     
@@ -4399,6 +4402,7 @@ function KellyGrabber(cfg) {
             quality : 'hd',
             itemsList : '',
             invertNumeration : true,
+            skipDownloaded : false, // not tested
         }        
     }
     
@@ -4759,9 +4763,7 @@ function KellyGrabber(cfg) {
             
             downloadsOffset = parseInt(this.getAttribute('data-start-from'));
             
-            KellyTools.getBrowser().runtime.sendMessage({method: "onChanged.keepAliveListener"}, function(response) {
-                handler.download();
-            });   
+            handler.download();  
             
             updateContinue(true); 
             return false;
@@ -5134,7 +5136,9 @@ function KellyGrabber(cfg) {
         var acceptIndex = options.invertNumeration ? downloads.length - itemIndex : itemIndex+1;        
         if (acceptItems && acceptItems.indexOf(acceptIndex) == -1) return 'skip';
         
-        if (ditem.downloadDelta) { // currently count any. Possible states - downloadDelta.state.current == "interrupted" / "complete"
+        // currently count any. Possible states - downloadDelta.state.current == "interrupted" / "complete"
+        
+        if (ditem.downloadDelta) { 
             
             return 'complete';
             
@@ -5154,29 +5158,6 @@ function KellyGrabber(cfg) {
             
            return 'wait'; // inlist \ wait 
         }
-    }
-    
-    function assignEvents() {
-    
-        if (eventsEnabled) return;
-        
-        // sometimes runtime may be undefined after debug breakpoints
-        // https://stackoverflow.com/questions/44234623/why-is-chrome-runtime-undefined-in-the-content-script
-        
-        // moved to refresh before download process
-        // KellyTools.getBrowser().runtime.sendMessage({method: "onChanged.keepAliveListener"}, function(response) {});
-                
-        KellyTools.getBrowser().runtime.onMessage.addListener(
-            function(request, sender, sendResponse) {
-
-            if (request.method == "onChanged") {       
-                
-                handler.onDownloadProcessChanged(request.downloadDelta);                
-            }
-        });  
-        
-        eventsEnabled = true;
-    
     }
     
     this.onDownloadProcessChanged = function(downloadDelta) {
@@ -5973,11 +5954,16 @@ function KellyGrabber(cfg) {
         var onDownloadApiStart = function(response){
                 
             if (!response.downloadId || response.downloadId < 0) {
-                
+                               
                 toTxtLog('DOWNLOADID ' + download.id + ' | download REJECTED by browser API : ' + downloadOptions.filename);
                 toTxtLog('DOWNLOADID ' + download.id + ' | error : ' + response.error + "\n\r");
+                                
+                if (mode != 'download') { 
+                    toTxtLog('DOWNLOADID ' + download.id + ' | downloading failed, ALSO user CANCEL downloading process.');
+                    return;
+                }
                 
-                addFailItem(download, 'Ошибка загрузки' + (response.error ? ' : ' + response.error : ''));
+                addFailItem(download, 'Ошибка загрузки ' + (response.error ? ' : ' + response.error : ''));
                 
                 resetItem(download);
                 
@@ -5993,7 +5979,7 @@ function KellyGrabber(cfg) {
 
                 toTxtLog('DOWNLOADID ' + download.id + ' | download ACCEPTED by browser API : ' + downloadOptions.filename);
                 
-                if (mode != 'download') { // perhapse promise was sended after cancel ?
+                if (mode != 'download') { // perhaps promise was sended after cancel ?
                 
                     // download not needed
                     toTxtLog('DOWNLOADID ' + download.id + ' | downloading start, but user CANCEL downloading process. SEND REJECT TO API for file : ' + downloadOptions.filename);
@@ -6044,9 +6030,64 @@ function KellyGrabber(cfg) {
                 handler.downloadUrl(downloadOptions, onDownloadApiStart);
             }
         }
-                
-        download.dataRequest = handler.getDataFromUrl(download.url, onLoadFile);
         
+        options.skipDownloaded = false;
+        
+        if (options.skipDownloaded) {
+            
+            // search by file name. todo may be some other search methods
+            
+            var onSearch = function(response) {
+                   
+                download.dataRequest = false;
+            
+                // process stoped \ canceled by timeout
+                if (mode != 'download') return false;
+            
+                if (response && response.matchResults && response.matchResults[0].match && response.matchResults[0].match.state == 'complete') {
+                                        
+                    download.downloadDelta = response.matchResults[0].match;
+                    download.downloadDelta.found = true;
+                    download.downloadDelta.state = {current : download.downloadDelta.state};
+                           
+                    if (download.cancelTimer) {
+                        clearTimeout(download.cancelTimer);
+                        download.cancelTimer = false;
+                    }
+                     
+                    download.workedout = true;
+                    
+                    updateProgressBar();
+                    handler.onDownloadEnd(download);
+                    
+                    toTxtLog('DOWNLOADID ' + download.id + ' | SKIPPED - ALREADY Downloaded');
+                                        
+                    handler.updateStateForImageGrid();
+
+                } else {
+                    
+                    download.dataRequest = handler.getDataFromUrl(download.url, onLoadFile);
+        
+                }
+            } 
+             
+            KellyTools.getBrowser().runtime.sendMessage({
+                method: "isFilesDownloaded", 
+                filenames : [downloadOptions.filename] // download.filename - filename, downloadOptions.filename - full path with extension 
+            }, onSearch);            
+            
+            download.dataRequest = {
+                abort : function() {
+                    onSearch = function() {} // is terminate method for search action exist ?
+                }
+            }
+        
+            
+        } else {
+                        
+            download.dataRequest = handler.getDataFromUrl(download.url, onLoadFile);    
+        }
+                
         if (events.onDownloadStart) events.onDownloadStart(download);
         return true;
     }
@@ -6082,25 +6123,41 @@ function KellyGrabber(cfg) {
                 
                 if (!downloadItem) return;
                 
-                toTxtLog('DOWNLOADID ' + downloadItem.id + ' | CANCELED BY TIMEOUT ' + downloadItem.url + ', ' + downloadItem.filename);
+                var endSync = true;
+                if (handler.getDownloadItemState(downloads[i]) == 'in_progress') {
+                     
+                    toTxtLog('DOWNLOADID ' + downloadItem.id + ' | CANCELED BY TIMEOUT ' + downloadItem.url + ', ' + downloadItem.filename);
+                            
+                    if (downloads[i].dataRequest) {                
+                        downloads[i].dataRequest.abort();  
+                        downloads[i].dataRequest = false;
+                    }
+                    
+                    if (downloadItem.downloadId > 0) {                    
+                        KellyTools.getBrowser().runtime.sendMessage({method: "downloads.cancel", downloadId : downloadItem.downloadId}, function(response) {   
+                        
+                            downloadItem.canceling = false;	
+                            downloadItem.workedout = true; 
+
+                            handler.onDownloadEnd(downloadItem);                            
+                            handler.updateStateForImageGrid();
+                        });  
+
+                        endSync = false;
+                    }
+                }
                 
-                downloadItem.cancelTimer = false; 
                 resetItem(downloadItem);
                            
                 downloadItem.error = 'Canceled by timeout';	
-                downloadItem.canceling = true;
-                
+                downloadItem.canceling = true;                
                 
                 addFailItem(downloadItem, 'Завершена по таймауту');
                 
-                if (downloadItem.downloadId > 0) {                    
-                    KellyTools.getBrowser().runtime.sendMessage({method: "downloads.cancel", downloadId : downloadItem.downloadId}, function(response) {   
-                        downloadItem.canceling = false;	
-                        downloadItem.workedout = true; 
-
-                        handler.onDownloadEnd(downloadItem);
-                    });                
-                }
+                if (endSync) handler.onDownloadEnd(downloadItem);
+                       
+                handler.updateStateForImageGrid();
+                 
                 
             }, options.cancelTimer * 1000);
         }
@@ -6122,9 +6179,9 @@ function KellyGrabber(cfg) {
             downloadItem.downloadId = KellyGrabber.DOWNLOADID_GET_PROCESS;
             downloadItem.workedout = false;
                        
-            if (downloadItemStart(downloads[i])) {
+            if (downloadItemStart(downloadItem)) {
                 
-                if (options.cancelTimer) {
+                if (!downloadItem.workedout && options.cancelTimer) {
                     addCancelTimer(downloadItem);
                 }
                 
@@ -6155,7 +6212,8 @@ function KellyGrabber(cfg) {
                  break;
             }           
         }   
-     
+               
+        handler.updateStateForImageGrid();
         updateProcessState(); 
     }
     
@@ -6219,9 +6277,7 @@ function KellyGrabber(cfg) {
         }       
                 
         if (!options.interval) options.interval = 0.1;
-                       
-        assignEvents();
-                        
+                     
         handler.resetDownloadItems(true);
 
         handler.updateStartButtonState('stop'); 
@@ -6382,14 +6438,12 @@ function KellyFastSave(cfg) {
                 categoryId : []
             }, i, options.fastsave.conflict);
         }
-                
-        KellyTools.getBrowser().runtime.sendMessage({method: "onChanged.keepAliveListener"}, function(response) {
-            if (!dm.download()) {
-                if (onDownload) onDownload(false);   
-            }
-        }); 
+        
+        if (!dm.download()) {
+            if (onDownload) onDownload(false);   
+        }
 
-         return true;
+        return true;
     }
  
     /*
@@ -6873,7 +6927,7 @@ KellyTools.validateFloatString = function(val) {
     return val;    
 }
 
-// bring string to regular expression match template like /sdfsdf/sf/sd/fs/f/test.ttt 
+// escape regExp characters. Bring string to regular expression match template like /sdfsdf/sf/sd/fs/f/test.ttt 
 
 KellyTools.folderPatchToRegularExpression = function(folder) {
     
@@ -6881,19 +6935,26 @@ KellyTools.folderPatchToRegularExpression = function(folder) {
     folder = folder.trim();
     
     if (!folder) return '';
-    // [\\(] [\\)]
 
-    folder = KellyTools.replaceAll(folder, '\\(', '__CCCC__');    
-    folder = KellyTools.replaceAll(folder, '\\)', '__DDDD__');
-    folder = KellyTools.replaceAll(folder, '\\\\', '/');
-    folder = KellyTools.replaceAll(folder, '\\\\', '(\\\\\\\\|/)');
-    folder = KellyTools.replaceAll(folder, '/', '(\\\\\\\\|/)');
-    folder = KellyTools.replaceAll(folder, '__CCCC__', '[\(]');    
-    folder = KellyTools.replaceAll(folder, '__DDDD__', '[\)]');
-    
-    // todo check special characters 
-    
-    return folder;
+	var folderEsc = '';
+    for (var i = 0; i < folder.length; i++) {
+        
+        if (['?', '[', ']', ',', '*', '(', ')', '\\', '/'].indexOf(folder.charAt(i)) != -1) {
+			if (folder.charAt(i) == '(') {
+				folderEsc += '[\(]';
+            } else if (folder.charAt(i) == ')') {
+				folderEsc += '[\)]';
+            } else if (folder.charAt(i) == '/' || folder.charAt(i) == '\\') {
+				folderEsc += "(\\\\|/)";
+            } else {
+            	folderEsc += '\\' + folder.charAt(i);
+			}
+        } else {
+			folderEsc += folder.charAt(i);
+		}
+    }    
+
+    return folderEsc;
 }
 
 // input - any string that suppose to be file path or directory -> output - dir/dir2/dir3/file.ext, dir/dir2, dir/dir2/dir3 ...
@@ -8179,9 +8240,30 @@ function KellyFavItems()
             log(KellyTools.getProgName() + ' init | loaded in ' + action + ' mode | profile ' + env.profile + ' | DEBUG ' + (KellyTools.DEBUG ? 'enabled' : 'disabled'));           
         }
         
+        initBGEvents();
+        
         handler.addEventPListener(window, "message", function (e) {
             getMessage(e);
         }, 'input_message_');             
+    }
+    
+    function initBGEvents() {
+        
+                 
+        KellyTools.getBrowser().runtime.onMessage.addListener(function(request, sender, callback) {
+
+            var response = {
+                method : request.method,
+            }
+            
+            if (request.method == "onChanged") {       
+                
+                handler.getDownloadManager().onDownloadProcessChanged(request.downloadDelta);                
+            }
+            
+            
+            if (callback) callback(response); 
+        });
     }
         
     function isMediaResource() {
