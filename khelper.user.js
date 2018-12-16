@@ -2655,7 +2655,7 @@ function KellyFavStorageManager(cfg) {
     
     this.inUse = false;
     
-    this.fav = false; // kellyFavHelper
+    this.fav = false; // KellyFavItems
     this.favValidKeys = ['categories', 'items', 'ids', 'selected_cats_ids', 'meta', 'coptions', 'cats_assoc_buffer'];
         
     
@@ -2925,7 +2925,7 @@ function KellyFavStorageManager(cfg) {
                     <tr><td colspan="2"><input type="submit" class="' + handler.className + '-create" value="' + lng.s('Создать', 'create') + '"></td></tr>\
                     <tr><td colspan="2"><div class="' + handler.className + '-message"></div></td></tr>\
                     <tr><td colspan="2"><h3>' + lng.s('Управление данными', 'storage_manage') + '</h3></td></tr>\
-                    <tr><td colspan="2"><div class="' + handler.className +'-StorageList"></div></td></tr>\
+                    <tr><td colspan="2"><div class="' + handler.className +'-StorageList">' + lng.s('Загрузка', 'loading') + '...' + '</div></td></tr>\
                     <tr><td colspan="2"><div class="' + handler.className + '-message ' + handler.className + '-message-storage"></div></td></tr>\
                     <tr><td colspan="2"><h3>' + lng.s('Удалить базу данных', 'storage_delete') + '</h3></td></tr>\
                     <tr><td>' + lng.s('Идентификатор базы', 'storage_name') + '</td><td><input type="text" id="' + handler.className + '-delete-name" placeholder="custom_data"></td></tr>\
@@ -3496,7 +3496,9 @@ function KellyFavStorageManager(cfg) {
             });
             
         } else {
-                
+            
+            // todo weak point - cant get names without load all items. need to add cached list
+            
             KellyTools.getBrowser().runtime.sendMessage({
                 method: "getApiStorageList", 
                 prefix : handler.prefix,
@@ -3854,6 +3856,9 @@ function KellyFavStorageManager(cfg) {
             // upd. данные не сохраняются. Выполняется вызов исключения. добавлен в обработку ошибок despetcher
             // проверка корректного исполнения save в kellyFavItems не выполняется, добавить
             
+            // seems that sendMessage already serialaize data when send to background, need to check that out
+            // https://stackoverflow.com/questions/38234925/does-chrome-extension-internally-use-json-stiringify-to-postmessage-over-to-back
+            
             KellyTools.getBrowser().runtime.sendMessage({
                 method: "setLocalStorageItem", 
                 dbName : dbName,
@@ -3869,7 +3874,7 @@ function KellyFavStorageManager(cfg) {
             
         } else {
             
-            // при больших объемах данных данные сохраняются корректно (тесты при 40-100мб данных, фрагментация 1-2 мегабайта на одно хранилище)
+            // при больших объемах данных данные сохраняются корректно (тесты при 40-100мб данных, фрагментация 1-5 мегабайт на одно хранилище)
             
             var save = {};
                 save[dbName] = data;
@@ -7981,7 +7986,7 @@ function KellyOptions(cfg) {
 // @encoding utf-8
 // @name           KellyFavItems
 // @namespace      Kelly
-// @description    useful script
+// @description    save bookmarks to local storage, batch download
 // @author         Rubchuk Vladimir <torrenttvi@gmail.com>
 // @license        GPLv3
 // ==/UserScript==
@@ -8579,12 +8584,11 @@ function KellyFavItems()
     this.load = function(type, onAfterload) {
                 
         var onLoadItems = function(itemsDb) {
-                    
+            
+            var useDefaultDb = false;
             if (!itemsDb) {
+                useDefaultDb = true;
                 itemsDb = sm.getDefaultData();
-                log('load() ' + fav.coptions.storage + ' db not exist, default used');
-                
-                handler.save('items');
             }
             
             for (var k in itemsDb){
@@ -8599,6 +8603,11 @@ function KellyFavItems()
             sm.validateDBItems(fav);
             
             fav.cats_assoc_buffer = false;
+            
+            if (useDefaultDb) {
+                log('load() ' + fav.coptions.storage + ' db not exist, default used');
+                handler.save('items');
+            }
             
             if ((type == 'items' || !type) && onAfterload) onAfterload(); 
         }
