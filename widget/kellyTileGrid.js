@@ -418,6 +418,7 @@ function KellyTileGrid(cfg) {
                         }
                     */
                     
+                    // todo need tile el in onLoadBounds method before
                     // addClass(tiles[i], 'tile-loading');
                     
                     tilesBoundsEls[i].addEventListener('error', imgEvents.onLoadBoundsError);

@@ -996,6 +996,7 @@ function KellyTileGrid(cfg) {
                         }
                     */
                     
+                    // todo need tile el in onLoadBounds method before
                     // addClass(tiles[i], 'tile-loading');
                     
                     tilesBoundsEls[i].addEventListener('error', imgEvents.onLoadBoundsError);
@@ -8071,7 +8072,7 @@ function KellyFavItems()
     var tooltip = false;
                
     var page = 1;
-    var tooltipBeasy = false; // pointer to dialog frame or true
+    var tooltipBeasy = false; // true if shown something important throw handler.getTooltip(), prevent create another tooltips onmouseover
     
     var displayedItems = [];
     var galleryImages = [];
@@ -8708,7 +8709,7 @@ function KellyFavItems()
         
         var totalPages = handler.getFavPageListCount();
         if (!totalPages) return false;
-                        
+                      
         imageEvents.saveImageProportions();     
            
         if (newPage == 'next') newPage = page+1;
@@ -8726,7 +8727,9 @@ function KellyFavItems()
         if (newPage == page) {
             return false;
         }
-        
+         
+        handler.getTooltip().show(false);
+         
         if (env.events.onBeforeGoToFavPage && env.events.onBeforeGoToFavPage(newPage)) {
             return false;
         }
@@ -8737,7 +8740,7 @@ function KellyFavItems()
         
         handler.updateImagesBlock();
         handler.updateImageGrid();
-               
+                
         return true;
     }
     
@@ -8969,6 +8972,7 @@ function KellyFavItems()
                     onShow : function(self, show) {
                         if (handler.getTooltip().isShown()) {
                             handler.getTooltip().show(false);
+                            tooltipBeasy = false;
                         }
                     }
                 },
@@ -9754,24 +9758,27 @@ function KellyFavItems()
                 
             if (collectionBtn) itemBlockAdditions.appendChild(collectionBtn);
             
-            itemBlock.appendChild(itemBlockAdditions);        
-            itemBlock.onmouseover = function(e) {                
-                if (tooltipBeasy) return false;
-                if (readOnly) return false;
-                
-                var itemIndex = this.getAttribute('itemIndex');
-                showItemInfoTooltip(this.getAttribute('itemIndex'), this);
-            }  
-                
-            itemBlock.onmouseout = function(e) {    
-                if (tooltipBeasy) return false;
-                if (readOnly) return false;
-                
-                var related = e.toElement || e.relatedTarget;
-                if (handler.getTooltip().isChild(related)) return;
+            itemBlock.appendChild(itemBlockAdditions); 
+
+            setTimeout(function() {
+                itemBlock.onmouseover = function(e) {                
+                    if (tooltipBeasy) return false;
+                    if (readOnly) return false;
                     
-                handler.getTooltip().show(false);
-            }  
+                    var itemIndex = this.getAttribute('itemIndex');
+                    showItemInfoTooltip(this.getAttribute('itemIndex'), this);
+                }  
+                    
+                itemBlock.onmouseout = function(e) {    
+                    if (tooltipBeasy) return false;
+                    if (readOnly) return false;
+                    
+                    var related = e.toElement || e.relatedTarget;
+                    if (handler.getTooltip().isChild(related)) return;
+                        
+                    handler.getTooltip().show(false);
+                }  
+            }, 1000);
         
             itemBlock.appendChild(postLink);
             if (postHd) itemBlock.appendChild(postHd);
@@ -10022,7 +10029,7 @@ function KellyFavItems()
         container.onclick = function(e) {            
             if (e.target.className.indexOf('make-beasy') == -1) return;
             
-            tooltipBeasy = tooltipEl; 
+            tooltipBeasy = true; 
             tooltipEl.updateCfg({closeButton : true});
         }
         
@@ -10225,9 +10232,15 @@ function KellyFavItems()
     function checkSafeUpdateData() {
         
         if (tooltipBeasy) {
-            handler.getTooltip().show(false);
+            tooltipBeasy = false;
         }
         
+        if (handler.getTooltip().isShown()) {
+            handler.getTooltip().show(false);
+        }  
+        
+        handler.getTooltip().show(false);
+            
         imageEvents.saveImageProportions();
         
         // todo save downloadManager config options by onConfigChanged event (currently event not exist, and config saved after click on Download button)
@@ -12694,10 +12707,8 @@ function kellyProfileJoyreactor() {
                         }
                     }
                     
-                    console.log(currentRow);
-                    
                     if (topItemBounds && currentRow >= autoScrollRow) {
-                        window.scrollTo(0, topItemBounds.top + scrollTop);
+                        window.scrollTo(0, topItemBounds.top + scrollTop - 90);
                     }
                 }
             }

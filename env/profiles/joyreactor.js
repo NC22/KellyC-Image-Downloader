@@ -219,10 +219,8 @@ function kellyProfileJoyreactor() {
                         }
                     }
                     
-                    console.log(currentRow);
-                    
                     if (topItemBounds && currentRow >= autoScrollRow) {
-                        window.scrollTo(0, topItemBounds.top + scrollTop);
+                        window.scrollTo(0, topItemBounds.top + scrollTop - 90);
                     }
                 }
             }
