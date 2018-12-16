@@ -7908,8 +7908,6 @@ function KellyOptions(cfg) {
         
         var menuItems = handler.favEnv.getView('menu');
         
-        console.log(menuItems['ctoptions']);
-        console.log(fav.coptions.optionsSide)
         if (menuItems['ctoptions']) {
             menuItems['ctoptions'].style.display = fav.coptions.optionsSide ? 'none' : '';  
         }
