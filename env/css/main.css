@@ -175,6 +175,27 @@
 	pointer-events: auto;
 }
 
+.__BASECLASS__-ModalBox.__BASECLASS__-hidden {
+    display : none;
+}
+
+.__BASECLASS__-sidebar-wrap .__BASECLASS__-sidebar-collapse.__BASECLASS__-active {
+    display : block;
+    float: right;
+}
+
+.__BASECLASS__-sidebar-wrap .__BASECLASS__-sidebar-collapse {
+    display : none;  
+    background: rgba(97, 83, 56, 0.77);
+    width: 100px;
+    text-align: center;
+    border-radius: 3px;
+    overflow : hidden;
+    cursor : pointer;
+    color : #fff;
+    padding: 4px;
+}
+
 .__BASECLASS__-FiltersMenu-tooltip label {
      display : block;
 }
@@ -500,6 +521,7 @@
      top : 0;
      left : 0;
      max-width : 0px;
+     overflow : hidden;
 }
 
 .__BASECLASS__-sidebar-wrap-active {

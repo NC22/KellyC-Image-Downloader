@@ -16,6 +16,16 @@
     white-space : nowrap;
 }
 
+.__BASECLASS__-old-reactor-cc .__BASECLASS__-exporter-container input[type=text] {
+    margin-top : 6px;
+    margin-bottom : 6px;
+}
+
+.__BASECLASS__-old-reactor-cc .__BASECLASS__-exporter-container .__BASECLASS__-tech-options input[type=text] {
+    margin-top : 0px;
+    margin-bottom : 0px;
+}
+
 .__BASECLASS__-old-reactor-cc .__BASECLASS__-post-addtofav {
     margin-left : 25px;
 }

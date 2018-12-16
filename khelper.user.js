@@ -850,6 +850,7 @@ function KellyTileGrid(cfg) {
     }
 
     this.getTiles = function() {
+        if (!tilesBlock) return false;
         return tilesBlock.getElementsByClassName(tileClass);
     }
     
@@ -6473,7 +6474,7 @@ function KellyFastSave(cfg) {
                     timeout = false;
                 }
                 
-                if (response && response.matchResults && response.matchResults[0].match) {
+                if (response && response.matchResults && response.matchResults[0].match && response.matchResults[0].match.state == 'complete') {
                                         
                     KellyTools.log(response, 'KellyFastSave | downloadCheckState');   
                     
@@ -6488,9 +6489,11 @@ function KellyFastSave(cfg) {
                 onSearch(false);
             }, 4000);
                    
+            var downloadFolder = handler.favEnv.getGlobal('fav').coptions.fastsave.baseFolder;
+                   
             KellyTools.getBrowser().runtime.sendMessage({
                 method: "isFilesDownloaded", 
-                filenames : [KellyTools.getUrlFileName(handler.favEnv.getGlobal('env').getImageDownloadLink(postMedia[0]))]
+                filenames : [KellyTools.validateFolderPath(downloadFolder) + '/' + KellyTools.getUrlFileName(handler.favEnv.getGlobal('env').getImageDownloadLink(postMedia[0]))]
             }, onSearch);
         
         } else {
@@ -6523,9 +6526,8 @@ KellyTools.getViewport = function() {
 
     var height = elem.clientHeight;
     var width = elem.clientWidth;	
-
+    
     return {
-        scrollBottom: KellyTools.getScrollTop() + height, // scroll + viewport height
         screenHeight: height,
         screenWidth: width,
     };
@@ -7412,6 +7414,7 @@ KellyTools.showPagination = function(params) {
 // todo - move profile-only props to profile (add onShow \ onUpdate events)
 // profile-only options 
 // "hide social networks"
+// "auto-scroll to top"
 
 function KellyOptions(cfg) {
     
@@ -7532,7 +7535,11 @@ function KellyOptions(cfg) {
                     \
                     </td></tr>';    
         output += '<tr><td>' + lng.s('Элементов на страницу', 'cgrid_per_page') + '</td> <td><input type="text" class="' + env.className + 'GridPerPage" value="' +  fav.coptions.grid.perPage + '"></td></tr>';
-        
+ 
+        output += '<tr><td>' + lng.s('Пролистывать на вверх при переходе на новую страницу', 'cgrid_autoscroll') + '</td>\
+                   <td><input type="text" placeholder="' + lng.s('Номер строки элементов', 'cgrid_autoscroll_input') + '" class="' + env.className + 'GridAutoScroll" value="' + (fav.coptions.grid.autoScroll ? fav.coptions.grid.autoScroll  : '') + '"></td></tr>';
+        output += '<tr><td colspan="2">' + lng.s('Если страница пролистана до N строки элементов, автоматически проматывать страницу при переходе на новую в начало', 'cgrid_autoscroll_notice') + '</td></tr>';
+       
         output += '<tr><td colspan="2">' + lng.s('Режим отображения публикаций', 'cgrid_type') + '</td></tr>';
         output += '\
             <tr class="radioselect"><td colspan="2">\
@@ -7786,13 +7793,7 @@ function KellyOptions(cfg) {
         var favContent = handler.wrap;
         var fav = handler.favEnv.getGlobal('fav');
         var env = handler.favEnv.getGlobal('env');
-        
-        if (KellyTools.getElementByClass(favContent, 'kellyAutoScroll').checked) {
-            fav.coptions.autoload_onscroll = true;
-        } else {
-            fav.coptions.autoload_onscroll = false;
-        }
-        
+                
         fav.coptions.grid = {
             fixed :  KellyTools.inputVal(env.className + 'GridFixed', 'int', favContent),
             rowHeight : KellyTools.inputVal(env.className + 'GridRowHeight', 'int', favContent),
@@ -7800,9 +7801,18 @@ function KellyOptions(cfg) {
             cssItem : KellyTools.inputVal(env.className + 'GridCssItem', 'string', favContent),
             heightDiff : KellyTools.inputVal(env.className + 'GridHeightDiff', 'int', favContent),
             perPage : KellyTools.inputVal(env.className + 'GridPerPage', 'int', favContent),
+            autoScroll : KellyTools.inputVal(env.className + 'GridAutoScroll', 'int', favContent),
             type : fav.coptions.grid.type,
             viewerShowAs : 'hd',
         };
+        
+        if (fav.coptions.grid.autoScroll <= 0) {
+            fav.coptions.grid.autoScroll = '';
+        }
+        
+        if (fav.coptions.grid.autoScroll > 1000) {
+            fav.coptions.grid.autoScroll = 1000;
+        }
         
         if (fav.coptions.grid.fixed < 1) {
             fav.coptions.grid.fixed = 1;
@@ -7846,7 +7856,7 @@ function KellyOptions(cfg) {
             }
             
             fav.coptions.fastsave = {
-                baseFolder : KellyTools.inputVal(env.className + 'FastSaveBaseFolder', 'string', favContent),
+                baseFolder : KellyTools.validateFolderPath(KellyTools.inputVal(env.className + 'FastSaveBaseFolder', 'string', favContent)),
                 // nameTemplate : KellyTools.getElementByClass(favContent, env.className + 'FastSaveNameTemplate').value,
                 enabled : fastSaveCurrent,
                 check :  KellyTools.getElementByClass(favContent, env.className + 'FastSaveCheck').checked ? true : false,
@@ -8714,15 +8724,17 @@ function KellyFavItems()
             return false;
         }
         
+        if (env.events.onBeforeGoToFavPage && env.events.onBeforeGoToFavPage(newPage)) {
+            return false;
+        }
+        
         page = newPage;
         
         handler.showSidebarMessage(false);
         
         handler.updateImagesBlock();
         handler.updateImageGrid();
-            
-        // todo add button goto up or auto ? window.scrollTo(x, y);
-        
+               
         return true;
     }
     
@@ -8965,7 +8977,9 @@ function KellyFavItems()
             </div>\
         ';
         
-        KellyTools.setHTMLData(sideBarWrap, modalBoxHTML + downloaderHTML);
+        var collapseButtonHTML = '<div class="' + env.className + '-sidebar-collapse">' + lng.s('Свернуть', 'collapse') + '</div>';
+        
+        KellyTools.setHTMLData(sideBarWrap, modalBoxHTML + downloaderHTML + collapseButtonHTML);
             
         modalBox = KellyTools.getElementByClass(sideBarWrap, modalClass + '-main');
         modalBoxContent = KellyTools.getElementByClass(modalBox, modalClass + '-content');
@@ -8975,6 +8989,21 @@ function KellyFavItems()
             modal : KellyTools.getElementByClass(sideBarWrap, modalClass + '-downloader'),
         }; 
         
+        var collapseButton = KellyTools.getElementByClass(sideBarWrap, env.className + '-sidebar-collapse'); // compatibility button, shows only if needed by profile
+            collapseButton.onclick = function() {
+                var collapsed = this.getAttribute('data-collapsed');
+                this.setAttribute('data-collapsed', collapsed ? '' : '1');
+                
+                var modalBoxes = sideBarWrap.getElementsByClassName(env.className + '-ModalBox');
+                for (var i = 0; i < modalBoxes.length; i++) {
+                    if (collapsed) {
+                        KellyTools.classList('remove', modalBoxes[i], env.className + '-hidden');
+                    } else {
+                        KellyTools.classList('add', modalBoxes[i], env.className + '-hidden');
+                    }
+                }
+            }
+            
         downloaderBox.content = KellyTools.getElementByClass(downloaderBox.modal, modalClass + '-content');
         
         envContainers.sideBar.appendChild(sideBarWrap);
@@ -12464,7 +12493,9 @@ function kellyProfileJoyreactor() {
     this.profile = 'joyreactor';        
     this.hostClass = handler.className + '-' + window.location.host.split(".").join("-");
     
-    this.fav = false;        
+    this.fav = false;   
+    this.sideBarDisabled = -1; // jras - sidebar hidden
+    
     this.events = {
         
         /* 
@@ -12613,6 +12644,44 @@ function kellyProfileJoyreactor() {
             
             updateSidebarPosition();
         },
+        
+        onBeforeGoToFavPage : function(newPage) {
+              
+            var autoScrollRow = handler.fav.getGlobal('fav').coptions.grid.autoScroll;            
+            if (autoScrollRow) {
+                
+                var tiles = handler.fav.getImageGrid().getTiles();   
+                if (tiles && tiles.length) {
+                    
+                    var scrollTop = KellyTools.getScrollTop();
+                    var screenBottom = scrollTop + KellyTools.getViewport().screenHeight;
+                    var currentRow = 0;
+                    var topItemBounds = false;
+                    
+                    for (var i = 0; i < tiles.length; i++) {
+                        
+                        if (tiles[i].className.indexOf('grid-last') == -1) continue;
+                        
+                        var itemBounds = tiles[i].getBoundingClientRect();
+                        if (!topItemBounds) {
+                            topItemBounds = itemBounds;
+                        }
+
+                        var itemScroll = itemBounds.top + scrollTop;                        
+                        if (itemScroll < screenBottom) {
+                            currentRow++;
+                        }
+                    }
+                    
+                    console.log(currentRow);
+                    
+                    if (topItemBounds && currentRow >= autoScrollRow) {
+                        window.scrollTo(0, topItemBounds.top + scrollTop);
+                    }
+                }
+            }
+
+        }        
     
     }
     
@@ -12726,7 +12795,7 @@ function kellyProfileJoyreactor() {
         
         if (!publications || !publications.length) return false;
 
-        var scrollBottom = KellyTools.getViewport().scrollBottom;
+        var scrollBottom = KellyTools.getViewport().screenHeight + KellyTools.getScrollTop();
         
         var updatePublicationFastButton = function(publication) {
             
@@ -12842,12 +12911,41 @@ function kellyProfileJoyreactor() {
         
         if (!handler.fav) return false;
         
-        var sideBarWrap = handler.fav.getView('sidebar');
-        
+        var sideBarWrap = handler.fav.getView('sidebar');        
         if (!sideBarWrap || sideBarWrap.className.indexOf('hidden') !== -1) return false;
         
-        var sideBlock = handler.getMainContainers().sideBlock;        
-        var sideBlockBounds = sideBlock.getBoundingClientRect();
+        var sideBlock = handler.getMainContainers().sideBlock;     
+        
+        // first time update position, validate sidebar block
+        
+        if (handler.sideBarDisabled == -1) {
+            
+            if (sideBlock && window.getComputedStyle(sideBlock).position == 'absolute') {
+                 
+                KellyTools.log('Bad sidebar position', 'updateSidebarPosition'); 
+                handler.sideBarDisabled = 1;
+               
+            }
+            
+            if (!sideBlock) {
+                KellyTools.log('Sidebar not found', 'updateSidebarPosition'); 
+                handler.sideBarDisabled = 1;
+                
+            }
+            
+            if (handler.sideBarDisabled == 1) {
+                
+                var collapseButton = KellyTools.getElementByClass(sideBarWrap, handler.className + '-sidebar-collapse');
+                if (collapseButton) {
+                    KellyTools.classList('add', collapseButton, handler.className + '-active');
+                }
+            }
+            
+        } 
+        
+        if (handler.sideBarDisabled == 1) {
+            sideBlock = false;
+        }
         
         var scrollTop = KellyTools.getScrollTop();
         var scrollLeft = KellyTools.getScrollLeft();
@@ -12856,6 +12954,9 @@ function kellyProfileJoyreactor() {
         var topMax = 0;
        
         if (sideBlock) {
+            
+            var sideBlockBounds = sideBlock.getBoundingClientRect();
+            
             topMax = sideBlockBounds.top + scrollTop;
             top = topMax;
         }
@@ -12866,18 +12967,22 @@ function kellyProfileJoyreactor() {
                 
         sideBarWrap.style.top = top + 'px';
        
-        var widthBase = 0;
-        
-        if (window.location.host.indexOf('old.') == -1) {
-            widthBase = 24;
-        }
-        
         if (sideBlock) {
+            
+            var widthBase = 0;            
+            if (handler.hostClass.indexOf('old') == -1) {
+                widthBase = 24;
+            }
+            
             sideBarWrap.style.right = 'auto';
             sideBarWrap.style.left = Math.round(sideBlockBounds.left + scrollLeft) + 'px';
             sideBarWrap.style.width = Math.round(sideBlockBounds.width + widthBase) + 'px';
+            
         } else {
-            sideBarWrap.right = '0px';
+            
+            sideBarWrap.style.right = '20px';
+            sideBarWrap.style.left = 'auto';
+            sideBarWrap.style.width = '326px';
         }		
         
         var tagList = handler.getMainContainers().tagList;
@@ -12913,13 +13018,6 @@ function kellyProfileJoyreactor() {
         if (!linkUrl) {
             KellyTools.log('bad post url', 'profile updatePostFavButton');
             return false;  
-        }
-        
-        var old = postBlock.getElementsByClassName(handler.className + '-base');
-        if (old) {
-            for (var i = 0; i < old.length; i++) {
-                old[i].parentElement.removeChild(old[i]);                
-            }
         }
         
         var sideName = side ? 'sidebar' : 'post';
@@ -13499,7 +13597,7 @@ function kellyProfileJoyreactor() {
         if (!info.container) {
         
             info.container = document.createElement('div');
-            info.container.className = handler.className + '-FavNativeInfo';
+            info.container.className = handler.hostClass + ' ' + handler.className + '-FavNativeInfo';
             
             info.header.parentNode.insertBefore(info.container, info.header.nextSibling);
         }

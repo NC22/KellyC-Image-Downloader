@@ -71,6 +71,9 @@
     "cats_filter":{  
         "message":"Mode for include \\ exclude categories from filtered data"
     },
+    "collapse":{  
+        "message":"Collapse"
+    },
     "cgrid_default_rowst":{  
         "message":"Default row style"
     },
@@ -100,6 +103,15 @@
     },
     "cgrid_type_dynamic":{  
         "message":"Dynamic number of elements per row"
+    },
+    "cgrid_autoscroll":{  
+        "message":"Autoscroll to top"
+    },   
+    "cgrid_autoscroll_input":{  
+        "message":"Items row"
+    },  
+    "cgrid_autoscroll_notice":{  
+        "message":"If page scrolled under \"Items row\" then auto scroll to top on next page"
     },
     "cgrid_type_fixed":{  
         "message":"Fixed number of elements per row"
@@ -214,6 +226,9 @@
     },
     "ext_name":{  
         "message":"KellyC Favorites"
+    },
+    "expand":{  
+        "message":"Expand"
     },
     "ext_ver":{  
         "message":"Version"

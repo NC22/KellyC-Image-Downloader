@@ -24,9 +24,8 @@ KellyTools.getViewport = function() {
 
     var height = elem.clientHeight;
     var width = elem.clientWidth;	
-
+    
     return {
-        scrollBottom: KellyTools.getScrollTop() + height, // scroll + viewport height
         screenHeight: height,
         screenWidth: width,
     };

@@ -272,6 +272,7 @@ function KellyTileGrid(cfg) {
     }
 
     this.getTiles = function() {
+        if (!tilesBlock) return false;
         return tilesBlock.getElementsByClassName(tileClass);
     }
     

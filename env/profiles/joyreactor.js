@@ -21,7 +21,9 @@ function kellyProfileJoyreactor() {
     this.profile = 'joyreactor';        
     this.hostClass = handler.className + '-' + window.location.host.split(".").join("-");
     
-    this.fav = false;        
+    this.fav = false;   
+    this.sideBarDisabled = -1; // jras - sidebar hidden
+    
     this.events = {
         
         /* 
@@ -170,6 +172,44 @@ function kellyProfileJoyreactor() {
             
             updateSidebarPosition();
         },
+        
+        onBeforeGoToFavPage : function(newPage) {
+              
+            var autoScrollRow = handler.fav.getGlobal('fav').coptions.grid.autoScroll;            
+            if (autoScrollRow) {
+                
+                var tiles = handler.fav.getImageGrid().getTiles();   
+                if (tiles && tiles.length) {
+                    
+                    var scrollTop = KellyTools.getScrollTop();
+                    var screenBottom = scrollTop + KellyTools.getViewport().screenHeight;
+                    var currentRow = 0;
+                    var topItemBounds = false;
+                    
+                    for (var i = 0; i < tiles.length; i++) {
+                        
+                        if (tiles[i].className.indexOf('grid-last') == -1) continue;
+                        
+                        var itemBounds = tiles[i].getBoundingClientRect();
+                        if (!topItemBounds) {
+                            topItemBounds = itemBounds;
+                        }
+
+                        var itemScroll = itemBounds.top + scrollTop;                        
+                        if (itemScroll < screenBottom) {
+                            currentRow++;
+                        }
+                    }
+                    
+                    console.log(currentRow);
+                    
+                    if (topItemBounds && currentRow >= autoScrollRow) {
+                        window.scrollTo(0, topItemBounds.top + scrollTop);
+                    }
+                }
+            }
+
+        }        
     
     }
     
@@ -283,7 +323,7 @@ function kellyProfileJoyreactor() {
         
         if (!publications || !publications.length) return false;
 
-        var scrollBottom = KellyTools.getViewport().scrollBottom;
+        var scrollBottom = KellyTools.getViewport().screenHeight + KellyTools.getScrollTop();
         
         var updatePublicationFastButton = function(publication) {
             
@@ -399,12 +439,41 @@ function kellyProfileJoyreactor() {
         
         if (!handler.fav) return false;
         
-        var sideBarWrap = handler.fav.getView('sidebar');
-        
+        var sideBarWrap = handler.fav.getView('sidebar');        
         if (!sideBarWrap || sideBarWrap.className.indexOf('hidden') !== -1) return false;
         
-        var sideBlock = handler.getMainContainers().sideBlock;        
-        var sideBlockBounds = sideBlock.getBoundingClientRect();
+        var sideBlock = handler.getMainContainers().sideBlock;     
+        
+        // first time update position, validate sidebar block
+        
+        if (handler.sideBarDisabled == -1) {
+            
+            if (sideBlock && window.getComputedStyle(sideBlock).position == 'absolute') {
+                 
+                KellyTools.log('Bad sidebar position', 'updateSidebarPosition'); 
+                handler.sideBarDisabled = 1;
+               
+            }
+            
+            if (!sideBlock) {
+                KellyTools.log('Sidebar not found', 'updateSidebarPosition'); 
+                handler.sideBarDisabled = 1;
+                
+            }
+            
+            if (handler.sideBarDisabled == 1) {
+                
+                var collapseButton = KellyTools.getElementByClass(sideBarWrap, handler.className + '-sidebar-collapse');
+                if (collapseButton) {
+                    KellyTools.classList('add', collapseButton, handler.className + '-active');
+                }
+            }
+            
+        } 
+        
+        if (handler.sideBarDisabled == 1) {
+            sideBlock = false;
+        }
         
         var scrollTop = KellyTools.getScrollTop();
         var scrollLeft = KellyTools.getScrollLeft();
@@ -413,6 +482,9 @@ function kellyProfileJoyreactor() {
         var topMax = 0;
        
         if (sideBlock) {
+            
+            var sideBlockBounds = sideBlock.getBoundingClientRect();
+            
             topMax = sideBlockBounds.top + scrollTop;
             top = topMax;
         }
@@ -423,18 +495,22 @@ function kellyProfileJoyreactor() {
                 
         sideBarWrap.style.top = top + 'px';
        
-        var widthBase = 0;
-        
-        if (window.location.host.indexOf('old.') == -1) {
-            widthBase = 24;
-        }
-        
         if (sideBlock) {
+            
+            var widthBase = 0;            
+            if (handler.hostClass.indexOf('old') == -1) {
+                widthBase = 24;
+            }
+            
             sideBarWrap.style.right = 'auto';
             sideBarWrap.style.left = Math.round(sideBlockBounds.left + scrollLeft) + 'px';
             sideBarWrap.style.width = Math.round(sideBlockBounds.width + widthBase) + 'px';
+            
         } else {
-            sideBarWrap.right = '0px';
+            
+            sideBarWrap.style.right = '20px';
+            sideBarWrap.style.left = 'auto';
+            sideBarWrap.style.width = '326px';
         }		
         
         var tagList = handler.getMainContainers().tagList;
@@ -470,13 +546,6 @@ function kellyProfileJoyreactor() {
         if (!linkUrl) {
             KellyTools.log('bad post url', 'profile updatePostFavButton');
             return false;  
-        }
-        
-        var old = postBlock.getElementsByClassName(handler.className + '-base');
-        if (old) {
-            for (var i = 0; i < old.length; i++) {
-                old[i].parentElement.removeChild(old[i]);                
-            }
         }
         
         var sideName = side ? 'sidebar' : 'post';
@@ -1056,7 +1125,7 @@ function kellyProfileJoyreactor() {
         if (!info.container) {
         
             info.container = document.createElement('div');
-            info.container.className = handler.className + '-FavNativeInfo';
+            info.container.className = handler.hostClass + ' ' + handler.className + '-FavNativeInfo';
             
             info.header.parentNode.insertBefore(info.container, info.header.nextSibling);
         }
