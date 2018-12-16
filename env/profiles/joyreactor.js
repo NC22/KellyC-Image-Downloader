@@ -17,9 +17,9 @@ function kellyProfileJoyreactor() {
       
     /* imp */
     
-    this.className = 'kellyJRFav'; 
+    this.className = 'kelly-jr-ui'; 
     this.profile = 'joyreactor';        
-    this.hostClass = window.location.host.split(".").join("_");
+    this.hostClass = handler.className + '-' + window.location.host.split(".").join("-");
     
     this.fav = false;        
     this.events = {
@@ -488,20 +488,20 @@ function kellyProfileJoyreactor() {
             
             if (side) {
                 addToFav = document.createElement('DIV'); 
-                addToFav.className = handler.hostClass + ' ' + handler.className + '-icon-diskete ' + className;
+                addToFav.className =  handler.hostClass + ' ' + handler.className + '-icon-diskete ' + className;
                      
                 shareButtonsBlock.appendChild(addToFav);
             } else {
                 
                 addToFav = document.createElement('span');
-                addToFav.className = className + '-link';
+                addToFav.className = handler.hostClass + ' ' + handler.className + '-link';
                 
                 // keep same url as main button, to dont loose getPostLink method functional and keep similar environment
                 
                 KellyTools.setHTMLData(addToFav, '<a href="#" class="' + className + '" href="' + link.href + '"></a>');
                                
                 link.parentElement.parentElement.insertBefore(addToFav, link.parentElement); 
-                addToFav = KellyTools.getElementByClass(addToFav, className);
+                addToFav = KellyTools.getElementByClass(addToFav, handler.className + '-base');
                 
             }           
         }         
@@ -613,7 +613,7 @@ function kellyProfileJoyreactor() {
                     addToFavButton = document.createElement('a');
                     addToFavButton.href = '#';                    
                     addToFavButton.innerText = '';
-                    addToFavButton.className = handler.className + '-addToFavComment';
+                    addToFavButton.className = handler.hostClass + ' ' + handler.className + '-addToFavComment';
             
                     bottomLink[0].appendChild(addToFavButton);
                     // responseButton.parentNode.inserBefore(addToFavButton, responseButton.nextSibling) insert after

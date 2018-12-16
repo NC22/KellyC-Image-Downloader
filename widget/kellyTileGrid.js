@@ -37,7 +37,7 @@ function KellyTileGrid(cfg) {
         heightDiff : 10, // допустимая погрешность по высоте для текущей строки элементов
         heightDiffLast : 20, // допустимая погрешность для последнего ряда
         unfitedExtendMin : 2, // для последнего ряда - подгоняем по ширине не обращая внимания на требуемую высоту если осталось указанное кол-во изображений невместифшихся в сетку с требуемой высотой
-        fixed : false, // фиксированное кол-во элементов на строку (если = true - игнорирует опции heightDiffLast\ heightDiff \ rowHeight)
+        fixed : false, // фиксированное кол-во элементов на строку (если != false - игнорирует опции heightDiffLast\ heightDiff \ rowHeight, берет указанное значение)
         tmpBounds : false, // временные пропорции до тех пор пока изображение не загружено. на время загрузки к тайлу добавляется класс tileClass + "-tmp-bounds" 
         lazy : false, // загружать только изображения в области видимости. Если для изображения не определены пропорции оно будет загружено сразу
         loadLimit : 10, // работает только в режиме lazy = true, максимальное кол-во загружаемых единовременно элементов
@@ -131,7 +131,7 @@ function KellyTileGrid(cfg) {
             hideUnfited = false;
         }
         
-        // some synonyms for rules section
+        // type, currently only checks by rules.fixed variable
         
         if (cfg.type && cfg.type != 'fixed') {
             rules.fixed = false;

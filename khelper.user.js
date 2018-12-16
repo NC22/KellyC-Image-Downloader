@@ -9446,6 +9446,19 @@ function KellyFavItems()
         }
         
     }
+    
+    function updateGoToPageButton(gotoPage) {
+        
+        if (!gotoPage) gotoPage = KellyTools.getElementByClass(sideBarWrap, env.className + '-FavEditButton-page');
+        
+        if (!gotoPage) return;
+        
+        if (handler.getFavPageListCount() > 14) {
+            KellyTools.classList('add', gotoPage, env.className + '-active'); 
+        } else {
+            KellyTools.classList('remove', gotoPage, env.className + '-active');
+        }
+    }
       
     function updateFilteredData() {
 
@@ -9456,6 +9469,7 @@ function KellyFavItems()
         displayedItems = false;
                 
         updateDisplayItemsList();
+        updateGoToPageButton();
         
         if (imagesAsDownloadItems) {
             
@@ -10469,27 +10483,25 @@ function KellyFavItems()
         if (optionsButton) {
             additionButtons.appendChild(optionsButton);
         }
+         
+        var gotoPage = editButton.cloneNode();
+            gotoPage.innerText = lng.s('Страница', 'page');
+            gotoPage.className = env.className + '-FavEditButton ' + env.className + '-FavEditButton-page';
+            gotoPage.title = lng.s('Перейти на страницу', 'goto_page');
+            gotoPage.onclick = function (e) { 
             
-        if (handler.getFavPageListCount() > 14) {
+                if (handler.getTooltip().isShown() == 'gotoFavPage') {
+                    handler.getTooltip().show(false);
+                    tooltipBeasy = false;
+                } else {                      
+                    showGoToPageTooltip(this);                       
+                }                  
+                
+                return false;
+            }
             
-            var gotoPage = editButton.cloneNode();
-                gotoPage.innerText = lng.s('Страница', 'page');
-                gotoPage.className = env.className + '-FavEditButton ' + env.className + '-FavEditButton-page';
-                gotoPage.title = lng.s('Перейти на страницу', 'goto_page');
-                gotoPage.onclick = function (e) { 
-                
-                    if (handler.getTooltip().isShown() == 'gotoFavPage') {
-                        handler.getTooltip().show(false);
-                        tooltipBeasy = false;
-                    } else {                      
-                        showGoToPageTooltip(this);                       
-                    }                  
-                    
-                    return false;
-                }
-                
-            additionButtons.appendChild(gotoPage);    
-        }
+        additionButtons.appendChild(gotoPage);        
+        updateGoToPageButton(gotoPage);
             
         if (handler.isDownloadSupported) {   
             
@@ -11383,7 +11395,9 @@ function KellyFavItems()
         
         var catItem = document.createElement('a');
             catItem.href = '#';
-            catItem.innerText = lng.s('Исключить __CATEGORYNAME__', 'cat_exclude', { CATEGORYNAME : category.name });
+            // catItem.innerText = lng.s('Исключить __CATEGORYNAME__', 'cat_exclude', { CATEGORYNAME : category.name });
+
+            KellyTools.setHTMLData(catItem, '<div class="' + env.className + '-minus"></div><span>' + category.name + '</span>');
             catItem.setAttribute('categoryId', category.id);
             catItem.onclick = function() {
                 
@@ -12435,9 +12449,9 @@ function kellyProfileJoyreactor() {
       
     /* imp */
     
-    this.className = 'kellyJRFav'; 
+    this.className = 'kelly-jr-ui'; 
     this.profile = 'joyreactor';        
-    this.hostClass = window.location.host.split(".").join("_");
+    this.hostClass = handler.className + '-' + window.location.host.split(".").join("-");
     
     this.fav = false;        
     this.events = {
@@ -12906,20 +12920,20 @@ function kellyProfileJoyreactor() {
             
             if (side) {
                 addToFav = document.createElement('DIV'); 
-                addToFav.className = handler.hostClass + ' ' + handler.className + '-icon-diskete ' + className;
+                addToFav.className =  handler.hostClass + ' ' + handler.className + '-icon-diskete ' + className;
                      
                 shareButtonsBlock.appendChild(addToFav);
             } else {
                 
                 addToFav = document.createElement('span');
-                addToFav.className = className + '-link';
+                addToFav.className = handler.hostClass + ' ' + handler.className + '-link';
                 
                 // keep same url as main button, to dont loose getPostLink method functional and keep similar environment
                 
                 KellyTools.setHTMLData(addToFav, '<a href="#" class="' + className + '" href="' + link.href + '"></a>');
                                
                 link.parentElement.parentElement.insertBefore(addToFav, link.parentElement); 
-                addToFav = KellyTools.getElementByClass(addToFav, className);
+                addToFav = KellyTools.getElementByClass(addToFav, handler.className + '-base');
                 
             }           
         }         
@@ -13031,7 +13045,7 @@ function kellyProfileJoyreactor() {
                     addToFavButton = document.createElement('a');
                     addToFavButton.href = '#';                    
                     addToFavButton.innerText = '';
-                    addToFavButton.className = handler.className + '-addToFavComment';
+                    addToFavButton.className = handler.hostClass + ' ' + handler.className + '-addToFavComment';
             
                     bottomLink[0].appendChild(addToFavButton);
                     // responseButton.parentNode.inserBefore(addToFavButton, responseButton.nextSibling) insert after

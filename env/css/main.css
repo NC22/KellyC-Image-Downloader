@@ -17,33 +17,12 @@
      line-height: 20px;
 }
 
-.__BASECLASS__-addToFavComment {
-    margin-left : 22px;
-    position : relative;
-}
-
 .__BASECLASS__-post-addtofav {
     margin-left: 20px;
     position: relative;
     margin-right: 10px;
     font-weight: 700;
     color: #586263;
-}
-
-.__BASECLASS__-addToFavComment:after, .__BASECLASS__-post-addtofav:after  {
-    content: " ";
-    position: absolute;
-    background: rgba(255, 120, 42, 0.51);
-    width: 14px;
-    height: 14px;
-    border-top-right-radius: 6px;
-    bottom: 1px;
-    vertical-align: middle;
-    left: -18px;
-    top: 50%;
-    margin-top: -7px;
-    /* border-bottom: solid 6px #fff; */
-    /* border-right: solid 4px; */
 }
 
 /* pagination */
@@ -408,6 +387,14 @@
 	 height : 22px;
 }
 
+.__BASECLASS__-FavEditButton-page {
+    display : none;
+}
+
+.__BASECLASS__-FavEditButton-page.__BASECLASS__-active {
+    display : inline-block;
+}
+
 .__BASECLASS__-FavEditButton-reset, .__BASECLASS__-FavEditButton-download, .__BASECLASS__-FavEditButton-page {
      float : right;
      background : #fff;
@@ -602,11 +589,43 @@
 }
 
 .__BASECLASS__CatAddToPostList a {
-     font-size: 12px;
-     padding : 0px;
-     line-height : 1;
-     padding-left : 4px;
-     padding-right : 4px;
+    font-size: 12px;
+    padding: 0px;
+    padding-left: 4px;
+    padding-right: 4px;
+    display: inline-block;
+    text-decoration: none;
+}
+
+.__BASECLASS__CatAddToPostList a .__BASECLASS__-minus {
+    position: relative;
+    width: 16px;
+    height: 16px;
+    background: #f97272;
+    border-radius: 8px;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: middle;
+    color: #fffefe;
+}
+
+.__BASECLASS__CatAddToPostList a .__BASECLASS__-minus:after {
+    top: 40%;
+    left: 20%;
+    width: 60%;
+    height: 20%;    
+    content: "";
+    position: absolute;
+    background-color: white;
+    transition: transform 0.25s ease-out;
+}
+
+.__BASECLASS__CatAddToPostList a span {
+    vertical-align: middle;
+    height: 100%;
+    display: inline-block;
+    overflow: hidden;
+    padding-left: 4px;
 }
 
 .__BASECLASS__Cat {
