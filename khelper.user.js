@@ -189,13 +189,16 @@ function KellyTooltip(cfg) {
                 return;
             }
             
-            handler.updatePosition();	
+            if (handler.isShown()) {
+                handler.updatePosition();
+            }   	
         }
         
         events.onScroll = function(e) {
         
-            
-            handler.updatePosition();	
+            if (handler.isShown()) {
+                handler.updatePosition();
+            }    
         }
         
         window.addEventListener('resize', events.onResize);
@@ -491,6 +494,8 @@ KellyTooltip.loadDefaultCss = function(className) {
     
     return true;
 }
+
+// dont use, untested
 
 KellyTooltip.addTipToEl = function(el, message, cfg, delay, onShow) {
     
