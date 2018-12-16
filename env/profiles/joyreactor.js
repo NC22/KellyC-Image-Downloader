@@ -569,7 +569,7 @@ function kellyProfileJoyreactor() {
                 ['div', 'span'].indexOf(comment.childNodes[i].tagName.toLowerCase()) != -1 &&
                 !comment.childNodes[i].className
             ) {
-                return KellyTools.getElementText(comment);
+                return KellyTools.getElementText(comment.childNodes[i]);
             }
         }
              
@@ -615,7 +615,7 @@ function kellyProfileJoyreactor() {
                     addToFavButton.innerText = '';
                     addToFavButton.className = handler.hostClass + ' ' + handler.className + '-addToFavComment';
             
-                    bottomLink[0].appendChild(addToFavButton);
+                    linksPlaceholder.appendChild(addToFavButton);
                     // responseButton.parentNode.inserBefore(addToFavButton, responseButton.nextSibling) insert after
                 } else {
                      KellyTools.log('formatComments : cant find placeholder for append "Add to fav button"'); 
