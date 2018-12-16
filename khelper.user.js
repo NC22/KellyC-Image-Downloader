@@ -9758,27 +9758,24 @@ function KellyFavItems()
                 
             if (collectionBtn) itemBlockAdditions.appendChild(collectionBtn);
             
-            itemBlock.appendChild(itemBlockAdditions); 
-
-            setTimeout(function() {
-                itemBlock.onmouseover = function(e) {                
-                    if (tooltipBeasy) return false;
-                    if (readOnly) return false;
+            itemBlock.appendChild(itemBlockAdditions);        
+            itemBlock.onmouseover = function(e) {                
+                if (tooltipBeasy) return false;
+                if (readOnly) return false;
+                
+                var itemIndex = this.getAttribute('itemIndex');
+                showItemInfoTooltip(this.getAttribute('itemIndex'), this);
+            }  
+                
+            itemBlock.onmouseout = function(e) {    
+                if (tooltipBeasy) return false;
+                if (readOnly) return false;
+                
+                var related = e.toElement || e.relatedTarget;
+                if (handler.getTooltip().isChild(related)) return;
                     
-                    var itemIndex = this.getAttribute('itemIndex');
-                    showItemInfoTooltip(this.getAttribute('itemIndex'), this);
-                }  
-                    
-                itemBlock.onmouseout = function(e) {    
-                    if (tooltipBeasy) return false;
-                    if (readOnly) return false;
-                    
-                    var related = e.toElement || e.relatedTarget;
-                    if (handler.getTooltip().isChild(related)) return;
-                        
-                    handler.getTooltip().show(false);
-                }  
-            }, 1000);
+                handler.getTooltip().show(false);
+            }  
         
             itemBlock.appendChild(postLink);
             if (postHd) itemBlock.appendChild(postHd);
