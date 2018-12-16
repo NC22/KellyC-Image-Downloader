@@ -7829,16 +7829,14 @@ function KellyOptions(cfg) {
         var refreshPosts = false;
         
         var hideSocCurrent = fav.coptions.hideSoc;
-        fav.coptions.hideSoc = KellyTools.getElementByClass(favContent, env.className + 'HideSoc').checked ? true : false;
-        
+        fav.coptions.hideSoc = KellyTools.getElementByClass(favContent, env.className + 'HideSoc').checked ? true : false;        
         if (hideSocCurrent != fav.coptions.hideSoc) {
             refreshPosts = true;
         }
                 
         if (handler.favEnv.isDownloadSupported) {
             
-            var fastSaveCurrent = KellyTools.getElementByClass(favContent, env.className + 'FastSaveEnabled').checked ? true : false;
-            
+            var fastSaveCurrent = KellyTools.getElementByClass(favContent, env.className + 'FastSaveEnabled').checked ? true : false;            
             if (fastSaveCurrent != fav.coptions.fastsave.enabled) {
                 refreshPosts = true;
             }
@@ -7909,7 +7907,12 @@ function KellyOptions(cfg) {
         }
         
         var menuItems = handler.favEnv.getView('menu');
-        if (menuItems['ctoptions']) menuItems['ctoptions'].style.display = fav.coptions.optionsSide ? 'none' : '';  
+        
+        console.log(menuItems['ctoptions']);
+        console.log(fav.coptions.optionsSide)
+        if (menuItems['ctoptions']) {
+            menuItems['ctoptions'].style.display = fav.coptions.optionsSide ? 'none' : '';  
+        }
                 
         if (handler.favEnv.isDownloadSupported) {
             
@@ -7977,9 +7980,11 @@ function KellyOptions(cfg) {
         
         applaySave();	
 
+        if (env.events.onOptionsUpdate && env.events.onOptionsUpdate(refreshPosts)) {
+            return;
+        }
         
-        if (refreshPosts) {
-            
+        if (refreshPosts) {            
             handler.favEnv.formatPostContainers(); 
         }        
     }
@@ -8440,7 +8445,7 @@ function KellyFavItems()
                     if (itemInfo.width < 140) {
                         var showPostBtn = KellyTools.getElementByClass(itemInfo.tile, env.className + '-FavItem-overlay-button');
                         if (showPostBtn) {
-                            showPostBtn.parentElement.removeChild(showPostBtn);
+                            showPostBtn.parentNode.removeChild(showPostBtn);
                         }
                     }                    
                 },
@@ -9041,7 +9046,7 @@ function KellyFavItems()
 
         
         if (favButton) {
-            menuButtons['fav'] = favButton.parentNode;
+            menuButtons['fav'] = favButton;
             favCounter = favButton.getElementsByClassName(env.className  + '-FavItemsCount')[0];
             // if (handler.isMainDomain())
             handler.updateFavCounter();
@@ -9062,7 +9067,7 @@ function KellyFavItems()
         }, 'options');
         
         if (optionsButton) {
-            menuButtons['ctoptions'] = optionsButton.parentNode;
+            menuButtons['ctoptions'] = optionsButton;
         }
         
         if (fav.coptions.optionsSide) optionsButton.style.display = 'none';
@@ -9074,6 +9079,8 @@ function KellyFavItems()
         
         return true;
     }
+             
+    // todo move method to profile
     
     function createMainMenuButton(name, onclick, index) {
         
@@ -9090,6 +9097,7 @@ function KellyFavItems()
             submenu = menuButtonTest.parentNode.parentNode;
         }
         
+        // fix css issues
         var menuBrTest = KellyTools.getElementByTag(submenu, 'br');
         if (menuBrTest) menuBrTest.style.display = 'none';
         
@@ -9113,7 +9121,7 @@ function KellyFavItems()
             return false;
         }
         
-        return menuButtonA;
+        return menuButtonContainer;
     }     
     
     // exit from Favourites plugin block
@@ -9122,14 +9130,13 @@ function KellyFavItems()
     
         siteContent.style.display = 'block';
         favContent.style.display = 'none';
+        
         handler.removeEventPListener(window, 'scroll', 'fav_scroll');
 
         imageGrid.close();
         
         for (var k in menuButtons){
-            if (typeof menuButtons[k] !== 'function') {
-                menuButtons[k].className = menuButtons[k].className.replace('active', '');
-            }
+            KellyTools.classList('remove', menuButtons[k], 'active');
         }
 
         handler.closeSidebar();
@@ -9154,13 +9161,11 @@ function KellyFavItems()
         else mode = newMode;
         
         for (var k in menuButtons){
-            if (typeof menuButtons[k] !== 'function') {
-                menuButtons[k].className = menuButtons[k].className.replace('active', '');
-            }
+            KellyTools.classList('remove', menuButtons[k], 'active');           
         }
         
         if (typeof menuButtons[mode] != 'undefined') {
-            menuButtons[mode].className += ' active';
+            KellyTools.classList('add', menuButtons[mode], 'active');
         }
     }
     
@@ -12645,6 +12650,24 @@ function kellyProfileJoyreactor() {
             updateSidebarPosition();
         },
         
+        onOptionsUpdate : function(refreshPosts) {
+            
+            if (refreshPosts) {
+                
+                var old = document.querySelectorAll('.' + handler.className + '-post-button-base');
+               
+                if (old) {
+                    for (var i = 0; i < old.length; i++) {
+                        if (old[i].parentNode) old[i].parentNode.removeChild(old[i]);                
+                    }
+                }
+                
+                handler.fav.formatPostContainers(); 
+                return true;
+            }
+            
+        },
+        
         onBeforeGoToFavPage : function(newPage) {
               
             var autoScrollRow = handler.fav.getGlobal('fav').coptions.grid.autoScroll;            
@@ -12835,7 +12858,7 @@ function kellyProfileJoyreactor() {
                 
                 placeholder.appendChild(fastSave); 
                     
-                var fastSaveBaseClass =  handler.hostClass + ' ' + handler.className + '-fast-save ' + handler.className + '-icon-download ';
+                var fastSaveBaseClass =  handler.hostClass + ' ' + handler.className + '-post-button-base ' + handler.className + '-fast-save ' + handler.className + '-icon-download ';
             
                 fastSave.className = fastSaveBaseClass + handler.className + '-fast-save-unchecked';
                 fastSave.onclick = function() {
@@ -13021,7 +13044,7 @@ function kellyProfileJoyreactor() {
         }
         
         var sideName = side ? 'sidebar' : 'post';
-        var className = handler.className + '-base ' + handler.className + '-' + sideName + '-addtofav';
+        var className =  handler.className + '-' + sideName + '-addtofav';
        
         var addToFav = KellyTools.getElementByClass(postBlock, className);
         
@@ -13029,20 +13052,20 @@ function kellyProfileJoyreactor() {
             
             if (side) {
                 addToFav = document.createElement('DIV'); 
-                addToFav.className =  handler.hostClass + ' ' + handler.className + '-icon-diskete ' + className;
+                addToFav.className =  handler.hostClass + ' ' + handler.className + '-post-button-base ' + handler.className + '-icon-diskete ' + className;
                      
                 shareButtonsBlock.appendChild(addToFav);
             } else {
                 
                 addToFav = document.createElement('span');
-                addToFav.className = handler.hostClass + ' ' + handler.className + '-link';
+                addToFav.className = handler.hostClass + ' ' + handler.className + '-post-button-base ' + handler.className + '-link';
                 
                 // keep same url as main button, to dont loose getPostLink method functional and keep similar environment
                 
                 KellyTools.setHTMLData(addToFav, '<a href="#" class="' + className + '" href="' + link.href + '"></a>');
                                
                 link.parentElement.parentElement.insertBefore(addToFav, link.parentElement); 
-                addToFav = KellyTools.getElementByClass(addToFav, handler.className + '-base');
+                addToFav = KellyTools.getElementByClass(addToFav, className);
                 
             }           
         }         

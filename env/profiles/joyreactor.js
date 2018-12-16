@@ -173,6 +173,24 @@ function kellyProfileJoyreactor() {
             updateSidebarPosition();
         },
         
+        onOptionsUpdate : function(refreshPosts) {
+            
+            if (refreshPosts) {
+                
+                var old = document.querySelectorAll('.' + handler.className + '-post-button-base');
+               
+                if (old) {
+                    for (var i = 0; i < old.length; i++) {
+                        if (old[i].parentNode) old[i].parentNode.removeChild(old[i]);                
+                    }
+                }
+                
+                handler.fav.formatPostContainers(); 
+                return true;
+            }
+            
+        },
+        
         onBeforeGoToFavPage : function(newPage) {
               
             var autoScrollRow = handler.fav.getGlobal('fav').coptions.grid.autoScroll;            
@@ -363,7 +381,7 @@ function kellyProfileJoyreactor() {
                 
                 placeholder.appendChild(fastSave); 
                     
-                var fastSaveBaseClass =  handler.hostClass + ' ' + handler.className + '-fast-save ' + handler.className + '-icon-download ';
+                var fastSaveBaseClass =  handler.hostClass + ' ' + handler.className + '-post-button-base ' + handler.className + '-fast-save ' + handler.className + '-icon-download ';
             
                 fastSave.className = fastSaveBaseClass + handler.className + '-fast-save-unchecked';
                 fastSave.onclick = function() {
@@ -549,7 +567,7 @@ function kellyProfileJoyreactor() {
         }
         
         var sideName = side ? 'sidebar' : 'post';
-        var className = handler.className + '-base ' + handler.className + '-' + sideName + '-addtofav';
+        var className =  handler.className + '-' + sideName + '-addtofav';
        
         var addToFav = KellyTools.getElementByClass(postBlock, className);
         
@@ -557,20 +575,20 @@ function kellyProfileJoyreactor() {
             
             if (side) {
                 addToFav = document.createElement('DIV'); 
-                addToFav.className =  handler.hostClass + ' ' + handler.className + '-icon-diskete ' + className;
+                addToFav.className =  handler.hostClass + ' ' + handler.className + '-post-button-base ' + handler.className + '-icon-diskete ' + className;
                      
                 shareButtonsBlock.appendChild(addToFav);
             } else {
                 
                 addToFav = document.createElement('span');
-                addToFav.className = handler.hostClass + ' ' + handler.className + '-link';
+                addToFav.className = handler.hostClass + ' ' + handler.className + '-post-button-base ' + handler.className + '-link';
                 
                 // keep same url as main button, to dont loose getPostLink method functional and keep similar environment
                 
                 KellyTools.setHTMLData(addToFav, '<a href="#" class="' + className + '" href="' + link.href + '"></a>');
                                
                 link.parentElement.parentElement.insertBefore(addToFav, link.parentElement); 
-                addToFav = KellyTools.getElementByClass(addToFav, handler.className + '-base');
+                addToFav = KellyTools.getElementByClass(addToFav, className);
                 
             }           
         }         
