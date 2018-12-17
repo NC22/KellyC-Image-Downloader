@@ -18,6 +18,7 @@
    ToDo : 
    
    todo docs and examples
+   todo avoidOutOfBounds - configurable sides
    
 */
 
@@ -79,6 +80,7 @@ function KellyTooltip(cfg) {
         }
         
         if (handler.self && updateContainerClass) {
+            // todo - better remove previouse class, without full overwrite
             handler.self.className = getSelfClass();
         }
         
@@ -647,6 +649,7 @@ function KellyTileGrid(cfg) {
     var loading = 0;
     
     this.eventsChecked = false;
+    this.gifBase64 = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; // empty 1x1 gif placeholder
     
     var imgEvents = {
         onLoadBoundsError : function(e) {
@@ -4040,7 +4043,8 @@ function KellyThreadWork(cfg) {
         for (var i = 0; i < threads.length; i++) {
             
             if (threads[i].request) {
-                threads[i].request.abort();
+                threads[i].request.abort();                
+                threads[i].request = false;
             }
             
             if (threads[i].timeoutTimer) {
@@ -4067,6 +4071,11 @@ function KellyThreadWork(cfg) {
     
     this.onJobEnd = function(thread) {
 
+        if (thread.request) {
+            thread.request.abort();
+            thread.request = false;
+        }
+        
         if (thread.timeoutTimer) {
             clearTimeout(thread.timeoutTimer);
             thread.timeoutTimer = false;
@@ -4154,10 +4163,13 @@ function KellyThreadWork(cfg) {
             request.open('GET', thread.job.url, true);
 
             request.onload = function() {
+                
+                thread.request = false;
+                
                 if (this.status == 200) {		  
                     thread.response = validateResponse(this.response);
                 } else {
-                    thread.response = 0;
+                    thread.response = false;
                     thread.error = 'XMLHttpRequest : bad response status ' + this.status;
                 }
 
@@ -4166,10 +4178,12 @@ function KellyThreadWork(cfg) {
 
             request.onerror = function() {
                
-               thread.response = 0;
-               thread.error = 'XMLHttpRequest : error without exit status check Access-Control-Allow-Origin';
-               
-               handler.onJobEnd(thread);
+                thread.request = false;
+                thread.response = false;
+                
+                thread.error = 'XMLHttpRequest : error without exit status check Access-Control-Allow-Origin';
+
+                handler.onJobEnd(thread);
             };
             
             request.send();
@@ -4950,14 +4964,15 @@ function KellyGrabber(cfg) {
             tooltipEl.updateCfg({
                 target : target, 
                 offset : {left : 0, top : 0}, 
-                positionY : 'top',
-                positionX : 'right',				
-                ptypeX : 'outside',
-                ptypeY : 'inside',
+                positionY : 'bottom',
+                positionX : 'left',				
+                ptypeX : 'inside',
+                ptypeY : 'outside',
                 avoidOutOfBounds : false,
+                closeButton : true,
             });
             
-        var baseClass = fav.getGlobal('env').className + '-tooltipster-ItemInfo';
+        var baseClass = fav.getGlobal('env').className + '-tooltipster-ItemInfo ' + fav.getGlobal('env').className + '-tooltipster-DownloaderItemInfo';
         
         var itemInfo = document.createElement('div');
             itemInfo.className = baseClass;
@@ -4978,6 +4993,7 @@ function KellyGrabber(cfg) {
             tcontainer.appendChild(itemInfo);
             
         tooltipEl.show(true);
+        fav.tooltipBeasy = true;
     }
     
     this.clearStateForImageGrid = function() {
@@ -5073,6 +5089,18 @@ function KellyGrabber(cfg) {
                 
                 }, tooltipOptions, 100);       
                 */
+                
+                holder.onclick = function(e) {                
+                    
+                    // if (fav.getTooltip().isShown()) return false;
+                    
+                    var itemIndex = this.getAttribute('downloadIndex');
+                    showDownloadItemInfoTooltip(this.getAttribute('downloadIndex'), this);
+                    
+                    return false;
+                }  
+                
+                /*
                 holder.onmouseover = function(e) {                
                     
                     var itemIndex = this.getAttribute('downloadIndex');
@@ -5086,7 +5114,7 @@ function KellyGrabber(cfg) {
                         
                     fav.getTooltip().show(false);
                 }  
-                                
+                */              
             } 
             
             var statusPlaceholder = KellyTools.getElementByClass(holder, imageClassName + '-download-status');
@@ -5951,7 +5979,10 @@ function KellyGrabber(cfg) {
             baseFileFolder += '/';
         }
         
-        if (!handler.initDownloadItemFile(download)) return false;
+        if (!handler.initDownloadItemFile(download)) {                              
+            handler.updateStateForImageGrid();
+            return false;
+        }
                 
         var downloadOptions = {
             filename : baseFileFolder + download.filename + '.' + download.ext, 
@@ -6537,10 +6568,6 @@ KellyTools.getViewport = function() {
         screenHeight: height,
         screenWidth: width,
     };
-}
-
-KellyTools.replaceAll = function(str, search, replacement) {
-    return str.split(search).join(replacement);
 }
 
 KellyTools.getScrollTop = function() {
@@ -7471,7 +7498,6 @@ function KellyOptions(cfg) {
             handler.favEnv.closeSidebar();
         }
                 
-        // currently only one type of storage
         favContent.innerHTML = '';
         var output= '';
     
@@ -8077,8 +8103,7 @@ function KellyFavItems()
     var tooltip = false;
                
     var page = 1;
-    var tooltipBeasy = false; // true if shown something important throw handler.getTooltip(), prevent create another tooltips onmouseover
-    
+        
     var displayedItems = [];
     var galleryImages = [];
     var galleryImagesData = [];
@@ -8090,14 +8115,16 @@ function KellyFavItems()
         Stores information about config, items, categories
         
         categories - array of objects [.name, .id] (see getStorageManager().categoryCreate method)
-        items      - array of objects [.categoryId (array), .link (string), .pImage (string|array of strings), .commentLink (undefined|text) (see itemAdd method for list of current available structured data vars)
+        items      - array of objects [.categoryId (array), .link (string), .pImage (string|array of strings), .commentLink (undefined|text) (see selectedDataToFavItem method for list of current available structured data vars)
         coptions   - structured data (see this.load method for list of current available options)
     */  
     
     var fav = {};
     
-    this.isDownloadSupported = false;    
+    this.isDownloadSupported = false;  
+    
     this.sideBarLock = false;
+    this.tooltipBeasy = false; // true if shown something important throw handler.getTooltip(), prevent create another tooltips onmouseover and hide onmouseout
     
     // buffer for page loaded as media rosource
     var selfData = false;
@@ -8247,6 +8274,8 @@ function KellyFavItems()
          
                 handler.load(false, function() {
                     
+                    initBGEvents();            
+                    
                     if (env.getPosts()) {                
                         handler.initOnPageReady();                    
                     } else {                    
@@ -8255,16 +8284,14 @@ function KellyFavItems()
                             return false;
                         }, 'init_');                    
                     }
-                });
-                
+                });               
+        
             } else if (action == 'ignore') {
                 return;
             } 
             
             log(KellyTools.getProgName() + ' init | loaded in ' + action + ' mode | profile ' + env.profile + ' | DEBUG ' + (KellyTools.DEBUG ? 'enabled' : 'disabled'));           
         }
-        
-        initBGEvents();
         
         handler.addEventPListener(window, "message", function (e) {
             getMessage(e);
@@ -8397,8 +8424,12 @@ function KellyFavItems()
                         var altBounds = {width : 200, height : 200};
                         
                         if (data.errorCode == 2 && data.boundEl.getAttribute('data-width')) {
+                            
                             altBounds.width = data.boundEl.getAttribute('data-width');
                             altBounds.height = data.boundEl.getAttribute('data-height');
+                            
+                            // todo - maybe add reload attempt (503 error gone away after few seconds)
+                            // события onload \ onerror сохраняются
                         }
                         
                         data.boundEl.setAttribute('data-width', altBounds.width);
@@ -8423,6 +8454,7 @@ function KellyFavItems()
                     if (isAllBoundsLoaded) {
                         imageEvents.saveImageProportions();
                     }
+                    
                     // if fav.coptions.imagegrid.padding
                     /*
                         var grid = imagesBlock.getElementsByClassName(env.className + '-FavItem-grid-resized');
@@ -8480,7 +8512,7 @@ function KellyFavItems()
             itemsLengthClass += '-1000';
         }
         
-        favCounter.className = env.className + '-FavItemsCount ' + env.className + '-buttoncolor-dynamic ' + itemsLengthClass;        
+        favCounter.className = env.className + '-FavItemsCount ' + env.className + '-bgcolor-dynamic ' + itemsLengthClass;        
         favCounter.innerText = fav.items.length;
     }
     
@@ -8515,7 +8547,8 @@ function KellyFavItems()
         return downloadManager;
     }
     
-    this.getTooltip = function(toDefaults) {
+    this.getTooltip = function() {
+
         if (!tooltip) {
         
             tooltip = new KellyTooltip({
@@ -8528,7 +8561,7 @@ function KellyFavItems()
                 
                     onMouseOut : function(tooltip, e) {
                         
-                        if (tooltipBeasy) return false;
+                        if (handler.tooltipBeasy) return false;
                         
                         var related = e.toElement || e.relatedTarget;
                         if (tooltip.isChild(related)) return;
@@ -8540,9 +8573,11 @@ function KellyFavItems()
                         
                         tooltip.updateCfg({closeButton : false});
                         
-                        setTimeout(function() {
-                            tooltipBeasy = false;
-                        }, 500);
+                        if (handler.tooltipBeasy) {
+                            setTimeout(function() {
+                                handler.tooltipBeasy = false;
+                            }, 500);
+                        }
                         
                         tooltip.getContent().onclick = function() {}
                     },
@@ -8708,7 +8743,7 @@ function KellyFavItems()
     this.goToFavPage = function(newPage) {
         
         if (page == newPage) return false;
-        if (tooltipBeasy) return false;
+        if (handler.tooltipBeasy) return false;
         
         if (!imagesBlock) return false;
         
@@ -8977,7 +9012,7 @@ function KellyFavItems()
                     onShow : function(self, show) {
                         if (handler.getTooltip().isShown()) {
                             handler.getTooltip().show(false);
-                            tooltipBeasy = false;
+                            handler.tooltipBeasy = false;
                         }
                     }
                 },
@@ -9029,7 +9064,7 @@ function KellyFavItems()
         
         // add fav button on top
         
-        var counterHtml = '<div class="'+ env.className + '-FavItemsCount ' + env.className + '-basecolor-dynamic"></div>';
+        var counterHtml = '<div class="'+ env.className + '-FavItemsCount ' + env.className + '-bgcolor-dynamic"></div>';
         var iconHtml = '';
         
         if (fav.coptions.icon) {
@@ -9693,7 +9728,7 @@ function KellyFavItems()
             var src = 'src="' + coverImage + '"';
             
             if (fav.coptions.grid.lazy) {
-                src = 'src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-' + src;                
+                src = 'src="' + imageGrid.gifBase64 + '" data-' + src;                
             }
             
             var html = '\
@@ -9765,7 +9800,7 @@ function KellyFavItems()
             
             itemBlock.appendChild(itemBlockAdditions);        
             itemBlock.onmouseover = function(e) {                
-                if (tooltipBeasy) return false;
+                if (handler.tooltipBeasy) return false;
                 if (readOnly) return false;
                 
                 var itemIndex = this.getAttribute('itemIndex');
@@ -9773,7 +9808,7 @@ function KellyFavItems()
             }  
                 
             itemBlock.onmouseout = function(e) {    
-                if (tooltipBeasy) return false;
+                if (handler.tooltipBeasy) return false;
                 if (readOnly) return false;
                 
                 var related = e.toElement || e.relatedTarget;
@@ -9890,7 +9925,7 @@ function KellyFavItems()
                 closeButton : false,
             });
         
-        tooltipBeasy = true; 
+        handler.tooltipBeasy = true; 
         
         var html = '\
             <div class="' + env.className + '-GoToPageForm">\
@@ -9912,7 +9947,7 @@ function KellyFavItems()
             if (page > totalPages) page = totalPages;
             if (page < 1) page = 1;
             
-            tooltipBeasy = false;
+            handler.tooltipBeasy = false;
             tooltipEl.show(false);
             
             handler.goToFavPage(page);
@@ -9949,7 +9984,7 @@ function KellyFavItems()
         KellyTools.setHTMLData(container, html);
         
         container.onclick = function() {
-            tooltipBeasy = true; 
+            handler.tooltipBeasy = true; 
             tooltipEl.updateCfg({closeButton : true});
         }
         
@@ -10031,7 +10066,7 @@ function KellyFavItems()
         container.onclick = function(e) {            
             if (e.target.className.indexOf('make-beasy') == -1) return;
             
-            tooltipBeasy = true; 
+            handler.tooltipBeasy = true; 
             tooltipEl.updateCfg({closeButton : true});
         }
         
@@ -10141,13 +10176,13 @@ function KellyFavItems()
                 }
             
                 filter.onmouseover = function (e) { 
-                    if (tooltipBeasy) return false;
+                    if (handler.tooltipBeasy) return false;
                     if (readOnly) return false; 
                     showCategoryControllTooltip(this.getAttribute('itemId'), this);    
                 }
                 
                 filter.onmouseout = function(e) {
-                    if (tooltipBeasy) return false;
+                    if (handler.tooltipBeasy) return false;
                     if (readOnly) return false;
                     
                     var related = e.toElement || e.relatedTarget;
@@ -10197,12 +10232,12 @@ function KellyFavItems()
             KellyTools.setHTMLData(filterAdd, '<a href="#" onclick="return false;">+</a>');
             
             filterAdd.onmouseover = function (e) { 
-                if (tooltipBeasy) return false;
+                if (handler.tooltipBeasy) return false;
                 showCategoryCreateTooltip(this);    
             }
             
             filterAdd.onmouseout = function(e) {
-                if (tooltipBeasy) return false;
+                if (handler.tooltipBeasy) return false;
                 var related = e.toElement || e.relatedTarget;
                 if (handler.getTooltip().isChild(related)) return;
                 
@@ -10233,13 +10268,9 @@ function KellyFavItems()
     
     function checkSafeUpdateData() {
         
-        if (tooltipBeasy) {
-            tooltipBeasy = false;
+        if (handler.tooltipBeasy) {
+            handler.tooltipBeasy = false;
         }
-        
-        if (handler.getTooltip().isShown()) {
-            handler.getTooltip().show(false);
-        }  
         
         handler.getTooltip().show(false);
             
@@ -10548,7 +10579,7 @@ function KellyFavItems()
             
                 if (handler.getTooltip().isShown() == 'gotoFavPage') {
                     handler.getTooltip().show(false);
-                    tooltipBeasy = false;
+                    handler.tooltipBeasy = false;
                 } else {                      
                     showGoToPageTooltip(this);                       
                 }                  
@@ -11152,6 +11183,8 @@ function KellyFavItems()
                     hidePreview.innerText = lng.s('Показать превью', 'item_preview_show');
                 }
                 
+                onSideBarUpdate();
+
                 return false;
             }
             
@@ -11215,13 +11248,39 @@ function KellyFavItems()
         KellyTools.getElementByClass(modalBoxContent, env.className + 'CatAdd').onclick = function() { handler.categoryAdd(); return false; }        
         KellyTools.getElementByClass(modalBoxContent, env.className + 'CatCreate').onclick = function () { handler.categoryCreate(); return false; }
         // KellyTools.getElementByClass(modalBoxContent, env.className + 'CatRemove').onclick = function () { handler.categoryRemove(); return false; }
-
+        
+        var savingProcess = false;
         KellyTools.getElementByClass(modalBoxContent, env.className + 'Add').onclick = function () { 
-            handler.save('cfg'); 
-
-            var result = handler.itemAdd();
-                     
-            if (result && onAdd) onAdd(selectedPost, selectedComment, selectedImages);            
+            
+            if (savingProcess) return;
+            console.log('sav sav');
+             
+            handler.showSidebarMessage(lng.s('', 'saving')); 
+                        
+            var result = selectedDataToFavItem();
+            if (result.error) {
+                
+                handler.showSidebarMessage(result.errorText, true); 
+                
+            } else {
+                
+                savingProcess = true;
+                
+                handler.itemAdd(result.postItem, function(error, exist) {
+                    
+                    savingProcess = false;
+                    
+                    if (error) {                     
+                        handler.showSidebarMessage(lng.s('Ошибка сохранения', 'storage_save_e1'), true);                   
+                    } else {                       
+                        handler.showSidebarMessage(lng.s('', exist ? 'item_upd' : 'item_added')); 
+                        
+                        if (onAdd) onAdd(selectedPost, selectedComment, selectedImages);
+                        handler.save('cfg');
+                    }                 
+                                            
+                });
+            }            
             return false; 
         }
                 
@@ -11243,13 +11302,11 @@ function KellyFavItems()
         return false;
     }
     
-    // noSave = true - only return new item without save and dialog
-    
-    this.itemAdd = function(noSave) {
-        
+    function selectedDataToFavItem() {
+      
         if (!selectedPost) {
             log('itemAdd : selected post empty');
-            return false;
+            return {error : 'not_selected', errorText : ''};
         }
                           
         var postItem = { 
@@ -11278,14 +11335,13 @@ function KellyFavItems()
             postItem.commentLink = env.getCommentLink(selectedComment);
             
             if (!postItem.commentLink) {
-                
-                if (!noSave) handler.showSidebarMessage(lng.s('Ошибка определения ссылки на публикацию', 'item_add_err1'), true);
-                return false;
+                return {error : 'post_link_empty', errorText : lng.s('Ошибка определения ссылки на комментарий', 'item_add_err1')};
             }
         } 
 
-        if (selectedImages.length == 1) postItem.pImage = selectedImages[0];
+             if (selectedImages.length == 1) postItem.pImage = selectedImages[0];
         else if (selectedImages.length > 1) {
+            
             var previewImage = KellyTools.getElementByClass(modalBoxContent, env.className + '-PreviewImage');
             
             // may unexist for images that taken from native favorites in iframe mode
@@ -11325,40 +11381,54 @@ function KellyFavItems()
         postItem.link = env.getPostLink(selectedPost);           
         
         if (!postItem.link) {
-            
-            if (!noSave) handler.showSidebarMessage(lng.s('Публикация не имеет ссылки', 'item_bad_url'), true);
-            return false;
-            
-        }
-        
-        if (noSave) return postItem;
-        
-        var inFav = handler.getStorageManager().searchItem(fav, {link : postItem.link, commentLink : postItem.commentLink ? postItem.commentLink : false});        
-        if (inFav !== false) {
-            
-            fav.items[inFav] = postItem;
-            
-            handler.showSidebarMessage(lng.s('Избранная публикация обновлена', 'item_upd'));
-            handler.save('items');
-            
-            return true;
-        }
-            
-        fav.ids++;		
-        postItem.id = fav.ids; 
+            return {error : 'post_link_empty', errorText : lng.s('Публикация не имеет ссылки', 'item_bad_url')};
+        } 
 
-        handler.showSidebarMessage(lng.s('Публикация добавлена в избранное', 'item_added'));
-                
-        fav.items[fav.items.length] = postItem;
-        handler.updateFavCounter();
+        return {error : false, postItem : postItem};
+    }
+    
+    // noSave = true - only return new item without save and dialog
+    
+    this.itemAdd = function(postItem, onSave) {
+        
+        var itemIndex = handler.getStorageManager().searchItem(fav, {link : postItem.link, commentLink : postItem.commentLink ? postItem.commentLink : false});        
+        if (itemIndex !== false) {
             
-        selectedComment ? env.formatComments(selectedPost) : env.formatPostContainer(selectedPost);
+            fav.items[itemIndex] = postItem;
+            
+            handler.save('items', function(error) {                
+                if (onSave) onSave(error, true, itemIndex);
+            });
+            
+        } else {        
         
-        log('post saved');
-        log(postItem);
+            itemIndex = fav.items.length;
+            
+            fav.ids++;		
+            postItem.id = fav.ids;
+            
+            fav.items[itemIndex] = postItem;
+
+            handler.save('items', function(error) {
+                
+                if (!error) {
+                
+                    handler.updateFavCounter();
+                        
+                    selectedComment ? env.formatComments(selectedPost) : env.formatPostContainer(selectedPost);
+                    
+                    log('itemAdd : post saved');
+                    log(postItem);
+                    
+                } else {
+                    fav.items.splice(itemIndex, 1);        
+                }
+                
+                if (onSave) onSave(error, false, itemIndex);
+            });
         
-        handler.save('items');
-        
+        }
+                
         return true;
     }
     
@@ -11663,7 +11733,7 @@ function KellyFavItems()
         
             error = 'Страница не доступна ' + thread.job.data.page + ' (ошибка загрузки или превышен интервал ожидания)'; // window.document null  
             if (thread.error) {
-                error += ' | Ошибка воркера : [' + thread.error + ']';
+                error += ' | Ошибка : [' + thread.error + ']';
             }
             
             favNativeParser.addJob(
@@ -11809,8 +11879,10 @@ function KellyFavItems()
                 if (!postOk) continue;
             }
             
-            var postItem = handler.itemAdd(true);
-            if (postItem) {
+            var result = selectedDataToFavItem();            
+            if (!result.error) {
+                
+                var postItem = result.postItem;
                 
                 if (handler.getStorageManager().searchItem(worker.collectedData, postItem) === false) {
                     
@@ -12570,8 +12642,8 @@ function kellyProfileJoyreactor() {
                     
                     css = "\n\r\n\r\n\r" + '/* ' +  handler.profile + '-dynamic */' + "\n\r\n\r\n\r";
                     
-                    if (style.btn && style.btn.indexOf('0, 0, 0, 0') == -1) {
-                        css += '.' + handler.className + '-basecolor-dynamic {';
+                    if (style.bg && style.bg.indexOf('0, 0, 0, 0') == -1) {
+                        css += '.' + handler.className + '-bgcolor-dynamic {';
                         css += 'background-color : ' + style.btn + '!important;';
                         css += '}';
                     }

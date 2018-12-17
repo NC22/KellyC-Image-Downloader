@@ -218,6 +218,10 @@
     color : #e25757;
 }
 
+.__BASECLASS__-tooltipster-DownloaderItemInfo {
+    width : 250px;
+}
+
 .__BASECLASS__-tooltipster-ItemInfo-tags {
      margin : 0px;
      padding : 0px;
@@ -307,8 +311,10 @@
 	height : 100%;
 }
 
-.__BASECLASS__-FavItem-error:after {
-    content: " /\\_/\\ [X] \A  ='_'= 404? \A  |    \\ / \A  |..__ \/";
+ /* 
+.-FavItem-error:after {
+    
+    content: " /\\_/\\ [X] \A  ='_'= 404? \A  |    \\ / \A  |..__ \/"; 
     left: 40%;
     bottom: 10px;
     position: absolute;
@@ -318,9 +324,31 @@
     color : #1d1515;
     font-weight : bold;
 }
+*/
 
-.__BASECLASS__-FavItem-error img.__BASECLASS__-preview {
+.__BASECLASS__-FavItem-error img {
     opacity : 0;
+}
+
+.__BASECLASS__-FavItem-error:before, .kelly-jr-ui-FavItem-error:after {
+    position: absolute;
+    left: 50%;
+    content: ' ';
+    height: 50%;
+    width: 16px;
+    background-color: #ffc9c9;
+    top: 50%;
+    z-index: 1;
+    margin-top: -25%;
+    border-radius: 6px;
+}
+
+.__BASECLASS__-FavItem-error:before {
+  transform: rotate(45deg);
+}
+
+.__BASECLASS__-FavItem-error:after {
+  transform: rotate(-45deg);
 }
 
 .__BASECLASS__-FavItem  {
@@ -1460,5 +1488,6 @@
     padding: 6px;
     width: 100%;
     height: 100%;
-    box-sizing: border-box;
+    box-sizing: border-box; 
+    cursor: pointer;
 }

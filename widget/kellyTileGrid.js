@@ -64,6 +64,7 @@ function KellyTileGrid(cfg) {
     var loading = 0;
     
     this.eventsChecked = false;
+    this.gifBase64 = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; // empty 1x1 gif placeholder
     
     var imgEvents = {
         onLoadBoundsError : function(e) {

@@ -80,8 +80,8 @@ function kellyProfileJoyreactor() {
                     
                     css = "\n\r\n\r\n\r" + '/* ' +  handler.profile + '-dynamic */' + "\n\r\n\r\n\r";
                     
-                    if (style.btn && style.btn.indexOf('0, 0, 0, 0') == -1) {
-                        css += '.' + handler.className + '-basecolor-dynamic {';
+                    if (style.bg && style.bg.indexOf('0, 0, 0, 0') == -1) {
+                        css += '.' + handler.className + '-bgcolor-dynamic {';
                         css += 'background-color : ' + style.btn + '!important;';
                         css += '}';
                     }

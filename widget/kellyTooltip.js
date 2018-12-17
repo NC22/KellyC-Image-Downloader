@@ -10,6 +10,7 @@
    ToDo : 
    
    todo docs and examples
+   todo avoidOutOfBounds - configurable sides
    
 */
 
@@ -71,6 +72,7 @@ function KellyTooltip(cfg) {
         }
         
         if (handler.self && updateContainerClass) {
+            // todo - better remove previouse class, without full overwrite
             handler.self.className = getSelfClass();
         }
         

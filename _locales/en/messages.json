@@ -560,6 +560,9 @@
     "save":{  
         "message":"Save"
     },
+    "saving":{  
+        "message":"Saving..."
+    }, 
     "selection_empty":{  
         "message":"Selection empty"
     },   
@@ -650,6 +653,9 @@
     "storage_import_e1":{  
         "message":"Please select file"
     }, 
+    "storage_save_e1":{  
+        "message":"Cant save data (check current used localStorage space in profile section) "
+    },
     "storage_import_limit":{  
         "message":"File is too big (maximum file size __MAX_CONFIG_SIZE__ mb). Uploaded file __FILESIZE__ mb."
     }, 
