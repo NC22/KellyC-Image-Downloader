@@ -2714,6 +2714,17 @@ function KellyFavStorageManager(cfg) {
         
         handler.envTotalKb = 0;
         var itemsLoaded = 0;
+
+        if (!slist.length) {
+            
+            KellyTools.setHTMLData(handler.storageList, '\
+                <div class="' + handler.className + '-DBItem active">\
+                    <span class="' + handler.className + '-DBItem-name">' + handler.fav.getGlobal('fav').coptions.storage + '</span>\
+                </div>\
+            ');
+            
+            return;
+        }
         
         for (var i=0; i < slist.length; i++) {
         
@@ -2902,17 +2913,158 @@ function KellyFavStorageManager(cfg) {
                 
         handler.wrap.appendChild(handler.storageContainer);
     }
+    
+    this.applayDBCreateButton = function(el, idPrefix) {
         
-    this.showDBManager = function() {
+        if (!el) {
+            return false;
+            
+        }
+
+        el.onclick = function() {
+            
+            if (handler.inUse) return false;
+            handler.inUse = true;
+            
+            var dbName = KellyTools.inputVal(document.getElementById(idPrefix + '-create-name')); // todo validate by regular	
+            if (!dbName) {
+                handler.showMessage(lng.s('Введите название базы данных', 'storage_empty_name'), true);
+                return false;
+            }
+            
+            // idPrefix + '-conflict-action'
+            
+            var overwrite = document.getElementById(idPrefix + '-overwrite').checked ? true : false;
+            var add       = document.getElementById(idPrefix + '-add').checked ? true : false;
+            var cancel    = document.getElementById(idPrefix + '-cancel').checked ? true : false;
+            
+            mode = 'cancel';
+            if (add) mode = 'add';
+            if (overwrite) mode = 'overwrite'; // dont needed - use delete instead, more safe and clear for user
+            
+            // validate memory limits
+            
+            if (handler.slist === false) {
+
+                handler.showMessage(lng.s('Дождитесь загрузки списка баз данных', 'storage_beasy'), true);
+                return false;
+            }
+            
+            var envMb = handler.envTotalKb / 1000;
+                
+            if (envMb > MAX_ENV_SIZE) {
+                                    
+                envMb = envMb.toFixed(2);
+                handler.showMessage(lng.s('', 'storage_manager_hit_limit_env', { MAX_ENV_SIZE : MAX_ENV_SIZE, ENVSIZE : envMb}), true);	
+                return false;
+            }
+            
+            // check cached data before ask dispetcher
+            if (mode == 'cancel' && handler.slist.indexOf(dbName) != -1) {
+                
+                handler.showMessage(lng.s('База данных уже существует', 'storage_create_already_exist'), true);
+                return false;					
+            }
+            
+            // request if any bd already exist
+            handler.loadDB(dbName, function(db) {
+                
+                if (db !== false && mode == 'cancel') {
+                    handler.showMessage(lng.s('База данных уже существует', 'storage_create_already_exist'), true);
+                    return false;							
+                }
+                
+                var onDBSave =  function(error) {
+                
+                    if (!error) {
+                        
+                        var noticeName = 'storage_create_ok_mcancel';
+                        
+                        if (db !== false && mode == 'add') {                                
+                            noticeName = 'storage_create_ok_madd';
+                        }
+                        
+                        if (dbName == handler.fav.getGlobal('fav').coptions.storage) {
+                            
+                            handler.fav.load('items', function() {
+                                handler.fav.updateFavCounter();
+                            });	
+                        }
+                        
+                        handler.getStorageList(handler.showStorageList);							
+                        handler.showMessage(lng.s('', noticeName));
+                        
+                    } else {
+                    
+                        handler.showMessage(lng.s('Ошибка добавления базы данных', 'storage_create_e1'), true);
+                    }
+                    
+                };
+                        
+                // load data from input file
+                
+                var fileInput = document.getElementById(idPrefix + '-db-file');
+                if (fileInput.value) {
+                
+                    KellyTools.readInputFile(fileInput, function(input, fileData) {
+                        
+                        var fileSizeMb = fileData.length / 1000 / 1000;
+                        
+                        if (fileSizeMb > MAX_TOTAL_PER_DB) {
+                            
+                            fileSizeMb = fileSizeMb.toFixed(2);
+                            handler.showMessage(lng.s('', 'storage_manager_hit_limit_db', { MAX_TOTAL_PER_DB : MAX_TOTAL_PER_DB, FILESIZE : fileSizeMb}), true);	
+                            return;
+                        }
+                        
+                        var newDBData = KellyTools.parseJSON(fileData.trim());                          
+                        if (newDBData) { 
+                        
+                            if (db && mode == 'add') {
+                                
+                                newDBData = handler.validateDBItems(newDBData);
+
+                                var result = handler.addDataToDb(db, newDBData);
+                                
+                                // todo show result public
+                                handler.log(result);  
+                                
+                                newDBData = db;
+                                handler.saveDB(dbName, newDBData, onDBSave);
+                            } else {
+                                newDBData = handler.validateDBItems(newDBData);	
+                                handler.saveDB(dbName, newDBData, onDBSave);
+                            }
+                        } else {
+                            handler.showMessage(lng.s('Ошибка парсинга структурированных данных', 'storage_create_e2'), true);	
+                        }
+                        
+                    });
+                
+                } else {
+                    
+                    handler.saveDB(dbName, handler.getDefaultData(), onDBSave);
+                }
+                
+            });
+            
+            return false;
+        }
+        
+        return true;
+    }
+        
+    this.showDBManager = function(idPrefix) {
     
         if (!handler.wrap) return;
         if (handler.inUse) return;
         
         handler.wrap.innerHTML = '';
-                
-        // todo - replace var name to base class and rename class, check correct
-                
-        var overwriteId = handler.className + '-overwrite';
+              
+        if (!idPrefix) {
+            idPrefix = handler.className + '-dbmanager';
+        }
+        
         var html = '\
             <div class="' + handler.className + '-wrap">\
                 <table class="' + handler.className + '-options-table">\
@@ -2924,21 +3076,21 @@ function KellyFavStorageManager(cfg) {
                     </td></tr>\
                     <tr><td colspan="2">' + lng.s('', 'storage_type_notice') + '</td></tr>\
                     <tr><td colspan="2"><h3>' + lng.s('Добавить новую базу', 'storage_add_new') + '</h3></td></tr>\
-                    <tr><td>' + lng.s('Загрузить из файла', 'storage_load_from_file') + '</td><td><input type="file" id="' + handler.className + '-db-file"></td></tr>\
-                    <tr><td>' + lng.s('Идентификатор базы', 'storage_name') + '</td><td><input type="text" id="' + handler.className + '-create-name" placeholder="custom_data"></td></tr>\
-                    <tr><td><label for="' + overwriteId + '-cancel">' + lng.s('Отмена если существует', 'storage_create_cancel_if_exist') + '</label></td>\
-                        <td><input type="radio" name="' + overwriteId + '" id="' + overwriteId + '-cancel" value="cancel" checked></td></tr>\
-                    <tr style="display : none;"><td><label for="' + overwriteId + '-overwrite">Перезаписать если существует</label></td>\
-                        <td><input type="radio" name="' + overwriteId + '" id="' + overwriteId + '-overwrite" value="overwrite" ></td></tr>\
-                    <tr><td><label for="' + overwriteId + '-add">' + lng.s('', 'storage_create_add_if_exist') + '</label></td>\
-                        <td><input type="radio" name="' + overwriteId + '" id="' + overwriteId + '-add" value="add"></td></tr>\
+                    <tr><td>' + lng.s('Загрузить из файла', 'storage_load_from_file') + '</td><td><input type="file" id="' + idPrefix + '-db-file"></td></tr>\
+                    <tr><td>' + lng.s('Идентификатор базы', 'storage_name') + '</td><td><input type="text" id="' + idPrefix + '-create-name" placeholder="custom_data"></td></tr>\
+                    <tr><td><label for="' + idPrefix + '-cancel">' + lng.s('Отмена если существует', 'storage_create_cancel_if_exist') + '</label></td>\
+                        <td><input type="radio" name="' + idPrefix + '-conflict-action" id="' + idPrefix + '-cancel" value="cancel" checked></td></tr>\
+                    <tr style="display : none;"><td><label for="' + idPrefix + '-overwrite">Перезаписать если существует</label></td>\
+                        <td><input type="radio" name="' + idPrefix + '-conflict-action" id="' + idPrefix + '-overwrite" value="overwrite" ></td></tr>\
+                    <tr><td><label for="' + idPrefix + '-add">' + lng.s('', 'storage_create_add_if_exist') + '</label></td>\
+                        <td><input type="radio" name="' + idPrefix + '-conflict-action" id="' + idPrefix + '-add" value="add"></td></tr>\
                     <tr><td colspan="2"><input type="submit" class="' + handler.className + '-create" value="' + lng.s('Создать', 'create') + '"></td></tr>\
                     <tr><td colspan="2"><div class="' + handler.className + '-message"></div></td></tr>\
                     <tr><td colspan="2"><h3>' + lng.s('Управление данными', 'storage_manage') + '</h3></td></tr>\
                     <tr><td colspan="2"><div class="' + handler.className +'-StorageList">' + lng.s('Загрузка', 'loading') + '...' + '</div></td></tr>\
                     <tr><td colspan="2"><div class="' + handler.className + '-message ' + handler.className + '-message-storage"></div></td></tr>\
                     <tr><td colspan="2"><h3>' + lng.s('Удалить базу данных', 'storage_delete') + '</h3></td></tr>\
-                    <tr><td>' + lng.s('Идентификатор базы', 'storage_name') + '</td><td><input type="text" id="' + handler.className + '-delete-name" placeholder="custom_data"></td></tr>\
+                    <tr><td>' + lng.s('Идентификатор базы', 'storage_name') + '</td><td><input type="text" id="' + idPrefix + '-delete-name" placeholder="custom_data"></td></tr>\
                     <tr><td colspan="2"><input type="submit" class="' + handler.className + '-delete" value="' + lng.s('Удалить', 'delete') + '"></td></tr>\
                     <tr><td colspan="2"><div class="' + handler.className + '-message ' + handler.className + '-message-delete"></div></td></tr>\
                 </table>\
@@ -2969,7 +3121,6 @@ function KellyFavStorageManager(cfg) {
                 }
             }
         
-        handler.storageList = KellyTools.getElementByClass(handler.storageContainer, handler.className + '-StorageList');			
         
         
         var removeButton = KellyTools.getElementByClass(handler.storageContainer, handler.className + '-delete');
@@ -2978,7 +3129,7 @@ function KellyFavStorageManager(cfg) {
                 if (handler.inUse) return false;
                 handler.inUse = true;
                 
-                var dbName = KellyTools.inputVal(document.getElementById(handler.className + '-delete-name')); 	
+                var dbName = KellyTools.inputVal(document.getElementById(idPrefix + '-delete-name')); 	
                 if (!dbName) {
                     handler.showMessage('Введите название базы данных', true, 'delete');
                     return false;
@@ -2999,134 +3150,12 @@ function KellyFavStorageManager(cfg) {
                 return false;
             };
             
+        
         var createNewButton = KellyTools.getElementByClass(handler.storageContainer, handler.className + '-create');
-            createNewButton.onclick = function() {
-                
-                if (handler.inUse) return false;
-                handler.inUse = true;
-                
-                var dbName = KellyTools.inputVal(document.getElementById(handler.className + '-create-name')); // todo validate by regular	
-                if (!dbName) {
-                    handler.showMessage(lng.s('Введите название базы данных', 'storage_empty_name'), true);
-                    return false;
-                }
-                
-                var overwrite = document.getElementById(overwriteId + '-overwrite').checked ? true : false;
-                var add       = document.getElementById(overwriteId + '-add').checked ? true : false;
-                var cancel    = document.getElementById(overwriteId + '-cancel').checked ? true : false;
-                
-                mode = 'cancel';
-                if (add) mode = 'add';
-                if (overwrite) mode = 'overwrite'; // dont needed - use delete instead, more safe and clear for user
-                
-                if (handler.slist === false) {
-
-                    handler.showMessage(lng.s('Дождитесь загрузки списка баз данных', 'storage_beasy'), true);
-                    return false;
-                }
-                
-                var envMb = handler.envTotalKb / 1000;
-                    
-                if (envMb > MAX_ENV_SIZE) {
-                                        
-                    envMb = envMb.toFixed(2);
-                    handler.showMessage(lng.s('', 'storage_manager_hit_limit_env', { MAX_ENV_SIZE : MAX_ENV_SIZE, ENVSIZE : envMb}), true);	
-                    return false;
-                }
-                
-                // check cached data before ask dispetcher
-                if (mode == 'cancel' && handler.slist.indexOf(dbName) != -1) {
-                    
-                    handler.showMessage(lng.s('База данных уже существует', 'storage_create_already_exist'), true);
-                    return false;					
-                }
-                
-                // request if any bd already exist
-                handler.loadDB(dbName, function(db) {
-                    
-                    if (db !== false && mode == 'cancel') {
-                        handler.showMessage(lng.s('База данных уже существует', 'storage_create_already_exist'), true);
-                        return false;							
-                    }
-                    
-                    var onDBSave =  function(error) {
-                    
-                        if (!error) {
-                            
-                            var noticeName = 'storage_create_ok_mcancel';
-                            
-                            if (mode == 'add') {                                
-                                noticeName = 'storage_create_ok_madd';
-                            }
-                            
-                            if (dbName == handler.fav.getGlobal('fav').coptions.storage) {
-                                
-                                handler.fav.load('items', function() {
-                                    handler.fav.updateFavCounter();
-                                });	
-                            }
-                            
-                            handler.getStorageList(handler.showStorageList);							
-                            handler.showMessage(lng.s('', noticeName));
-                            
-                        } else {
-                        
-                            handler.showMessage(lng.s('Ошибка добавления базы данных', 'storage_create_e1'), true);
-                        }
-                        
-                    };
-                            
-                    // load data from input file
-                    
-                    var fileInput = document.getElementById(handler.className + '-db-file');
-                    if (fileInput.value) {
-                    
-                        KellyTools.readInputFile(fileInput, function(input, fileData) {
-                            
-                            var fileSizeMb = fileData.length / 1000 / 1000;
-                            
-                            if (fileSizeMb > MAX_TOTAL_PER_DB) {
-                                
-                                fileSizeMb = fileSizeMb.toFixed(2);
-                                handler.showMessage(lng.s('', 'storage_manager_hit_limit_db', { MAX_TOTAL_PER_DB : MAX_TOTAL_PER_DB, FILESIZE : fileSizeMb}), true);	
-                                return;
-                            }
-                            
-                            var newDBData = KellyTools.parseJSON(fileData.trim());                          
-                            if (newDBData) { 
-                            
-                                if (db && mode == 'add') {
-                                    
-                                    newDBData = handler.validateDBItems(newDBData);
-
-                                    var result = handler.addDataToDb(db, newDBData);
-                                    
-                                    // todo show result public
-                                    handler.log(result);  
-                                    
-                                    newDBData = db;
-                                    handler.saveDB(dbName, newDBData, onDBSave);
-                                } else {
-                                    newDBData = handler.validateDBItems(newDBData);	
-                                    handler.saveDB(dbName, newDBData, onDBSave);
-                                }
-                            } else {
-                                handler.showMessage(lng.s('Ошибка парсинга структурированных данных', 'storage_create_e2'), true);	
-                            }
-                            
-                        });
-                    
-                    } else {
-                        
-                        handler.saveDB(dbName, handler.getDefaultData(), onDBSave);
-                    }
-                    
-                });
-                
-                return false;
-            }
+        handler.applayDBCreateButton(createNewButton, idPrefix);
         
         handler.getStorageList(handler.showStorageList);
+        handler.storageList = KellyTools.getElementByClass(handler.storageContainer, handler.className + '-StorageList');			
         
         handler.wrap.appendChild(handler.storageContainer);
     }
@@ -8639,10 +8668,9 @@ function KellyFavItems()
                 
         var onLoadItems = function(itemsDb) {
             
-            var useDefaultDb = false;
             if (!itemsDb) {
-                useDefaultDb = true;
-                itemsDb = sm.getDefaultData();
+                itemsDb = sm.getDefaultData(); 
+                log('load() ' + fav.coptions.storage + ' db not exist, default used');                
             }
             
             for (var k in itemsDb){
@@ -8657,11 +8685,6 @@ function KellyFavItems()
             sm.validateDBItems(fav);
             
             fav.cats_assoc_buffer = false;
-            
-            if (useDefaultDb) {
-                log('load() ' + fav.coptions.storage + ' db not exist, default used');
-                handler.save('items');
-            }
             
             if ((type == 'items' || !type) && onAfterload) onAfterload(); 
         }
@@ -12262,7 +12285,7 @@ function KellyFavItems()
                 <div class="' + env.className + '-Save" style="display : none;">\
                     <p>' + lng.s('', 'download_save_notice') + '</p>\
                     <a href="#" class="' + env.className + '-SaveFavNew" >' + lng.s('Скачать как файл профиля', 'download_save') + '</a>\
-                </div><br>';
+                </div>';
             
             var items = favPageInfo.items;
             if (favPageInfo.pages > 2) { 

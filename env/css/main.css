@@ -1162,11 +1162,11 @@
 
 .__BASECLASS__-Save {
 	margin-top : 24px;
+    margin-bottom : 64px;
 }
 
 .__BASECLASS__-SaveFavNew {
 	font-weight : bold;
-	margin-bottom : 24px;
 }
 
 .__BASECLASS__-tech-options,
