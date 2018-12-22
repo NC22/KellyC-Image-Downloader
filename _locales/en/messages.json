@@ -651,7 +651,7 @@
         "message":"Profile updated"
     },   
     "storage_create_e1":{  
-        "message":"Error while save profile to localstorage (turn on debug mode an watch F12 console)"
+        "message":"Error while save profile to localstorage (turn on debug mode an watch console)"
     },   
     "storage_create_e2":{  
         "message":"Bad profile file format (JSON parse fail)"
