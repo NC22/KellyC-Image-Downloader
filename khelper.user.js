@@ -12600,14 +12600,78 @@ function kellyProfileJoyreactor() {
     var sideBarPaddingTop = 24;
     var publications = false;
       
+    var sideBarDisabled = -1; // 1 - sidebar not found or hidden (jras - sidebar can be hidden)
+    
     /* imp */
     
-    this.className = 'kelly-jr-ui'; 
-    this.profile = 'joyreactor';        
-    this.hostClass = handler.className + '-' + window.location.host.split(".").join("-");
+    this.className = 'kelly-jr-ui'; // base class for every extension container \ element
+    
+    this.profile = 'joyreactor';
+    this.hostClass = handler.className + '-' + window.location.host.split(".").join("-"); 
     
     this.fav = false;   
-    this.sideBarDisabled = -1; // jras - sidebar hidden
+    
+    this.isNSFW = function() {
+        
+        var sfw = KellyTools.getElementByClass(document, 'sswither');
+        
+        if (sfw && sfw.className.indexOf('active') != -1) return false;
+        else return true;
+    }
+    
+    this.getMainContainers = function() {
+        
+        // todo move create buttons methods from faitems core
+        
+        if (!mainContainers) {
+            mainContainers = {
+                
+                // public
+                
+                body : document.getElementById('container'), // place where to put all dynamic absolute position elements
+                siteContent : document.getElementById('contentinner'), // site main container
+                favContent : false, // main extension container - image grid \ options block
+                sideBar : false,  // place where to put extension sidebar (add post \ filters menu)
+                               
+                menu : document.getElementById('submenu'), // currently used in kellyFavItems to create menu buttons
+                
+                // private
+                 
+                sideBlock : document.getElementById('sidebar'), // helps to detect width of sideBar, only for updateSidebarPosition()
+                tagList : document.getElementById('tagList'),   // helps to detect lowest position of sideBar by Y (top), only for updateSidebarPosition()
+            };
+            
+            mainContainers.sideBar = mainContainers.body;
+            
+            if (mainContainers.siteContent) {
+                
+                mainContainers.favContent = document.createElement('div');
+                mainContainers.favContent.className = handler.className + '-FavContainer ' + handler.hostClass;            
+                
+                mainContainers.siteContent.parentNode.insertBefore(mainContainers.favContent, mainContainers.siteContent);                
+            }
+            
+            if (!mainContainers.body) {
+                KellyTools.log('getMainContainers : body container not found', KellyTools.E_ERROR); 
+                return false;  
+            }
+            
+            if (!mainContainers.favContent) {
+                KellyTools.log('getMainContainers : cant create favContent container, check siteContent selector', KellyTools.E_ERROR);
+                return false;               
+            }
+        }
+        
+        return mainContainers;
+    }
+    
+    // will be replaced by formatPosts
+    
+    this.getPosts = function(container) {
+        if (!container) container = document;
+        
+        return container.getElementsByClassName(publicationClass);
+    }
     
     this.events = {
         
@@ -13047,22 +13111,22 @@ function kellyProfileJoyreactor() {
         
         // first time update position, validate sidebar block
         
-        if (handler.sideBarDisabled == -1) {
+        if (sideBarDisabled == -1) {
             
             if (sideBlock && window.getComputedStyle(sideBlock).position == 'absolute') {
                  
                 KellyTools.log('Bad sidebar position', 'updateSidebarPosition'); 
-                handler.sideBarDisabled = 1;
+                sideBarDisabled = 1;
                
             }
             
             if (!sideBlock) {
                 KellyTools.log('Sidebar not found', 'updateSidebarPosition'); 
-                handler.sideBarDisabled = 1;
+                sideBarDisabled = 1;
                 
             }
             
-            if (handler.sideBarDisabled == 1) {
+            if (sideBarDisabled == 1) {
                 
                 var collapseButton = KellyTools.getElementByClass(sideBarWrap, handler.className + '-sidebar-collapse');
                 if (collapseButton) {
@@ -13072,7 +13136,7 @@ function kellyProfileJoyreactor() {
             
         } 
         
-        if (handler.sideBarDisabled == 1) {
+        if (sideBarDisabled == 1) {
             sideBlock = false;
         }
         
@@ -13152,8 +13216,7 @@ function kellyProfileJoyreactor() {
         var sideName = side ? 'sidebar' : 'post';
         var className =  handler.className + '-' + sideName + '-addtofav';
        
-        var addToFav = KellyTools.getElementByClass(postBlock, className);
-        
+        var addToFav = KellyTools.getElementByClass(postBlock, className);        
         if (!addToFav) {
             
             if (side) {
@@ -13404,68 +13467,7 @@ function kellyProfileJoyreactor() {
             }
         }
     }   
-            
-    this.isNSFW = function() {
-        
-        var sfw = KellyTools.getElementByClass(document, 'sswither');
-        
-        if (sfw && sfw.className.indexOf('active') != -1) return false;
-        else return true;
-    }
-    
-    this.getMainContainers = function() {
-        
-        // todo move create buttons methods from faitems core
-        
-        if (!mainContainers) {
-            mainContainers = {
-                
-                // public
-                
-                body : document.getElementById('container'), // place where to put all dynamic absolute position elements
-                siteContent : document.getElementById('contentinner'), // site main container
-                favContent : false, // main extension container - image grid \ options block
-                sideBar : false,  // place where to put extension sidebar (add post \ filters menu)
-                
-                // private
-                
-                sideBlock : document.getElementById('sidebar'),
-                menu : document.getElementById('submenu'),
-                tagList : document.getElementById('tagList'), // or check pageInner
-            };
-            
-            mainContainers.sideBar = mainContainers.body;
-            
-            if (mainContainers.siteContent) {
-                
-                mainContainers.favContent = document.createElement('div');
-                mainContainers.favContent.className = handler.className + '-FavContainer ' + handler.hostClass;            
-                
-                mainContainers.siteContent.parentNode.insertBefore(mainContainers.favContent, mainContainers.siteContent);                
-            }
-            
-            if (!mainContainers.body) {
-                KellyTools.log('getMainContainers : body container not found', KellyTools.E_ERROR); 
-                return false;  
-            }
-            
-            if (!mainContainers.favContent) {
-                KellyTools.log('getMainContainers : cant create favContent container, check siteContent selector', KellyTools.E_ERROR);
-                return false;               
-            }
-        }
-        
-        return mainContainers;
-    }
-    
-    // will be replaced by formatPosts
-    
-    this.getPosts = function(container) {
-        if (!container) container = document;
-        
-        return container.getElementsByClassName(publicationClass);
-    }
-    
+       
     /* not imp */
     
     this.getPostTags = function(publication, limitTags) {
