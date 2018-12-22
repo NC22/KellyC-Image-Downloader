@@ -226,7 +226,10 @@
     },     
     "ext_ver":{  
         "message":"Версия"
-    },    
+    },        
+    "ext_name":{  
+        "message":"KellyC Favorites"
+    },
     "expand":{  
         "message":"Развернуть"
     },
