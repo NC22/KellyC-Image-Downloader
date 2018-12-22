@@ -418,7 +418,10 @@
     }, 
      "grabber_errors_counter":{  
         "message":"Failed : __ERRORSNUM__"
-    },
+    },  
+    "grabber_skip_downloaded":{  
+        "message":"Skip already downloaded in dir (by history)"
+    }, 
     "goto_page":{  
         "message":"Go to page"
     },
@@ -517,7 +520,10 @@
     },
     "options_side":{  
         "message":"Move extension options button to sidebar"
-    },    
+    },     
+    "options_storage":{  
+        "message":"Base directory for store profiles and cfgs"
+    },
     "other":{  
         "message":"Other"
     },

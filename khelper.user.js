@@ -2636,13 +2636,13 @@ function KellyFavStorageManager(cfg) {
     var MAX_TOTAL_PER_DB = 28; // mb ~60000 images
     var MAX_CONFIG_SIZE = 2; // mb
     
-    // from root = Downloads/[profile name]/
+    // from root = Downloads/coptions.baseFolder/[dir]/
     this.dir = {
-        exportProfile : 'Storage/ExportedProfiles/',
-        exportFiltered : 'Storage/FilteredProfiles/',
-        exportBookmark : 'Storage/ExportedBookmarks/',
-        logs : 'Storage/Logs/',
-        cfgs : 'Storage/ExportedCfgs/',
+        exportProfile : 'ExportedProfiles/',
+        exportFiltered : 'FilteredProfiles/',
+        exportBookmark : 'ExportedBookmarks/',
+        logs : 'Logs/',
+        cfgs : 'ExportedCfgs/',
     }
     
     // todo - more options for "add data to db" function (import only images without categories)
@@ -2795,7 +2795,7 @@ function KellyFavStorageManager(cfg) {
                             return false;							
                         }
                         
-                        var path = handler.fav.getGlobal('env').profile + '/' + handler.dir.exportProfile + dbName + '_' + KellyTools.getTimeStamp() + '.' + handler.format;
+                        var path = handler.fav.getGlobal('options').baseFolder + '/' + handler.dir.exportProfile + dbName + '_' + KellyTools.getTimeStamp() + '.' + handler.format;
                             path = KellyTools.validateFolderPath(path);
                             
                         handler.fav.getDownloadManager().createAndDownloadFile(JSON.stringify(db), path);	
@@ -2898,7 +2898,7 @@ function KellyFavStorageManager(cfg) {
             var downloadButton = KellyTools.getElementByClass(handler.storageContainer, handler.className + '-io-import');
                 downloadButton.onclick = function() {
                  
-                    var path = handler.fav.getGlobal('env').profile + '/' + handler.dir.cfgs + 'config_' + KellyTools.getTimeStamp() + '.' + handler.format;
+                    var path = handler.fav.getGlobal('options').baseFolder + '/' + handler.dir.cfgs + 'config_' + KellyTools.getTimeStamp() + '.' + handler.format;
                         path = KellyTools.validateFolderPath(path);
                     
                     var currentSession = handler.fav.getGlobal('fav');
@@ -3647,6 +3647,10 @@ function KellyFavStorageManager(cfg) {
             };
         }
         
+        if (!data.coptions.baseFolder) {
+            data.coptions.baseFolder = env.profile + '/' + 'Storage';
+        }
+        
         if (!data.coptions.grabber) {
             
             data.coptions.grabber = {
@@ -3654,6 +3658,7 @@ function KellyFavStorageManager(cfg) {
                 baseFolder : env.profile + '/' + 'Downloads',
                 invertNumeration : true,
                 quality : 'hd',
+                skipDownloaded : false,
             };
         }
         
@@ -4358,6 +4363,8 @@ function KellyGrabber(cfg) {
         onUpdateView : false,
         
         onChangeState : false, // enter in new mode - cancel, download, wait
+        
+        onOptionsUpdate : false,
     };
     
     this.nameTemplate = false;
@@ -4425,6 +4432,7 @@ function KellyGrabber(cfg) {
     var lng = KellyLoc;
     
     var availableItemsIndexes = [];
+    var updateOptionsTimer = false;
     
     function constructor(cfg) {
         handler.resetOptions();
@@ -4447,6 +4455,8 @@ function KellyGrabber(cfg) {
         }
     }
     
+    // addDownloadItem - conflict action always - overwrite
+    
     this.resetOptions = function() {
         options = {	
             nameTemplate : '#category_1#/#number#_#filename#', 
@@ -4457,7 +4467,7 @@ function KellyGrabber(cfg) {
             quality : 'hd',
             itemsList : '',
             invertNumeration : true,
-            skipDownloaded : false, // not tested
+            skipDownloaded : false, 
         }        
     }
     
@@ -4526,6 +4536,19 @@ function KellyGrabber(cfg) {
             }
         }
     }
+    
+    function delayUpdateOptionsEvent() {
+        if (!events.onOptionsUpdate) return;
+
+        if (updateOptionsTimer) {            
+            clearTimeout(updateOptionsTimer); 
+        }
+    
+        updateOptionsTimer = setTimeout(function() {
+            updateOptionsTimer = false;
+            events.onOptionsUpdate(handler);    
+        }, 600);       
+    }
         
     this.showGrabManager = function() {
     
@@ -4575,6 +4598,11 @@ function KellyGrabber(cfg) {
                     <tr class="' + extendedClass + '"><td colspan="2">\
                         <label><input type="checkbox" class="' + className + '-invertNumeration" ' + (options.invertNumeration ? 'checked' : '') + '>\
                             ' + lng.s('Инвертировать нумерацию', 'grabber_flip_numbers') + '\
+                        </label>\
+                    </td></tr>\
+                    <tr class="' + extendedClass + '"><td colspan="2">\
+                        <label><input type="checkbox" class="' + className + '-skipDownloaded" ' + (options.skipDownloaded ? 'checked' : '') + '>\
+                            ' + lng.s('Пропускать уже скачанные в директорию (по истории загрузок)', 'grabber_skip_downloaded') + '\
                         </label>\
                     </td></tr>\
                     <tr class="' + extendedClass + '"><td>\
@@ -4693,9 +4721,9 @@ function KellyGrabber(cfg) {
         var baseFolderInput = KellyTools.getElementByClass(handler.container, className + '-controll-baseFolder');
             baseFolderInput.onchange = function() {
                 
-                handler.setBaseFolder(this.value);
-                
+                handler.setBaseFolder(this.value);                
                 this.value = options.baseFolder;
+                delayUpdateOptionsEvent();
                 return;
             }        
             
@@ -4719,9 +4747,16 @@ function KellyGrabber(cfg) {
                 
                 handler.clearStateForImageGrid();
                 handler.updateStateForImageGrid();
-                
+                delayUpdateOptionsEvent();
                 return;
-            }             
+            }  
+            
+        var skipDownloaded = KellyTools.getElementByClass(handler.container, className + '-skipDownloaded');
+            skipDownloaded.onchange = function() {
+                options.skipDownloaded = this.checked ? true : false;
+                delayUpdateOptionsEvent();
+                return;
+            }              
             
         var nameTemplateHelp = KellyTools.getElementByClass(handler.container, className + '-nameTemplate-help');
             nameTemplateHelp.onclick = function() {
@@ -4737,6 +4772,7 @@ function KellyGrabber(cfg) {
                 this.value = options.nameTemplate;
                 
                 handler.setDownloadTasks();
+                delayUpdateOptionsEvent();
                 return;
             }       
             
@@ -4748,6 +4784,7 @@ function KellyGrabber(cfg) {
                     options.quality = this.value == 'hd' ? 'hd' : 'preview';
                     
                     handler.setDownloadTasks();
+                    delayUpdateOptionsEvent();
                 }
             }
         }
@@ -4779,6 +4816,7 @@ function KellyGrabber(cfg) {
                 if (!options.maxDownloadsAtTime || options.maxDownloadsAtTime < 0) options.maxDownloadsAtTime = 1;
                 
                 this.value = options.maxDownloadsAtTime;
+                delayUpdateOptionsEvent();
             }
    
         var intervalInput = KellyTools.getElementByClass(handler.container, className + '-interval');
@@ -4788,6 +4826,7 @@ function KellyGrabber(cfg) {
                 if (!options.interval || options.interval < 0.1) options.interval = 0.1;
                
                 this.value = options.interval;
+                delayUpdateOptionsEvent();
             }
             
         var cancelInput = KellyTools.getElementByClass(handler.container, className + '-timeout');
@@ -4797,6 +4836,7 @@ function KellyGrabber(cfg) {
                 if (!options.cancelTimer || options.cancelTimer < 2) options.cancelTimer = 5 * 60;                
                 
                 this.value = options.cancelTimer;
+                delayUpdateOptionsEvent();
             } 
             
         downloadProgress = {
@@ -4893,7 +4933,7 @@ function KellyGrabber(cfg) {
     
     function downloadLog() {
     
-        var fname = fav.getGlobal('env').profile + '/' + fav.getStorageManager().dir.logs;
+        var fname = fav.getGlobal('options').baseFolder + '/' + fav.getStorageManager().dir.logs;
             fname += 'download_log_' + KellyTools.getTimeStamp() + '.log';
             fname = KellyTools.validateFolderPath(fname);
             
@@ -6103,8 +6143,6 @@ function KellyGrabber(cfg) {
             }
         }
         
-        options.skipDownloaded = false;
-        
         if (options.skipDownloaded) {
             
             // search by file name. todo may be some other search methods
@@ -6486,6 +6524,10 @@ function KellyFastSave(cfg) {
                 nameTemplate : '#filename#',
             },
             events : {
+                
+                onOptionsUpdate : function() {
+                    return true;
+                },
                 
                 onUpdateView : function(handler) {
                     return true;
@@ -6909,15 +6951,16 @@ KellyTools.getPrintValues = function(print, reverse, limitFrom, limitTo) {
     return itemsToSelect;
 }
 
-KellyTools.getVarList = function(str, type) {
+KellyTools.getVarList = function(str, type, glue) {
         
     if (!str) return [];
     
     str = str.trim();
     
     if (!str) return [];
-    
-    str = str.split(",");
+      
+    if (!glue) glue = ',';
+    str = str.split(glue);    
     
     for (var i=0; i <= str.length-1; i++) {
         
@@ -6928,14 +6971,18 @@ KellyTools.getVarList = function(str, type) {
     return str;
 }
     
-KellyTools.varListToStr = function(varlist) {
+KellyTools.varListToStr = function(varlist, glue) {
+        
     if (!varlist || !varlist.length) return '';
-    var str = '';        
+    
+    var str = '';            
+    if (!glue) glue = ',';
+    
     for (var i=0; i <= varlist.length-1; i++) {
     
         if (!varlist[i]) continue;
     
-        if (str) str += ',' + varlist[i];
+        if (str) str += glue + varlist[i];
         else str = varlist[i];
     }
     
@@ -7822,11 +7869,14 @@ function KellyOptions(cfg) {
                ' + lng.s('Перенести кнопку настроек из основного в боковое меню фильтров', 'options_side') + '</label></td></tr>';
          
         output += '<tr><td>' + lng.s('Игнорировать комментарии', 'ignore_comments') + ' :</td>\
-                        <td><input type="text" class="kellyBlockcomments" value="' + KellyTools.varListToStr(fav.coptions.comments_blacklist) + '"></td>\
+                        <td><input type="text" class="' + env.className + 'Blockcomments" value="' + KellyTools.varListToStr(fav.coptions.comments_blacklist) + '"></td>\
                    </tr>';
         output += '<tr><td>' + lng.s('Игнорировать посты', 'ignore_publications') + ' :</td>\
-                        <td><input type="text" class="kellyBlockposts" value="' + KellyTools.varListToStr(fav.coptions.posts_blacklist) + '"></td>\
+                        <td><input type="text" class="' + env.className + 'Blockposts" value="' + KellyTools.varListToStr(fav.coptions.posts_blacklist) + '"></td>\
                    </tr>';
+        output += '<tr><td>' + lng.s('Основная папка для сохранения профилей и настроек', 'options_storage') + ' :</td>\
+                <td><input type="text" class="' + env.className + 'BaseFolder" value="' + (fav.coptions.baseFolder ? fav.coptions.baseFolder : '') + '"></td>\
+           </tr>';
         output += '<tr><td colspan="2"><label><input type="checkbox" class="' + env.className + 'OptionsDebug" ' + (fav.coptions.debug ? 'checked' : '') + '> ' + lng.s('Режим отладки', 'debug') + '</label></td></tr>';
         output += '<tr><td colspan="2"><label>' + lng.s('Версия', 'ext_ver') + ' : ' + KellyTools.getProgName() + '</label></td></tr>';
                   
@@ -7862,7 +7912,7 @@ function KellyOptions(cfg) {
             cssItem : KellyTools.inputVal(env.className + 'GridCssItem', 'string', favContent),
             heightDiff : KellyTools.inputVal(env.className + 'GridHeightDiff', 'int', favContent),
             perPage : KellyTools.inputVal(env.className + 'GridPerPage', 'int', favContent),
-            autoScroll : KellyTools.inputVal(env.className + 'GridAutoScroll', 'int', favContent),
+            autoScroll : KellyTools.inputVal(env.className + 'GridAutoScroll', 'int', favContent),            
             type : fav.coptions.grid.type,
             viewerShowAs : 'hd',
         };
@@ -7890,7 +7940,8 @@ function KellyOptions(cfg) {
         var refreshPosts = false;
         
         var hideSocCurrent = fav.coptions.hideSoc;
-        fav.coptions.hideSoc = KellyTools.getElementByClass(favContent, env.className + 'HideSoc').checked ? true : false;        
+        fav.coptions.hideSoc = KellyTools.getElementByClass(favContent, env.className + 'HideSoc').checked ? true : false;  
+        
         if (hideSocCurrent != fav.coptions.hideSoc) {
             refreshPosts = true;
         }
@@ -7967,6 +8018,11 @@ function KellyOptions(cfg) {
             refreshPosts = true;
         }
         
+        var baseFolder = KellyTools.validateFolderPath(KellyTools.inputVal(env.className + 'BaseFolder', 'string', favContent));
+        if (baseFolder) {
+            fav.coptions.baseFolder = baseFolder;
+        }
+        
         var menuItems = handler.favEnv.getView('menu');
         
         if (menuItems['ctoptions']) {
@@ -8021,8 +8077,8 @@ function KellyOptions(cfg) {
             fav.coptions.grid.heightDiff = 60;
         }
                 
-        fav.coptions.comments_blacklist = KellyTools.getVarList(KellyTools.inputVal('kellyBlockcomments', 'string', favContent));
-        fav.coptions.posts_blacklist = KellyTools.getVarList(KellyTools.inputVal('kellyBlockposts', 'string', favContent));
+        fav.coptions.comments_blacklist = KellyTools.getVarList(KellyTools.inputVal(env.className + 'Blockcomments', 'string', favContent));
+        fav.coptions.posts_blacklist = KellyTools.getVarList(KellyTools.inputVal(env.className + 'Blockposts', 'string', favContent));
         
         var applaySave = function() {
         
@@ -9615,7 +9671,7 @@ function KellyFavItems()
             storage.items[storage.items.length] = item;			
         }
   
-        var fname = env.profile + '/' + handler.getStorageManager().dir.exportFiltered;
+        var fname = fav.coptions.baseFolder + '/' + handler.getStorageManager().dir.exportFiltered;
             fname += fav.coptions.storage + '_filtered_' + KellyTools.getTimeStamp() + '.' + handler.getStorageManager().format;
             fname = KellyTools.validateFolderPath(fname);
             
@@ -10638,6 +10694,15 @@ function KellyFavItems()
                     
                     dm.updateCfg({
                         events : {
+                            
+                            onOptionsUpdate : function(self) {
+                                
+                                KellyTools.log('New download options confirmed', 'KellyFavItems | downloadManager');   
+                                
+                                fav.coptions.grabber = self.getOptions();
+                                handler.save('cfg');
+                            },
+                            
                             onChangeState : function(self, newState) {
                                 if (newState == 'download') {
                                     fav.coptions.grabber = self.getOptions();
@@ -11637,6 +11702,7 @@ function KellyFavItems()
         else if (name == 'fav') return fav;
         else if (name == 'filters') return catFilters;
         else if (name == 'lng') return lng;
+        else if (name == 'options') return fav.coptions;	
     }
     
     // add category to list of categories of selected item
@@ -12257,7 +12323,7 @@ function KellyFavItems()
                         delete favNativeParser.collectedData.selected_cats_ids;
                     }
                     
-                    var fname = env.profile + '/' + handler.getStorageManager().dir.exportBookmark;
+                    var fname = fav.coptions.baseFolder + '/' + handler.getStorageManager().dir.exportBookmark;
                         fname += 'db_';
                         
                     var pageInfo = env.getFavPageInfo();					
@@ -12401,6 +12467,37 @@ function KellyFavItems()
                     
                     var el = KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-tag-filter-container');
                         el.style.display = this.checked ? 'block' : 'none'; 
+                    
+                    return false;
+                };
+                
+                KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-tag-filter').onchange = function() {
+                    var list = KellyTools.parseTagsList(this.value);
+                    
+                    var value = KellyTools.varListToStr(list.include, ', ');
+                    if (list.exclude.length) value += (value ? ', ' : '') + '-' + KellyTools.varListToStr(list.exclude, ', -');
+
+                    this.value = value;
+                    
+                    if (this.value != fav.coptions.downloader.tagList) {
+                        fav.coptions.downloader.tagList = this.value;
+                        handler.save('cfg');
+                    }
+                    
+                    return false;
+                };
+                
+                KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-create-by-tag').onchange = function() {
+                    
+                    var list = KellyTools.parseTagsList(this.value);
+                    
+                    var value = KellyTools.varListToStr(list.include, ', ');
+                    this.value = value;
+                    
+                    if (this.value != fav.coptions.downloader.catByTagList) {
+                        fav.coptions.downloader.catByTagList = this.value;
+                        handler.save('cfg');
+                    }
                     
                     return false;
                 };
