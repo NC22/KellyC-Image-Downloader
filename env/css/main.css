@@ -330,7 +330,7 @@
     opacity : 0;
 }
 
-.__BASECLASS__-FavItem-error:before, .kelly-jr-ui-FavItem-error:after {
+.__BASECLASS__-FavItem-error:before, .__BASECLASS__-FavItem-error:after {
     position: absolute;
     left: 50%;
     content: ' ';
