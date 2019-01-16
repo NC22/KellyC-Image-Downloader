@@ -1,7 +1,8 @@
 @echo off
 pushd "%~1"
-SET frontend=khelper.user.js
-SET background=khelper.bg.js
+SET frontend=kmerged.user.js
+SET background=kmerged.bg.js
+SET options=kmerged.options.js
 SET debug=0
 
 break>%frontend%
@@ -43,7 +44,7 @@ IF "%debug%" GEQ "1" (
 )
 @echo.>> %frontend%
 
-copy %frontend% + "%~dp0\init.js" %frontend%
+copy %frontend% + "%~dp0\init\init.js" %frontend%
 
 @echo.>> %frontend%
 @echo // end of file >> %frontend%
@@ -75,10 +76,32 @@ IF "%debug%" GEQ "1" (
 )
 @echo.>> %background%
 
-copy %background% + "%~dp0\init.bg.js" %background%
+copy %background% + "%~dp0\init\init.bg.js" %background%
 
 @echo.>> %background%
 @echo // end of file >> %background%
+
+break>%options%
+
+copy %options% + "%~dp0\SIGN" %options%
+
+for %%x in (
+    "lib\kellyOptionsPage.js"  
+) do (
+
+    @echo // EXTRACTED FROM FILE %%~x>> %options%
+    
+    copy %options% + "%~dp0\%%~x" %options%
+)
+
+@echo.>> %options%
+@echo.>> %options%
+
+@echo // initialization>> %options%
+copy %options% + "%~dp0\init\init.options.js" %options%
+
+@echo.>> %options%
+@echo // end of file >> %options%
 
 :: copy tmp.js + "%%~x" tmp.js > NUL
 popd

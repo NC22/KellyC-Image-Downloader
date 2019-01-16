@@ -18,11 +18,17 @@ function kellyProfileJoyreactor() {
     var sideBarDisabled = -1; // 1 - sidebar not found or hidden (jras - sidebar can be hidden)
     
     /* imp */
-    
+        
+    this.location = {
+        protocol : window.location.protocol,
+        host : window.location.host,
+        href : window.location.href,
+    }
+	
     this.className = 'kelly-jr-ui'; // base class for every extension container \ element
     
     this.profile = 'joyreactor';
-    this.hostClass = handler.className + '-' + window.location.host.split(".").join("-"); 
+    this.hostClass = handler.className + '-' + handler.location.host.split(".").join("-"); 
     
     this.fav = false;   
     
@@ -131,7 +137,7 @@ function kellyProfileJoyreactor() {
             
             // get fandom css for buttons
             
-            if (window.location.host == handler.mainDomain || window.location.host.indexOf('old.') == -1) {
+            if (handler.location.host == handler.mainDomain || handler.location.host.indexOf('old.') == -1) {
 
                 var bar = document.getElementById('searchBar');
                 
@@ -307,7 +313,7 @@ function kellyProfileJoyreactor() {
     
     function getPostLinkEl(publication) {
         
-        if (window.location.host.indexOf('old.') == -1) {
+        if (handler.location.host.indexOf('old.') == -1) {
             
             var link = publication.querySelector('.ufoot_first .link_wr a'); // avoid links in jras-pcLinks-img container
             
@@ -1041,7 +1047,7 @@ function kellyProfileJoyreactor() {
             
             imgServer = imgServer[0];
             var type = url.indexOf('comment') == -1 ? 'post' : 'comment';
-            url = window.location.protocol + '//' + imgServer + '.' + window.location.host + '/pics/' + type + '/' + (full ? 'full/' : '') + filename;
+            url = handler.location.protocol + '//' + imgServer + '.' + handler.location.host + '/pics/' + type + '/' + (full ? 'full/' : '') + filename;
         }
         
         
@@ -1088,7 +1094,7 @@ function kellyProfileJoyreactor() {
             userName : false,
         }
         
-        var parts = window.location.href.split('/');
+        var parts = handler.location.href.split('/');
         for (var i = 0; i < parts.length; i++) {
             if (parts[i] == 'user' && i+1 <= parts.length-1) {
                 info.userName = parts[i+1];
@@ -1099,15 +1105,15 @@ function kellyProfileJoyreactor() {
         if (!info.userName) return false;
         
         info.url = '';
-        info.url += window.location.origin + favPageUrlTpl;
+        info.url += handler.location.protocol + '//' + handler.location.host + favPageUrlTpl;
         info.url = info.url.replace('__USERNAME__', info.userName);
         
         var posts = document.getElementsByClassName('postContainer');
         if (posts) info.items = posts.length;
         
-        //(window.location.href.substr(window.location.href.length - 8) == 'favourite')
+        //(handler.location.href.substr(handler.location.href.length - 8) == 'favourite')
         
-        if (window.location.host.indexOf('old.') != -1) {
+        if (handler.location.host.indexOf('old.') != -1) {
             var pagination = document.getElementById('Pagination');
         } else {
             var pagination = KellyTools.getElementByClass(document, 'pagination_expanded'); 

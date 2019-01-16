@@ -488,6 +488,8 @@ function KellyTileGrid(cfg) {
         return parseInt(dataValue);
     }
     
+	// todo - add optional delay, because may be some issues if tilesBlock have % width. In this case add elements, then after delay update grid 
+	
     this.updateTileGrid = function() {		
         
         if (!updateTileGridState()) return false;

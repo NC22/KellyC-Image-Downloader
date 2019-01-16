@@ -13,10 +13,16 @@ function kellyProfileTumblr() {
     var commentsBlockTimer = [];
     
     /* imp */
-    
+            
+    this.location = {
+        protocol : window.location.protocol,
+        host : window.location.host,
+        href : window.location.href,
+    }
+	
     this.className = 'kellyJRFav'; 
     this.profile = 'tumblr';        
-    this.hostClass = window.location.host.split(".").join("_");
+    this.hostClass = handler.location.host.split(".").join("_");
 
     this.fav = false;        
     this.events = {
@@ -47,7 +53,7 @@ function kellyProfileTumblr() {
         onExtensionReady : function() {
                      
             KellyTools.log('tumblr controller initialized');
-            KellyTools.log(window.location);
+            KellyTools.log(handler.location);
             
             
         },
@@ -61,7 +67,7 @@ function kellyProfileTumblr() {
     
     this.getInitAction = function() {
         
-        var page = window.location.href;
+        var page = handler.location.href;
         
         if (page.indexOf('yahoo_cookie_receiver') != -1) return 'ignore';
         else return 'main';

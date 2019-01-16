@@ -1128,6 +1128,8 @@ function KellyTileGrid(cfg) {
         return parseInt(dataValue);
     }
     
+	// todo - add optional delay, because may be some issues if tilesBlock have % width. In this case add elements, then after delay update grid 
+	
     this.updateTileGrid = function() {		
         
         if (!updateTileGridState()) return false;
@@ -5988,7 +5990,7 @@ function KellyGrabber(cfg) {
         else if (ext == 'txt' ) mimetype = 'text/plain';
         else if (ext == 'json' ) mimetype = 'application/json';
         
-        return ext;
+        return mimetype;
     }
     
     // fileData - arrayBuffer or plain text
@@ -6058,7 +6060,7 @@ function KellyGrabber(cfg) {
             }
         }
         
-        if (transportMethod == KellyGrabber.TRANSPORT_BLOBBASE64) {
+        if (fav.isDownloadSupported && transportMethod == KellyGrabber.TRANSPORT_BLOBBASE64) {
                 
             KellyTools.blobToBase64(downloadOptions.url, function(base64) {              
                 downloadOptions.url = {base64 : base64, type : mimetype};
@@ -8181,7 +8183,7 @@ function KellyOptions(cfg) {
 
 ﻿// part of KellyFavItems extension
 
-function KellyFavItems() 
+function KellyFavItems(noexec) 
 {
     var handler = this;	
         
@@ -8267,7 +8269,9 @@ function KellyFavItems()
     var fav = {};
     
     this.isDownloadSupported = false;  
-    
+	
+    this.aspectRatioAccurCheck = 0.05;
+	
     this.sideBarLock = false;
     this.tooltipBeasy = false; // true if shown something important throw handler.getTooltip(), prevent create another tooltips onmouseover and hide onmouseout
     
@@ -8348,7 +8352,7 @@ function KellyFavItems()
                 aspectRatioCached = item.pw / item.ph;
             }
             
-            if (!aspectRatioCached || Math.abs(aspectRatioCached - aspectRatio) > 0.05) {
+            if (!aspectRatioCached || (handler.aspectRatioAccurCheck && Math.abs(aspectRatioCached - aspectRatio) > handler.aspectRatioAccurCheck)) {
                 imageGridProportions[imageGridProportions.length] = fav.items[favItemIndex].id;
                 
                 item.pw = imageWH.width;
@@ -8454,11 +8458,11 @@ function KellyFavItems()
             
             if (request.method == "onChanged") {       
                 
-                handler.getDownloadManager().onDownloadProcessChanged(request.downloadDelta);                
-            }
+                handler.getDownloadManager().onDownloadProcessChanged(request.downloadDelta); 
+
+				if (callback) callback(response); 				
+            }          
             
-            
-            if (callback) callback(response); 
         });
     }
         
@@ -10099,11 +10103,15 @@ function KellyFavItems()
         tooltipEl.show(true, 'gotoFavPage');
     }  
     
-    function showCategoryCreateTooltip(target) {
+    function showCategoryCreateTooltip(targetId) {
+         
+        var getTooltipTarget = function() {
+            return document.getElementById(targetId);            
+        }
         
         var tooltipEl = handler.getTooltip();
             tooltipEl.updateCfg({
-                target : target, 
+                target : getTooltipTarget(), 
                 offset : {left : 0, top : 0}, 
                 positionY : 'bottom',
                 positionX : 'left',
@@ -10134,6 +10142,7 @@ function KellyFavItems()
                 
                 // handler.showFavouriteImages();
                 showCatList();
+                tooltipEl.updateCfg({target : getTooltipTarget()});
             }
 
             return false; 
@@ -10149,14 +10158,18 @@ function KellyFavItems()
         extendCats = [];
     }
     
-    function showCategoryControllTooltip(id, target) {
+    function showCategoryControllTooltip(id, targetId) {
+                
+        var getTooltipTarget = function() {
+            return document.getElementById(targetId);            
+        }
         
         var category = handler.getStorageManager().getCategoryById(fav, id);                
         if (category.id == -1) return false;
         
         var tooltipEl = handler.getTooltip();
             tooltipEl.updateCfg({
-                target : target, 
+                target : getTooltipTarget(), 
                 offset : {left : 0, top : 0}, 
                 positionY : 'bottom',
                 positionX : 'left',
@@ -10203,22 +10216,21 @@ function KellyFavItems()
         
         var container = tooltipEl.getContent();
             KellyTools.setHTMLData(container, html);
-        
-        container.onclick = function(e) {            
-            if (e.target.className.indexOf('make-beasy') == -1) return;
             
-            handler.tooltipBeasy = true; 
-            tooltipEl.updateCfg({closeButton : true});
-        }
+            container.onclick = function(e) {            
+                if (e.target.className.indexOf('make-beasy') == -1) return;
+                
+                handler.tooltipBeasy = true; 
+                tooltipEl.updateCfg({closeButton : true});
+            }
         
         var flushCatButton = function() {            
             setTimeout(function() {
-                var filterButton = document.getElementById(env.className + '-extend-filter-' + category.id); 
-                
-                if (filterButton && filterButton.className.indexOf('flush') == -1) {
-                    filterButton.className += ' flush';
+                var target = getTooltipTarget();
+                if (target && target.className.indexOf('flush') == -1) {
+                    target.className += ' flush';
                     setTimeout(function() {
-                        filterButton.className = filterButton.className.replace('flush', '').trim();             
+                        target.className = target.className.replace('flush', '').trim();             
                     }, 300);
                 } 
             }, 100);
@@ -10229,6 +10241,7 @@ function KellyFavItems()
                 itemIndex = handler.getStorageManager().categoryOrder(fav.categories, itemIndex, up);
                 showCatList();
                 flushCatButton();
+                tooltipEl.updateCfg({target : getTooltipTarget()});
             }
         
         var orderChangeUp = KellyTools.getElementByClass(container, env.className + '-neworder-up');
@@ -10261,6 +10274,8 @@ function KellyFavItems()
                 
                 showCatList();                
                 flushCatButton();
+                tooltipEl.updateCfg({target : getTooltipTarget()});
+                
                 // handler.showSidebarMessage('Изменения применены');
                 return false;
             }
@@ -10272,8 +10287,7 @@ function KellyFavItems()
                     var updateFavPage = function() { 
                         
                         // after delete validated, test that, reset unnecessary
-                        handler.resetFilterSettings();
-                        
+                        handler.resetFilterSettings();                        
                         handler.showFavouriteImages(); 
                     };
                     
@@ -10319,7 +10333,7 @@ function KellyFavItems()
                 filter.onmouseover = function (e) { 
                     if (handler.tooltipBeasy) return false;
                     if (readOnly) return false; 
-                    showCategoryControllTooltip(this.getAttribute('itemId'), this);    
+                    showCategoryControllTooltip(this.getAttribute('itemId'), this.id);    
                 }
                 
                 filter.onmouseout = function(e) {
@@ -10367,14 +10381,15 @@ function KellyFavItems()
                 
         var filterAdd = document.createElement('li');
             filterAdd.className = env.className + '-filters-CatCreate';
-
+            filterAdd.id = env.className + '-filters-CatCreate';
+            
             if (readOnly) filterAdd.style.display = 'none';
             
             KellyTools.setHTMLData(filterAdd, '<a href="#" onclick="return false;">+</a>');
             
             filterAdd.onmouseover = function (e) { 
                 if (handler.tooltipBeasy) return false;
-                showCategoryCreateTooltip(this);    
+                showCategoryCreateTooltip(this.id);    
             }
             
             filterAdd.onmouseout = function(e) {
@@ -11771,7 +11786,8 @@ function KellyFavItems()
         else if (name == 'fav') return fav;
         else if (name == 'filters') return catFilters;
         else if (name == 'lng') return lng;
-        else if (name == 'options') return fav.coptions;	
+        else if (name == 'options') return fav.coptions;
+		else if (name == 'image_events') return imageEvents;
     }
     
     // add category to list of categories of selected item
@@ -12740,7 +12756,7 @@ function KellyFavItems()
         return true;
     }
     
-    constructor();
+    constructor(noexec);
 }
 
 
@@ -12769,11 +12785,17 @@ function kellyProfileJoyreactor() {
     var sideBarDisabled = -1; // 1 - sidebar not found or hidden (jras - sidebar can be hidden)
     
     /* imp */
-    
+        
+    this.location = {
+        protocol : window.location.protocol,
+        host : window.location.host,
+        href : window.location.href,
+    }
+	
     this.className = 'kelly-jr-ui'; // base class for every extension container \ element
     
     this.profile = 'joyreactor';
-    this.hostClass = handler.className + '-' + window.location.host.split(".").join("-"); 
+    this.hostClass = handler.className + '-' + handler.location.host.split(".").join("-"); 
     
     this.fav = false;   
     
@@ -12882,7 +12904,7 @@ function kellyProfileJoyreactor() {
             
             // get fandom css for buttons
             
-            if (window.location.host == handler.mainDomain || window.location.host.indexOf('old.') == -1) {
+            if (handler.location.host == handler.mainDomain || handler.location.host.indexOf('old.') == -1) {
 
                 var bar = document.getElementById('searchBar');
                 
@@ -13058,7 +13080,7 @@ function kellyProfileJoyreactor() {
     
     function getPostLinkEl(publication) {
         
-        if (window.location.host.indexOf('old.') == -1) {
+        if (handler.location.host.indexOf('old.') == -1) {
             
             var link = publication.querySelector('.ufoot_first .link_wr a'); // avoid links in jras-pcLinks-img container
             
@@ -13792,7 +13814,7 @@ function kellyProfileJoyreactor() {
             
             imgServer = imgServer[0];
             var type = url.indexOf('comment') == -1 ? 'post' : 'comment';
-            url = window.location.protocol + '//' + imgServer + '.' + window.location.host + '/pics/' + type + '/' + (full ? 'full/' : '') + filename;
+            url = handler.location.protocol + '//' + imgServer + '.' + handler.location.host + '/pics/' + type + '/' + (full ? 'full/' : '') + filename;
         }
         
         
@@ -13839,7 +13861,7 @@ function kellyProfileJoyreactor() {
             userName : false,
         }
         
-        var parts = window.location.href.split('/');
+        var parts = handler.location.href.split('/');
         for (var i = 0; i < parts.length; i++) {
             if (parts[i] == 'user' && i+1 <= parts.length-1) {
                 info.userName = parts[i+1];
@@ -13850,15 +13872,15 @@ function kellyProfileJoyreactor() {
         if (!info.userName) return false;
         
         info.url = '';
-        info.url += window.location.origin + favPageUrlTpl;
+        info.url += handler.location.protocol + '//' + handler.location.host + favPageUrlTpl;
         info.url = info.url.replace('__USERNAME__', info.userName);
         
         var posts = document.getElementsByClassName('postContainer');
         if (posts) info.items = posts.length;
         
-        //(window.location.href.substr(window.location.href.length - 8) == 'favourite')
+        //(handler.location.href.substr(handler.location.href.length - 8) == 'favourite')
         
-        if (window.location.host.indexOf('old.') != -1) {
+        if (handler.location.host.indexOf('old.') != -1) {
             var pagination = document.getElementById('Pagination');
         } else {
             var pagination = KellyTools.getElementByClass(document, 'pagination_expanded'); 
@@ -13953,7 +13975,11 @@ if (typeof K_DEFAULT_ENVIRONMENT == 'undefined' || !K_DEFAULT_ENVIRONMENT) {
     var K_DEFAULT_ENVIRONMENT = false;
 }
 
-var K_FAV = new KellyFavItems();
+if (typeof K_INIT_HOOK != 'undefined') {
+    K_INIT_HOOK();
+} else {
+    var K_FAV = new KellyFavItems();
+}
 
 // keep empty space to prevent syntax errors if some symbols will added at end
 // end of file 

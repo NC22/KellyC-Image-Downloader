@@ -1,0 +1,96 @@
+
+body,html {
+	margin: 0px;
+	padding: 0px; 
+	
+	/*
+		width : 1280px;
+		height : 640px;
+	*/
+}
+
+a {
+	color: #212121;
+}
+
+ul {
+	margin: 0px;
+	padding: 0px;
+}
+
+
+input[type=submit] {
+	background: #fb0;
+	border: 0px;
+	padding: 6px;
+	cursor: pointer;
+}
+
+.__BASECLASS__-imagesBlock-container {
+	width : 100%;
+	overflow : hidden;
+}
+
+.page-content {
+	padding : 50px;
+	padding-top : 20px;
+}
+
+.page-content > div {
+	float : left;
+}
+
+.content {
+	width : 960px;
+	min-height : 100px;
+}
+
+.page-content > div.clear {
+	
+	clear : both; 
+	float: none;
+}
+
+#sidebar {
+	width : 300px;
+	min-height : 100px;
+}
+
+#submenu .submenuitem {
+	display : inline-block;
+}
+
+#submenu .submenuitem a {
+	background: #ffefc9;
+	height: 30px;
+	display: inline-block;
+	vertical-align: middle;
+	padding-left: 12px;
+	padding-right: 12px;
+	/* padding-top: 6px; */
+	/* border-radius: 6px; */
+	line-height: 28px;
+	text-decoration: none;
+	font-size: 14px;
+}
+
+.joyreactor-env #submenu .submenuitem.__BASECLASS__-MainMenuItem-fav a {
+	background : transparent;
+}
+
+.joyreactor-env #submenu .submenuitem.active a {
+	background : #fdb201;
+}
+
+#submenu div div.__BASECLASS__-FavItemsCount.__BASECLASS__-FavItemsCount-1 {
+	
+	border-radius : 6px;
+}
+
+#submenu {
+	padding: 50px;
+	padding-bottom: 20px;
+	padding-top: 20px;
+	background: #ffd6a4;
+	border-bottom: 1px solid #ffa429;
+}
