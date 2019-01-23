@@ -217,7 +217,13 @@
     },
     "download_partly":{  
         "message":"Данные загружены частично. Можно скачать обработанные страницы (см. лог)"
-    }, 
+    },     
+    "download_autosaved_partly":{  
+        "message":"Часть страниц была сохранена в отдельные файлы автоматически (последнее автосохранение - страница __LAST_PAGE__)"
+    },    
+    "download_autosaved_ok":{  
+        "message":"Все страницы уже скачаны автоматически"
+    },
     "download_empty":{  
         "message":"Список найденных публикаций пуст (см. лог)"
     },
@@ -610,7 +616,19 @@
     },
     "storage_load_from_file":{  
         "message":"Загрузить из файла"
+    },      
+    "storage_load_from_user":{  
+        "message":"Загрузить со страницы закладок"
     },    
+    "storage_load_from_user_info":{  
+        "message":"Пользователь [__USER_NAME__] (закладок : __BOOKMARKS_NUM__)"
+    },      
+    "storage_create_e3":{  
+        "message":"Данные из профиля пользователя не доступны"
+    },    
+    "storage_parser_save_to_profile":{  
+        "message":"Добавить картинки в профиль"
+    },
     "storage_name":{  
         "message":"Идентификатор профиля<br>(только символы A-Z, 1-9, _)"
     },

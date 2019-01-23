@@ -1091,7 +1091,7 @@ function kellyProfileJoyreactor() {
             page : 1,
             header : header,
             url : false,
-            userName : false,
+            userName : false, // url encoded
         }
         
         var parts = handler.location.href.split('/');

@@ -882,23 +882,12 @@
 	padding-left : 16px;
 }
 
-.__BASECLASS__-form-row span{
-    display : inline-block;
-	min-width : 170px;
-	margin-right : 12px;
-}
-
-.__BASECLASS__-form-row input[type=text]{
-    display : inline-block;
-	width : 180px;
-}
-
 .__BASECLASS__GridType-option.hidden {
     display : none;
 }
 
-.__BASECLASS__-BaseOptions .__BASECLASS__-form-row span{
-	min-width : 320px;
+.__BASECLASS__-options-table td > span {
+    padding-left : 16px;
 }
 
 .__BASECLASS__-options-table .radioselect label {
@@ -1178,6 +1167,30 @@
     max-height : 0px;
     transition : opacity 0.3s;
     overflow : hidden;
+}
+
+.__BASECLASS__-exporter-buttons {
+    margin-top : 16px;
+}
+
+.__BASECLASS__-exporter-buttons a {
+    margin-right : 16px;
+}
+
+
+.__BASECLASS__-common-button,
+.__BASECLASS__-exporter-button-addtoprofile {
+    
+    background: #ffbb00;
+    height: 42px;
+    display: inline-block;
+    vertical-align: middle;
+    padding-left: 12px;
+    padding-right: 12px;
+    line-height: 38px;
+    text-decoration: none;
+    font-size: 14px;
+    margin-right : 16px;
 }
 
 .__BASECLASS__-exporter-container label {

@@ -2830,10 +2830,14 @@ function KellyFavStorageManager(cfg) {
                     handler.fav.save('cfg', function(error) {
                     
                         handler.getStorageList(handler.showStorageList);
-                        handler.fav.load('items', function() {					
+                        handler.fav.load('items', function() {		
+                        
                             // clear selected ?
+                            
                             handler.fav.updateFavCounter();
                             handler.fav.resetFilterSettings();
+                            handler.fav.formatPostContainers(); 
+                            
                             handler.showMessage(lng.s('База данных выбрана', 'storage_selected'), false, 'storage');
                         });					
                     });
@@ -2989,6 +2993,11 @@ function KellyFavStorageManager(cfg) {
                 return false;
             }
             
+            var source = 'file';
+            if (document.getElementById(idPrefix + '-data-source-bookmarks').checked) {
+                source = 'user-bookmarks';
+            }
+            
             // idPrefix + '-conflict-action'
             
             var overwrite = document.getElementById(idPrefix + '-overwrite').checked ? true : false;
@@ -3057,50 +3066,70 @@ function KellyFavStorageManager(cfg) {
                     }
                     
                 };
+                    
+                var createProfileByInput = function(input, fileData) {
+                    
+                    var fileSizeMb = fileData.length / 1000 / 1000;
+                    
+                    if (fileSizeMb > MAX_TOTAL_PER_DB) {
                         
+                        fileSizeMb = fileSizeMb.toFixed(2);
+                        handler.showMessage(lng.s('', 'storage_manager_hit_limit_db', { MAX_TOTAL_PER_DB : MAX_TOTAL_PER_DB, FILESIZE : fileSizeMb}), true);	
+                        return;
+                    }
+                    
+                    var newDBData = KellyTools.parseJSON(fileData.trim());                          
+                    if (newDBData) { 
+                    
+                        if (db && mode == 'add') {
+                            
+                            newDBData = handler.validateDBItems(newDBData);
+
+                            var result = handler.addDataToDb(db, newDBData);
+                            
+                            // todo show result public
+                            handler.log(result);  
+                            
+                            newDBData = db;
+                            handler.saveDB(dbName, newDBData, onDBSave);
+                        } else {
+                            newDBData = handler.validateDBItems(newDBData);	
+                            handler.saveDB(dbName, newDBData, onDBSave);
+                        }
+                    } else {
+                        handler.showMessage(lng.s('Ошибка парсинга структурированных данных', 'storage_create_e2'), true);	
+                    }
+                    
+                }
+                
                 // load data from input file
                 
-                var fileInput = document.getElementById(idPrefix + '-db-file');
-                if (fileInput.value) {
-                
-                    KellyTools.readInputFile(fileInput, function(input, fileData) {
+                if (source == 'file') {
+                    
+                    var fileInput = document.getElementById(idPrefix + '-db-file');
+                    if (fileInput.value) {
+                    
+                        KellyTools.readInputFile(fileInput, createProfileByInput);
+                    
+                    } else {
                         
-                        var fileSizeMb = fileData.length / 1000 / 1000;
+                        // create empty profile
                         
-                        if (fileSizeMb > MAX_TOTAL_PER_DB) {
-                            
-                            fileSizeMb = fileSizeMb.toFixed(2);
-                            handler.showMessage(lng.s('', 'storage_manager_hit_limit_db', { MAX_TOTAL_PER_DB : MAX_TOTAL_PER_DB, FILESIZE : fileSizeMb}), true);	
-                            return;
-                        }
-                        
-                        var newDBData = KellyTools.parseJSON(fileData.trim());                          
-                        if (newDBData) { 
-                        
-                            if (db && mode == 'add') {
-                                
-                                newDBData = handler.validateDBItems(newDBData);
-
-                                var result = handler.addDataToDb(db, newDBData);
-                                
-                                // todo show result public
-                                handler.log(result);  
-                                
-                                newDBData = db;
-                                handler.saveDB(dbName, newDBData, onDBSave);
-                            } else {
-                                newDBData = handler.validateDBItems(newDBData);	
-                                handler.saveDB(dbName, newDBData, onDBSave);
-                            }
-                        } else {
-                            handler.showMessage(lng.s('Ошибка парсинга структурированных данных', 'storage_create_e2'), true);	
-                        }
-                        
-                    });
+                        handler.saveDB(dbName, handler.getDefaultData(), onDBSave);
+                    }
                 
                 } else {
+                       
+                    var bookmarksParser = handler.fav.getBookmarksParser();
+                    if (bookmarksParser && !bookmarksParser.isBeasy() && bookmarksParser.collectedData.items.length) {
+                        
+                        createProfileByInput(false, JSON.stringify(bookmarksParser.collectedData)); // todo check any way to count memory size of object without stringify ?
+                        
+                    } else {
+                        
+                        handler.showMessage(lng.s('Данные из профиля пользователя не доступны', 'storage_create_e3'), true);	
+                    }
                     
-                    handler.saveDB(dbName, handler.getDefaultData(), onDBSave);
                 }
                 
             });
@@ -3122,6 +3151,37 @@ function KellyFavStorageManager(cfg) {
             idPrefix = handler.className + '-dbmanager';
         }
         
+        var sourceHtml = '<tr><td>' + lng.s('Загрузить из файла', 'storage_load_from_file') + '</td><td><input type="file" id="' + idPrefix + '-db-file"></td></tr>';
+        
+        var bookmarksParser = handler.fav.getBookmarksParser();
+        if (bookmarksParser && !bookmarksParser.isBeasy() && bookmarksParser.collectedData && bookmarksParser.collectedData.items.length) {
+            
+            sourceHtml  = '\
+                <tr>\
+                    <td>\
+                        <label>\
+                            <input type="radio" id="' + idPrefix + '-data-source-file" name="' + idPrefix + '-data-source" value="file"> ' + lng.s('Загрузить из файла', 'storage_load_from_file') + '\
+                        </label>\
+                    </td>\
+                    <td><input type="file" id="' + idPrefix + '-db-file"></td>\
+                </tr>\
+                <tr>\
+                    <td>\
+                        <label>\
+                            <input type="radio" id="' + idPrefix + '-data-source-bookmarks" name="' + idPrefix + '-data-source" value="user-bookmarks" checked> ' + lng.s('Загрузить из профиля', 'storage_load_from_user') + '\
+                        </label>\
+                    </td>\
+                    <td>\
+                        <span>\
+                            ' + lng.s('Профиль __USER_NAME__ (закладок : __BOOKMARKS_NUM__)', 'storage_load_from_user_info',  {
+                                 USER_NAME : KellyTools.getUrlFileName(bookmarksParser.pageInfo.userName), 
+                                 BOOKMARKS_NUM : bookmarksParser.collectedData.items.length
+                            }) + '\
+                        </span>\
+                    </td>\
+                </tr>';
+        }
+        
         var html = '\
             <div class="' + handler.className + '-wrap">\
                 <table class="' + handler.className + '-options-table">\
@@ -3133,7 +3193,7 @@ function KellyFavStorageManager(cfg) {
                     </td></tr>\
                     <tr><td colspan="2">' + lng.s('', 'storage_type_notice') + '</td></tr>\
                     <tr><td colspan="2"><h3>' + lng.s('Добавить новую базу', 'storage_add_new') + '</h3></td></tr>\
-                    <tr><td>' + lng.s('Загрузить из файла', 'storage_load_from_file') + '</td><td><input type="file" id="' + idPrefix + '-db-file"></td></tr>\
+                    ' + sourceHtml + '\
                     <tr><td>' + lng.s('Идентификатор базы', 'storage_name') + '</td><td><input type="text" id="' + idPrefix + '-create-name" placeholder="custom_data"></td></tr>\
                     <tr><td><label for="' + idPrefix + '-cancel">' + lng.s('Отмена если существует', 'storage_create_cancel_if_exist') + '</label></td>\
                         <td><input type="radio" name="' + idPrefix + '-conflict-action" id="' + idPrefix + '-cancel" value="cancel" checked></td></tr>\
@@ -3367,20 +3427,7 @@ function KellyFavStorageManager(cfg) {
     
     this.categoryAssocToString = function(assoc) {
         
-        if (!assoc) return '';
-        if (typeof assoc != 'object') return '';
-        if (!assoc.length) return '';
-        
-        var string = '';
-        
-        for (var i = 0; i < assoc.length; i++) {
-            assoc[i] = KellyTools.val(assoc[i], 'string');
-            if (assoc[i]) {
-                string += string ? ',' + assoc[i] : assoc[i];
-            }            
-        }
-        
-        return string;
+        return KellyTools.varListToStr(assoc, 'string', ', ');
     }
     
     this.categoryAssocFromString = function(assoc) {
@@ -4002,7 +4049,6 @@ function KellyFavStorageManager(cfg) {
 
 function KellyThreadWork(cfg) {
 
-
     var jobs = [];
     var env = false;
     var maxThreads = 1; // эксперименты чреваты баном за спам запросами, пробовать только за впном или если у вас динамический адрес
@@ -4017,12 +4063,11 @@ function KellyThreadWork(cfg) {
     var untilPause = getRandom(pauseEvery);
     var pauseTimer = [10,14,20];
     
-    var beasy = false;
     var events = { onProcess : false, onEnd : false };
     var handler = this;
     var threadId = 1;
     var applayJobTimer = false;
-    
+    var beasy = false;
     
     function constructor(cfg) {
     
@@ -4155,7 +4200,7 @@ function KellyThreadWork(cfg) {
             applayJobTimer = false;
         }
         
-        if (events.onEnd) events.onEnd('stop', true);
+        onEnd('stop', true); 
             
     }
         
@@ -4190,7 +4235,7 @@ function KellyThreadWork(cfg) {
         
         if (!jobs.length && !threads.length) {   
         
-            if (events.onEnd) events.onEnd('onJobEnd');
+            onEnd('onJobEnd');
             
         } else {
             
@@ -4234,7 +4279,7 @@ function KellyThreadWork(cfg) {
     
         if (threads.length >= maxThreads) return false;
         if (!jobs.length && !threads.length) {            
-            if (events.onEnd) events.onEnd('applayJob');
+            onEnd('applayJob');
             return false;
         }
         
@@ -4296,19 +4341,40 @@ function KellyThreadWork(cfg) {
         return true;            
     }
     
+    this.isBeasy = function() {
+        return beasy;
+    }
+    
+    function onEnd(cname, forced) {
+        
+        forced = forced ? true : false;
+        beasy = false;
+        
+        if (events.onEnd) events.onEnd(cname, forced);
+    }
+    
     this.exec = function() {
     
-        if (beasy) return false;
+        if (this.isBeasy()) return false;
         
         if (!jobs.length) {            
-            if (events.onEnd) events.onEnd('exec');
+            onEnd('exec');
+            return false;
+        }
+               
+        for (var i = 1; i <= maxThreads; i++) {
+            if (!applayJob()) break;
+            else beasy = true;
+        }
+        
+        // job exist, but not applayed (bad maxThreads \ applayJob)
+        
+        if (!this.isBeasy()) {
+            onEnd('exec_fail');
             return false;
         }
         
-        for (var i = 1; i <= maxThreads; i++) {
-            if (!applayJob()) return false;
-        }
-      
+        return true;
     }
     
     // data - page \ nik \ etc
@@ -6714,7 +6780,7 @@ KellyTools.getScrollLeft = function() {
     return scrollLeft;
 }
 
-// basic validation of input string
+// trim and basic validation of input string
 
 KellyTools.val = function(value, type) {
     
@@ -7032,7 +7098,7 @@ KellyTools.getVarList = function(str, type, glue) {
     return str;
 }
     
-KellyTools.varListToStr = function(varlist, glue) {
+KellyTools.varListToStr = function(varlist, type, glue) {
         
     if (!varlist || !varlist.length) return '';
     
@@ -7040,11 +7106,12 @@ KellyTools.varListToStr = function(varlist, glue) {
     if (!glue) glue = ',';
     
     for (var i=0; i <= varlist.length-1; i++) {
+        
+        var tmp = KellyTools.val(varlist[i], type);
+        if (!tmp) continue;
     
-        if (!varlist[i]) continue;
-    
-        if (str) str += glue + varlist[i];
-        else str = varlist[i];
+        if (str) str += glue + tmp;
+        else str = tmp;
     }
     
     return str;
@@ -9370,7 +9437,7 @@ function KellyFavItems(noexec)
             optionsManager.wrap = favContent;
         }
         
-        optionsManager.showOptionsDialog();
+        optionsManager.showOptionsDialog(tabActive);
         
         displayFavouritesBlock('ctoptions');
     }
@@ -11852,19 +11919,23 @@ function KellyFavItems(noexec)
         handler.save('items');
         
         return true;
-    }
-    
+    }    
     
     this.onDownloadNativeFavPagesEnd = function(stage, canceled) {
         
         log(stage);
         
         var notice = KellyTools.getElementByClass(document, env.className + '-exporter-process');
-        if (notice) {
-            notice.innerText = canceled ? lng.s('', 'download_partly') : '';            
-        }
+            notice.innerText = '';
         
-        var downloadBtn = KellyTools.getElementByClass(document, env.className + '-DownloadFav');
+        var saveNotice = KellyTools.getElementByClass(document, env.className + '-exporter-save-result');
+        var saveNoticeHtml = '';
+        
+        if (canceled) {
+            saveNoticeHtml = lng.s('', 'download_partly');
+        }
+            
+        var downloadBtn = KellyTools.getElementByClass(document, env.className + '-exporter-button-start');
         if (downloadBtn) downloadBtn.innerText = lng.s('Запустить скачивание страниц', 'download_start');	
         
         // todo - notify about auto download ?
@@ -11883,18 +11954,42 @@ function KellyFavItems(noexec)
             fav.coptions.downloader.autosaveEnabled && 
             (favNativeParser.jobSaved || !favNativeParser.jobBeforeAutosave)
         ) { 
+        
             favNativeParser.jobSaved += favNativeParser.jobAutosave - favNativeParser.jobBeforeAutosave;
-            favNativeParser.saveData(true, 'onDownloadNativeFavPagesEnd');            
+            favNativeParser.saveData(true, 'onDownloadNativeFavPagesEnd');
+            
+            saveNoticeHtml += '<br><b>' + lng.s('', 'download_autosaved_ok') + '</b>';    
+            
         } else {
+            
             KellyTools.getElementByClass(document, env.className + '-Save').style.display = 'block';
+            
+            if (fav.coptions.downloader.autosaveEnabled && favNativeParser.jobSaved && favNativeParser.jobBeforeAutosave) {
+                saveNoticeHtml += '<br><b>' + lng.s('', 'download_autosaved_partly', {LAST_PAGE : favNativeParser.jobSaved}) + '</b>';
+            }
         }
         
-        var saveNew = KellyTools.getElementByClass(document, env.className + '-SaveFavNew');
+        if (saveNotice) {
+            KellyTools.setHTMLData(saveNotice, saveNoticeHtml);
+        }
+        
+        var saveNew = KellyTools.getElementByClass(document, env.className + '-exporter-button-save');
             saveNew.onclick = function() {
             
                 if (favNativeParser && favNativeParser.saveData) favNativeParser.saveData();
                 return false;
-            }            
+            } 
+            
+        var addToProfile = KellyTools.getElementByClass(document, env.className + '-exporter-button-addtoprofile');
+            addToProfile.onclick = function() {
+            
+                if (favNativeParser) {
+                    handler.showOptionsDialog(env.className + '-Storage');
+                    window.scrollTo(0,  handler.getStorageManager().wrap.getBoundingClientRect().top + KellyTools.getScrollTop());
+                }
+                
+                return false;
+            }
     }
     
     this.onDownloadNativeFavPage = function(worker, thread, jobsLength) {
@@ -12107,14 +12202,11 @@ function KellyFavItems(noexec)
     
     this.downloadNativeFavPage = function(el) {
         
-        if (!env.getFavPageInfo) {
-            log(env.profile + 'not support native downloads');
+        if (!favNativeParser || !favNativeParser.pageInfo) {
+            log(env.profile + ' bad bookmarks page info');
             return false;
         }
         
-        var favInfo = env.getFavPageInfo();        
-        if (!favInfo) return false;
-
         favNativeParser.errors = '';
 
         if (favNativeParser.getJobs().length) {
@@ -12185,8 +12277,8 @@ function KellyFavItems(noexec)
                 
                 customUrlEl.value = customUrl;    
                 
-                if (favInfo.url != customUrl) {
-                    favInfo.url = customUrl;
+                if (favNativeParser.pageInfo.url != customUrl) {
+                    favNativeParser.pageInfo.url = customUrl;
                 } else customUrl = false;
                 
             } else customUrl = false;
@@ -12202,18 +12294,22 @@ function KellyFavItems(noexec)
                
         var pagesList = [];
         
-        var message = KellyTools.getElementByClass(document, env.className + '-exporter-process');
+        var message = KellyTools.getElementByClass(document, env.className + '-exporter-process');        
+        var saveNotice = KellyTools.getElementByClass(document, env.className + '-exporter-save-result');
+        
+        message.innerText = '';
+        saveNotice.innerText = '';
         
         if (pages && pages.value.length) {
            
-            pagesList = KellyTools.getPrintValues(pages.value, true, 1, customUrl ? false : favInfo.pages);
+            pagesList = KellyTools.getPrintValues(pages.value, true, 1, customUrl ? false : favNativeParser.pageInfo.pages);
             
         } else { 
         
-            pagesList = KellyTools.getPrintValues('1-' + favInfo.pages, true);
+            pagesList = KellyTools.getPrintValues('1-' + favNativeParser.pageInfo.pages, true);
         }	
               
-        if (!fav.coptions.downloader.autosaveEnabled && favInfo.pages > favNativeParser.maxPagesPerExport && pagesList.length > favNativeParser.maxPagesPerExport ) {
+        if (!fav.coptions.downloader.autosaveEnabled && favNativeParser.pageInfo.pages > favNativeParser.maxPagesPerExport && pagesList.length > favNativeParser.maxPagesPerExport ) {
                         
             message.innerText = lng.s('', 'download_limitpages', {MAXPAGESPERIMPORT : favNativeParser.maxPagesPerExport, CURRENTPAGESPERIMPORT : pagesList.length});
             return; 
@@ -12257,7 +12353,7 @@ function KellyFavItems(noexec)
             var pageNumber = pagesList[i];
             
             favNativeParser.addJob(
-                favInfo.url.replace('__PAGENUMBER__', pageNumber), 
+                favNativeParser.pageInfo.url.replace('__PAGENUMBER__', pageNumber), 
                 handler.onDownloadNativeFavPage, 
                 {page : pageNumber}
             );
@@ -12341,6 +12437,85 @@ function KellyFavItems(noexec)
         favNativeParser.exec();        
     }
     
+    this.getBookmarksParser = function() {
+        
+        if (favNativeParser) return favNativeParser;
+        
+        favNativeParser = new KellyThreadWork({env : handler});  
+        
+        favNativeParser.setEvent('onEnd', handler.onDownloadNativeFavPagesEnd);                
+
+        favNativeParser.maxPagesPerExport = 1000;
+        favNativeParser.pageInfo = env.getFavPageInfo ? env.getFavPageInfo() : false;
+        
+        favNativeParser.addToLog = function(txt, clear) {
+            
+            txt = '[' + KellyTools.getTime() + '] ' + txt;
+            
+            var logEl = KellyTools.getElementByClass(favNativeParser.pageInfo.container, env.className + '-exporter-log');
+            if (clear) {
+                
+                KellyTools.setHTMLData(logEl, txt + '<br>');
+                logEl.setAttribute('data-lines', 0);
+                
+            } else {
+                
+                var text = document.createTextNode(txt);
+                var logNewLine = document.createElement('br');
+                
+                var logNum = parseInt(logEl.getAttribute('data-lines'));
+                if (!logNum) logNum = 0;
+                
+                if (logNum > 1000) {
+                    
+                    logEl.innerHTML = '';
+                    logNum = 0;
+                    
+                    logEl.setAttribute('data-lines', 0);
+                }
+                                    
+                logEl.appendChild(text);
+                logEl.appendChild(logNewLine);                
+                logEl.setAttribute('data-lines', logNum+1);
+            }
+        }
+        
+        favNativeParser.saveData = function(autosave, source) {
+            
+            log('favNativeParser : save current progress : ' + (autosave ? 'autosave - saved ' + favNativeParser.jobSaved  : 'click'));
+            
+            if (source) log('favNativeParser : source ' + source );
+            
+            if (favNativeParser.collectedData.selected_cats_ids) {
+                delete favNativeParser.collectedData.selected_cats_ids;
+            }
+                    
+            var fname = fav.coptions.baseFolder + '/' + handler.getStorageManager().dir.exportBookmark;
+                fname += 'db_';
+                                    
+            if (favNativeParser.pageInfo.userName) fname += '_' + KellyTools.getUrlFileName(favNativeParser.pageInfo.userName);
+            
+            fname += '_' + KellyTools.getTimeStamp();
+            
+            if (autosave) {
+                fname += '__page_' + favNativeParser.jobSaved;
+                favNativeParser.addToLog('Автосохранение после ' + favNativeParser.jobSaved + ' страниц');
+            }
+            
+            fname += '.' + handler.getStorageManager().format;
+            
+            fname = KellyTools.validateFolderPath(fname);                    
+            
+            handler.getDownloadManager().createAndDownloadFile(JSON.stringify(favNativeParser.collectedData), fname);
+
+            if (autosave) {
+                favNativeParser.collectedData = handler.getStorageManager().getDefaultData();
+            }
+        }
+        
+        return favNativeParser;
+    }
+    
     this.showNativeFavoritePageInfo = function() {
         
         // single file downloads now supported in any browser
@@ -12350,257 +12525,187 @@ function KellyFavItems(noexec)
         // }
         
         if (!env.getFavPageInfo) {
-            log(env.profile + 'not support native downloads');
+            log(env.profile + ' not support native downloads');
+            return false;
+        }        
+        
+        var favPageInfo = handler.getBookmarksParser().pageInfo;     
+        if (!favPageInfo || !favPageInfo.items) {
             return false;
         }
+                              
+        var saveBlock = '\
+            <div class="' + env.className + '-Save" style="display : none;">\
+                <p>' + lng.s('', 'download_save_notice') + '</p>\
+                <a href="#" class="' + env.className + '-exporter-button-addtoprofile" >' + lng.s('Добавить картинки в отдельный профиль', 'storage_parser_save_to_profile') + '</a>\
+                <a href="#" class="' + env.className + '-exporter-button-save" >' + lng.s('Скачать как файл профиля', 'download_save') + '</a>\
+            </div>\
+            <div class="' + env.className + '-exporter-save-result"></div>';
         
+        var items = favPageInfo.items;
+        if (favPageInfo.pages > 2) { 
+            items = '~' + items;
+        }
         
-        var favPageInfo = env.getFavPageInfo();
-     
-        if (favPageInfo && favPageInfo.items) {
-                                
-            if (!favNativeParser) {
-                
-                favNativeParser = new KellyThreadWork({env : handler});  
-                
-                favNativeParser.setEvent('onEnd', handler.onDownloadNativeFavPagesEnd);                
+        // для текстовый публикаций делать заголовок через метод setSelectionInfo
         
-                favNativeParser.maxPagesPerExport = 1000;
-                favNativeParser.addToLog = function(txt, clear) {
-                    
-                    txt = '[' + KellyTools.getTime() + '] ' + txt;
-                    
-                    var logEl = KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-log');
-                    if (clear) {
-                        
-                        KellyTools.setHTMLData(logEl, txt + '<br>');
-                        logEl.setAttribute('data-lines', 0);
-                        
-                    } else {
-                        
-                        var text = document.createTextNode(txt);
-                        var logNewLine = document.createElement('br');
-                        
-                        var logNum = parseInt(logEl.getAttribute('data-lines'));
-                        if (!logNum) logNum = 0;
-                        
-                        if (logNum > 1000) {
-                            
-                            logEl.innerHTML = '';
-                            logNum = 0;
-                            
-                            logEl.setAttribute('data-lines', 0);
-                        }
-                                            
-                        logEl.appendChild(text);
-                        logEl.appendChild(logNewLine);                
-                        logEl.setAttribute('data-lines', logNum+1);
-                    }
-                }
-                
-                favNativeParser.saveData = function(autosave, source) {
-                    
-                    log('favNativeParser : save current progress : ' + (autosave ? 'autosave - saved ' + favNativeParser.jobSaved  : 'click'));
-                    
-                    if (source) log('favNativeParser : source ' + source );
-                    
-                    if (favNativeParser.collectedData.selected_cats_ids) {
-                        delete favNativeParser.collectedData.selected_cats_ids;
-                    }
-                    
-                    var fname = fav.coptions.baseFolder + '/' + handler.getStorageManager().dir.exportBookmark;
-                        fname += 'db_';
-                        
-                    var pageInfo = env.getFavPageInfo();					
-                    if (pageInfo.userName) fname += '_' + KellyTools.getUrlFileName(pageInfo.userName);
-                    
-                    fname += '_' + KellyTools.getTimeStamp();
-                    
-                    if (autosave) {
-                        fname += '__page_' + favNativeParser.jobSaved;
-                    }
-                    
-                    fname += '.' + handler.getStorageManager().format;
-                    
-                    fname = KellyTools.validateFolderPath(fname);                    
-                    
-                    handler.getDownloadManager().createAndDownloadFile(JSON.stringify(favNativeParser.collectedData), fname);
-
-                    if (autosave) {
-                        favNativeParser.collectedData = handler.getStorageManager().getDefaultData();
-                    }
-                }
-            }
+        var tagFilterHtml = '';
         
-            var saveBlock = '\
-                <div class="' + env.className + '-Save" style="display : none;">\
-                    <p>' + lng.s('', 'download_save_notice') + '</p>\
-                    <a href="#" class="' + env.className + '-SaveFavNew" >' + lng.s('Скачать как файл профиля', 'download_save') + '</a>\
-                </div>';
-            
-            var items = favPageInfo.items;
-            if (favPageInfo.pages > 2) { 
-                items = '~' + items;
-            }
-            
-            // для текстовый публикаций делать заголовок через метод setSelectionInfo
-            
-            var tagFilterHtml = '';
-            
-            var tags = fav.coptions.downloader.tagList ? fav.coptions.downloader.tagList : '';
-            var createByTags = fav.coptions.downloader.catByTagList ? fav.coptions.downloader.catByTagList : '';
-            var autosave = fav.coptions.downloader.autosave ? fav.coptions.downloader.autosave : favNativeParser.maxPagesPerExport;
-            
-            if (env.getPostTags) {
-            
-                tagFilterHtml = '\
-                    <label><input type="checkbox" class="' + env.className + '-exporter-tag-filter-show" ' + ( fav.coptions.downloader.tagListEnabled ? 'checked' : '' ) + '> ' + lng.s('Применять фильтрацию по тегам', 'download_tag_filter_show') + '</label>\
-                    <div class="' + env.className + '-exporter-tag-filter-container" style=" ' + (  fav.coptions.downloader.tagListEnabled ? '' : 'display : none;' ) + '">'
-                        + lng.s('', 'download_tag_filter_1') + '<br>'
-                        + lng.s('Если теги не определены, выполняется сохранение всех публикаций', 'download_tag_filter_empty') 
-                        + '</br>\
-                        <textarea class="' + env.className + '-exporter-tag-filter" placeholder="' + lng.s('Фильтровать публикации по списку тегов', 'download_tag_filter') + '">' + tags + '</textarea>\
-                    </div>\
-                ';
-                
-                tagFilterHtml += '\
-                    <label><input type="checkbox" class="' + env.className + '-exporter-create-by-tag-show" ' + ( fav.coptions.downloader.catByTagListEnabled ? 'checked' : '' ) + '> ' + lng.s('Автоматически создавать категории для тегов', 'download_createc_by_tag') + '</label>\
-                    <div class="' + env.className + '-exporter-create-by-tag-container" style="' + (  fav.coptions.downloader.catByTagListEnabled ? '' : 'display : none;' ) + '">'
-                        + lng.s('Если публикация содержит один из перечисленных в поле тегов, к публикации будет добавлена соответствующая категория', 'download_createc_1') + '<br>'
-                        + '</br>\
-                        <textarea class="' + env.className + '-exporter-create-by-tag" placeholder="' + lng.s('Автоматически создавать категории для тегов', 'download_createc_by_tag') + '">' + createByTags + '</textarea>\
-                    </div>\
-                ';
-            }
-            
-            var downloaderOptions = favNativeParser.getCfg();
-            
-            // настройки для отладки \ скрытые настройки
-                        
-            var dhtml = '<table><tbody>';
-            
-            for (var k in downloaderOptions){
-                 dhtml += '<tr><td>' + k + ' :</td><td><input type="text" value="' + downloaderOptions[k]+ '" class="' + env.className +'-downloader-option-' + k + '"></td></tr>';
-            }   
-            
-            dhtml +=  '<tr><td>Ссылка :</td><td><input type="text" value="' + favPageInfo.url + '" class="' + env.className + '-downloader-option-url"></td></tr>';
-            dhtml += '</tbody></table>';
-            
-            var autosaveHtml = '\
-                        <label>\
-                            <input type="checkbox" class="' + env.className + '-exporter-autosave-show" ' + (fav.coptions.downloader.autosaveEnabled ? 'checked' : '') + '> \
-                            ' +  lng.s('Автоматически сохранять в отдельный файл через указанное число страниц', 'download_pages_autosave') + '\
-                        </label>\
-                        <div class="' + env.className + '-exporter-autosave-container" style="display : ' + (fav.coptions.downloader.autosaveEnabled ? 'block' : 'none') + ';">\
-                            <input class="' + env.className +'-PageAutosave" type="text" placeholder="" value="' + autosave + '">\
-                        </div>\
-                    ';
-                             
-            
-            var html = '\
-                <input type="submit" value="' +  lng.s('выгрузить в профиль данных', 'download_form_open') + '" class="' + env.className + '-exporter-form-show">\
-                <div class="' + env.className + '-exporter-container hidden">\
-                     ' +  lng.s('Страниц', 'pages_n') + ' : ' + favPageInfo.pages + ' (' + items + ')<br>\
-                     ' +  lng.s('Укажите список страниц выборки, которые необходимо скачать. Например 2, 4, 66-99, 44, 78, 8-9, 29-77 и т.п.,', 'download_example') + '<br>\
-                     ' +  lng.s('Если нужно захватить все страницы оставьте не заполненным', 'download_tip') + '<br>\
-                     <input class="' + env.className +'-PageArray" type="text" placeholder="' + lng.s('Страницы', 'pages')+ '" value="">\
-                     ' + autosaveHtml + '\
-                     <label><input type="checkbox" class="' + env.className + '-exporter-skip-empty" ' + (fav.coptions.downloader.skipEmpty ? 'checked' : '') + '> ' +  
-                        lng.s('Пропускать публикации не имеющие медиа данных (текст, заблокировано цензурой)', 'download_skip_empty') +
-                     '</label>\
-                     ' + tagFilterHtml + '\
-                     ' + saveBlock + '\
-                     <a href="#" class="' + env.className + '-DownloadFav">' + lng.s('Запустить скачивание страниц', 'download_start') + '</a>\
-                     <a href="#" class="' + env.className + '-exporter-log-show" style="display : none;">' + lng.s('Показать лог', 'download_log') + '</a>\
-                     <a href="#" class="' + env.className + '-tech-options-show" style="' + (!KellyTools.DEBUG ? 'display : none;' : '') + '">' + lng.s('Options', 'hidden_options') + '</a>\
-                     <div class="' + env.className + '-tech-options hidden">\
-                        ' + dhtml + '\
-                     </div>\
-                     <div class="' + env.className + '-exporter-process"></div>\
-                     <div class="' + env.className + '-exporter-log-container" style="display : none;">\
-                        <div class="' + env.className + '-exporter-log"></div>\
-                     </div>\
+        var tags = fav.coptions.downloader.tagList ? fav.coptions.downloader.tagList : '';
+        var createByTags = fav.coptions.downloader.catByTagList ? fav.coptions.downloader.catByTagList : '';
+        var autosave = fav.coptions.downloader.autosave ? fav.coptions.downloader.autosave : handler.getBookmarksParser().maxPagesPerExport;
+        
+        if (env.getPostTags) {
+        
+            tagFilterHtml = '\
+                <label><input type="checkbox" class="' + env.className + '-exporter-tag-filter-show" ' + ( fav.coptions.downloader.tagListEnabled ? 'checked' : '' ) + '> ' + lng.s('Применять фильтрацию по тегам', 'download_tag_filter_show') + '</label>\
+                <div class="' + env.className + '-exporter-tag-filter-container" style=" ' + (  fav.coptions.downloader.tagListEnabled ? '' : 'display : none;' ) + '">'
+                    + lng.s('', 'download_tag_filter_1') + '<br>'
+                    + lng.s('Если теги не определены, выполняется сохранение всех публикаций', 'download_tag_filter_empty') 
+                    + '</br>\
+                    <textarea class="' + env.className + '-exporter-tag-filter" placeholder="' + lng.s('Фильтровать публикации по списку тегов', 'download_tag_filter') + '">' + tags + '</textarea>\
                 </div>\
-            ';	
+            ';
             
-            KellyTools.setHTMLData(favPageInfo.container, html);
-            
-            if (KellyTools.DEBUG) {
-                var showHiddenOptBtn = KellyTools.getElementByClass(favPageInfo.container, env.className + '-tech-options-show');
-                    showHiddenOptBtn.onclick = function() {
-                        KellyTools.toogleActive(KellyTools.getElementByClass(favPageInfo.container, env.className + '-tech-options'));
-                        return false;
-                    }       
+            tagFilterHtml += '\
+                <label><input type="checkbox" class="' + env.className + '-exporter-create-by-tag-show" ' + ( fav.coptions.downloader.catByTagListEnabled ? 'checked' : '' ) + '> ' + lng.s('Автоматически создавать категории для тегов', 'download_createc_by_tag') + '</label>\
+                <div class="' + env.className + '-exporter-create-by-tag-container" style="' + (  fav.coptions.downloader.catByTagListEnabled ? '' : 'display : none;' ) + '">'
+                    + lng.s('Если публикация содержит один из перечисленных в поле тегов, к публикации будет добавлена соответствующая категория', 'download_createc_1') + '<br>'
+                    + '</br>\
+                    <textarea class="' + env.className + '-exporter-create-by-tag" placeholder="' + lng.s('Автоматически создавать категории для тегов', 'download_createc_by_tag') + '">' + createByTags + '</textarea>\
+                </div>\
+            ';
+        }
+        
+        var downloaderOptions = handler.getBookmarksParser().getCfg();
+        
+        // настройки для отладки \ скрытые настройки
+                    
+        var dhtml = '<table><tbody>';
+        
+        for (var k in downloaderOptions){
+             dhtml += '<tr><td>' + k + ' :</td><td><input type="text" value="' + downloaderOptions[k]+ '" class="' + env.className +'-downloader-option-' + k + '"></td></tr>';
+        }   
+        
+        dhtml +=  '<tr><td>Ссылка :</td><td><input type="text" value="' + favPageInfo.url + '" class="' + env.className + '-downloader-option-url"></td></tr>';
+        dhtml += '</tbody></table>';
+        
+        var autosaveHtml = '\
+            <label>\
+                <input type="checkbox" class="' + env.className + '-exporter-autosave-show" ' + (fav.coptions.downloader.autosaveEnabled ? 'checked' : '') + '> \
+                ' +  lng.s('Автоматически сохранять в отдельный файл через указанное число страниц', 'download_pages_autosave') + '\
+            </label>\
+            <div class="' + env.className + '-exporter-autosave-container" style="display : ' + (fav.coptions.downloader.autosaveEnabled ? 'block' : 'none') + ';">\
+                <input class="' + env.className +'-PageAutosave" type="text" placeholder="" value="' + autosave + '">\
+            </div>\
+        ';
+                         
+        
+        var html = '\
+            <input type="submit" value="' +  lng.s('выгрузить в профиль данных', 'download_form_open') + '" class="' + env.className + '-exporter-form-show">\
+            <div class="' + env.className + '-exporter-container hidden">\
+                 ' +  lng.s('Страниц', 'pages_n') + ' : ' + favPageInfo.pages + ' (' + items + ')<br>\
+                 ' +  lng.s('Укажите список страниц выборки, которые необходимо скачать. Например 2, 4, 66-99, 44, 78, 8-9, 29-77 и т.п.,', 'download_example') + '<br>\
+                 ' +  lng.s('Если нужно захватить все страницы оставьте не заполненным', 'download_tip') + '<br>\
+                 <input class="' + env.className +'-PageArray" type="text" placeholder="' + lng.s('Страницы', 'pages')+ '" value="">\
+                 ' + autosaveHtml + '\
+                 <label><input type="checkbox" class="' + env.className + '-exporter-skip-empty" ' + (fav.coptions.downloader.skipEmpty ? 'checked' : '') + '> ' +  
+                    lng.s('Пропускать публикации не имеющие медиа данных (текст, заблокировано цензурой)', 'download_skip_empty') +
+                 '</label>\
+                 ' + tagFilterHtml + '\
+                 ' + saveBlock + '\
+                 <div class="' + env.className + '-exporter-buttons">\
+                    <a href="#" class="' + env.className + '-exporter-button-start">' + lng.s('Запустить скачивание страниц', 'download_start') + '</a>\
+                    <a href="#" class="' + env.className + '-exporter-log-show" style="display : none;">' + lng.s('Показать лог', 'download_log') + '</a>\
+                    <a href="#" class="' + env.className + '-tech-options-show" style="' + (!KellyTools.DEBUG ? 'display : none;' : '') + '">' + lng.s('Options', 'hidden_options') + '</a>\
+                 </div>\
+                 <div class="' + env.className + '-tech-options hidden">\
+                    ' + dhtml + '\
+                 </div>\
+                 <div class="' + env.className + '-exporter-process"></div>\
+                 <div class="' + env.className + '-exporter-log-container" style="display : none;">\
+                    <div class="' + env.className + '-exporter-log"></div>\
+                 </div>\
+            </div>\
+        ';	
+        
+        KellyTools.setHTMLData(favPageInfo.container, html);
+        
+        if (KellyTools.DEBUG) {
+            var showHiddenOptBtn = KellyTools.getElementByClass(favPageInfo.container, env.className + '-tech-options-show');
+                showHiddenOptBtn.onclick = function() {
+                    KellyTools.toogleActive(KellyTools.getElementByClass(favPageInfo.container, env.className + '-tech-options'));
+                    return false;
+                }       
+        }
+
+        var showFormBtn = KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-form-show');
+            showFormBtn.onclick = function() {
+                KellyTools.toogleActive(KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-container'));
+                return false;
             }
-
-            var showFormBtn = KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-form-show');
-                showFormBtn.onclick = function() {
-                    KellyTools.toogleActive(KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-container'));
-                    return false;
-                }
-                
-                KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-autosave-show').onchange = function() {
-                    
-                    var el = KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-autosave-container');
-                        el.style.display = this.checked ? 'block' : 'none'; 
-                        
-                    return false;
-                }  
-                
-            if (env.getPostTags) {
-                KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-tag-filter-show').onchange = function() {
-                    
-                    var el = KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-tag-filter-container');
-                        el.style.display = this.checked ? 'block' : 'none'; 
-                    
-                    return false;
-                };
-                
-                KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-tag-filter').onchange = function() {
-                    var list = KellyTools.parseTagsList(this.value);
-                    
-                    var value = KellyTools.varListToStr(list.include, ', ');
-                    if (list.exclude.length) value += (value ? ', ' : '') + '-' + KellyTools.varListToStr(list.exclude, ', -');
-
-                    this.value = value;
-                    
-                    if (this.value != fav.coptions.downloader.tagList) {
-                        fav.coptions.downloader.tagList = this.value;
-                        handler.save('cfg');
-                    }
-                    
-                    return false;
-                };
-                
-                KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-create-by-tag').onchange = function() {
-                    
-                    var list = KellyTools.parseTagsList(this.value);
-                    
-                    var value = KellyTools.varListToStr(list.include, ', ');
-                    this.value = value;
-                    
-                    if (this.value != fav.coptions.downloader.catByTagList) {
-                        fav.coptions.downloader.catByTagList = this.value;
-                        handler.save('cfg');
-                    }
-                    
-                    return false;
-                };
-                
-                KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-create-by-tag-show').onchange = function() {
-                    
-                    var el = KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-create-by-tag-container');
-                        el.style.display = this.checked ? 'block' : 'none'; 
-                    
-                    return false;
-                };
-            }            
             
-            KellyTools.getElementByClass(document, env.className + '-DownloadFav').onclick = function() {
-                handler.downloadNativeFavPage(this);
+            KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-autosave-show').onchange = function() {
+                
+                var el = KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-autosave-container');
+                    el.style.display = this.checked ? 'block' : 'none'; 
+                    
+                return false;
+            }  
+            
+        if (env.getPostTags) {
+            KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-tag-filter-show').onchange = function() {
+                
+                var el = KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-tag-filter-container');
+                    el.style.display = this.checked ? 'block' : 'none'; 
+                
                 return false;
             };
-        }
+            
+            KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-tag-filter').onchange = function() {
+                var list = KellyTools.parseTagsList(this.value);
+                
+                var value = KellyTools.varListToStr(list.include, 'string', ', ');
+                if (list.exclude.length) value += (value ? ', ' : '') + '-' + KellyTools.varListToStr(list.exclude, 'string', ', -');
+
+                this.value = value;
+                
+                if (this.value != fav.coptions.downloader.tagList) {
+                    fav.coptions.downloader.tagList = this.value;
+                    handler.save('cfg');
+                }
+                
+                return false;
+            };
+            
+            KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-create-by-tag').onchange = function() {
+                
+                var list = KellyTools.parseTagsList(this.value);
+                
+                var value = KellyTools.varListToStr(list.include, 'string', ', ');
+                this.value = value;
+                
+                if (this.value != fav.coptions.downloader.catByTagList) {
+                    fav.coptions.downloader.catByTagList = this.value;
+                    handler.save('cfg');
+                }
+                
+                return false;
+            };
+            
+            KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-create-by-tag-show').onchange = function() {
+                
+                var el = KellyTools.getElementByClass(favPageInfo.container, env.className + '-exporter-create-by-tag-container');
+                    el.style.display = this.checked ? 'block' : 'none'; 
+                
+                return false;
+            };
+        }            
+        
+        KellyTools.getElementByClass(document, env.className + '-exporter-button-start').onclick = function() {
+            handler.downloadNativeFavPage(this);
+            return false;
+        };
         
     }
     
@@ -13858,7 +13963,7 @@ function kellyProfileJoyreactor() {
             page : 1,
             header : header,
             url : false,
-            userName : false,
+            userName : false, // url encoded
         }
         
         var parts = handler.location.href.split('/');

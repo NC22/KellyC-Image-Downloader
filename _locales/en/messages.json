@@ -218,6 +218,12 @@
     "download_partly":{  
         "message":"Only part of data was loaded (see log for more info). You still can download loaded data as profile"
     },
+    "download_autosaved_partly":{  
+        "message":"Part of user bookmarks pages data saved to separate files"
+    },   
+    "download_autosaved_ok":{  
+        "message":"Pages saved automaticaly"
+    },
     "download_empty":{  
         "message":"List of found publications is empty (see log for more info)"
     },
@@ -601,7 +607,19 @@
     },
     "storage_load_from_file":{  
         "message":"Load from file"
+    }, 
+    "storage_load_from_user":{  
+        "message":"Load from user profile"
     },    
+    "storage_load_from_user_info":{  
+        "message":"User __USER_NAME__ (bookmarks : __BOOKMARKS_NUM__)"
+    },      
+    "storage_create_e3":{  
+        "message":"Data from user profile is unavailable"
+    },    
+    "storage_parser_save_to_profile":{  
+        "message":"Save images to profile"
+    }, 
     "storage_name":{  
         "message":"Profile id (only ch. A-Z, 1-9, _)"
     },  

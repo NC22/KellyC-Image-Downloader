@@ -98,7 +98,7 @@ KellyTools.getScrollLeft = function() {
     return scrollLeft;
 }
 
-// basic validation of input string
+// trim and basic validation of input string
 
 KellyTools.val = function(value, type) {
     
@@ -416,7 +416,7 @@ KellyTools.getVarList = function(str, type, glue) {
     return str;
 }
     
-KellyTools.varListToStr = function(varlist, glue) {
+KellyTools.varListToStr = function(varlist, type, glue) {
         
     if (!varlist || !varlist.length) return '';
     
@@ -424,11 +424,12 @@ KellyTools.varListToStr = function(varlist, glue) {
     if (!glue) glue = ',';
     
     for (var i=0; i <= varlist.length-1; i++) {
+        
+        var tmp = KellyTools.val(varlist[i], type);
+        if (!tmp) continue;
     
-        if (!varlist[i]) continue;
-    
-        if (str) str += glue + varlist[i];
-        else str = varlist[i];
+        if (str) str += glue + tmp;
+        else str = tmp;
     }
     
     return str;
