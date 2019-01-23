@@ -4559,10 +4559,31 @@ function KellyGrabber(cfg) {
     var updateOptionsTimer = false;
     
     function constructor(cfg) {
+		
         handler.resetOptions();
         handler.updateCfg(cfg);
+		handler.initListeners();
     }
     
+	this.initListeners = function() {
+		
+		KellyTools.getBrowser().runtime.onMessage.addListener(function(request, sender, callback) {
+
+            var response = {
+                method : request.method,
+            }
+            
+            if (request.method == "onChanged") {       
+                
+                handler.onDownloadProcessChanged(request.downloadDelta); 
+
+				if (callback) callback(response); 				
+            }          
+            
+        });
+		
+	}
+	
     this.getState = function() {    
         return mode;
     }
@@ -8252,7 +8273,7 @@ function KellyOptions(cfg) {
 
 function KellyFavItems(noexec) 
 {
-    var handler = this;	
+    var handler = this;    
         
     var env = false;
     var events = [];
@@ -8336,9 +8357,9 @@ function KellyFavItems(noexec)
     var fav = {};
     
     this.isDownloadSupported = false;  
-	
+    
     this.aspectRatioAccurCheck = 0.05;
-	
+    
     this.sideBarLock = false;
     this.tooltipBeasy = false; // true if shown something important throw handler.getTooltip(), prevent create another tooltips onmouseover and hide onmouseout
     
@@ -8441,41 +8462,43 @@ function KellyFavItems(noexec)
        
     }
     
-    function constructor(noexec) {
+    function constructor(cfg) {
         
-        if (noexec) return;
-      
-        if (window.location.host.indexOf('tumblr') != -1) {
-            K_DEFAULT_ENVIRONMENT = kellyProfileTumblr.getInstance();
-        } else {
-            K_DEFAULT_ENVIRONMENT = kellyProfileJoyreactor.getInstance();
+        // todo - use chrome.tabs.executeScript(tabId, {file: filename}, function() {  handler.exec(); }); to inject custom environments instead of eval \ presets
+        
+        // if (window.location.host.indexOf('tumblr') != -1) 
+        // K_DEFAULT_ENVIRONMENT = kellyProfileTumblr.getInstance();
+        
+        K_DEFAULT_ENVIRONMENT = kellyProfileJoyreactor.getInstance();
+        
+        if (!cfg) {
+            cfg = {};
         }
         
-        if (!K_DEFAULT_ENVIRONMENT) {          
-            log('Unknown servise or site, cant find profile for ' + window.location.host, KellyTools.E_ERROR);            
-        } else {
-            handler.exec({env : K_DEFAULT_ENVIRONMENT});
+        if (!cfg.env) {
+            cfg.env = K_DEFAULT_ENVIRONMENT;        
         }
-    }	
+        
+        if (!cfg.env) {          
+            log('Unknown servise or site, cant find profile for ' + window.location.host, KellyTools.E_ERROR);
+            return;
+        } 
+                
+        handler.exec(cfg);
+    }
     
     this.exec = function(cfg) {
-
+        
         if (env) {
             return;
         }
         
-        if (!cfg || (!cfg.envText && !cfg.env)) {
+        if (!cfg || !cfg.env) {
             log('empty environment attribute or profile name', KellyTools.E_ERROR);
-            log(cfg.error);
             return;
         }
     
         env = cfg.env;
-        
-        if (!env) {
-            log('init env error', KellyTools.E_ERROR);
-            return;
-        }
         
         if (isMediaResource()) {
             
@@ -8483,22 +8506,25 @@ function KellyFavItems(noexec)
             
         } else {
             
-            env.setFav(handler);		
+            env.setFav(handler);
             
-            var action = (env.getInitAction) ? env.getInitAction() : 'main';        
+            var action = 'main';  
+                 if (cfg.initAction) action = cfg.action;
+            else if (env.getInitAction) {
+                action = env.getInitAction();
+            } 
+            
             if (action == 'main') {
          
                 handler.load(false, function() {
                     
-                    initBGEvents();            
-                    
-                    if (env.getPosts()) {                
-                        handler.initOnPageReady();                    
-                    } else {                    
+                    if (env.getPosts()) {
+                        handler.initOnPageReady();
+                    } else {
                         handler.addEventPListener(window, "load", function (e) {
                             handler.initOnPageReady();
                             return false;
-                        }, 'init_');                    
+                        }, 'init_');
                     }
                 });               
         
@@ -8514,25 +8540,6 @@ function KellyFavItems(noexec)
         }, 'input_message_');             
     }
     
-    function initBGEvents() {
-        
-                 
-        KellyTools.getBrowser().runtime.onMessage.addListener(function(request, sender, callback) {
-
-            var response = {
-                method : request.method,
-            }
-            
-            if (request.method == "onChanged") {       
-                
-                handler.getDownloadManager().onDownloadProcessChanged(request.downloadDelta); 
-
-				if (callback) callback(response); 				
-            }          
-            
-        });
-    }
-        
     function isMediaResource() {
         
         var ext = KellyTools.getUrlExt(selfUrl);        
@@ -8715,7 +8722,7 @@ function KellyFavItems(noexec)
     
     this.updateFavCounter = function() {
     
-        if (!favCounter) return;		
+        if (!favCounter) return;        
         var itemsLengthClass = env.className + '-FavItemsCount';
         
         if (fav.items.length < 10) {
@@ -9015,7 +9022,7 @@ function KellyFavItems(noexec)
         if (!style) {
             
             var head = document.head || document.getElementsByTagName('head')[0];
-            var	style = document.createElement('style');
+            var    style = document.createElement('style');
                 style.type = 'text/css';
                 style.id = env.className + '-mainCss';
             
@@ -9110,7 +9117,7 @@ function KellyFavItems(noexec)
         var getCurrentImage = function(state) {
             var image = false;
             
-            if (state.imageData) {		
+            if (state.imageData) {        
                 if (typeof state.imageData.pImage != 'undefined') {
                     image = state.imageData;
                 } else {
@@ -9162,12 +9169,12 @@ function KellyFavItems(noexec)
             selfClass : env.hostClass + ' ' + env.className + '-ItemTip-tooltipster',
             classGroup : env.className + '-tooltipster',
             removeOnClose : true,
-        }, 100, onShow);	
+        }, 100, onShow);    
     }
     
     function initWorktop() {
         
-        if (env.events.onInitWorktop && env.events.onInitWorktop()) return true;	
+        if (env.events.onInitWorktop && env.events.onInitWorktop()) return true;    
         
         // todo modal mode for fit to ANY site, or overloading by profilejs
                 
@@ -9279,7 +9286,7 @@ function KellyFavItems(noexec)
         
         if (fav.coptions.icon) {
             iconHtml = '<div class="' + env.className + '-icon ' + env.className + '-buttoncolor-dynamic" style="' + fav.coptions.icon + '"></div>';
-        } else {			
+        } else {            
             iconHtml = '<div class="' + env.className + '-icon ' + env.className + '-icon-diskete ' + env.className + '-buttoncolor-dynamic"></div>';
         }
         
@@ -9289,7 +9296,7 @@ function KellyFavItems(noexec)
                 
                 if (mode == 'fav') {
                     handler.hideFavoritesBlock();
-                } else {					
+                } else {                    
                     handler.showFavouriteImages();
                 }
          
@@ -9310,7 +9317,7 @@ function KellyFavItems(noexec)
             
             if (mode == 'ctoptions') {
                 handler.hideFavoritesBlock();
-            } else {					
+            } else {                    
                 handler.showOptionsDialog();
             }
             
@@ -9426,7 +9433,7 @@ function KellyFavItems(noexec)
         imageGrid.updateConfig({tilesBlock : imagesBlock});
         imageGrid.updateTileGrid();
         
-        return;		
+        return;        
     }
     
     this.showOptionsDialog = function(tabActive) {
@@ -9460,7 +9467,7 @@ function KellyFavItems(noexec)
 
         var tag = document.getElementById(env.className + '-extend-filter-' + category.id);
         if (tag) {
-            tag.className = tag.className.replace('includable', '');	
+            tag.className = tag.className.replace('includable', '');    
             if (!remove) tag.className += ' includable';
             tag.className = tag.className.trim();
         }
@@ -9606,7 +9613,7 @@ function KellyFavItems(noexec)
                 target : target, 
                 offset : {left : 0, top : 0}, 
                 positionY : 'bottom',
-                positionX : 'left',				
+                positionX : 'left',                
                 ptypeX : 'inside',
                 ptypeY : 'outside',
                 avoidOutOfBounds : false,
@@ -9627,7 +9634,7 @@ function KellyFavItems(noexec)
             }
             
         var removeItem = document.createElement('a');
-            removeItem.setAttribute('itemIndex', index);		
+            removeItem.setAttribute('itemIndex', index);        
             removeItem.onclick = function() { 
             
                 var updateFavPage = function() { handler.showFavouriteImages(); };
@@ -9796,10 +9803,10 @@ function KellyFavItems(noexec)
                     if (handler.getStorageManager().getCategoryById(storage, itemCats[c]).id == -1) {
                         storage.categories[storage.categories.length] = handler.getStorageManager().getCategoryById(fav, itemCats[c]);
                     }                    
-                }	
+                }    
             }
 
-            storage.items[storage.items.length] = item;			
+            storage.items[storage.items.length] = item;            
         }
   
         var fname = fav.coptions.baseFolder + '/' + handler.getStorageManager().dir.exportFiltered;
@@ -9845,7 +9852,7 @@ function KellyFavItems(noexec)
         var index = fav.items.indexOf(item);
            
         var itemBlock = document.createElement('div');
-            itemBlock.className = env.className + '-FavItem ';			
+            itemBlock.className = env.className + '-FavItem ';            
             itemBlock.id = env.className + '-FavItem-' + item.id;
             
         if (subItem) {
@@ -9898,8 +9905,8 @@ function KellyFavItems(noexec)
             }                
             
             //if (item.pw) {
-            //	itemBlock.setAttribute('data-width', item.pw);
-            //	itemBlock.setAttribute('data-height', item.ph);
+            //    itemBlock.setAttribute('data-width', item.pw);
+            //    itemBlock.setAttribute('data-height', item.ph);
             //}
             
             imageCount = 1;
@@ -10001,7 +10008,7 @@ function KellyFavItems(noexec)
                     
                     return false;
                 }
-            }			
+            }            
             
             var itemBlockAdditions = document.createElement('DIV');
                 itemBlockAdditions.className = env.className + '-FavItem-additions';
@@ -10420,7 +10427,7 @@ function KellyFavItems(noexec)
                 catSelector.href = '#';
                 catSelector.setAttribute('filterId', fav.categories[i].id);
                 
-                var catSelectorActive = '';	
+                var catSelectorActive = '';    
                 
                      if (catFilters.indexOf(fav.categories[i].id) != -1) catSelectorActive = 'active';
                 else if (catIgnoreFilters.indexOf(fav.categories[i].id) != -1) catSelectorActive = 'activeIgnore';
@@ -10467,7 +10474,7 @@ function KellyFavItems(noexec)
                 handler.getTooltip().show(false);
             }
         
-            list.appendChild(filterAdd);	
+            list.appendChild(filterAdd);    
 
         return true;
     }
@@ -10483,7 +10490,7 @@ function KellyFavItems(noexec)
                 var catIndex = catFilters.indexOf(fav.categories[i].id);
                 if (catIndex != -1) catFilters.splice(catIndex, 1);
             }
-        }  			
+        }              
         
     }
     
@@ -10520,14 +10527,14 @@ function KellyFavItems(noexec)
     
     this.showFavouriteImages = function() {
         
-        imageGrid.close();		
+        imageGrid.close();        
         imageGrid.updateConfig({rowHeight : fav.coptions.grid.rowHeight, rules : fav.coptions.grid, type : fav.coptions.grid.type});
                 
         if (mode != 'fav') {
             // moved to reset button
             // catFilters = [];
             // catIgnoreFilters = [];
-        }		
+        }        
         
         if (!env.isNSFW() || fav.coptions.ignoreNSFW) {                               
             handler.ignoreNSFW();
@@ -10567,16 +10574,16 @@ function KellyFavItems(noexec)
                     
                 if (readOnly) {
                 
-                    readOnly = false;					
+                    readOnly = false;                    
                     this.className = this.className.replace('closed', 'open');
                 
-                } else {				
+                } else {                
                     readOnly = true;
-                    this.className = this.className.replace('open', 'closed');					
+                    this.className = this.className.replace('open', 'closed');                    
                 }
                                 
-                if (filterAdd) filterAdd.style.display = readOnly ? 'none' : 'inline-block';				
-                return false;				
+                if (filterAdd) filterAdd.style.display = readOnly ? 'none' : 'inline-block';                
+                return false;                
             }
             
             editButton.className  = env.className + '-FavEditButton-edit ' + env.className + '-iconset1 ';
@@ -10595,7 +10602,7 @@ function KellyFavItems(noexec)
                 if (mode == 'ctoptions') {
                     handler.hideFavoritesBlock();                    
                     this.className = this.className.replace('closed', 'open');
-                } else {					
+                } else {                    
                     handler.showOptionsDialog();                    
                     this.className = this.className.replace('open', 'closed');
                 }
@@ -10614,7 +10621,7 @@ function KellyFavItems(noexec)
                 handler.resetFilterSettings();
                 handler.showFavouriteImages();
                 
-                return false;				
+                return false;                
             }
             
             resetButton.className = env.className + '-FavEditButton-reset';
@@ -10728,7 +10735,7 @@ function KellyFavItems(noexec)
                 return false;
             }
             
-        var gif = logicButton.cloneNode();			
+        var gif = logicButton.cloneNode();            
             gif.className = env.className + '-FavFilter';
             if (fav.coptions.animateGif) gif.innerText = '+ ' + lng.s('Анимация GIF', 'animate_gifs');
             else gif.innerText = '- ' + lng.s('Анимация GIF', 'animate_gifs');
@@ -10754,7 +10761,7 @@ function KellyFavItems(noexec)
                 return false;
             }
             
-        var nsfw = logicButton.cloneNode();		
+        var nsfw = logicButton.cloneNode();        
             nsfw.className = env.className + '-FavFilter';
             
             if (fav.coptions.ignoreNSFW) nsfw.innerText = '- NSFW';
@@ -10928,7 +10935,7 @@ function KellyFavItems(noexec)
             
         typeFiltersContainer.appendChild(logicButton);
         
-        var cOptions = document.createElement('div');	
+        var cOptions = document.createElement('div');    
         KellyTools.setHTMLData(cOptions, '<table><tbody><tr><td></td><td></td><td></td></tr></tbody></table>');
         
         var cOptionsSectors = cOptions.getElementsByTagName('td');
@@ -11475,7 +11482,7 @@ function KellyFavItems(noexec)
         ';
 
         KellyTools.setHTMLData(modalBoxContent, html);
-        modalBoxContent.insertBefore(controlls, modalBoxContent.childNodes[0]);		
+        modalBoxContent.insertBefore(controlls, modalBoxContent.childNodes[0]);        
         
         KellyTools.getElementByClass(modalBoxContent, env.className + 'CatAdd').onclick = function() { handler.categoryAdd(); return false; }        
         KellyTools.getElementByClass(modalBoxContent, env.className + 'CatCreate').onclick = function () { handler.categoryCreate(); return false; }
@@ -11643,7 +11650,7 @@ function KellyFavItems(noexec)
         
             itemIndex = fav.items.length;
             
-            fav.ids++;		
+            fav.ids++;        
             postItem.id = fav.ids;
             
             fav.items[itemIndex] = postItem;
@@ -11848,13 +11855,13 @@ function KellyFavItems(noexec)
     
     this.getGlobal = function(name) {
         
-             if (name == 'debug') return fav.coptions.debug;	
-        else if (name == 'env') return env;		
+             if (name == 'debug') return fav.coptions.debug;    
+        else if (name == 'env') return env;        
         else if (name == 'fav') return fav;
         else if (name == 'filters') return catFilters;
         else if (name == 'lng') return lng;
         else if (name == 'options') return fav.coptions;
-		else if (name == 'image_events') return imageEvents;
+        else if (name == 'image_events') return imageEvents;
     }
     
     // add category to list of categories of selected item
@@ -11936,7 +11943,7 @@ function KellyFavItems(noexec)
         }
             
         var downloadBtn = KellyTools.getElementByClass(document, env.className + '-exporter-button-start');
-        if (downloadBtn) downloadBtn.innerText = lng.s('Запустить скачивание страниц', 'download_start');	
+        if (downloadBtn) downloadBtn.innerText = lng.s('Запустить скачивание страниц', 'download_start');    
         
         // todo - notify about auto download ?
         log('onDownloadNativeFavPagesEnd : ' + (canceled ? ' canceled' : 'job finished successfull'));
@@ -12033,7 +12040,7 @@ function KellyFavItems(noexec)
         
         if (error) {
         
-            worker.errors += error;		
+            worker.errors += error;        
             favNativeParser.addToLog(error);
             return;
         }
@@ -12159,7 +12166,7 @@ function KellyFavItems(noexec)
                         postItem.categoryId = validateCategories(worker.collectedData.selected_cats_ids, worker.collectedData);
                     }
                     
-                    worker.collectedData.ids++;	
+                    worker.collectedData.ids++;    
                 
                     postItem.id = worker.collectedData.ids; 
 
@@ -12307,7 +12314,7 @@ function KellyFavItems(noexec)
         } else { 
         
             pagesList = KellyTools.getPrintValues('1-' + favNativeParser.pageInfo.pages, true);
-        }	
+        }    
               
         if (!fav.coptions.downloader.autosaveEnabled && favNativeParser.pageInfo.pages > favNativeParser.maxPagesPerExport && pagesList.length > favNativeParser.maxPagesPerExport ) {
                         
@@ -12627,7 +12634,7 @@ function KellyFavItems(noexec)
                     <div class="' + env.className + '-exporter-log"></div>\
                  </div>\
             </div>\
-        ';	
+        ';    
         
         KellyTools.setHTMLData(favPageInfo.container, html);
         
@@ -12723,7 +12730,7 @@ function KellyFavItems(noexec)
             
             // console.log(response.url);
             
-            if (!response || response.data === false) {	
+            if (!response || response.data === false) {    
                 log('onLoadCssResource : bad init data');
                 return false;
             }
@@ -12752,7 +12759,7 @@ function KellyFavItems(noexec)
             if (env.events.onExtensionReady) env.events.onExtensionReady();
         };
         
-        KellyTools.getBrowser().runtime.sendMessage({method: "getCss", items : ['main', env.profile], debug : fav.coptions.debug}, onLoadCssResource);		
+        KellyTools.getBrowser().runtime.sendMessage({method: "getCss", items : ['main', env.profile], debug : fav.coptions.debug}, onLoadCssResource);        
         return true;
     }
         
@@ -12761,7 +12768,7 @@ function KellyFavItems(noexec)
         if (init) return false;
         init = true;
         
-        if (env.events.onPageReady && env.events.onPageReady()) {			
+        if (env.events.onPageReady && env.events.onPageReady()) {            
             return false;
         }
         
