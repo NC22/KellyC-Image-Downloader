@@ -3187,10 +3187,11 @@ function KellyFavStorageManager(cfg) {
                             <input type="radio" id="' + idPrefix + '-data-source-bookmarks" name="' + idPrefix + '-data-source" value="user-bookmarks" checked> ' + lng.s('Загрузить из профиля', 'storage_load_from_user') + '\
                         </label>\
                     </td>\
-                    <td>\
+                    <td class="' + handler.className + '-options-table-bookmarks">\
+                        ' + (bookmarksParser.pageInfo.contentImg ? '<img src="' + bookmarksParser.pageInfo.contentImg + '">' : '' ) + '\
                         <span>\
                             ' + lng.s('Профиль __USER_NAME__ (закладок : __BOOKMARKS_NUM__)', 'storage_load_from_user_info',  {
-                                 USER_NAME : KellyTools.getUrlFileName(bookmarksParser.pageInfo.userName), 
+                                 USER_NAME : bookmarksParser.pageInfo.contentName, 
                                  BOOKMARKS_NUM : bookmarksParser.collectedData.items.length
                             }) + '\
                         </span>\
@@ -12637,7 +12638,7 @@ function KellyFavItems(noexec)
             var fname = fav.coptions.baseFolder + '/' + handler.getStorageManager().dir.exportBookmark;
                 fname += 'db_';
                                     
-            if (favNativeParser.pageInfo.userName) fname += '_' + KellyTools.getUrlFileName(favNativeParser.pageInfo.userName);
+            if (favNativeParser.pageInfo.contentName) fname += '_' + favNativeParser.pageInfo.contentName;
             
             fname += '_' + KellyTools.getTimeStamp();
             
@@ -12675,7 +12676,7 @@ function KellyFavItems(noexec)
         var saveBlock = '\
             <div class="' + env.className + '-Save" style="display : none;">\
                 <p>' + lng.s('', 'download_save_notice') + '</p>\
-                <a href="#" class="' + env.className + '-exporter-button-addtoprofile" >' + lng.s('Добавить картинки в отдельный профиль', 'storage_parser_save_to_profile') + '</a>\
+                <a href="#" class="' + env.className + '-exporter-button-addtoprofile ' + env.className + '-buttoncolor-dynamic" >' + lng.s('Добавить картинки в отдельный профиль', 'storage_parser_save_to_profile') + '</a>\
                 <a href="#" class="' + env.className + '-exporter-button-save" >' + lng.s('Скачать как файл профиля', 'download_save') + '</a>\
             </div>\
             <div class="' + env.className + '-exporter-save-result"></div>';
@@ -13014,7 +13015,13 @@ function KellyFavItems(noexec)
 function kellyProfileJoyreactor() {
         
     var handler = this;
-    var favPageUrlTpl = '/user/__USERNAME__/favorite/__PAGENUMBER__';  
+    
+    var favPageUrlTpl = {
+        tag : '/tag/__CONTENTNAME__/__PAGENUMBER__',
+        tag_all : '/tag/__CONTENTNAME__/all/__PAGENUMBER__',
+        favorite : '/user/__CONTENTNAME__/favorite/__PAGENUMBER__',
+    }
+    
     var publicationClass = 'postContainer';
     
     var mainDomain = 'joyreactor.cc';    
@@ -13062,7 +13069,7 @@ function kellyProfileJoyreactor() {
                 body : document.getElementById('container'), // place where to put all dynamic absolute position elements
                 siteContent : document.getElementById('contentinner'), // site main container
                 favContent : false, // main extension container - image grid \ options block
-                sideBar : false,  // place where to put extension sidebar (add post \ filters menu)
+                sideBar : false,  // place where to put extension sidebar block (add post \ filters menu)
                                
                 menu : document.getElementById('submenu'), // currently used in kellyFavItems to create menu buttons
                 
@@ -14082,46 +14089,62 @@ function kellyProfileJoyreactor() {
     },
     
     /* not imp */
+
+    // Расширяет страницу формой грабера на этапе инициализации если страница соответствует условиям и возвращает информацию о странице
     // return false if not supported for page \ site
     
     this.getFavPageInfo = function() {
-    
-        var header = KellyTools.getElementByClass(document, 'mainheader');
-        if (!header) {
-            return false;
-        }
-        
-        if (header.innerHTML.indexOf('Избранное') == -1) {
-            return false;
-        }
-        
+ 
         var info = {
             pages : 1,
             items : 0,
             page : 1,
-            header : header,
+            route : false,
             url : false,
-            userName : false, // url encoded
-        }
+            contentName : false, // url decoded, todo - rename - Tag name or User name
+            contentImg : false,
+        }      
+        
+        if (handler.location.href.indexOf('/tag/') != -1) {
+            
+            info.route = 'tag';
+            if (handler.location.href.indexOf('/all') != -1) {
+                info.route = 'tag_all';
+            }
+                        
+            var insertAfterEl = document.getElementById('blogHeader');
+            if (insertAfterEl) {         
+                info.contentImg = insertAfterEl.querySelector('.blog_avatar');                
+            }
+            
+        } else if (handler.location.href.indexOf('/favorite') != -1) {
+            
+            info.route = 'favorite';            
+            var insertAfterEl = KellyTools.getElementByClass(document, 'mainheader');
+            if (insertAfterEl) {
+                info.contentImg = document.querySelector('.sidebarContent .user img')
+            }
+            
+        } else return false;
+                
+        if (!insertAfterEl) {
+            return false;
+        }  
+        
+        if (info.contentImg) info.contentImg = info.contentImg.src;
         
         var parts = handler.location.href.split('/');
-        for (var i = 0; i < parts.length; i++) {
-            if (parts[i] == 'user' && i+1 <= parts.length-1) {
-                info.userName = parts[i+1];
-                break;
-            }
-        }
         
-        if (!info.userName) return false;
+        info.contentName = parts.indexOf(info.route == 'favorite' ? 'user' : 'tag');            
+        if (info.contentName != -1 && info.contentName + 1 <= parts.length-1){
+            info.contentName = parts[info.contentName+1];
+        } else return false;
         
-        info.url = '';
-        info.url += handler.location.protocol + '//' + handler.location.host + favPageUrlTpl;
-        info.url = info.url.replace('__USERNAME__', info.userName);
+        info.url = handler.location.protocol + '//' + handler.location.host + favPageUrlTpl[info.route].replace('__CONTENTNAME__', info.contentName);        
+        info.contentName = KellyTools.getUrlFileName(info.contentName);
         
-        var posts = document.getElementsByClassName('postContainer');
+        var posts = handler.getPosts();
         if (posts) info.items = posts.length;
-        
-        //(handler.location.href.substr(handler.location.href.length - 8) == 'favourite')
         
         if (handler.location.host.indexOf('old.') != -1) {
             var pagination = document.getElementById('Pagination');
@@ -14130,9 +14153,9 @@ function kellyProfileJoyreactor() {
         }  
         
         if (pagination) {
-            var current = pagination.getElementsByClassName('current');
             
-            if (current) {
+            var current = pagination.getElementsByClassName('current');            
+            if (current) {                
                 for (var i = 0; i < current.length; i++) {
                     if (parseInt(current[i].innerHTML)) {
                         info.page = parseInt(current[i].innerHTML);
@@ -14155,13 +14178,12 @@ function kellyProfileJoyreactor() {
         }
         
         
-        info.container = KellyTools.getElementByClass(document, handler.className + '-FavNativeInfo'); 
-        if (!info.container) {
-        
+        info.container = KellyTools.getElementByClass(document, handler.className + '-exporter-wrap'); 
+        if (!info.container) {        
             info.container = document.createElement('div');
-            info.container.className = handler.hostClass + ' ' + handler.className + '-FavNativeInfo';
+            info.container.className = handler.hostClass + ' ' + handler.className + '-exporter-wrap ' + handler.className + '-exporter-wrap-' + info.route;
             
-            info.header.parentNode.insertBefore(info.container, info.header.nextSibling);
+            insertAfterEl.parentNode.insertBefore(info.container, insertAfterEl.nextSibling);
         }
             
         return info;

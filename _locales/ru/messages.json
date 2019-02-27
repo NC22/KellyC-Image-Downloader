@@ -618,10 +618,10 @@
         "message":"Загрузить из файла"
     },      
     "storage_load_from_user":{  
-        "message":"Загрузить со страницы закладок"
+        "message":"Загрузить со страницы"
     },    
     "storage_load_from_user_info":{  
-        "message":"Пользователь [__USER_NAME__] (закладок : __BOOKMARKS_NUM__)"
+        "message":"Данные [__USER_NAME__] (постов : __BOOKMARKS_NUM__)"
     },      
     "storage_create_e3":{  
         "message":"Данные из профиля пользователя не доступны"

@@ -609,10 +609,10 @@
         "message":"Load from file"
     }, 
     "storage_load_from_user":{  
-        "message":"Load from user profile"
+        "message":"Load from content page"
     },    
     "storage_load_from_user_info":{  
-        "message":"User __USER_NAME__ (bookmarks : __BOOKMARKS_NUM__)"
+        "message":"Content __USER_NAME__ (items : __BOOKMARKS_NUM__)"
     },      
     "storage_create_e3":{  
         "message":"Data from user profile is unavailable"

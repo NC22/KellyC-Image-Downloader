@@ -898,6 +898,20 @@
     padding-left : 16px;
 }
 
+.__BASECLASS__-options-table-bookmarks {
+    vertical-align: middle;
+}
+
+.__BASECLASS__-options-table-bookmarks img {
+    width: 62px;
+    height: 62px;
+    border-radius: 32px;
+    margin: 6px;
+    padding: 0px;
+    vertical-align: middle;
+    margin-right: 0px;
+}
+
 .__BASECLASS__-options-table .radioselect label {
     margin-right : 16px;
 }
@@ -1181,10 +1195,13 @@
     margin-top : 16px;
 }
 
-.__BASECLASS__-exporter-buttons a {
-    margin-right : 16px;
+.__BASECLASS__-exporter-wrap-tag {
+    margin-bottom : 16px;
 }
 
+.__BASECLASS__-options-table-bookmarks {
+    vertical-align: middle;
+}
 
 .__BASECLASS__-common-button,
 .__BASECLASS__-exporter-button-addtoprofile {
