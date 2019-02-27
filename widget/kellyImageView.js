@@ -137,7 +137,7 @@ function KellyImgView(cfg) {
         if (cfg.lockMoveMethod) {
             lockMoveMethod = cfg.lockMoveMethod;
         }               
-    }   
+    };
     
     function lazyHandUpdate(e) {
         
@@ -219,15 +219,15 @@ function KellyImgView(cfg) {
         if (!buttons[index]) return false;
         
         return buttons[index];
-    }
+    };
     
     this.getButtons = function() {
         return buttons;
-    }
+    };
     
     this.getImages = function() {
         return images;
-    }
+    };
     
     this.getCurrentState = function() {	
         
@@ -243,7 +243,7 @@ function KellyImgView(cfg) {
             imageBounds : imageBounds, // width, height, resizedWidth, resizedHeight
             imageData : imagesData[selectedGallery] ? imagesData[selectedGallery] : false,
         };
-    }
+    };
     
     this.hideButtons = function(hide) {
         for (var k in buttons){
@@ -259,7 +259,7 @@ function KellyImgView(cfg) {
                 }
             }
         }        
-    }
+    };
     
     this.hideLoader = function(hide) {
                 
@@ -268,7 +268,7 @@ function KellyImgView(cfg) {
             if (hide) addClass(loader, 'loader-hidden');
             else removeClass(loader, 'loader-hidden');
         }
-    }
+    };
     
     this.addButton = function(innerHTML, index, eventOnClick, addition) {
         
@@ -293,7 +293,9 @@ function KellyImgView(cfg) {
         if (h) additionStyle += 'height : ' + h + 'px;';
         
         var button = document.createElement('div');
+        
             if (additionStyle) button.setAttribute('style', additionStyle);
+            
             button.onclick = function(e) {
                 
                 if (lazyHand.enabled) {                    
@@ -302,7 +304,8 @@ function KellyImgView(cfg) {
                 }
                 
                 if (eventOnClick) eventOnClick(e);
-            }
+            };
+            
             button.className = className;
             
         addHtml(button, innerHTML);
@@ -311,7 +314,7 @@ function KellyImgView(cfg) {
         block.appendChild(buttons[index]);
         
         return button;        
-    }
+    };
     
     function addHtml(el, html) {       
         
@@ -333,7 +336,7 @@ function KellyImgView(cfg) {
         handler.addButton(getSvgIcon('right', '#000'), 'next', function() { handler.nextImage(true); });
         
         return true;
-    }
+    };
 
     this.updateButtonsPos = function(pos) {
         
@@ -344,7 +347,7 @@ function KellyImgView(cfg) {
             pos = {						
                 left : parseInt(image.style.left),
                 top : parseInt(image.style.top),
-            }
+            };
         }
     
         var clientBounds = handler.getClientBounds();
@@ -393,7 +396,7 @@ function KellyImgView(cfg) {
                 top += buttonBounds.height + buttonsMargin;
             }
         }
-    }
+    };
     
     function removeClass(el, name) {        
         if (el) {
@@ -435,7 +438,7 @@ function KellyImgView(cfg) {
             var stop = function(e) {
                 preventEvent(e);
                 return false;
-            }
+            };
             
             if (disable) {
             
@@ -450,7 +453,7 @@ function KellyImgView(cfg) {
                 handler.removeEventPListener(window, 'wheel', '_scroll');
             }
             
-        }            
+        };
         
         if (show) {
         
@@ -488,7 +491,7 @@ function KellyImgView(cfg) {
                 
                 handler.cancelLoad();
                 return false; 
-            }        
+            };        
                  
             handler.addEventPListener(window, "scroll", function (e) {
                 handler.updateBlockPosition();
@@ -611,11 +614,14 @@ function KellyImgView(cfg) {
         image = document.createElement("img");
         image.src = getImageUrlFromPointer(galleryItemPointer);  
         
-        if (isImgLoaded(image)) handler.imageShow();
-        else image.onload = function() { 
-            handler.imageShow(); return false; 
-        }	
-    }
+        if (isImgLoaded(image)) {
+            handler.imageShow();
+        } else {
+            image.onload = function() { 
+                handler.imageShow(); return false; 
+            };
+        }
+    };
     
     this.getClientBounds = function() {
     
@@ -627,9 +633,11 @@ function KellyImgView(cfg) {
             screenHeight: elem.clientHeight,
             screenWidth: elem.clientWidth,
         };
-    }
+    };
     
-    this.getScale = function() { return scale; }
+    this.getScale = function() {
+        return scale;
+    };
     
     this.scale = function(plus) {
         
@@ -662,7 +670,7 @@ function KellyImgView(cfg) {
         image.style.top = Math.floor(posCenter.top - (rHeight / 2)) + 'px';        
         
         handler.updateButtonsPos();
-    }
+    };
     
     // get local coordinats event pos
     
@@ -670,7 +678,6 @@ function KellyImgView(cfg) {
         e = e || window.event;
         var x, y;
         
-        // 
         var scrollX = 0; // document.body.scrollLeft + document.documentElement.scrollLeft;
         var scrollY = 0; // document.body.scrollTop + document.documentElement.scrollTop;
         
@@ -678,10 +685,11 @@ function KellyImgView(cfg) {
         if (e.touches && e.touches.length > 0) {
             
             for (var i = 0; i < e.touches.length; i++) {
+                
                 touches[i] = {
                     x : e.touches[i].clientX + scrollX,
                     y : e.touches[i].clientY + scrollY,
-                }
+                };
                 
                 if (i == 0) {
                     x = touches[0].x;
@@ -704,7 +712,7 @@ function KellyImgView(cfg) {
     this.updateCursor = function(e) {
     
         console.log(getEventDot(e));
-    }
+    };
     
     function calcDistance(pointA, pointB) {
         var a = pointA.x - pointB.x;
@@ -739,20 +747,20 @@ function KellyImgView(cfg) {
             
         } else if (moveable || scale != 1) {
         
-            var newPos = {left : move.left + lastPos.x - move.x, top : move.top + lastPos.y - move.y}
+            var newPos = {left : move.left + lastPos.x - move.x, top : move.top + lastPos.y - move.y};
             
             image.style.left = newPos.left + 'px';
             image.style.top =  newPos.top + 'px';
             
         } else if (scale == 1 && swipe) { // lastPos && lastPos.touches.length == 1
         
-            var newPos = {left : move.left + lastPos.x - move.x, top : move.top}
+            var newPos = {left : move.left + lastPos.x - move.x, top : move.top};
             image.style.left = newPos.left + 'px';
             
         } else return;
         
         handler.updateButtonsPos(newPos);
-    }
+    };
     
     this.dragEnd = function(e) {
     
@@ -783,7 +791,7 @@ function KellyImgView(cfg) {
             
                 if (image) {
                 
-                    var newPos = {left : move.left, top : move.top}
+                    var newPos = {left : move.left, top : move.top};
                 
                     image.style.left = newPos.left + 'px';                
                     handler.updateButtonsPos(newPos);
@@ -793,7 +801,7 @@ function KellyImgView(cfg) {
         }     
 
         lastPos = false;
-    }
+    };
     
     this.dragStart = function(e) {
         
@@ -824,7 +832,7 @@ function KellyImgView(cfg) {
         handler.addEventPListener(document.body, "touchmove", function (e) {
             handler.drag(e);
         }, 'image_drag_');
-    }
+    };
     
     // calls after image fully loaded and ready to show
     
@@ -848,12 +856,12 @@ function KellyImgView(cfg) {
         
             handler.dragStart(e);
             return false;
-        }
+        };
         
         image.ontouchstart = function (e) {
             handler.dragStart(e);
             return false;
-        }
+        };
         
         setTimeout(function() { 
         
@@ -862,7 +870,7 @@ function KellyImgView(cfg) {
             handler.updateButtonsPos(false);
             
         }, 100);         
-    }
+    };
     
     this.updateSize = function(e) {
         
@@ -912,8 +920,9 @@ function KellyImgView(cfg) {
         image.style.top = newPos.top + 'px';
            
         handler.updateButtonsPos(newPos);
+        
         return true;
-    }
+    };
     
     // hide show image block and cancel load
     
@@ -941,7 +950,9 @@ function KellyImgView(cfg) {
         } else {
           
             if (image) {
-                image.onload = function() { return false; };                
+                image.onload = function() { 
+                    return false; 
+                };                
             }
             
             showMainBlock(false);
@@ -954,7 +965,7 @@ function KellyImgView(cfg) {
             setTimeout(function() { handler.cancelLoad(2);}, fadeTime);  
         }
         
-    }
+    };
     
     // update image gallery viewer block position 
     
@@ -962,7 +973,7 @@ function KellyImgView(cfg) {
         if (blockShown && window.getComputedStyle(block).position !== 'fixed') {
             block.style.top = (window.pageYOffset || document.documentElement.scrollTop) - (document.documentElement.clientTop || 0) + 'px'; // getScrollTop
         }
-    }
+    };
 
     
     // get image url from source string or element
@@ -1098,7 +1109,7 @@ function KellyImgView(cfg) {
             }, fadeTime);
             
         }
-    }
+    };
         
     // accept events to A or IMG elements, or elements with attribute "data-image" and specify gallery name, or accept data for some galleryName
     // galleryItems - array of elements or className or array of src strings
@@ -1156,7 +1167,7 @@ function KellyImgView(cfg) {
         }
         
         return true;    
-    }
+    };
     
     this.addEventPListener = function(object, event, callback, prefix) {
         if (!object)
@@ -1173,7 +1184,7 @@ function KellyImgView(cfg) {
         }
 
         return true;
-    }
+    };
 
     this.removeEventPListener = function(object, event, prefix) {
         if (!object)
@@ -1192,7 +1203,7 @@ function KellyImgView(cfg) {
 
         events[prefix + event] = null;
         return true;
-    }
+    };
     
     this.removeEvents = function(galleryName) {
         
@@ -1204,7 +1215,7 @@ function KellyImgView(cfg) {
             
             handler.removeEventPListener(item, 'click', 'showGallery');
         }
-    }
+    };
     
     constructor(cfg);
 }

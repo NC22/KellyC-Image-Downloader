@@ -200,8 +200,16 @@
      display : block;
 }
 
-.__BASECLASS__-FiltersMenu-order-buttons a {
+.__BASECLASS__-FiltersMenu-order-buttons a, .__BASECLASS__-tooltipster-ItemInfo-order-buttons a {
     text-decoration: none;
+}
+
+.__BASECLASS__-tooltipster-ItemInfo-neworder-accept { 
+    display : none; 
+}
+
+.__BASECLASS__-tooltipster-ItemInfo-neworder-accept.active {
+    display : inline-block;
 }
 
 .__BASECLASS__-tooltipster-content a {
@@ -210,7 +218,7 @@
     padding-right: 2px;
 }
 
-.__BASECLASS__-FiltersMenu-order-buttons {
+.__BASECLASS__-FiltersMenu-order-buttons, .__BASECLASS__-tooltipster-ItemInfo-order-buttons  {
     margin-bottom : 0px;
 }
 
@@ -733,7 +741,7 @@
      top : 0px;
      left : 0px;
      background : rgba(0, 0, 0, 0.50);
-     transition : opacity 1s;
+     transition : opacity 0.5s;
      width : 100%;
      height : 100%;
      z-index : 1008;

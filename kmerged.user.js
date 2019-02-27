@@ -75,6 +75,8 @@
    todo docs and examples
    todo avoidOutOfBounds - configurable sides
    
+   При удалении target'a возможно некорректное отображение (innerHTML = '') Добавить опцию для автоскрытия при некорректных данных о позиции элемента?
+   
 */
 
 function KellyTooltip(cfg) {
@@ -650,6 +652,7 @@ KellyTooltip.addTipToEl = function(el, message, cfg, delay, onShow) {
    ToDo : 
    
    todo docs and examples
+   pause
    
 */
 
@@ -1552,7 +1555,7 @@ function KellyImgView(cfg) {
         if (cfg.lockMoveMethod) {
             lockMoveMethod = cfg.lockMoveMethod;
         }               
-    }   
+    };
     
     function lazyHandUpdate(e) {
         
@@ -1634,15 +1637,15 @@ function KellyImgView(cfg) {
         if (!buttons[index]) return false;
         
         return buttons[index];
-    }
+    };
     
     this.getButtons = function() {
         return buttons;
-    }
+    };
     
     this.getImages = function() {
         return images;
-    }
+    };
     
     this.getCurrentState = function() {	
         
@@ -1658,7 +1661,7 @@ function KellyImgView(cfg) {
             imageBounds : imageBounds, // width, height, resizedWidth, resizedHeight
             imageData : imagesData[selectedGallery] ? imagesData[selectedGallery] : false,
         };
-    }
+    };
     
     this.hideButtons = function(hide) {
         for (var k in buttons){
@@ -1674,7 +1677,7 @@ function KellyImgView(cfg) {
                 }
             }
         }        
-    }
+    };
     
     this.hideLoader = function(hide) {
                 
@@ -1683,7 +1686,7 @@ function KellyImgView(cfg) {
             if (hide) addClass(loader, 'loader-hidden');
             else removeClass(loader, 'loader-hidden');
         }
-    }
+    };
     
     this.addButton = function(innerHTML, index, eventOnClick, addition) {
         
@@ -1708,7 +1711,9 @@ function KellyImgView(cfg) {
         if (h) additionStyle += 'height : ' + h + 'px;';
         
         var button = document.createElement('div');
+        
             if (additionStyle) button.setAttribute('style', additionStyle);
+            
             button.onclick = function(e) {
                 
                 if (lazyHand.enabled) {                    
@@ -1717,7 +1722,8 @@ function KellyImgView(cfg) {
                 }
                 
                 if (eventOnClick) eventOnClick(e);
-            }
+            };
+            
             button.className = className;
             
         addHtml(button, innerHTML);
@@ -1726,7 +1732,7 @@ function KellyImgView(cfg) {
         block.appendChild(buttons[index]);
         
         return button;        
-    }
+    };
     
     function addHtml(el, html) {       
         
@@ -1748,7 +1754,7 @@ function KellyImgView(cfg) {
         handler.addButton(getSvgIcon('right', '#000'), 'next', function() { handler.nextImage(true); });
         
         return true;
-    }
+    };
 
     this.updateButtonsPos = function(pos) {
         
@@ -1759,7 +1765,7 @@ function KellyImgView(cfg) {
             pos = {						
                 left : parseInt(image.style.left),
                 top : parseInt(image.style.top),
-            }
+            };
         }
     
         var clientBounds = handler.getClientBounds();
@@ -1808,7 +1814,7 @@ function KellyImgView(cfg) {
                 top += buttonBounds.height + buttonsMargin;
             }
         }
-    }
+    };
     
     function removeClass(el, name) {        
         if (el) {
@@ -1850,7 +1856,7 @@ function KellyImgView(cfg) {
             var stop = function(e) {
                 preventEvent(e);
                 return false;
-            }
+            };
             
             if (disable) {
             
@@ -1865,7 +1871,7 @@ function KellyImgView(cfg) {
                 handler.removeEventPListener(window, 'wheel', '_scroll');
             }
             
-        }            
+        };
         
         if (show) {
         
@@ -1903,7 +1909,7 @@ function KellyImgView(cfg) {
                 
                 handler.cancelLoad();
                 return false; 
-            }        
+            };        
                  
             handler.addEventPListener(window, "scroll", function (e) {
                 handler.updateBlockPosition();
@@ -2026,11 +2032,14 @@ function KellyImgView(cfg) {
         image = document.createElement("img");
         image.src = getImageUrlFromPointer(galleryItemPointer);  
         
-        if (isImgLoaded(image)) handler.imageShow();
-        else image.onload = function() { 
-            handler.imageShow(); return false; 
-        }	
-    }
+        if (isImgLoaded(image)) {
+            handler.imageShow();
+        } else {
+            image.onload = function() { 
+                handler.imageShow(); return false; 
+            };
+        }
+    };
     
     this.getClientBounds = function() {
     
@@ -2042,9 +2051,11 @@ function KellyImgView(cfg) {
             screenHeight: elem.clientHeight,
             screenWidth: elem.clientWidth,
         };
-    }
+    };
     
-    this.getScale = function() { return scale; }
+    this.getScale = function() {
+        return scale;
+    };
     
     this.scale = function(plus) {
         
@@ -2077,7 +2088,7 @@ function KellyImgView(cfg) {
         image.style.top = Math.floor(posCenter.top - (rHeight / 2)) + 'px';        
         
         handler.updateButtonsPos();
-    }
+    };
     
     // get local coordinats event pos
     
@@ -2085,7 +2096,6 @@ function KellyImgView(cfg) {
         e = e || window.event;
         var x, y;
         
-        // 
         var scrollX = 0; // document.body.scrollLeft + document.documentElement.scrollLeft;
         var scrollY = 0; // document.body.scrollTop + document.documentElement.scrollTop;
         
@@ -2093,10 +2103,11 @@ function KellyImgView(cfg) {
         if (e.touches && e.touches.length > 0) {
             
             for (var i = 0; i < e.touches.length; i++) {
+                
                 touches[i] = {
                     x : e.touches[i].clientX + scrollX,
                     y : e.touches[i].clientY + scrollY,
-                }
+                };
                 
                 if (i == 0) {
                     x = touches[0].x;
@@ -2119,7 +2130,7 @@ function KellyImgView(cfg) {
     this.updateCursor = function(e) {
     
         console.log(getEventDot(e));
-    }
+    };
     
     function calcDistance(pointA, pointB) {
         var a = pointA.x - pointB.x;
@@ -2154,20 +2165,20 @@ function KellyImgView(cfg) {
             
         } else if (moveable || scale != 1) {
         
-            var newPos = {left : move.left + lastPos.x - move.x, top : move.top + lastPos.y - move.y}
+            var newPos = {left : move.left + lastPos.x - move.x, top : move.top + lastPos.y - move.y};
             
             image.style.left = newPos.left + 'px';
             image.style.top =  newPos.top + 'px';
             
         } else if (scale == 1 && swipe) { // lastPos && lastPos.touches.length == 1
         
-            var newPos = {left : move.left + lastPos.x - move.x, top : move.top}
+            var newPos = {left : move.left + lastPos.x - move.x, top : move.top};
             image.style.left = newPos.left + 'px';
             
         } else return;
         
         handler.updateButtonsPos(newPos);
-    }
+    };
     
     this.dragEnd = function(e) {
     
@@ -2198,7 +2209,7 @@ function KellyImgView(cfg) {
             
                 if (image) {
                 
-                    var newPos = {left : move.left, top : move.top}
+                    var newPos = {left : move.left, top : move.top};
                 
                     image.style.left = newPos.left + 'px';                
                     handler.updateButtonsPos(newPos);
@@ -2208,7 +2219,7 @@ function KellyImgView(cfg) {
         }     
 
         lastPos = false;
-    }
+    };
     
     this.dragStart = function(e) {
         
@@ -2239,7 +2250,7 @@ function KellyImgView(cfg) {
         handler.addEventPListener(document.body, "touchmove", function (e) {
             handler.drag(e);
         }, 'image_drag_');
-    }
+    };
     
     // calls after image fully loaded and ready to show
     
@@ -2263,12 +2274,12 @@ function KellyImgView(cfg) {
         
             handler.dragStart(e);
             return false;
-        }
+        };
         
         image.ontouchstart = function (e) {
             handler.dragStart(e);
             return false;
-        }
+        };
         
         setTimeout(function() { 
         
@@ -2277,7 +2288,7 @@ function KellyImgView(cfg) {
             handler.updateButtonsPos(false);
             
         }, 100);         
-    }
+    };
     
     this.updateSize = function(e) {
         
@@ -2327,8 +2338,9 @@ function KellyImgView(cfg) {
         image.style.top = newPos.top + 'px';
            
         handler.updateButtonsPos(newPos);
+        
         return true;
-    }
+    };
     
     // hide show image block and cancel load
     
@@ -2356,7 +2368,9 @@ function KellyImgView(cfg) {
         } else {
           
             if (image) {
-                image.onload = function() { return false; };                
+                image.onload = function() { 
+                    return false; 
+                };                
             }
             
             showMainBlock(false);
@@ -2369,7 +2383,7 @@ function KellyImgView(cfg) {
             setTimeout(function() { handler.cancelLoad(2);}, fadeTime);  
         }
         
-    }
+    };
     
     // update image gallery viewer block position 
     
@@ -2377,7 +2391,7 @@ function KellyImgView(cfg) {
         if (blockShown && window.getComputedStyle(block).position !== 'fixed') {
             block.style.top = (window.pageYOffset || document.documentElement.scrollTop) - (document.documentElement.clientTop || 0) + 'px'; // getScrollTop
         }
-    }
+    };
 
     
     // get image url from source string or element
@@ -2513,7 +2527,7 @@ function KellyImgView(cfg) {
             }, fadeTime);
             
         }
-    }
+    };
         
     // accept events to A or IMG elements, or elements with attribute "data-image" and specify gallery name, or accept data for some galleryName
     // galleryItems - array of elements or className or array of src strings
@@ -2571,7 +2585,7 @@ function KellyImgView(cfg) {
         }
         
         return true;    
-    }
+    };
     
     this.addEventPListener = function(object, event, callback, prefix) {
         if (!object)
@@ -2588,7 +2602,7 @@ function KellyImgView(cfg) {
         }
 
         return true;
-    }
+    };
 
     this.removeEventPListener = function(object, event, prefix) {
         if (!object)
@@ -2607,7 +2621,7 @@ function KellyImgView(cfg) {
 
         events[prefix + event] = null;
         return true;
-    }
+    };
     
     this.removeEvents = function(galleryName) {
         
@@ -2619,7 +2633,7 @@ function KellyImgView(cfg) {
             
             handler.removeEventPListener(item, 'click', 'showGallery');
         }
-    }
+    };
     
     constructor(cfg);
 }
@@ -2734,11 +2748,11 @@ function KellyFavStorageManager(cfg) {
     // todo - add check total amount of data without prefix, it can differs in future, if more then one environment will supported
     this.envTotalKb = 0;
     
-    function constructor(cfg) {	}
+    function constructor(cfg) {    }
             
     this.showMessage = function(text, error, section) {
     
-        var	message = KellyTools.getElementByClass(handler.storageContainer, handler.className + '-message' + (section ? '-' + section : ''));            
+        var message = KellyTools.getElementByClass(handler.storageContainer, handler.className + '-message' + (section ? '-' + section : ''));            
         if (!message) return;
         
         message.className = message.className.replace(handler.className + '-error', '').trim();
@@ -2749,7 +2763,7 @@ function KellyFavStorageManager(cfg) {
         handler.inUse = false;
     }
     
-    this.showStorageList = function(slist) {	
+    this.showStorageList = function(slist) {    
     
         if (!handler.storageList) return;
         
@@ -2804,7 +2818,7 @@ function KellyFavStorageManager(cfg) {
         
             KellyTools.setHTMLData(dbItem, html);
                 
-            handler.storageList.appendChild(dbItem);			
+            handler.storageList.appendChild(dbItem);            
             
             handler.getDBSize(dbName, false, function(dbName, size) {
                 
@@ -2830,7 +2844,7 @@ function KellyFavStorageManager(cfg) {
                     handler.fav.save('cfg', function(error) {
                     
                         handler.getStorageList(handler.showStorageList);
-                        handler.fav.load('items', function() {		
+                        handler.fav.load('items', function() {        
                         
                             // clear selected ?
                             
@@ -2839,12 +2853,12 @@ function KellyFavStorageManager(cfg) {
                             handler.fav.formatPostContainers(); 
                             
                             handler.showMessage(lng.s('База данных выбрана', 'storage_selected'), false, 'storage');
-                        });					
+                        });                    
                     });
     
                     return false;
                 }
-            // if (handler.fav.isDownloadSupported) {	
+            // if (handler.fav.isDownloadSupported) {    
             var downloadButton = KellyTools.getElementByClass(dbItem, handler.className + '-DBItem-download');
                 downloadButton.setAttribute('data-dbname', slist[i]);
                 downloadButton.onclick = function() {
@@ -2853,13 +2867,13 @@ function KellyFavStorageManager(cfg) {
                     handler.loadDB(dbName, function(db) {
                     
                         if (db === false) {
-                            return false;							
+                            return false;                            
                         }
                         
                         var path = handler.fav.getGlobal('options').baseFolder + '/' + handler.dir.exportProfile + dbName + '_' + KellyTools.getTimeStamp() + '.' + handler.format;
                             path = KellyTools.validateFolderPath(path);
                             
-                        handler.fav.getDownloadManager().createAndDownloadFile(JSON.stringify(db), path);	
+                        handler.fav.getDownloadManager().createAndDownloadFile(JSON.stringify(db), path);    
                     });
                     
                     return false;
@@ -2910,7 +2924,7 @@ function KellyFavStorageManager(cfg) {
                         if (fileSizeMb > MAX_CONFIG_SIZE) {
                             
                             fileSizeMb = fileSizeMb.toFixed(2);
-                            handler.showMessage(lng.s('', 'storage_manager_hit_limit_db', { MAX_CONFIG_SIZE : MAX_CONFIG_SIZE, FILESIZE : fileSizeMb}), true);	
+                            handler.showMessage(lng.s('', 'storage_manager_hit_limit_db', { MAX_CONFIG_SIZE : MAX_CONFIG_SIZE, FILESIZE : fileSizeMb}), true);    
                             return;
                         }
                         
@@ -2928,7 +2942,7 @@ function KellyFavStorageManager(cfg) {
                                             var menuItems = handler.fav.getView('menu');
                                             if (menuItems['ctoptions']) menuItems['ctoptions'].style.display = handler.fav.getGlobal('fav').coptions.optionsSide ? 'none' : '';                                              
                                             handler.showMessage(lng.s('', 'storage_import_ok'));
-                                        });						
+                                        });                        
                                         
                                     } else {
                                     
@@ -2943,14 +2957,14 @@ function KellyFavStorageManager(cfg) {
                                 
                            
                         } else {
-                            handler.showMessage(lng.s('Ошибка парсинга структурированных данных', 'storage_create_e2'), true);	
+                            handler.showMessage(lng.s('Ошибка парсинга структурированных данных', 'storage_create_e2'), true);    
                         }
                         
                     });
                 
                 } else {
                     
-                    handler.showMessage(lng.s('Укажите файл из которого будут импортированы настройки', 'storage_import_e1'), true);	
+                    handler.showMessage(lng.s('Укажите файл из которого будут импортированы настройки', 'storage_import_e1'), true);    
                 }
                 
                 return false;
@@ -2967,7 +2981,7 @@ function KellyFavStorageManager(cfg) {
                     handler.fav.getDownloadManager().createAndDownloadFile(JSON.stringify({ 
                         selected_cats_ids : currentSession.selected_cats_ids, 
                         coptions : currentSession.coptions
-                    }), path);	
+                    }), path);    
                 
                     return false;
                 }   
@@ -2987,14 +3001,16 @@ function KellyFavStorageManager(cfg) {
             if (handler.inUse) return false;
             handler.inUse = true;
             
-            var dbName = KellyTools.inputVal(document.getElementById(idPrefix + '-create-name')); // todo validate by regular	
+            var dbName = KellyTools.inputVal(document.getElementById(idPrefix + '-create-name')); // todo validate by regular    
             if (!dbName) {
                 handler.showMessage(lng.s('Введите название базы данных', 'storage_empty_name'), true);
                 return false;
             }
-            
+                        
             var source = 'file';
-            if (document.getElementById(idPrefix + '-data-source-bookmarks').checked) {
+            
+            var byBookmarks = document.getElementById(idPrefix + '-data-source-bookmarks');
+            if (byBookmarks && byBookmarks.checked) {
                 source = 'user-bookmarks';
             }
             
@@ -3021,7 +3037,7 @@ function KellyFavStorageManager(cfg) {
             if (envMb > MAX_ENV_SIZE) {
                                     
                 envMb = envMb.toFixed(2);
-                handler.showMessage(lng.s('', 'storage_manager_hit_limit_env', { MAX_ENV_SIZE : MAX_ENV_SIZE, ENVSIZE : envMb}), true);	
+                handler.showMessage(lng.s('', 'storage_manager_hit_limit_env', { MAX_ENV_SIZE : MAX_ENV_SIZE, ENVSIZE : envMb}), true);    
                 return false;
             }
             
@@ -3029,7 +3045,7 @@ function KellyFavStorageManager(cfg) {
             if (mode == 'cancel' && handler.slist.indexOf(dbName) != -1) {
                 
                 handler.showMessage(lng.s('База данных уже существует', 'storage_create_already_exist'), true);
-                return false;					
+                return false;                    
             }
             
             // request if any bd already exist
@@ -3037,7 +3053,7 @@ function KellyFavStorageManager(cfg) {
                 
                 if (db !== false && mode == 'cancel') {
                     handler.showMessage(lng.s('База данных уже существует', 'storage_create_already_exist'), true);
-                    return false;							
+                    return false;                            
                 }
                 
                 var onDBSave =  function(error) {
@@ -3046,7 +3062,7 @@ function KellyFavStorageManager(cfg) {
                         
                         var noticeName = 'storage_create_ok_mcancel';
                         
-                        if (db !== false && mode == 'add') {                                
+                        if (db !== false && mode == 'add') {
                             noticeName = 'storage_create_ok_madd';
                         }
                         
@@ -3054,10 +3070,10 @@ function KellyFavStorageManager(cfg) {
                             
                             handler.fav.load('items', function() {
                                 handler.fav.updateFavCounter();
-                            });	
+                            });    
                         }
                         
-                        handler.getStorageList(handler.showStorageList);							
+                        handler.getStorageList(handler.showStorageList);
                         handler.showMessage(lng.s('', noticeName));
                         
                     } else {
@@ -3074,11 +3090,11 @@ function KellyFavStorageManager(cfg) {
                     if (fileSizeMb > MAX_TOTAL_PER_DB) {
                         
                         fileSizeMb = fileSizeMb.toFixed(2);
-                        handler.showMessage(lng.s('', 'storage_manager_hit_limit_db', { MAX_TOTAL_PER_DB : MAX_TOTAL_PER_DB, FILESIZE : fileSizeMb}), true);	
+                        handler.showMessage(lng.s('', 'storage_manager_hit_limit_db', { MAX_TOTAL_PER_DB : MAX_TOTAL_PER_DB, FILESIZE : fileSizeMb}), true);    
                         return;
                     }
                     
-                    var newDBData = KellyTools.parseJSON(fileData.trim());                          
+                    var newDBData = KellyTools.parseJSON(fileData.trim());
                     if (newDBData) { 
                     
                         if (db && mode == 'add') {
@@ -3093,11 +3109,11 @@ function KellyFavStorageManager(cfg) {
                             newDBData = db;
                             handler.saveDB(dbName, newDBData, onDBSave);
                         } else {
-                            newDBData = handler.validateDBItems(newDBData);	
+                            newDBData = handler.validateDBItems(newDBData);    
                             handler.saveDB(dbName, newDBData, onDBSave);
                         }
                     } else {
-                        handler.showMessage(lng.s('Ошибка парсинга структурированных данных', 'storage_create_e2'), true);	
+                        handler.showMessage(lng.s('Ошибка парсинга структурированных данных', 'storage_create_e2'), true);    
                     }
                     
                 }
@@ -3127,7 +3143,7 @@ function KellyFavStorageManager(cfg) {
                         
                     } else {
                         
-                        handler.showMessage(lng.s('Данные из профиля пользователя не доступны', 'storage_create_e3'), true);	
+                        handler.showMessage(lng.s('Данные из профиля пользователя не доступны', 'storage_create_e3'), true);    
                     }
                     
                 }
@@ -3233,8 +3249,8 @@ function KellyFavStorageManager(cfg) {
                         handler.fav.load('items', function() {
                             
                             handler.fav.updateFavCounter();
-                        });					
-                    });					
+                        });                    
+                    });                    
                 }
             }
         
@@ -3246,7 +3262,7 @@ function KellyFavStorageManager(cfg) {
                 if (handler.inUse) return false;
                 handler.inUse = true;
                 
-                var dbName = KellyTools.inputVal(document.getElementById(idPrefix + '-delete-name')); 	
+                var dbName = KellyTools.inputVal(document.getElementById(idPrefix + '-delete-name'));     
                 if (!dbName) {
                     handler.showMessage('Введите название базы данных', true, 'delete');
                     return false;
@@ -3255,14 +3271,14 @@ function KellyFavStorageManager(cfg) {
                 if (handler.slist && handler.slist.indexOf(dbName) == -1) {
                     
                     handler.showMessage('Базы данных не существует', true, 'delete');
-                    return false;					
+                    return false;                    
                 }
                 
                 handler.removeDB(dbName, function(error) {
                     
-                    handler.showMessage('Данные удалены', true, 'delete');					
+                    handler.showMessage('Данные удалены', true, 'delete');                    
                     handler.getStorageList(handler.showStorageList);
-                });	
+                });    
                 
                 return false;
             };
@@ -3272,7 +3288,7 @@ function KellyFavStorageManager(cfg) {
         handler.applayDBCreateButton(createNewButton, idPrefix);
         
         handler.getStorageList(handler.showStorageList);
-        handler.storageList = KellyTools.getElementByClass(handler.storageContainer, handler.className + '-StorageList');			
+        handler.storageList = KellyTools.getElementByClass(handler.storageContainer, handler.className + '-StorageList');            
         
         handler.wrap.appendChild(handler.storageContainer);
     }
@@ -3294,7 +3310,7 @@ function KellyFavStorageManager(cfg) {
         for (var i=0; i < dbsKeys.length; i++) {
             handler.mergeProcess.dbs[dbsKeys[i]] = -1;
             handler.loadDB(name, function(db) { 
-                onLoadDb(db, dbsKeys[i]);	
+                onLoadDb(db, dbsKeys[i]);    
             });
         }
         
@@ -3309,7 +3325,7 @@ function KellyFavStorageManager(cfg) {
             
             for (var i=1; i < dbsKeys.length; i++) {
                 handler.addDataToDb(mergeData.container, mergeData.dbs[dbsKeys[i]]);
-            }			
+            }            
         }
         
     }
@@ -3390,7 +3406,7 @@ function KellyFavStorageManager(cfg) {
     
     this.searchItem = function(db, item) {
         
-        var link = '';	
+        var link = '';    
         var searchComment = false;
         
         if (item.commentLink) {
@@ -3408,7 +3424,7 @@ function KellyFavStorageManager(cfg) {
                 return b;
             } else if (!searchComment && KellyTools.getRelativeUrl(db.items[b].link) == link && !db.items[b].commentLink) {
                 return b;
-            }		
+            }        
         }
         
         return false;
@@ -3611,7 +3627,7 @@ function KellyFavStorageManager(cfg) {
                 existIndex = db.items.length;
                 
                 db.items[existIndex] = {};
-                handler.copyObjectValues(data.items[i], db.items[existIndex]);			
+                handler.copyObjectValues(data.items[i], db.items[existIndex]);            
                 
                 db.ids++;
                 
@@ -3635,7 +3651,7 @@ function KellyFavStorageManager(cfg) {
                 prefix : handler.prefix,
                 keepPrefix : keepPrefix,
             }, function(response) {
-                if (callback) callback(response.slist);				
+                if (callback) callback(response.slist);                
             });
             
         } else {
@@ -3680,7 +3696,7 @@ function KellyFavStorageManager(cfg) {
                     bytes = response.item.length;
                 } else {
                     bytes = response.item.length / 1000;
-                }	
+                }    
                 
                 if (callback) callback(name, bytes);
             });
@@ -3887,7 +3903,7 @@ function KellyFavStorageManager(cfg) {
     
     this.loadDB = function(name, callback, cfg) {
         
-        name = handler.validateDBName(name);		
+        name = handler.validateDBName(name);        
         if (!name) {
             if (callback) callback(false);
             return;
@@ -3934,7 +3950,7 @@ function KellyFavStorageManager(cfg) {
                 } else {
                     response.item = response.item[dbName];
                 }
-                // 	handler.copyObjectValues(response.item[dbName], db);
+                //     handler.copyObjectValues(response.item[dbName], db);
                                 
                 if (callback) callback(response.item);
                 
@@ -3974,7 +3990,7 @@ function KellyFavStorageManager(cfg) {
             }, function(response) {
                 
                 if (callback) callback(response.error);
-            });			
+            });            
         }
     } 
     
@@ -4036,7 +4052,7 @@ function KellyFavStorageManager(cfg) {
                 
                 if (callback) callback(response.error);
             });
-        }	   
+        }       
     }
     
     constructor(cfg);
@@ -6619,7 +6635,10 @@ function KellyFastSave(cfg) {
     
     this.isAvailable = function() {
                 
-        if (!handler.favEnv.isDownloadSupported || !handler.favEnv.getGlobal('fav').coptions.fastsave.enabled) {
+        if (
+            !handler.favEnv.isDownloadSupported || 
+            !handler.favEnv.getGlobal('fav').coptions.fastsave.enabled
+        ) {
             return false;
         } else return true;
     }
@@ -6644,11 +6663,15 @@ function KellyFastSave(cfg) {
     
     this.downloadPostData = function(postData, onDownload) {
         
-        if (!handler.isAvailable()) return false;
+        if (!handler.isAvailable()) {
+            if (onDownload) onDownload(false);
+            return false;
+        }
                       
         var postMedia = handler.favEnv.getGlobal('env').getAllMedia(postData);        
         if (!postMedia || !postMedia.length) {            
             if (onDownload) onDownload(false);
+            return false;
         }
         
         var dm = handler.favEnv.getDownloadManager();
@@ -6661,6 +6684,8 @@ function KellyFastSave(cfg) {
         
         dm.clearDownloads();
         dm.resetOptions();
+        
+        // reset events
         
         dm.updateCfg({
             events : false,
@@ -7547,6 +7572,26 @@ KellyTools.dispatchEvent = function(target, name) {
     target.dispatchEvent(event);
 }
 
+KellyTools.injectAddition = function(addition, onload) {
+    
+    if (this['injection' + addition]) {
+        return;
+    }
+    
+    var script = document.createElement('script'); 
+        
+        script.type = 'text/javascript'; 
+        script.src = chrome.extension.getURL('env/dynamic/' + addition + '.js'); 
+        
+        if (onload) {
+            script.onload = onload;
+        }
+    
+    this['injection' + addition] = script;
+    
+    document.body.appendChild(script); 
+}
+
 KellyTools.PROGNAME = '';
 
 KellyTools.getProgName = function() { 
@@ -8278,14 +8323,20 @@ function KellyFavItems(noexec)
     var env = false;
     var events = [];
     
+    // выделенная для добавления в закладки публикация
+    
     var selectedPost = false;
     var selectedImages = false;
     var selectedComment = false;
     var selectedInfo = false; // какие-либо мета данные сохраняемые для определенной публикации в обработчике itemAdd (добавлять методом setSelectionInfo)
     
+    // последние выбранные категории для selectedPost хранятся в fav.selected_cats_ids
+    
     var extendCats = []; // выделеные категории для последующего добавления к определенной публикации в режиме просмотра избранного
     
     var init = false; // маркер инициализации расширения (вызов метода initExtension)
+    
+    // todo порядок сортировки при выгрузке в соответствии с датой \ ид
     
     // события
     
@@ -8322,7 +8373,7 @@ function KellyFavItems(noexec)
     
     var logic = 'and';
     var catFilters = [];
-    var catFilterNot = false; // режим выбора категории с отрицанием
+    var catFilterNot = false; // режим добавления категорий в список исключения при выборке 
     var catIgnoreFilters = [];
     
     var readOnly = true;
@@ -8339,7 +8390,7 @@ function KellyFavItems(noexec)
                
     var page = 1;
         
-    var displayedItems = [];
+    var displayedItems = [];  // все ключи элементов попавших в выборку отсортированные в нужном порядке
     var galleryImages = [];
     var galleryImagesData = [];
     
@@ -8350,7 +8401,7 @@ function KellyFavItems(noexec)
         Stores information about config, items, categories
         
         categories - array of objects [.name, .id] (see getStorageManager().categoryCreate method)
-        items      - array of objects [.categoryId (array), .link (string), .pImage (string|array of strings), .commentLink (undefined|text) (see selectedDataToFavItem method for list of current available structured data vars)
+        items      - array of objects [.categoryId (array), .link (string), .pImage (string|array of strings), .commentLink (undefined|text) (see getFavItemFromSelected method for list of current available structured data vars)
         coptions   - structured data (see this.load method for list of current available options)
     */  
     
@@ -8368,7 +8419,7 @@ function KellyFavItems(noexec)
     var selfUrl = window.location.href;
    
     var imageGrid = false; // see getImageGrid method
-    var imageGridProportions = []; // ids of updated fav items if some of ratio data deprecated
+    var imageGridProportions = []; // ids of updated fav items (if some of ratio data deprecated)
     var imageEvents = {
         
         saveImageProportions : function() {
@@ -9114,7 +9165,7 @@ function KellyFavItems(noexec)
         
         var item = false;
         
-        var getCurrentImage = function(state) {
+        var getCurrentViewedImage = function(state) {
             var image = false;
             
             if (state.imageData) {        
@@ -9127,18 +9178,17 @@ function KellyFavItems(noexec)
             return image;
         }
         
-        var getMessage = function(el, e) {
+        var showTooltip = function(el, e) {
         
             var state = imgViewer.getCurrentState();
-            item = getCurrentImage(state); 
+            item = getCurrentViewedImage(state); 
             
             if (!item) return false;
         
             var message = document.createElement('div');
                 
-            KellyTools.setHTMLData(message, handler.showItemInfo(item)); 
-            
-            handler.applayItemCollectionButton(message.getElementsByClassName(env.className + '-ItemTip-image'));
+            KellyTools.setHTMLData(message, handler.showItemInfo(item));            
+            handler.setShowCollectionEvent(message.getElementsByClassName(env.className + '-ItemTip-image'));
             
             return message;
         }
@@ -9147,7 +9197,7 @@ function KellyFavItems(noexec)
             
             var state = imgViewer.getCurrentState();
             
-            if (state.beasy || !state.shown || getCurrentImage(state) != item) {
+            if (state.beasy || !state.shown || getCurrentViewedImage(state) != item) {
                 tooltip.remove();
                 imgViewer.tooltip = false;
             }
@@ -9159,7 +9209,7 @@ function KellyFavItems(noexec)
             imgViewer.tooltip = tooltip;
         }
         
-        KellyTooltip.addTipToEl(el, getMessage, {
+        KellyTooltip.addTipToEl(el, showTooltip, {
             offset : {left : 0, top : 0}, 
             positionY : 'top',
             positionX : 'right',
@@ -9606,6 +9656,8 @@ function KellyFavItems(noexec)
     
     function showItemInfoTooltip(index, target) {
     
+        index = parseInt(index);
+        if (!index) return;        
         if (!fav.items[index]) return;
         
         var tooltipEl = handler.getTooltip();
@@ -9654,12 +9706,77 @@ function KellyFavItems(noexec)
             addCats.innerText = lng.s('Добавить отмеченые категории', 'add_selected_cats'); 
             addCats.setAttribute('itemIndex', index);
             addCats.onclick = function() {
-                handler.addCatsForPost(parseInt(this.getAttribute('itemIndex')));
                 
+                handler.addCatsForPost(parseInt(this.getAttribute('itemIndex')));                
                 return false;
             }
-                            
+            
+        var priority = document.createElement('p');
+            priority.className = baseClass + '-order-buttons';
+            
+        var priorityHtml = '\
+            ' + lng.s('Приоритет', 'cat_order') + '\
+                <a href="#" class="' + baseClass + '-neworder-up">&#9650;</a>\
+                <a href="#" class="' + baseClass + '-neworder-down">&#9660;</a>\
+                <a href="#" class="' + baseClass + '-neworder-accept">' + lng.s('Применить', 'change') + '</a>\
+            ';
+                
+          
+        KellyTools.setHTMLData(priority, priorityHtml); 
+        
+        var prioritySwitch = function(up) {
+            
+            var displayedPos = displayedItems.indexOf(index);            
+            
+            if (displayedPos <= 0 && up) return false;
+            
+            if ((displayedPos == -1 || displayedPos == displayedItems.length - 1) && !up) return false;
+            
+            var switchWithIndex = up ? displayedItems[displayedPos - 1] : displayedItems[displayedPos + 1];
+            
+            if (!fav.items[index] || !fav.items[switchWithIndex]) return false;
+            
+            var tmp = fav.items[index];
+            
+            fav.items[index] = fav.items[switchWithIndex];
+            fav.items[switchWithIndex] = tmp;
+            
+            index = switchWithIndex;
+            
+            handler.updateImagesBlock();
+            handler.updateImageGrid();
+            
+            // var tooltipPos = {left : tooltipEl.self.style.left, top : tooltipEl.self.style.top};
+            
+            showItemInfoTooltip(index, false); //  target = env.className + '-FavItem-' + fav.items[index].id - не задаем чтобы не перемещать тултип
+            
+            handler.tooltipBeasy = true; 
+            handler.getTooltip().updateCfg({closeButton : true});
+            
+            // handler.getTooltip().self.style.left = tooltipPos.left;
+            // handler.getTooltip().self.style.top = tooltipPos.top;
+            KellyTools.classList('add', KellyTools.getElementByClass(handler.getTooltip().self, baseClass + '-neworder-accept'), 'active');
+            
+        }       
+                
+        KellyTools.getElementByClass(priority, baseClass + '-neworder-up').onclick = function() {            
+            prioritySwitch(true);   
+            return false;
+        };
+        
+        KellyTools.getElementByClass(priority, baseClass + '-neworder-down').onclick = function() {            
+            prioritySwitch(false); 
+            return false;           
+        };
+                
+        KellyTools.getElementByClass(priority, baseClass + '-neworder-accept').onclick = function() {            
+            KellyTools.classList('remove', this, 'active');
+            handler.save('items');
+            return false;           
+        };
+        
         itemInfo.appendChild(addCats);
+        itemInfo.appendChild(priority);
         
         var catList = document.createElement('ul');
             catList.id = env.className + '-cat-list-post' + index;
@@ -9679,7 +9796,7 @@ function KellyFavItems(noexec)
     
     function updateDisplayItemsList() {
 
-        displayedItems = []; // все элементы попавшие в выборку
+        displayedItems = [];
         
         // applay filters 
         
@@ -9817,12 +9934,12 @@ function KellyFavItems(noexec)
         return true;
     }
     
-    this.applayItemCollectionButton = function(items) {
+    this.setShowCollectionEvent = function(buttons) {
         
-        if (!items || !items.length) return;
+        if (!buttons || !buttons.length) return;
         
-        for (var i = 0; i < items.length; i++) {
-            items[i].onclick = function() {
+        for (var i = 0; i < buttons.length; i++) {
+            buttons[i].onclick = function() {
             
                 var item = fav.items[this.getAttribute('itemIndex')];
                 var imageSet = [];
@@ -9935,7 +10052,7 @@ function KellyFavItems(noexec)
                 collectionBtn.setAttribute('kellyGalleryIndex', 0);
                 collectionBtn.setAttribute('itemIndex', index);
                 
-                handler.applayItemCollectionButton([collectionBtn]);
+                handler.setShowCollectionEvent([collectionBtn]);
             }
                     
             if (!fav.coptions.animateGif || !item.pw) {
@@ -10041,9 +10158,7 @@ function KellyFavItems(noexec)
         imagesBlock.appendChild(itemBlock);
     }
     
-    // noClear - add to show list (on move to next page for example)
-    
-    this.updateImagesBlock = function(noClear) {
+    this.updateImagesBlock = function() {
         
         if (!imagesBlock) return false;
         if (!fav.items.length) {
@@ -10051,7 +10166,7 @@ function KellyFavItems(noexec)
             return false;
         }
         
-        noClear ? imageGrid.reset() : imageGrid.close();
+        imageGrid.close(); // imageGrid.reset() - if some day will be mode without pagination 
                 
         var startItem = (page - 1) * fav.coptions.grid.perPage;
         var end = startItem + fav.coptions.grid.perPage - 1;         
@@ -10856,8 +10971,14 @@ function KellyFavItems(noexec)
                             
                             onChangeState : function(self, newState) {
                                 if (newState == 'download') {
+                                    
+                                    // add beforeunload
+                                    KellyTools.injectAddition('onunload');
+                                    
                                     fav.coptions.grabber = self.getOptions();
                                     handler.save('cfg');
+                                } else {
+                                    // remove beforeunload
                                 }
                             },
                             
@@ -11465,20 +11586,20 @@ function KellyFavItems(noexec)
         catsHTML = '<select class="' + env.className + 'Cat">' + catsHTML + '</select>';
         
         var html = '\
-        <div class="' + env.className + 'SavePostWrap">\
-                <div class="' + env.className + 'CatAddForm">\
-                    <div>\
-                        <input type="text" placeholder="' + lng.s('Новая категория', 'cat_new_cat_name') + '" value="" class="' + env.className + 'CatName">\
-                        <a href="#" class="' + env.className + 'CatCreate">' +lng.s('Создать категорию', 'cat_create') + '</a>\
+            <div class="' + env.className + 'SavePostWrap">\
+                    <div class="' + env.className + 'CatAddForm">\
+                        <div>\
+                            <input type="text" placeholder="' + lng.s('Новая категория', 'cat_new_cat_name') + '" value="" class="' + env.className + 'CatName">\
+                            <a href="#" class="' + env.className + 'CatCreate">' +lng.s('Создать категорию', 'cat_create') + '</a>\
+                        </div>\
                     </div>\
-                </div>\
-                <div class="' + env.className + 'SavePost">\
-                    <div class="' + env.className + 'CatList">' + catsHTML + ' <a href="#" class="' + env.className + 'CatAdd">' +lng.s('Добавить категорию', 'cat_add') + '</a></div>\
-                    <input type="text" placeholder="' +lng.s('Подпись', 'item_notice') + '" value="" class="' + env.className + 'Name">\
-                    <a href="#" class="' + env.className + 'Add">' +lng.s('Сохранить', 'save') + '</a>\
-                </div>\
-                <div class="' + env.className + 'CatAddToPostList"></div>\
-        </div>\
+                    <div class="' + env.className + 'SavePost">\
+                        <div class="' + env.className + 'CatList">' + catsHTML + ' <a href="#" class="' + env.className + 'CatAdd">' +lng.s('Добавить категорию', 'cat_add') + '</a></div>\
+                        <input type="text" placeholder="' +lng.s('Подпись', 'item_notice') + '" value="" class="' + env.className + 'Name">\
+                        <a href="#" class="' + env.className + 'Add">' +lng.s('Сохранить', 'save') + '</a>\
+                    </div>\
+                    <div class="' + env.className + 'CatAddToPostList"></div>\
+            </div>\
         ';
 
         KellyTools.setHTMLData(modalBoxContent, html);
@@ -11496,7 +11617,7 @@ function KellyFavItems(noexec)
              
             handler.showSidebarMessage(lng.s('', 'saving')); 
                         
-            var result = selectedDataToFavItem();
+            var result = getFavItemFromSelected();
             if (result.error) {
                 
                 handler.showSidebarMessage(result.errorText, true); 
@@ -11548,7 +11669,7 @@ function KellyFavItems(noexec)
         return false;
     }
     
-    function selectedDataToFavItem() {
+    function getFavItemFromSelected() {
       
         if (!selectedPost) {
             log('itemAdd : selected post empty');
@@ -11588,9 +11709,11 @@ function KellyFavItems(noexec)
              if (selectedImages.length == 1) postItem.pImage = selectedImages[0];
         else if (selectedImages.length > 1) {
             
+            // set main image bu selected in PreviewImage element 
+            
             var previewImage = KellyTools.getElementByClass(modalBoxContent, env.className + '-PreviewImage');
             
-            // may unexist for images that taken from native favorites in iframe mode
+            // element may unexist for images that taken from user bookmarks by parser
             
             if (previewImage) {
             
@@ -11932,6 +12055,8 @@ function KellyFavItems(noexec)
         
         log(stage);
         
+        // remove beforeunload
+        
         var notice = KellyTools.getElementByClass(document, env.className + '-exporter-process');
             notice.innerText = '';
         
@@ -12050,11 +12175,17 @@ function KellyFavItems(noexec)
             itemsNum : 0,
         }
         
-        // exlude unnesessery data to improve load speed - ok        
+        // exclude unnesessery data to improve load speed - ok        
         // clear selected cats to ignore current profile categories in itemAdd method (used to collect selectedImages to new item)
-            fav.selected_cats_ids = [];
             
-        for (var i = 0; i < posts.length; i++) {
+            fav.selected_cats_ids = [];
+                
+        // for (var i = 0; i < posts.length; i++) 
+            
+        // ToDo - для сортировки по дате - учитывать ее при обработке постов \ сортировать постфактум. на данный момент, просто применяется обратный проход по массиву элементов в рамках страницы
+        // что бы записи шли по порядку добавления от старых - к более новым (мешанины не будет только при одном потоке)
+            
+        for (var i = posts.length - 1; i >= 0; i--) {         
         
             selectedComment = false;
             selectedPost = posts[i];
@@ -12155,7 +12286,7 @@ function KellyFavItems(noexec)
                 if (!postOk) continue;
             }
             
-            var result = selectedDataToFavItem();            
+            var result = getFavItemFromSelected();            
             if (!result.error) {
                 
                 var postItem = result.postItem;
@@ -12440,9 +12571,15 @@ function KellyFavItems(noexec)
         log('download native page started');
         log('Include Tag list :');
         log(favNativeParser.tagList);
+
+        // add beforeunload
         
-        favNativeParser.exec();        
+        KellyTools.injectAddition('onunload');
+        favNativeParser.exec();   
+        
     }
+    
+    // todo - move parser to separate class
     
     this.getBookmarksParser = function() {
         
@@ -12524,12 +12661,6 @@ function KellyFavItems(noexec)
     }
     
     this.showNativeFavoritePageInfo = function() {
-        
-        // single file downloads now supported in any browser
-        
-        // if (!handler.isDownloadSupported) {
-        //    return false;
-        // }
         
         if (!env.getFavPageInfo) {
             log(env.profile + ' not support native downloads');

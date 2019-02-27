@@ -12,6 +12,8 @@
    todo docs and examples
    todo avoidOutOfBounds - configurable sides
    
+   При удалении target'a возможно некорректное отображение (innerHTML = '') Добавить опцию для автоскрытия при некорректных данных о позиции элемента?
+   
 */
 
 function KellyTooltip(cfg) {

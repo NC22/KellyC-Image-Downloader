@@ -10,6 +10,7 @@
    ToDo : 
    
    todo docs and examples
+   pause
    
 */
 
