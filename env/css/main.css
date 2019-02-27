@@ -1195,6 +1195,11 @@
     margin-top : 16px;
 }
 
+
+.__BASECLASS__-exporter-buttons a {
+    margin-right : 16px;
+}
+
 .__BASECLASS__-exporter-wrap-tag {
     margin-bottom : 16px;
 }
