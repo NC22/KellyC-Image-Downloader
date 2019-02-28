@@ -9,9 +9,9 @@
 <p>This extension add the following functional for sites joyreactor.com, joyreactor.cc, old.reactor.cc : </p>
 <p>
 <ul>
-    <li>Allow user to bookmark publications and comments (without registration)</li>
+    <li>Allow user to bookmark publications and comments</li>
     <li>Store \ manage \ export \ import publications and comments ("Save" icon and "Options" button placed in header menu of site)</li>
-    <li>Export bookmarks of selected user to local profile (from pages like http://safereactor.cc/user/Радиоволна/favorite)</li>
+    <li>Export bookmarks of selected user or tag to local profile</li>
     <li>Batch download of images from filtered publications in local profile (select range, number of threads, etc) *</li>
 </ul>
 </p>
