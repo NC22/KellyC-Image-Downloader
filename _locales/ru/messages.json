@@ -474,7 +474,10 @@
         "message":"Публикация не имеет ссылки"
     },
     "item_notice":{  
-        "message":"Подпись"
+        "message":"Своя заметка"
+    },
+    "item_notice_title":{  
+        "message":"Будет сохранена вместо превью публикации или ее текста"
     },
     "item_number":{  
         "message":"Запись №__ITEMN__"

@@ -3168,6 +3168,7 @@ function KellyFavStorageManager(cfg) {
         }
         
         var sourceHtml = '<tr><td>' + lng.s('Загрузить из файла', 'storage_load_from_file') + '</td><td><input type="file" id="' + idPrefix + '-db-file"></td></tr>';
+        var dbDefaultName = '';
         
         var bookmarksParser = handler.fav.getBookmarksParser();
         if (bookmarksParser && !bookmarksParser.isBeasy() && bookmarksParser.collectedData && bookmarksParser.collectedData.items.length) {
@@ -3197,6 +3198,10 @@ function KellyFavStorageManager(cfg) {
                         </span>\
                     </td>\
                 </tr>';
+                
+            // contentImg - todo save image as preview for profile (use method kellyGrabber.getDataFromUrl)
+            
+            dbDefaultName = KellyTools.generateIdWord(bookmarksParser.pageInfo.contentName);
         }
         
         var html = '\
@@ -3211,7 +3216,8 @@ function KellyFavStorageManager(cfg) {
                     <tr><td colspan="2">' + lng.s('', 'storage_type_notice') + '</td></tr>\
                     <tr><td colspan="2"><h3>' + lng.s('Добавить новую базу', 'storage_add_new') + '</h3></td></tr>\
                     ' + sourceHtml + '\
-                    <tr><td>' + lng.s('Идентификатор базы', 'storage_name') + '</td><td><input type="text" id="' + idPrefix + '-create-name" placeholder="custom_data"></td></tr>\
+                    <tr><td>' + lng.s('Идентификатор базы', 'storage_name') + '</td>\
+                        <td><input type="text" id="' + idPrefix + '-create-name" placeholder="custom_data" value="' + dbDefaultName + '"></td></tr>\
                     <tr><td><label for="' + idPrefix + '-cancel">' + lng.s('Отмена если существует', 'storage_create_cancel_if_exist') + '</label></td>\
                         <td><input type="radio" name="' + idPrefix + '-conflict-action" id="' + idPrefix + '-cancel" value="cancel" checked></td></tr>\
                     <tr style="display : none;"><td><label for="' + idPrefix + '-overwrite">Перезаписать если существует</label></td>\
@@ -6798,6 +6804,9 @@ KellyTools.DEBUG = false;
 KellyTools.E_NOTICE = 1;
 KellyTools.E_ERROR = 2;
 
+KellyTools.PROGNAME = '';
+
+
 // Get screen width \ height
 
 KellyTools.getViewport = function() {
@@ -7573,9 +7582,11 @@ KellyTools.dispatchEvent = function(target, name) {
     target.dispatchEvent(event);
 }
 
-KellyTools.injectAddition = function(addition, onload) {
+KellyTools.injectAddition = function(addition, onload, duplicateIgnore) {
     
-    if (this['injection' + addition]) {
+    // remove old node on duplicate ?
+    
+    if (!duplicateIgnore && this['injection_' + addition]) {
         return;
     }
     
@@ -7588,12 +7599,27 @@ KellyTools.injectAddition = function(addition, onload) {
             script.onload = onload;
         }
     
-    this['injection' + addition] = script;
+    this['injection_' + addition] = script;
     
     document.body.appendChild(script); 
 }
 
-KellyTools.PROGNAME = '';
+KellyTools.generateIdWord = function(text) {
+	
+	if (typeof text != 'string') return '';
+	text = text.trim().toLowerCase();	
+	
+	if (!text) return '';
+
+    var replaceFrom = ['а','б','в','г','д','е','ё','ж','з','и','й','к','л','м','н','о','п','р','с','т','у','ф','х','ц','ч', 'ш', 'щ', 'ъ','ы','ь','э', 'ю', 'я',' ', '-'];
+    var replaceBy = ['a','b','v','g','d','e','e','g','z','i','y','k','l','m','n','o','p','r','s','t','u','f','h','c','ch','sh','sh','', 'y','y', 'e','yu','ya','_', '_'];
+
+	for (var i = 0; i < replaceFrom.length; i++) {
+		text = text.replace(new RegExp(replaceFrom[i], 'g'), replaceBy[i]);
+	}
+	
+    return text.replace(new RegExp(/\W/, 'g'), '');
+}
 
 KellyTools.getProgName = function() { 
     if (this.PROGNAME) return this.PROGNAME;
@@ -8317,19 +8343,22 @@ function KellyOptions(cfg) {
 
 ﻿// part of KellyFavItems extension
 
-function KellyFavItems(noexec) 
+function KellyFavItems(cfg) 
 {
     var handler = this;    
         
     var env = false;
     var events = [];
     
-    // выделенная для добавления в закладки публикация
+    // выбранная для добавления в закладки публикация, из этих данных формируется элемент в getFavItemFromSelected
     
     var selectedPost = false;
     var selectedImages = false;
     var selectedComment = false;
-    var selectedInfo = false; // какие-либо мета данные сохраняемые для определенной публикации в обработчике itemAdd (добавлять методом setSelectionInfo)
+    
+    // какие-либо мета данные сохраняемые для определенной публикации в обработчике itemAdd (добавлять методом setSelectionInfo) 
+    
+    var selectedInfo = false; 
     
     // последние выбранные категории для selectedPost хранятся в fav.selected_cats_ids
     
@@ -8382,7 +8411,7 @@ function KellyFavItems(noexec)
     
     // addition classes
     var imgViewer = false;    
-    var favNativeParser = false;
+    var favNativeParser = false; // may be renamed to BookmarksParser in future 
     var downloadManager = false;
     var storageManager = false;    
     var optionsManager = false;
@@ -10936,7 +10965,7 @@ function KellyFavItems(noexec)
         additionButtons.appendChild(gotoPage);        
         updateGoToPageButton(gotoPage);
             
-        if (handler.isDownloadSupported) {   
+        if (handler.isDownloadSupported && (!favNativeParser || (favNativeParser && !favNativeParser.isBeasy()))) {   
             
             var showDownloadManagerForm = function(show) {
                 
@@ -10974,11 +11003,17 @@ function KellyFavItems(noexec)
                                 if (newState == 'download') {
                                     
                                     // add beforeunload
+                                    
                                     KellyTools.injectAddition('onunload');
                                     
                                     fav.coptions.grabber = self.getOptions();
                                     handler.save('cfg');
                                 } else {
+                                    
+                                    if (KellyTools['injection_onunload'] ) {
+                                        KellyTools.injectAddition('onunload', false, true);
+                                    }
+                                    
                                     // remove beforeunload
                                 }
                             },
@@ -11596,7 +11631,7 @@ function KellyFavItems(noexec)
                     </div>\
                     <div class="' + env.className + 'SavePost">\
                         <div class="' + env.className + 'CatList">' + catsHTML + ' <a href="#" class="' + env.className + 'CatAdd">' +lng.s('Добавить категорию', 'cat_add') + '</a></div>\
-                        <input type="text" placeholder="' +lng.s('Подпись', 'item_notice') + '" value="" class="' + env.className + 'Name">\
+                        <input type="text" placeholder="' +lng.s('Подпись', 'item_notice') + '" title="' + lng.s('', 'item_notice_title') + '" value="" class="' + env.className + 'Name">\
                         <a href="#" class="' + env.className + 'Add">' +lng.s('Сохранить', 'save') + '</a>\
                     </div>\
                     <div class="' + env.className + 'CatAddToPostList"></div>\
@@ -11681,10 +11716,10 @@ function KellyFavItems(noexec)
             categoryId : [], 
             pImage : '', 
             link : '', 
-            name : KellyTools.inputVal(env.className + 'Name', 'string', modalBoxContent),
+            name : KellyTools.inputVal(env.className + 'Name', 'string', modalBoxContent), // исключение - todo перенести в selectedInfo
             // commentLink : '',
         };
-               
+         
         fav.selected_cats_ids = validateCategories(fav.selected_cats_ids);
         
         if (fav.selected_cats_ids.length) {
@@ -11705,8 +11740,18 @@ function KellyFavItems(noexec)
             if (!postItem.commentLink) {
                 return {error : 'post_link_empty', errorText : lng.s('Ошибка определения ссылки на комментарий', 'item_add_err1')};
             }
-        } 
+        }
+        
+        postItem.link = env.getPostLink(selectedPost);           
+        
+        if (!postItem.link) {
+            return {error : 'post_link_empty', errorText : lng.s('Публикация не имеет ссылки', 'item_bad_url')};
+        }  
 
+        if (postItem.name) {                        
+            return {error : false, postItem : postItem};
+        }              
+        
              if (selectedImages.length == 1) postItem.pImage = selectedImages[0];
         else if (selectedImages.length > 1) {
             
@@ -11748,12 +11793,6 @@ function KellyFavItems(noexec)
             postItem.gifInfo = selectedInfo['gifInfo'];     
         }
         
-        postItem.link = env.getPostLink(selectedPost);           
-        
-        if (!postItem.link) {
-            return {error : 'post_link_empty', errorText : lng.s('Публикация не имеет ссылки', 'item_bad_url')};
-        } 
-
         return {error : false, postItem : postItem};
     }
     
@@ -12056,7 +12095,7 @@ function KellyFavItems(noexec)
         
         log(stage);
         
-        // remove beforeunload
+        // remove beforeunload - maybe dont needed because its may be importent to not close window until safe data to profile
         
         var notice = KellyTools.getElementByClass(document, env.className + '-exporter-process');
             notice.innerText = '';
@@ -13000,7 +13039,7 @@ function KellyFavItems(noexec)
         return true;
     }
     
-    constructor(noexec);
+    constructor(cfg);
 }
 
 

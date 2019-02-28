@@ -467,6 +467,9 @@
     "item_notice":{  
         "message":"Notice"
     },
+    "item_notice_title":{  
+        "message":"Will replace text or image of saved publication"
+    },
     "item_number":{  
         "message":"Item №__ITEMN__"
     },

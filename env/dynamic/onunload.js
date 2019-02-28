@@ -10,4 +10,8 @@ if (typeof KELLY_ONUNLOAD == 'undefined') {
     }
     
     window.addEventListener('beforeunload', KELLY_ONUNLOAD);	
+    
+} else {
+    
+    window.removeEventListener('beforeunload', KELLY_ONUNLOAD);	
 }

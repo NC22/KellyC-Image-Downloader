@@ -104,9 +104,7 @@ KellyOptionsPage.init = function() {
 				return false; 
 			}
 			
-			K_FAV.addCss(KellyTools.replaceAll(response.data.css, '__BASECLASS__', KellyOptionsPage.env.className)); 			
-			K_FAV.exec();    
-			
+			K_FAV.addCss(KellyTools.replaceAll(response.data.css, '__BASECLASS__', KellyOptionsPage.env.className));
 			K_FAV.load(false, function() {
 				 K_FAV.initOnPageReady();
 			});
