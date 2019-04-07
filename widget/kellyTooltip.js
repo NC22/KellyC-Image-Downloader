@@ -45,7 +45,7 @@ function KellyTooltip(cfg) {
     this.contentId = '';
     this.avoidOutOfBounds = true;
     
-    this.userEvents = { onMouseOut : false, onMouseOver : false, onClose : false  };
+    this.userEvents = getDefaultUserEvents();
     
     var events = {};
     
@@ -72,19 +72,20 @@ function KellyTooltip(cfg) {
             handler.ptypeY = cfg.ptypeY;
             updateContainerClass = true;
         }
-        
-        if (handler.self && updateContainerClass) {
-            // todo - better remove previouse class, without full overwrite
-            handler.self.className = getSelfClass();
-        }
-        
+                
         var settings = ['avoidOutOfBounds', 'target', 'message', 'hideWidth', 'offset', 'minWidth', 'closeByBody', 'classGroup', 'selfClass', 'zIndex', 'closeButton', 'removeOnClose'];
         
         for (var i=0; i < settings.length; i++) {
+            
             var key = settings[i];
+            
             if (typeof cfg[key] != 'undefined') {
             
                 handler[key] = cfg[key];
+                
+                if (key == 'selfClass' || key == 'classGroup'){
+                    updateContainerClass = true;
+                }
                 
                 if (key == 'closeButton' && handler.self) {
                     handler.getCloseButton().style.display = handler.closeButton ? 'block' : 'none';
@@ -96,20 +97,44 @@ function KellyTooltip(cfg) {
                 
             }
         }
-        
-        if (cfg.events && cfg.events.onClose) {
-            handler.userEvents.onClose = cfg.events.onClose;
+                
+        if (handler.self && updateContainerClass) {
+            
+            // todo - better remove previouse class, without full overwrite
+            
+            handler.self.className = getSelfClass();
         }
         
-        if (cfg.events && cfg.events.onMouseOut) {
-            handler.userEvents.onMouseOut = cfg.events.onMouseOut;
-        }
+        if (typeof cfg.events != 'undefined' && cfg.events === false) {
+            
+            handler.userEvents = getDefaultUserEvents();
+            
+        } else {
         
-        if (cfg.events && cfg.events.onMouseIn) {
-            handler.userEvents.onMouseIn = cfg.events.onMouseIn;
+            if (cfg.events && cfg.events.onClose) {
+                handler.userEvents.onClose = cfg.events.onClose;
+            }
+            
+            if (cfg.events && cfg.events.onMouseOut) {
+                handler.userEvents.onMouseOut = cfg.events.onMouseOut;
+            }
+            
+            if (cfg.events && cfg.events.onMouseIn) {
+                handler.userEvents.onMouseIn = cfg.events.onMouseIn;
+            }
+            
         }
         
         return handler;
+    }
+    
+    function getDefaultUserEvents() {
+        
+        return { 
+            onMouseOut : false, 
+            onMouseOver : false, 
+            onClose : false  
+        };
     }
     
     function getSelfClass() {
