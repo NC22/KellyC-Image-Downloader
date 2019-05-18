@@ -5,12 +5,13 @@
    @description    creates tooltip elements (attaches to an element or screen) widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.0.0 24.09.18
+   @version        v 1.0.1 18.05.19
    
    ToDo : 
    
    todo docs and examples
    todo avoidOutOfBounds - configurable sides
+   todo add optional dragable div element (onDragStart \ onDragEnd \ draggable)
    
    При удалении target'a возможно некорректное отображение (innerHTML = '') Добавить опцию для автоскрытия при некорректных данных о позиции элемента?
    
@@ -109,20 +110,13 @@ function KellyTooltip(cfg) {
             
             handler.userEvents = getDefaultUserEvents();
             
-        } else {
-        
-            if (cfg.events && cfg.events.onClose) {
-                handler.userEvents.onClose = cfg.events.onClose;
+        } else if (typeof cfg.events != 'object') {
+                        
+            for (var k in cfg.events){
+                if (typeof cfg.events[k] === 'function') {
+                     handler.userEvents[k] = cfg.events[k];
+                }
             }
-            
-            if (cfg.events && cfg.events.onMouseOut) {
-                handler.userEvents.onMouseOut = cfg.events.onMouseOut;
-            }
-            
-            if (cfg.events && cfg.events.onMouseIn) {
-                handler.userEvents.onMouseIn = cfg.events.onMouseIn;
-            }
-            
         }
         
         return handler;
@@ -133,7 +127,9 @@ function KellyTooltip(cfg) {
         return { 
             onMouseOut : false, 
             onMouseOver : false, 
-            onClose : false  
+            onClose : false,
+            onScroll : false,
+            onResize : false,
         };
     }
     
@@ -169,7 +165,7 @@ function KellyTooltip(cfg) {
             
         var closeBtn = document.createElement('div');
             closeBtn.className = handler.classGroup + '-close'; 
-            closeBtn.setAttribute('style', 'cursor : pointer; display:' + (handler.closeButton ? 'block' : 'none'));
+            closeBtn.setAttribute('style', 'display:' + (handler.closeButton ? 'block' : 'none'));
             closeBtn.innerText = '+';
             closeBtn.onclick = function() {
                  handler.show(false); 
@@ -203,6 +199,10 @@ function KellyTooltip(cfg) {
         
         events.onResize = function(e) {
         
+            if (handler.userEvents.onResize && handler.userEvents.onResize(handler, e)) {
+                return;
+            }
+            
             //console.log(screen.width + ' ff '  + toolTip.hideAfterWidth)
             
             if (!checkRequierdWidth()) {
@@ -216,7 +216,11 @@ function KellyTooltip(cfg) {
         }
         
         events.onScroll = function(e) {
-        
+            
+            if (handler.userEvents.onScroll && handler.userEvents.onScroll(handler, e)) {
+                return;
+            }
+            
             if (handler.isShown()) {
                 handler.updatePosition();
             }    
@@ -489,6 +493,7 @@ KellyTooltip.loadDefaultCss = function(className) {
             width: 25px;\
             height: 25px;\
             line-height: 25px;\
+            cursor : pointer;\
         }\
         .' + className + '-content {\
             text-align: left;\

@@ -210,6 +210,8 @@
 
 .__BASECLASS__-filters-AdditionButtons table .__BASECLASS__-FavFilter {
     margin : 0px;
+    padding-left: 3px;
+    padding-right: 3px;
 }
 
 #submenu .__BASECLASS__-old-reactor-cc.__BASECLASS__-MainMenuItem-fav .__BASECLASS__-icon {

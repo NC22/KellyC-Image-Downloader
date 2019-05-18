@@ -12,6 +12,7 @@
    data-ignore-click - ok
    include pixel ratio detection - https://stackoverflow.com/questions/1713771/how-to-detect-page-zoom-level-in-all-modern-browsers
    add user event onButtonsShow
+   alternative load by xmlHTTPrequest - make posible progressbar on "onprogress" event https://stackoverflow.com/questions/76976/how-to-get-progress-from-xmlhttprequest
    
 */
 
@@ -52,11 +53,12 @@ function KellyImgView(cfg) {
     var imagesData = {};
     
     var userEvents = { 
-        onBeforeImageLoad : false,  // onBeforeImageLoad(handler, galleryItemPointer, galleryData) calls before onShow and initialize open image process (to prevent, return true in userEvent method) 
-        onBeforeImageShow : false,  // onBeforeImageShow(handler, image) calls before add loaded image to container изображение загружено но не показано, переменные окружения обновлены
-        onClose : false,            // onShow(handler) calls after hide viewer block
-        onShow : false,             // onShow(handler, show) calls before show \ hide viewer block
-        onNextImage : false,        // onNextImage(handler, nextImage, next)
+        onBeforeImageLoad : false,     // onBeforeImageLoad(handler, galleryItemPointer, galleryData) calls before onShow and initialize open image process (to prevent native behavior, return true in userEvent method)        
+        onBeforeImageShow : false,     // onBeforeImageShow(handler, image) calls before add loaded image to container изображение загружено но не показано, переменные окружения обновлены
+        onImageLoadFail : false,       // onImageLoadFail(handler) calls if image is failed to load
+        onClose : false,               // onShow(handler) calls after hide viewer block
+        onShow : false,                // onShow(handler, show) calls before show \ hide viewer block
+        onNextImage : false,           // onNextImage(handler, nextImage, next)
     };
  
     var moveable = true;
@@ -410,6 +412,23 @@ function KellyImgView(cfg) {
         }
     }
     
+    function imageClearLoadEvents() {
+        if (image) {
+            
+            image.onload = function() {
+                // empty
+                
+                return false;
+            }
+            
+            image.onerror = function() {
+                // empty
+                
+                return false;
+            }
+        }
+    }
+    
     function getEl(name) {
         if (!getBlock()) return false;
         var pool = block.getElementsByClassName(commClassName + '-' + name);        
@@ -618,8 +637,20 @@ function KellyImgView(cfg) {
             handler.imageShow();
         } else {
             image.onload = function() { 
-                handler.imageShow(); return false; 
+            
+                handler.imageShow(); 
+                
+                return false; 
             };
+            
+            image.onerror = function() {
+                                
+                imageClearLoadEvents();
+                
+                if (userEvents.onImageLoadFail && userEvents.onImageLoadFail(handler)) {
+                    return false;
+                }
+            }
         }
     };
     
@@ -837,7 +868,9 @@ function KellyImgView(cfg) {
     // calls after image fully loaded and ready to show
     
     this.imageShow = function() {
-    
+            
+        imageClearLoadEvents();
+                
         beasy = false;
         
         var imgContainer = getEl('img'); 
@@ -949,11 +982,7 @@ function KellyImgView(cfg) {
             
         } else {
           
-            if (image) {
-                image.onload = function() { 
-                    return false; 
-                };                
-            }
+            imageClearLoadEvents();
             
             showMainBlock(false);
             

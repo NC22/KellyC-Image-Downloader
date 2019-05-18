@@ -479,6 +479,11 @@
      margin-right : 6px;
 }
 
+.__BASECLASS__-filters-AdditionButtons table .__BASECLASS__-FavFilter {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
 .__BASECLASS__-FiltersMenu {
      margin-bottom : 12px;
     /* todo move tooltips max-height: 450px;

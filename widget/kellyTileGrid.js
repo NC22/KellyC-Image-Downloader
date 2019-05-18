@@ -12,6 +12,7 @@
    todo docs and examples
    pause
    
+   tmpBounds - ненужная опция - убрать т.к. для отмасштабированных элементов добавляется класс tileClass + grid-resized, для блока с тайлами на время загрузки назначается класс tileClass + loading
 */
 
 function KellyTileGrid(cfg) {

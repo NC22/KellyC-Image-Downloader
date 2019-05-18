@@ -454,6 +454,9 @@
     },
     "image_total":{  
         "message":"Images total : __IMAGEN__"
+    },   
+    "image_fail":{  
+        "message":"Fail to load image"
     },
     "init_css_error":{  
         "message":"Initialization error (unable to load CSS files)"
@@ -505,6 +508,12 @@
     },
     "logic_or":{  
         "message":"Logic OR"
+    },   
+    "logic_and_help":{  
+        "message":"Select items with all selected categories (excluded categories filtered separately)"
+    },
+    "logic_or_help":{  
+        "message":"Select items that have one of selected categories (excluded categories filtered separately)"
     },
     "new_name":{  
         "message":"New name"

@@ -68,12 +68,13 @@
    @description    creates tooltip elements (attaches to an element or screen) widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.0.0 24.09.18
+   @version        v 1.0.1 18.05.19
    
    ToDo : 
    
    todo docs and examples
    todo avoidOutOfBounds - configurable sides
+   todo add optional dragable div element (onDragStart \ onDragEnd \ draggable)
    
    При удалении target'a возможно некорректное отображение (innerHTML = '') Добавить опцию для автоскрытия при некорректных данных о позиции элемента?
    
@@ -172,20 +173,13 @@ function KellyTooltip(cfg) {
             
             handler.userEvents = getDefaultUserEvents();
             
-        } else {
-        
-            if (cfg.events && cfg.events.onClose) {
-                handler.userEvents.onClose = cfg.events.onClose;
+        } else if (typeof cfg.events != 'object') {
+                        
+            for (var k in cfg.events){
+                if (typeof cfg.events[k] === 'function') {
+                     handler.userEvents[k] = cfg.events[k];
+                }
             }
-            
-            if (cfg.events && cfg.events.onMouseOut) {
-                handler.userEvents.onMouseOut = cfg.events.onMouseOut;
-            }
-            
-            if (cfg.events && cfg.events.onMouseIn) {
-                handler.userEvents.onMouseIn = cfg.events.onMouseIn;
-            }
-            
         }
         
         return handler;
@@ -196,7 +190,9 @@ function KellyTooltip(cfg) {
         return { 
             onMouseOut : false, 
             onMouseOver : false, 
-            onClose : false  
+            onClose : false,
+            onScroll : false,
+            onResize : false,
         };
     }
     
@@ -232,7 +228,7 @@ function KellyTooltip(cfg) {
             
         var closeBtn = document.createElement('div');
             closeBtn.className = handler.classGroup + '-close'; 
-            closeBtn.setAttribute('style', 'cursor : pointer; display:' + (handler.closeButton ? 'block' : 'none'));
+            closeBtn.setAttribute('style', 'display:' + (handler.closeButton ? 'block' : 'none'));
             closeBtn.innerText = '+';
             closeBtn.onclick = function() {
                  handler.show(false); 
@@ -266,6 +262,10 @@ function KellyTooltip(cfg) {
         
         events.onResize = function(e) {
         
+            if (handler.userEvents.onResize && handler.userEvents.onResize(handler, e)) {
+                return;
+            }
+            
             //console.log(screen.width + ' ff '  + toolTip.hideAfterWidth)
             
             if (!checkRequierdWidth()) {
@@ -279,7 +279,11 @@ function KellyTooltip(cfg) {
         }
         
         events.onScroll = function(e) {
-        
+            
+            if (handler.userEvents.onScroll && handler.userEvents.onScroll(handler, e)) {
+                return;
+            }
+            
             if (handler.isShown()) {
                 handler.updatePosition();
             }    
@@ -552,6 +556,7 @@ KellyTooltip.loadDefaultCss = function(className) {
             width: 25px;\
             height: 25px;\
             line-height: 25px;\
+            cursor : pointer;\
         }\
         .' + className + '-content {\
             text-align: left;\
@@ -679,6 +684,7 @@ KellyTooltip.addTipToEl = function(el, message, cfg, delay, onShow) {
    todo docs and examples
    pause
    
+   tmpBounds - ненужная опция - убрать т.к. для отмасштабированных элементов добавляется класс tileClass + grid-resized, для блока с тайлами на время загрузки назначается класс tileClass + loading
 */
 
 function KellyTileGrid(cfg) {
@@ -1455,6 +1461,7 @@ function KellyTileGrid(cfg) {
    data-ignore-click - ok
    include pixel ratio detection - https://stackoverflow.com/questions/1713771/how-to-detect-page-zoom-level-in-all-modern-browsers
    add user event onButtonsShow
+   alternative load by xmlHTTPrequest - make posible progressbar on "onprogress" event https://stackoverflow.com/questions/76976/how-to-get-progress-from-xmlhttprequest
    
 */
 
@@ -1495,11 +1502,12 @@ function KellyImgView(cfg) {
     var imagesData = {};
     
     var userEvents = { 
-        onBeforeImageLoad : false,  // onBeforeImageLoad(handler, galleryItemPointer, galleryData) calls before onShow and initialize open image process (to prevent, return true in userEvent method) 
-        onBeforeImageShow : false,  // onBeforeImageShow(handler, image) calls before add loaded image to container изображение загружено но не показано, переменные окружения обновлены
-        onClose : false,            // onShow(handler) calls after hide viewer block
-        onShow : false,             // onShow(handler, show) calls before show \ hide viewer block
-        onNextImage : false,        // onNextImage(handler, nextImage, next)
+        onBeforeImageLoad : false,     // onBeforeImageLoad(handler, galleryItemPointer, galleryData) calls before onShow and initialize open image process (to prevent native behavior, return true in userEvent method)        
+        onBeforeImageShow : false,     // onBeforeImageShow(handler, image) calls before add loaded image to container изображение загружено но не показано, переменные окружения обновлены
+        onImageLoadFail : false,       // onImageLoadFail(handler) calls if image is failed to load
+        onClose : false,               // onShow(handler) calls after hide viewer block
+        onShow : false,                // onShow(handler, show) calls before show \ hide viewer block
+        onNextImage : false,           // onNextImage(handler, nextImage, next)
     };
  
     var moveable = true;
@@ -1853,6 +1861,23 @@ function KellyImgView(cfg) {
         }
     }
     
+    function imageClearLoadEvents() {
+        if (image) {
+            
+            image.onload = function() {
+                // empty
+                
+                return false;
+            }
+            
+            image.onerror = function() {
+                // empty
+                
+                return false;
+            }
+        }
+    }
+    
     function getEl(name) {
         if (!getBlock()) return false;
         var pool = block.getElementsByClassName(commClassName + '-' + name);        
@@ -2061,8 +2086,20 @@ function KellyImgView(cfg) {
             handler.imageShow();
         } else {
             image.onload = function() { 
-                handler.imageShow(); return false; 
+            
+                handler.imageShow(); 
+                
+                return false; 
             };
+            
+            image.onerror = function() {
+                                
+                imageClearLoadEvents();
+                
+                if (userEvents.onImageLoadFail && userEvents.onImageLoadFail(handler)) {
+                    return false;
+                }
+            }
         }
     };
     
@@ -2280,7 +2317,9 @@ function KellyImgView(cfg) {
     // calls after image fully loaded and ready to show
     
     this.imageShow = function() {
-    
+            
+        imageClearLoadEvents();
+                
         beasy = false;
         
         var imgContainer = getEl('img'); 
@@ -2392,11 +2431,7 @@ function KellyImgView(cfg) {
             
         } else {
           
-            if (image) {
-                image.onload = function() { 
-                    return false; 
-                };                
-            }
+            imageClearLoadEvents();
             
             showMainBlock(false);
             
@@ -8387,11 +8422,10 @@ function KellyFavItems(cfg)
     
     // последние выбранные категории для selectedPost хранятся в fav.selected_cats_ids
     
-    var extendCats = []; // выделеные категории для последующего добавления к определенной публикации в режиме просмотра избранного
-    
+    var extendCats = []; // выделеные категории для последующего добавления к определенной публикации в режиме просмотра избранного    
     var init = false; // маркер инициализации расширения (вызов метода initExtension)
     
-    // todo порядок сортировки при выгрузке в соответствии с датой \ ид
+    // todo сохранять порядок сортировки при парсинге тегов \ закладок в соответствии с датой \ ид (учтено для одного потока см. onDownloadNativeFavPage)
     
     // события
     
@@ -9336,6 +9370,25 @@ function KellyFavItems(cfg)
                             handler.getTooltip().show(false);
                             handler.tooltipBeasy = false;
                         }
+                    },
+                    
+                    onImageLoadFail : function(self) {
+                        
+                        self.cancelLoad();
+                        
+                        handler.getTooltip().updateCfg({
+                            closeButton : true,
+                            target : 'screen', 
+                            offset : {left : 40, top : -40}, 
+                            positionY : 'bottom',
+                            positionX : 'left',				
+                            ptypeX : 'inside',
+                            ptypeY : 'inside',
+                        });
+                        
+                        handler.getTooltip().setMessage(lng.s('Не удалось загрузить изображение', 'image_fail'));                        
+                        handler.getTooltip().show(true);
+                        
                     }
                 },
             });
@@ -10804,9 +10857,6 @@ function KellyFavItems(cfg)
         var filterPosts = filterComments.cloneNode();
             filterPosts.innerText = lng.s('Публикации', 'items');          
         
-            if (!excludeFavPosts) filterPosts.className += ' active';
-            if (!excludeFavComments) filterComments.className += ' active';
-            
         filterComments.onclick = function() {
             
             if (!checkSafeUpdateData()) return false;
@@ -10853,30 +10903,57 @@ function KellyFavItems(cfg)
             return false;
             
         }
-        
+            
+        var filterNsfw = filterComments.cloneNode();        
+            
+            filterNsfw.innerText = 'NSFW';
+            filterNsfw.title = lng.s('', 'nsfw_tip');
+            filterNsfw.onclick = function () {
+                
+                if (!checkSafeUpdateData()) return false;
+                
+                if (fav.coptions.ignoreNSFW) {
+                    fav.coptions.ignoreNSFW = false;
+                    this.className += ' active';
+                } else {
+                    fav.coptions.ignoreNSFW = true;
+                    this.className = this.className.replace('active', '');
+                }
+                
+                handler.save('cfg');
+                
+                page = 1;
+                handler.showFavouriteImages();
+                return false;
+            }
+            
+            if (!env.isNSFW()) {                
+                filterNsfw.style.display = 'none';
+            }
+      
+        if (!fav.coptions.ignoreNSFW) filterNsfw.className += ' active';            
+        if (!excludeFavPosts) filterPosts.className += ' active';
+        if (!excludeFavComments) filterComments.className += ' active';
+            
         var typeFiltersContainer = document.createElement('div');
             typeFiltersContainer.className = env.className + '-TypeFiltersContainer';
+            
             typeFiltersContainer.appendChild(filterComments);
             typeFiltersContainer.appendChild(filterPosts);
+            typeFiltersContainer.appendChild(filterNsfw);
             
         var logicButton = editButton.cloneNode();
-            logicButton.title = '';
             logicButton.className = env.className + '-FavFilter ' + env.className + '-FavFilter-logic';
-            logicButton.innerText = lng.s('Логика И', 'logic_and');
-            // logic.alt = 'Вывести записи где есть хотябы один из выбранных тегов';
+            logicButton.innerText = lng.s('', 'logic_' + logic);
+            logicButton.title = lng.s('', 'logic_' + logic + '_help');
             
             logicButton.onclick = function () {
                 
                 if (!checkSafeUpdateData()) return false;
                 
-                if (logic == 'or') {
-                    logic = 'and';
-                    this.innerText = lng.s('Логика И', 'logic_and');
-                    
-                } else {
-                    logic = 'or';
-                    this.innerText = lng.s('Логика ИЛИ', 'logic_or');
-                }
+                logic = (logic == 'or') ? 'and' : 'or';
+                logicButton.innerText = lng.s('', 'logic_' + logic);
+                logicButton.title = lng.s('', 'logic_' + logic + '_help');
                 
                 updateFilteredData();
                 
@@ -10929,36 +11006,6 @@ function KellyFavItems(cfg)
                 handler.updateImagesBlock();
                 handler.updateImageGrid();
                 return false;
-            }
-            
-        var nsfw = logicButton.cloneNode();        
-            nsfw.className = env.className + '-FavFilter';
-            
-            if (fav.coptions.ignoreNSFW) nsfw.innerText = '- NSFW';
-            else nsfw.innerText = '+ NSFW';
-            
-            nsfw.title = lng.s('', 'nsfw_tip');
-            nsfw.onclick = function () {
-                
-                if (!checkSafeUpdateData()) return false;
-                
-                if (fav.coptions.ignoreNSFW) {
-                    fav.coptions.ignoreNSFW = false;
-                    this.innerText = '+ NSFW';
-                } else {
-                    fav.coptions.ignoreNSFW = true;
-                    this.innerText = '- NSFW';
-                }
-                
-                handler.save('cfg');
-                
-                page = 1;
-                handler.showFavouriteImages();
-                return false;
-            }
-            
-            if (!env.isNSFW()) {                
-                nsfw.style.display = 'none';
             }
             
         var additionButtons = document.createElement('div');
@@ -11115,13 +11162,11 @@ function KellyFavItems(cfg)
        
         }
             
-        typeFiltersContainer.appendChild(logicButton);
-        
         var cOptions = document.createElement('div');    
         KellyTools.setHTMLData(cOptions, '<table><tbody><tr><td></td><td></td><td></td></tr></tbody></table>');
         
         var cOptionsSectors = cOptions.getElementsByTagName('td');
-        var cOptionsSectorItems = [no, gif, nsfw];
+        var cOptionsSectorItems = [no, gif, logicButton];
         
         for (i = 0; i < cOptionsSectors.length; i++) {
             
@@ -12247,7 +12292,7 @@ function KellyFavItems(cfg)
                 
         // for (var i = 0; i < posts.length; i++) 
             
-        // ToDo - для сортировки по дате - учитывать ее при обработке постов \ сортировать постфактум. на данный момент, просто применяется обратный проход по массиву элементов в рамках страницы
+        // ToDo - для сортировки по дате \ ид - учитывать их при обработке постов \ сортировать постфактум. на данный момент, просто применяется обратный проход по массиву элементов в рамках страницы
         // что бы записи шли по порядку добавления от старых - к более новым (мешанины не будет только при одном потоке)
             
         for (var i = posts.length - 1; i >= 0; i--) {         
