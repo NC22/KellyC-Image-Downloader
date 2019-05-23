@@ -1454,7 +1454,7 @@ function KellyTileGrid(cfg) {
    @description    image view widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.1.3 15.12.18
+   @version        v 1.1.4 18.05.19
    
    ToDo : 
    
@@ -1462,6 +1462,7 @@ function KellyTileGrid(cfg) {
    include pixel ratio detection - https://stackoverflow.com/questions/1713771/how-to-detect-page-zoom-level-in-all-modern-browsers
    add user event onButtonsShow
    alternative load by xmlHTTPrequest - make posible progressbar on "onprogress" event https://stackoverflow.com/questions/76976/how-to-get-progress-from-xmlhttprequest
+   scale by scroll
    
 */
 
@@ -1486,7 +1487,6 @@ function KellyImgView(cfg) {
     
     var cursor = 0;
     
-    // todo touch move by x, go to previuse \ next by swipe
     // realise throw dragStart \ DragMove functions that related to image block
     
     var isMoved = false;
@@ -1910,9 +1910,9 @@ function KellyImgView(cfg) {
             
             if (disable) {
             
-                handler.addEventPListener(window, 'wheel', stop, '_scroll');
-                handler.addEventPListener(window, 'mousewheel', stop, '_scroll');
-                handler.addEventPListener(window, 'touchmove', stop, '_scroll');
+                handler.addEventPListener(window, 'wheel', stop, '_scroll', { passive: false });
+                handler.addEventPListener(window, 'mousewheel', stop, '_scroll', { passive: false });
+                handler.addEventPListener(window, 'touchmove', stop, '_scroll', { passive: false });
             
             } else {
             
@@ -2647,7 +2647,7 @@ function KellyImgView(cfg) {
         return true;    
     };
     
-    this.addEventPListener = function(object, event, callback, prefix) {
+    this.addEventPListener = function(object, event, callback, prefix, options) {
         if (!object)
             return false;
         if (!prefix)
@@ -2658,7 +2658,7 @@ function KellyImgView(cfg) {
         if (!object.addEventListener) {
             object.attachEvent('on' + event, events[prefix + event]);
         } else {
-            object.addEventListener(event, events[prefix + event]);
+            object.addEventListener(event, events[prefix + event], options);
         }
 
         return true;

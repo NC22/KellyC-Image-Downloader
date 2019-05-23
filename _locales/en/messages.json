@@ -93,7 +93,7 @@
         "message":"Min items number"
     },
     "cgrid_new_to_begin":{  
-        "message":"New to begining"
+        "message":"New to beginning"
     },
     "cgrid_per_page":{  
         "message":"Items per page"
@@ -183,7 +183,7 @@
         "message":"Create data profile"
     },
     "download_tag_filter_1":{  
-        "message":"Select tags, post that includes that tags will be saved. For example \"art, girl\". If you want to exclude some publications with specifed tags, then type tags with sybmbol \"-\" before tag name. For example \"-carrot, -dog, -minecraft\""
+        "message":"Select tags, post that includes that tags will be saved. For example \"art, girl\". If you want to exclude some publications with specified tags, then type tags with symbol \"-\" before tag name. For example \"-carrot, -dog, -minecraft\""
     },
     "download_tag_filter_show":{  
         "message":"Apply tag filter"
@@ -195,7 +195,7 @@
         "message":"Tag filter"
     },
     "download_createc_1":{  
-        "message":"If publication contain one of the described tags, catagory will be automaticly added"
+        "message":"If publication contain one of the described tags, category will be automatically added"
     },
     "download_createc_by_tag":{  
         "message":"Automaticly create category by tag name"
@@ -207,13 +207,13 @@
         "message":"Save as profile file"
     },           
     "download_pages_autosave" : {
-        "message":"Autosave after to separate file after setted number of pages"
+        "message":"Save to separate file after set number of pages"
     },
     "download_save_notice":{  
-        "message":"Saved profile can be added to extension thow menu (Options -> Profiles -> Add new profile)"
+        "message":"Saved profile can be added to extension throw menu (Options -> Profiles -> Add new profile)"
     },   
     "download_limitpages":{  
-        "message":"Selection hit limit (__CURRENTPAGESPERIMPORT__). Please set export pages manualy (not more then __MAXPAGESPERIMPORT__ pages per one operation)"
+        "message":"Selection hit limit (__CURRENTPAGESPERIMPORT__). Please set export pages manually (not more then __MAXPAGESPERIMPORT__ pages per one operation)"
     },    
     "download_partly":{  
         "message":"Only part of data was loaded (see log for more info). You still can download loaded data as profile"
@@ -222,7 +222,7 @@
         "message":"Part of user bookmarks pages data saved to separate files"
     },   
     "download_autosaved_ok":{  
-        "message":"Pages saved automaticaly"
+        "message":"Pages saved automatically"
     },
     "download_empty":{  
         "message":"List of found publications is empty (see log for more info)"
@@ -231,7 +231,7 @@
         "message":"Edit mode"
     },
     "ext_description":{  
-        "message":"Save favourite publications to your local browser storage. "
+        "message":"Save favorite publications and comments to local browser storage. "
     },
     "ext_name":{  
         "message":"KellyC Favorites"
@@ -270,7 +270,7 @@
         "message":"Check file already downloaded"
     }, 
     "fast_save_check_notice":{  
-        "message":"If file already downloaded, then green marker will be adedd to download button"
+        "message":"If file already downloaded, then green marker will be added to download button"
     },
     "go_to_comment":{  
         "message":"Show comment"
@@ -288,7 +288,7 @@
         "message":"Items"
     }, 
     "grabber_selected_items_not_found":{  
-        "message":"Cant select any items for download setted in \"Items\" field"
+        "message":"Cant select any items for download by \"Items\" field"
     },
     "grabber_source":{  
         "message":"High quality"
@@ -408,7 +408,7 @@
         "message": "For example http://www.example.com and http://example.com counts as different domain and will be blocked by CORS<br>"
     },
     "grabber_request_help_2":{  
-        "message": "We can use - \"Iframe\", that will answer by reglamented format<br>"
+        "message": "We can use - \"Iframe\", that will answer by specified format<br>"
     },  
     "grabber_request_help_3":{  
         "message": "Also if you still want to use direct download by XMLHttpRequest method, just search extension that disable security options ex. \"Allow-Control-Allow-Origin: * extension\"<br>"
@@ -495,7 +495,7 @@
         "message":"Cant detect comment url"
     },  
     "fav_list_empty":{  
-        "message":"List of favourite items is empty"
+        "message":"List of favorite items is empty"
     },
     "loading":{  
         "message":"Loading"
@@ -537,13 +537,13 @@
         "message":"Options changed"
     },
     "options_fav_add":{  
-        "message":"Add to Favourites"
+        "message":"Add to Favorites"
     },
     "options_side":{  
         "message":"Move extension options button to sidebar"
     },     
     "options_storage":{  
-        "message":"Base directory for store profiles and cfgs"
+        "message":"Base directory for store profiles and configs"
     },
     "other":{  
         "message":"Other"
@@ -573,13 +573,13 @@
         "message":"Restore"
     },
     "remove_from_fav":{  
-        "message":"remove from favourite"
+        "message":"remove from favorite"
     },
     "remove_from_fav_comment":{  
-        "message":"remove from favourite"
+        "message":"remove from favorite"
     },  
     "remove_from_fav_tip":{  
-        "message":"Remove from favourite"
+        "message":"Remove from favorite"
     },
     "removed_cat":{  
         "message":"Removed category"
@@ -645,7 +645,7 @@
         "message":"Disk space used"
     },   
     "storage_manager_localstorage_notice":{  
-        "message":"For selected storage type (<b>localstorage</b>) max amount of space is limited and in common case can't be more then <b>4mb</b>. Please delete unused profiles if you near to this limit, or select another storage type"
+        "message":"For selected storage type (<b>localStorage</b>) max amount of space is limited and in common case can't be more then <b>4mb</b>. Please delete unused profiles if you near to this limit, or select another storage type"
     },
     "storage_manager_api_notice":{  
         "message":"For selected storage type (<b>Browser API</b>) max amount of space is <b>__MAX_ENV_SIZE__mb</b> (maximum per profile file <b>__MAX_TOTAL_PER_DB__mb</b>)"
@@ -660,7 +660,7 @@
         "message":"Storage type"
     },   
     "storage_type_notice":{  
-        "message":"<b>Change storage type only if needed</b>. After change, your current profile list will be hidden, until switch back to previouse storage type"
+        "message":"<b>Change storage type only if needed</b>. After change, your current profile list will be hidden, until switch back to previous storage type"
     }, 
     "storage_manage":{  
         "message":"Profile manager"
@@ -684,7 +684,7 @@
         "message":"Profile updated"
     },   
     "storage_create_e1":{  
-        "message":"Error while save profile to localstorage (turn on debug mode an watch console)"
+        "message":"Error while save profile to localStorage (turn on debug mode an watch console)"
     },   
     "storage_create_e2":{  
         "message":"Bad profile file format (JSON parse fail)"
@@ -705,7 +705,7 @@
         "message":"Current configuration updated"
     },
     "sync_by_add":{  
-        "message":"If user is logged in, dublicates publication to main favourites storage"
+        "message":"If user is logged in, duplicates publication to main favorites storage"
     },  
     "tip":{  
         "message":"notice"
