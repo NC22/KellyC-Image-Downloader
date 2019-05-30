@@ -173,7 +173,7 @@ function KellyTooltip(cfg) {
             
             handler.userEvents = getDefaultUserEvents();
             
-        } else if (typeof cfg.events != 'object') {
+        } else if (typeof cfg.events == 'object') {
                         
             for (var k in cfg.events){
                 if (typeof cfg.events[k] === 'function') {
@@ -8913,7 +8913,7 @@ function KellyFavItems(cfg)
     this.getTooltip = function() {
 
         if (!tooltip) {
-        
+           
             tooltip = new KellyTooltip({
             
                 classGroup : env.className + '-tooltipster', 
@@ -8922,19 +8922,21 @@ function KellyFavItems(cfg)
                 
                 events : { 
                 
-                    onMouseOut : function(tooltip, e) {
+                    onMouseOut : function(self, e) {
                         
                         if (handler.tooltipBeasy) return false;
                         
                         var related = e.toElement || e.relatedTarget;
-                        if (tooltip.isChild(related)) return;
+                        if (self.isChild(related)) return;
                         
-                        tooltip.show(false);
+                        self.show(false);
                     },
                     
-                    onClose : function(tooltip) {
+                    onClose : function(self) {
                         
-                        tooltip.updateCfg({closeButton : false});
+                        // reset to defaults
+                        
+                        self.updateCfg({closeButton : false});
                         
                         if (handler.tooltipBeasy) {
                             setTimeout(function() {
@@ -8942,7 +8944,9 @@ function KellyFavItems(cfg)
                             }, 500);
                         }
                         
-                        tooltip.getContent().onclick = function() {}
+                        self.getContent().onclick = function() {
+                            // default
+                        }
                     },
                 
                 }, 

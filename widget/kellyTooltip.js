@@ -110,7 +110,7 @@ function KellyTooltip(cfg) {
             
             handler.userEvents = getDefaultUserEvents();
             
-        } else if (typeof cfg.events != 'object') {
+        } else if (typeof cfg.events == 'object') {
                         
             for (var k in cfg.events){
                 if (typeof cfg.events[k] === 'function') {
