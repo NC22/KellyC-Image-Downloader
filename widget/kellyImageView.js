@@ -5,7 +5,7 @@
    @description    image view widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.1.4 18.05.19
+   @version        v 1.1.5 21.06.19
    
    ToDo : 
    
@@ -58,7 +58,7 @@ function KellyImgView(cfg) {
         onImageLoadFail : false,       // onImageLoadFail(handler) calls if image is failed to load
         onClose : false,               // onShow(handler) calls after hide viewer block
         onShow : false,                // onShow(handler, show) calls before show \ hide viewer block
-        onNextImage : false,           // onNextImage(handler, nextImage, next)
+        onNextImage : false,           // onNextImage(handler, nextImage, next) calls before load next image
     };
  
     var moveable = true;
@@ -243,6 +243,7 @@ function KellyImgView(cfg) {
             shown : blockShown,
             blockShown : blockShown,
             imageBounds : imageBounds, // width, height, resizedWidth, resizedHeight
+            imagePointer : images[selectedGallery] && images[selectedGallery][cursor] ? images[selectedGallery][cursor] : false,
             imageData : imagesData[selectedGallery] ? imagesData[selectedGallery] : false,
         };
     };
@@ -281,11 +282,14 @@ function KellyImgView(cfg) {
         
         var w, h, additionStyle, className;
         
+        var lazyAccept = false;
+        
         if (addition) {
             if (addition.w) w = parseInt(addition.w);
             if (addition.h) h = parseInt(addition.h);
             if (addition.additionStyle) additionStyle = addition.additionStyle;
             if (addition.className) className = addition.className;
+            if (addition.lazyAccept) lazyAccept = true;
         }
         
         if (!additionStyle) additionStyle = '';
@@ -299,13 +303,16 @@ function KellyImgView(cfg) {
             if (additionStyle) button.setAttribute('style', additionStyle);
             
             button.onclick = function(e) {
-                
-                if (lazyHand.enabled) {                    
+             
+                if (lazyAccept && lazyHand.enabled) {                    
                     lazyHand.button = this; 
                     lazyHand.pos = getEventDot(e);
                 }
                 
-                if (eventOnClick) eventOnClick(e);
+                if (eventOnClick) {
+                    
+                    eventOnClick(e, button);
+                }
             };
             
             button.className = className;
@@ -332,10 +339,10 @@ function KellyImgView(cfg) {
     this.addBaseButtons = function(){
         if (buttons['close']) return true;
         
-        handler.addButton(getSvgIcon('close', '#000'), 'close', function() { handler.cancelLoad(); });
+        handler.addButton(getSvgIcon('close'), 'close', function() { handler.cancelLoad(); });
         
-        handler.addButton(getSvgIcon('left', '#000'), 'prev', function() { handler.nextImage(false); });
-        handler.addButton(getSvgIcon('right', '#000'), 'next', function() { handler.nextImage(true); });
+        handler.addButton(getSvgIcon('left'), 'prev', function() { handler.nextImage(false); }, {lazyAccept : true});
+        handler.addButton(getSvgIcon('right'), 'next', function() { handler.nextImage(true); }, {lazyAccept : true});
         
         return true;
     };
@@ -419,13 +426,13 @@ function KellyImgView(cfg) {
                 // empty
                 
                 return false;
-            }
+            };
             
             image.onerror = function() {
                 // empty
                 
                 return false;
-            }
+            };
         }
     }
     
@@ -1069,18 +1076,18 @@ function KellyImgView(cfg) {
         
             icon = '<g>\
                     <title>' + name + '</title>\
-                    <line x1="27.5" x2="145.5" y1="24.9" y2="131.9" fill="none" stroke="' + color + '" stroke-linecap="round" stroke-linejoin="undefined" stroke-width="19"/>\
-                    <line x1="144" x2="28" y1="24.9" y2="131.9" fill="none" stroke="' + color + '" stroke-linecap="round" stroke-linejoin="undefined" stroke-width="19"/>\
+                    <line x1="27.5" x2="145.5" y1="24.9" y2="131.9" stroke-linecap="round" stroke-width="19" stroke="' + color + '"/>\
+                    <line x1="144" x2="28" y1="24.9" y2="131.9" stroke="' + color + '" stroke-linecap="round" stroke-width="19"/>\
                     </g>';
                     
         } else if (name == 'left' || name == 'right') {
         
             bounds = '120 120';
-            icon = '<g>\
+            icon = '<g stroke="' + color + '" fill="' + color + '" >\
                      <title>' + name + '</title>\
                      <path transform="rotate(' + (name == 'right' ? '90' : '-90') + ' 61.24249267578127,65.71360778808595) " id="svg_1" \
                      d="m12.242498,108.588584l48.999996,-85.74996l48.999996,85.74996l-97.999992,0z" \
-                     stroke-width="1.5" stroke="' + color + '" fill="' + color + '"/>\
+                     stroke-width="1.5"/>\
                      </g>';
         } 
         
