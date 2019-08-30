@@ -101,6 +101,27 @@ KellyTools.getScrollLeft = function() {
     return scrollLeft;
 }
 
+
+// prevent loading images and media
+        
+KellyTools.stopMediaLoad = function(loadDoc) {
+
+    var cleared = 0;
+    var loadImages = loadDoc.getElementsByTagName('img');
+    for (var i = 0; i < loadImages.length; i++) {            
+        loadImages[i].src = '';            
+        cleared++;
+    }
+    
+    loadImages = loadDoc.getElementsByTagName('source');
+    for (var i = 0; i < loadImages.length; i++) {            
+        loadImages[i].src = '';
+        cleared++;
+    }
+    
+    return cleared;
+}
+
 // trim and basic validation of input string
 
 KellyTools.val = function(value, type) {

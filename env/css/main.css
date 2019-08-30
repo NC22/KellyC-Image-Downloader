@@ -119,22 +119,34 @@
 	min-width: 210px;
 	min-height: 52px;
 	margin : 0;
-	background : rgba(96, 102, 126, 0.9490);
+	/*
+    background : rgba(96, 102, 126, 0.9490);
 	border : 0px dashed #c5c5c5;
 	color : #fff;
+    */
+    background: rgb(253, 218, 151);
+    border: 2px solid #634949;
+    color: #060303;
 	border-radius : 4px;
 	padding : 12px;
 }
 
 .__BASECLASS__-tooltipster-container a {
-    color : #fff;
+    /* color : #fff; */
+    color : #060303;
 }
 
 .__BASECLASS__-tooltipster-close {
     
     top: -32px;
+    /* 
     background: rgb(96, 102, 126);
     color: #fff;
+    */
+    
+    background: rgb(253, 218, 151);
+    color: #060303;
+    
     text-align: center;
     border-radius: 13px;
     
@@ -147,7 +159,10 @@
 	font-size: 25px;
 	width: 25px;
 	height: 25px;
-	line-height: 25px;
+    line-height: 21px;
+    border: 2px solid #634949;
+    
+    box-sizing: border-box;
 }
 
 .__BASECLASS__-tooltipster-content {
@@ -580,34 +595,36 @@
 
 .__BASECLASS__-ModalBox {
 
-     margin : 0 auto; 
-     background : #fff;     
-     min-height : 255px;     
-     border : 1px solid #e1e1e1;
-     border-radius : 4px;
-     
-     opacity : 1;
-     transition : opacity 0.3s;
-     
-     pointer-events: auto;
+    margin : 0 auto; 
+    background : #fff;     
+    min-height : 255px;     
+    border : 1px solid #e1e1e1;
+    border-radius : 4px;
+
+    opacity : 1;
+    transition : opacity 0.3s;
+
+    pointer-events: auto;
 }
 
 .__BASECLASS__-ModalBox-controll-buttons a {
     padding-left : 6px;
     padding-right : 6px;
+    white-space: nowrap;
+    display: inline-block;
 }
 
 .__BASECLASS__-ModalBox-header {
-     min-height : 32px;
-     text-align : left;
-     padding : 0px;
-     
-     padding-left : 12px;
-     padding-right : 12px;
-     
-     border-bottom : 1px solid #e1e1e1;
-     text-decoration : none;
-     background-color : #f5f5f5;
+    min-height : 32px;
+    text-align : left;
+    padding : 0px;
+
+    padding-left : 12px;
+    padding-right : 12px;
+
+    border-bottom : 1px solid #e1e1e1;
+    text-decoration : none;
+    background-color : #f5f5f5;
 }
 
 .__BASECLASS__-ModalBox-close {
@@ -759,7 +776,7 @@
     opacity : 1;
 }
 
-.__BASECLASS__-ImgView-fade {
+.__BASECLASS__-ImgView-active.__BASECLASS__-ImgView-fade {
      opacity : 0;
 }
 
@@ -815,17 +832,16 @@
 	padding : 9px; 
 	box-sizing: border-box; 
 	cursor : pointer; 
-	background : rgba(204,204,204,0.5); 
-	color : #000;
+	background : #fdb201; 
+	color : #56400c;
 	position : absolute; 
 	display : block;
-	opacity : 1;
 	width : 32px;
 	height : 32px;
 	font-weight : bold;
 	padding-top: 7px;
     font-family: Tahoma, sans-serif;
-	border-radius: 4px;
+	border-radius: 16px;
     padding-left: 8px;
 }
 
@@ -847,7 +863,20 @@
 	padding-left: 7px;
 }
 
-.__BASECLASS__-ImgView-btn-hidden {
+.__BASECLASS__-ImgView-btn-next {
+    padding-left: 9px;
+}
+
+.__BASECLASS__-ImgView-btn-info {
+    font-size: 16px;
+}
+
+.__BASECLASS__-ImgView-active, .material-image-view-btns {
+    visibility : visible;
+    opacity : 1;
+}
+
+.__BASECLASS__-ImgView-btns-hidden, .__BASECLASS__-ImgView-btn-hidden {
 	opacity : 0;
     pointer-events: none;
 }
@@ -857,13 +886,13 @@
 }
 
 .__BASECLASS__-ImgView-btn svg g {
-    stroke: #000;
-    fill: #000;
+    stroke: #56400c;
+    fill: #56400c;
 }
 
 .__BASECLASS__-ImgView-btn svg g line {
-    stroke: #000; 
-    fill: #000;
+    stroke: #56400c; 
+    fill: #56400c;
 }
 
 .__BASECLASS__-ImgView-lock {

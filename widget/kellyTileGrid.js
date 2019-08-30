@@ -5,14 +5,13 @@
    @description    image view widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.1.0 14.12.18
+   @version        v 1.1.2 28.08.19
    
    ToDo : 
    
    todo docs and examples
    pause
-   
-   tmpBounds - ненужная опция - убрать т.к. для отмасштабированных элементов добавляется класс tileClass + grid-resized, для блока с тайлами на время загрузки назначается класс tileClass + loading
+   empty tile if unfitted
 */
 
 function KellyTileGrid(cfg) {
@@ -31,20 +30,19 @@ function KellyTileGrid(cfg) {
     var hideUnfited = false;
     
     var rowHeight = 250; // требуемая высота тайловой строки
-    
-    var updateAnimationFrame = true;
-    
+        
     var rules = {
         min : 2, // минимальное кол-во элементов в строке не зависимо от rowHeight
         heightDiff : 10, // допустимая погрешность по высоте для текущей строки элементов
         heightDiffLast : 20, // допустимая погрешность для последнего ряда
-        unfitedExtendMin : 2, // для последнего ряда - подгоняем по ширине не обращая внимания на требуемую высоту если осталось указанное кол-во изображений невместифшихся в сетку с требуемой высотой
-        fixed : false, // фиксированное кол-во элементов на строку (если != false - игнорирует опции heightDiffLast\ heightDiff \ rowHeight, берет указанное значение)
+        unfitedExtendMin : 2, // для последнего ряда - подгоняем по ширине не обращая внимания на требуемую высоту если осталось указанное кол-во изображений невместифшихся в сетку с требуемой высотой (heightDiffLast), false - для выключения
+        fixed : false, // фиксированное кол-во элементов на строку (если != false - игнорирует опции heightDiff \ rowHeight, берет указанное значение, heightDiffLast - для последнего используется)
         tmpBounds : false, // временные пропорции до тех пор пока изображение не загружено. на время загрузки к тайлу добавляется класс tileClass + "-tmp-bounds" 
         lazy : false, // загружать только изображения в области видимости. Если для изображения не определены пропорции оно будет загружено сразу
         loadLimit : 10, // работает только в режиме lazy = true, максимальное кол-во загружаемых единовременно элементов
         minAspectRatio : 0.2, // картинка маркируется классом oversized, вызывается событие onBadBounds, при отсутствии пользовательского обработчика возвращающего пропорции, картинка скрывается         
         recheckAlways : false, // (если данные из недоверенного источника) вызывать события загрузки пропорций изображения даже если есть предварительно заданные через атрибуты данные о пропорция для их пост валидации
+        collectLast : false, // включать N элементов в последнюю строку если уже достигнута величина heightDiff
     };
     
     var handler = this;
@@ -64,9 +62,10 @@ function KellyTileGrid(cfg) {
     
     var lazyEvent = false;
     var loading = 0;
+    var updateAnimationFrame = true;
     
-    this.eventsChecked = false;
-    this.gifBase64 = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; // empty 1x1 gif placeholder
+    this.eventsChecked = false; 
+    this.gifBase64 = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP/' + '/' + '/yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; // empty 1x1 gif placeholder
     
     var imgEvents = {
         onLoadBoundsError : function(e) {
@@ -113,7 +112,7 @@ function KellyTileGrid(cfg) {
     
             lazyEvent = function() {
                 updateTileGridEvents();
-            }
+            };
     
             window.addEventListener('scroll', lazyEvent);
         }
@@ -128,11 +127,10 @@ function KellyTileGrid(cfg) {
             tileClass = cfg.tileClass;
         }
         
-        if (cfg.hideUnfited) {
-            hideUnfited = true;
-        } else {
-            hideUnfited = false;
-        }
+            
+        if (typeof cfg.hideUnfited != 'undefined') {
+            hideUnfited = cfg.hideUnfited ? true : false;
+        } 
         
         // type, currently only checks by rules.fixed variable
         
@@ -144,13 +142,13 @@ function KellyTileGrid(cfg) {
         
             for (var k in events){
                 if (typeof cfg.events[k] == 'function') {
-                     events[k] = cfg.events[k];
+                    events[k] = cfg.events[k];
                 }
             }
         }
         
         return true;
-    }
+    };
     
     function onResize() {
         if (!tilesBlock) return;
@@ -161,7 +159,7 @@ function KellyTileGrid(cfg) {
         
         delayUpdateTileGrid();
         handler.reset();
-    }
+    };
     
    function isBoundsLoaded(tile, boundEl) {
         
@@ -187,7 +185,7 @@ function KellyTileGrid(cfg) {
     
         var loaded = boundEl.complete && boundEl.naturalHeight !== 0;
         return loaded;
-    }
+    };
     
     // data errorCode
     // 1 - boundEl unexist
@@ -210,7 +208,7 @@ function KellyTileGrid(cfg) {
         
         return false;
             
-    }
+    };
     
     function onLoadBounds(boundEl, state) {
         
@@ -243,7 +241,7 @@ function KellyTileGrid(cfg) {
         }       
         
         delayUpdateTileGrid();
-    }
+    };
 
     function delayUpdateTileGrid() {
         
@@ -254,7 +252,7 @@ function KellyTileGrid(cfg) {
             updateAnimationFrame = true;
             handler.updateTileGrid();
         });      
-    }
+    };
     
     function getResizedInfo(resizeTo, info, resizeBy) 
     {	
@@ -268,26 +266,26 @@ function KellyTileGrid(cfg) {
         
         info[resizeBy] = resizeTo;
         return info;
-    }	 
+    }; 
 
     this.getTilesBlock = function() {
         return tilesBlock;
-    }
+    };
 
     this.getTiles = function() {
         if (!tilesBlock) return false;
         return tilesBlock.getElementsByClassName(tileClass);
-    }
+    };
     
     this.getBoundElement = function(tile) {
         if (events.getBoundElement) return events.getBoundElement(handler, tile);
         return tile;
-    }
+    };
 
     this.getResizableElement = function(tile) {
         if (events.getResizableElement) return events.getResizableElement(handler, tile);
         return tile;
-    }
+    };
 
     this.getTileByBoundElement = function(boundEl) {
         
@@ -299,7 +297,7 @@ function KellyTileGrid(cfg) {
                 return tiles[i];
             }
         }
-    }
+    };
     
     // stops all in-progress images and clear tileblock
     
@@ -323,11 +321,11 @@ function KellyTileGrid(cfg) {
                 tilesBlock.removeChild(tilesBlock.firstChild);
             }
         }        
-    }
+    };
     
     this.isWaitLoad = function() {
         return tilesLoaded == tiles.length ? false : true;
-    }
+    };
     
     // clear events, addition classes if tiles exist
 
@@ -356,7 +354,7 @@ function KellyTileGrid(cfg) {
                 }
             }
         }
-    }
+    };
     
     function updateTileGridEvents() {
         
@@ -439,7 +437,7 @@ function KellyTileGrid(cfg) {
         }
         
         return true;     
-    }
+    };
         
     function updateTileGridState() {
         
@@ -463,19 +461,19 @@ function KellyTileGrid(cfg) {
         }
         
         return true;
-    }
+    };
     
     function removeClass(el, name) {        
         if (el) {
             el.classList.remove(tileClass + '-' + name);
         }
-    }
+    };
     
     function addClass(el, name) {
         if (el) {
             el.classList.add(tileClass + '-' + name);
         }
-    }
+    };
     
     function getBoundElementData(boundEl, type) {
         
@@ -488,7 +486,7 @@ function KellyTileGrid(cfg) {
         }
         
         return parseInt(dataValue);
-    }
+    };
     
 	// todo - add optional delay, because may be some issues if tilesBlock have % width. In this case add elements, then after delay update grid 
 	
@@ -625,7 +623,9 @@ function KellyTileGrid(cfg) {
                 
                 if (!rules.fixed) {
                     if (currentTileRow.length < rules.min ) continue;
-                    if (i + rules.min >= tiles.length) continue; // collect last elements, todo set as option
+                    
+                    console.log(rules.collectLast + ' vs ' + ( i + rules.collectLast));
+                    if (rules.collectLast && i + rules.collectLast >= tiles.length) continue; // collect last elements
                     
                     var currentRowResultHeight = getExpectHeight();
                     
@@ -656,8 +656,7 @@ function KellyTileGrid(cfg) {
                         
                     } else {
                         
-                        
-                        var showAsUnfited = currentTileRow.length >= rules.unfitedExtendMin ? false : true;
+                        var showAsUnfited = rules.unfitedExtendMin && currentTileRow.length >= rules.unfitedExtendMin ? false : true;
                         // if (rules.fixed) showAsUnfited = false;
                         
                         resizeImagesRow(showAsUnfited);
@@ -683,7 +682,7 @@ function KellyTileGrid(cfg) {
         updateTileGridEvents();
         
         if (events.onGridUpdated) events.onGridUpdated(handler, isAllBoundsLoaded);
-    }
+    };
     
     function getCurrentRowWidth() {
     
@@ -696,12 +695,12 @@ function KellyTileGrid(cfg) {
         }
         
         return width;
-    }
+    };
     
     function getExpectHeight() {
         
         return getResizedInfo(requiredWidth, {width : getCurrentRowWidth(), height : rowHeight}, 'width').height; // подгоняем к треуемой ширине
-    }
+    };
     
     // if some of the items info contain zero values, can return NaN for all row items
     
@@ -742,13 +741,18 @@ function KellyTileGrid(cfg) {
             }
             
             addClass(currentTileRow[i].image, 'grid-resized');
+            removeClass(currentTileRow[i].image, 'grid-hidden');
             
             if (i == 0) {
                 addClass(currentTileRow[i].image, 'grid-first');
+            } else {
+                removeClass(currentTileRow[i].image, 'grid-first');
             }
             
             if (i == currentTileRow.length-1) {     
                 addClass(currentTileRow[i].image, 'grid-last');
+            } else {
+                removeClass(currentTileRow[i].image, 'grid-last'); // needs only on config changes \ resize
             }
                     
             if (events.onResizeImage && events.onResizeImage(handler, currentTileRow[i])) {
@@ -765,7 +769,7 @@ function KellyTileGrid(cfg) {
         portrait = 0;
         landscape = 0;
         currentTileRow = [];
-    }
+    };
     
     constructor(cfg);
 }

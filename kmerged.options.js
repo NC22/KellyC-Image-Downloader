@@ -55,7 +55,7 @@
 
 
 // EXTRACTED FROM FILE lib\kellyOptionsPage.js
-var K_INIT_HOOK = false;
+var K_FAV = false;
 
 KellyOptionsPage = new Object();
 KellyOptionsPage.env = false;
@@ -85,7 +85,7 @@ KellyOptionsPage.getContainer = function() {
 
 KellyOptionsPage.init = function() {
           
-    K_INIT_HOOK = function() {
+    var onLoadFrontendController = function() {
 		
         var onLoadCssResource = function(response) {
         
@@ -141,7 +141,7 @@ KellyOptionsPage.init = function() {
         KellyTools.getBrowser().runtime.sendMessage({method: "getCss", items : [KellyOptionsPage.env.profile + '_options']}, onLoadCssResource);
     }
      
-    this.loadDiskete(this.front);
+    this.loadDiskete(this.front, onLoadFrontendController);
 }
 
 KellyOptionsPage.showProfileSandbox = function() {
