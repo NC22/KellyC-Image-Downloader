@@ -541,7 +541,10 @@
     },
     "options_side":{  
         "message":"Move extension options button to sidebar"
-    },     
+    },    
+    "options_show_censored":{  
+        "message":"Show preview of blocked publication (full image still will be unavailable)"
+    },  
     "options_storage":{  
         "message":"Base directory for store profiles and configs"
     },
@@ -569,6 +572,9 @@
     "reset":{  
         "message":"Reset"
     },  
+    "reload":{  
+        "message":"Reload"
+    }, 
     "restore":{  
         "message":"Restore"
     },
@@ -704,6 +710,9 @@
     "storage_import_ok":{  
         "message":"Current configuration updated"
     },
+    "storage_deprecated":{  
+        "message":"List of fav images was updated from another tab. Reload image list ?"
+    }, 
     "sync_by_add":{  
         "message":"If user is logged in, duplicates publication to main favorites storage"
     },  

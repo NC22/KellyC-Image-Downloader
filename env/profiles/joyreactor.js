@@ -440,13 +440,15 @@ function kellyProfileJoyreactor() {
         }
     }
 
+    function isPostCensored(postBlock) {
+        return (postBlock.innerHTML.indexOf('/images/censorship') != -1 || postBlock.innerHTML.indexOf('/images/unsafe_ru') != -1) ? true : false;
+    }
+
     function updateFastSaveButton(postBlock, placeholder, showButton) {
         
         var fastSave = KellyTools.getElementByClass(placeholder,  handler.className + '-fast-save');
         
-        var censored = postBlock.innerHTML.indexOf('/images/censorship') != -1 ? true : false;
-        
-        if (!censored && showButton) {
+        if (!isPostCensored(postBlock) && showButton) {
             
             if (!fastSave) {
                 
@@ -845,6 +847,27 @@ function kellyProfileJoyreactor() {
         var addToFav = updateAddToFavButton(postBlock, shareButtonsBlock, coptions.addToFavSide);        
         if (!addToFav) {
             return false;
+        }
+        
+        if (coptions.showCensored && !postBlock.classList.contains(handler.className + '-post-uncensored') && isPostCensored(postBlock)) {
+            
+            var tagList = KellyTools.getElementByClass(postBlock, 'taglist');
+            var cImage = postBlock.getElementsByTagName('img');
+            for (var i = 0; i < cImage.length; i++) {
+                if (cImage[i].src.indexOf('/images/censorship') != -1 || cImage[i].src.indexOf('/images/unsafe_ru') != -1) {
+                    
+                    var censoredPreview = document.createElement('IMG');
+                        censoredPreview.className = handler.className + '-censored-preview';
+                        censoredPreview.src = "//img.joyreactor.cc/pics/thumbnail/post-" + postBlock.id.match(/[0-9]+/g) + ".jpg";
+                    
+                    
+                    cImage[i].classList.add(handler.className + '-censored-notice');
+                    cImage[i].parentNode.insertBefore(censoredPreview, cImage[i]);
+                    postBlock.classList.add(handler.className + '-post-uncensored');
+                    break;
+                }
+            }
+            
         }
         
         var fastSave = updateFastSaveButton(postBlock, shareButtonsBlock, coptions.fastsave.enabled);      

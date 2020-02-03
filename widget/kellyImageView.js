@@ -13,7 +13,7 @@
    include pixel ratio detection - https://stackoverflow.com/questions/1713771/how-to-detect-page-zoom-level-in-all-modern-browsers
    add user event onButtonsShow
    alternative load by xmlHTTPrequest - make posible progressbar on "onprogress" event https://stackoverflow.com/questions/76976/how-to-get-progress-from-xmlhttprequest
-   
+   зум скроллом - только при наведении на изображение
 */
 
 function KellyImgView(cfg) {
@@ -540,6 +540,9 @@ function KellyImgView(cfg) {
     }
     
     function zoomByScroll(event) {
+        
+        if (!event || !event.target || !containsClass(event.target, 'img-self')) return;
+        
         var delta = Math.sign(event.deltaY);
         handler.scale(delta < 0 ? true : false);
     }
@@ -752,6 +755,9 @@ function KellyImgView(cfg) {
         }
         
         image = document.createElement("img");
+        
+        addClass(image, 'img-self');
+        
         image.src = getImageUrlFromPointer(galleryItemPointer);  
         
         // image.onmouseenter = function() {
@@ -1012,6 +1018,8 @@ function KellyImgView(cfg) {
         imageClearLoadEvents();
                 
         beasy = false;
+        
+        // todo add support addition dom elements (not just img) for image var
         
         var imgContainer = getEl('img'); 
 

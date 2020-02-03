@@ -229,7 +229,18 @@ function KellyTooltip(cfg) {
         var closeBtn = document.createElement('div');
             closeBtn.className = handler.classGroup + '-close'; 
             closeBtn.setAttribute('style', 'display:' + (handler.closeButton ? 'block' : 'none'));
-            closeBtn.innerText = '+';
+            
+        var closeBtnHtml = '<g>\
+                    <title>x</title>\
+                    <line x1="27.5" x2="145.5" y1="24.9" y2="131.9" stroke-linecap="round" stroke-width="19" stroke="#000"/>\
+                    <line x1="144" x2="28" y1="24.9" y2="131.9" stroke="#000" stroke-linecap="round" stroke-width="19"/>\
+                    </g>';
+                    
+            closeBtnHtml = '<?xml version="1.0" encoding="UTF-8"?>\
+                    <svg viewBox="0 0 170 170" xmlns="http://www.w3.org/2000/svg">' + closeBtnHtml + '</svg>';
+                    
+            addHtml(closeBtn, closeBtnHtml);
+            
             closeBtn.onclick = function() {
                  handler.show(false); 
             }
@@ -268,7 +279,7 @@ function KellyTooltip(cfg) {
             
             //console.log(screen.width + ' ff '  + toolTip.hideAfterWidth)
             
-            if (!checkRequierdWidth()) {
+            if (!checkRequiredWidth()) {
                 handler.show(false);
                 return;
             }
@@ -295,7 +306,7 @@ function KellyTooltip(cfg) {
         return handler;
     }
     
-    function checkRequierdWidth() {
+    function checkRequiredWidth() {
         if (handler.hideAfterWidth && document.body.clientWidth <= handler.hideAfterWidth) return false;
         else return true;
     }
@@ -346,7 +357,7 @@ function KellyTooltip(cfg) {
     
         if (show) {			
         
-            if (!checkRequierdWidth()) return;
+            if (!checkRequiredWidth()) return;
             
             handler.self.className += ' ' + handler.classGroup + '-show';
             if (handler.zIndex) handler.self.style.zIndex = handler.zIndex;
@@ -550,13 +561,17 @@ KellyTooltip.loadDefaultCss = function(className) {
             position: absolute;\
             top: 0px;\
             display: block;\
-            transform: rotate(45deg);\
             cursor: pointer;\
             font-size: 25px;\
             width: 25px;\
             height: 25px;\
+            text-align: center;\
             line-height: 25px;\
             cursor : pointer;\
+        }\
+        .' + className + '-close svg g line {\
+            stroke: #56400c;\
+            fill: #56400c;\
         }\
         .' + className + '-content {\
             text-align: left;\
@@ -708,7 +723,7 @@ function KellyTileGrid(cfg) {
         heightDiff : 10, // допустимая погрешность по высоте для текущей строки элементов
         heightDiffLast : 20, // допустимая погрешность для последнего ряда
         unfitedExtendMin : 2, // для последнего ряда - подгоняем по ширине не обращая внимания на требуемую высоту если осталось указанное кол-во изображений невместифшихся в сетку с требуемой высотой (heightDiffLast), false - для выключения
-        fixed : false, // фиксированное кол-во элементов на строку (если != false - игнорирует опции heightDiffLast\ heightDiff \ rowHeight, берет указанное значение)
+        fixed : false, // фиксированное кол-во элементов на строку (если != false - игнорирует опции heightDiff \ rowHeight, берет указанное значение, heightDiffLast - для последнего используется)
         tmpBounds : false, // временные пропорции до тех пор пока изображение не загружено. на время загрузки к тайлу добавляется класс tileClass + "-tmp-bounds" 
         lazy : false, // загружать только изображения в области видимости. Если для изображения не определены пропорции оно будет загружено сразу
         loadLimit : 10, // работает только в режиме lazy = true, максимальное кол-во загружаемых единовременно элементов
@@ -1296,7 +1311,6 @@ function KellyTileGrid(cfg) {
                 if (!rules.fixed) {
                     if (currentTileRow.length < rules.min ) continue;
                     
-                    console.log(rules.collectLast + ' vs ' + ( i + rules.collectLast));
                     if (rules.collectLast && i + rules.collectLast >= tiles.length) continue; // collect last elements
                     
                     var currentRowResultHeight = getExpectHeight();
@@ -1466,7 +1480,7 @@ function KellyTileGrid(cfg) {
    include pixel ratio detection - https://stackoverflow.com/questions/1713771/how-to-detect-page-zoom-level-in-all-modern-browsers
    add user event onButtonsShow
    alternative load by xmlHTTPrequest - make posible progressbar on "onprogress" event https://stackoverflow.com/questions/76976/how-to-get-progress-from-xmlhttprequest
-   
+   зум скроллом - только при наведении на изображение
 */
 
 function KellyImgView(cfg) {
@@ -1993,6 +2007,9 @@ function KellyImgView(cfg) {
     }
     
     function zoomByScroll(event) {
+        
+        if (!event || !event.target || !containsClass(event.target, 'img-self')) return;
+        
         var delta = Math.sign(event.deltaY);
         handler.scale(delta < 0 ? true : false);
     }
@@ -2205,6 +2222,9 @@ function KellyImgView(cfg) {
         }
         
         image = document.createElement("img");
+        
+        addClass(image, 'img-self');
+        
         image.src = getImageUrlFromPointer(galleryItemPointer);  
         
         // image.onmouseenter = function() {
@@ -2465,6 +2485,8 @@ function KellyImgView(cfg) {
         imageClearLoadEvents();
                 
         beasy = false;
+        
+        // todo add support addition dom elements (not just img) for image var
         
         var imgContainer = getEl('img'); 
 
@@ -4209,6 +4231,7 @@ function KellyFavStorageManager(cfg) {
     
     // callback(error)
     // todo если понадобится, то хранить мета информацию (дата последнего изменения \ кол-во элементов и тд) в localstorage, реализовать методы .metaSet \ .metaGet
+    // name, data, callback, cfg - является ли data конфигом - конфиг в отличии от данных сохраняется в локальное хранилище всегда
     
     this.saveDB = function(name, data, callback, cfg) {
             
@@ -4223,7 +4246,7 @@ function KellyFavStorageManager(cfg) {
         
         if (!cfg && handler.fav && handler.fav.getGlobal('env')) {
             
-            // all storage data that can be accessed wihout JSON parse
+            // all storage data that can be accessed wihout JSON parse - unused
             
             data.meta = '[meta_start]' + handler.fav.getGlobal('env').profile + '|' + KellyTools.getGMTDate() + '[meta_end]';
         }
@@ -4241,6 +4264,8 @@ function KellyFavStorageManager(cfg) {
                 method: "setLocalStorageItem", 
                 dbName : dbName,
                 data : data,
+                dbOrigName : name,
+                isCfg : cfg,
             }, function(response) {
             
                 if (response.error) {
@@ -4261,6 +4286,8 @@ function KellyFavStorageManager(cfg) {
                 method: "setApiStorageItem", 
                 dbName : dbName,
                 data : save,
+                dbOrigName : name,
+                isCfg : cfg,
             }, function(response) {
                 
                 if (callback) callback(response.error);
@@ -7249,6 +7276,28 @@ KellyTools.getParentByTag = function(el, tagName) {
     return parent;
 }
 
+// validate url depends on location
+
+KellyTools.validateUrlForLocation = function(url, location) {
+    
+    // relative url 
+    
+    if (url.indexOf('.') == -1) {
+        
+        if (url.charAt(0) != '/') url = '/' + url;
+        url = location.href + url;
+    }
+    
+    // url without protocol
+    
+    if (url.indexOf('http') == -1) {
+        
+        url = location.protocol + '//' + url;
+    }
+    
+    return url;
+}
+
 KellyTools.getUrlFileName = function(url, excludeExt, noDecode) {
     if (!url) return '';
     
@@ -7809,11 +7858,15 @@ KellyTools.dispatchEvent = function(target, name) {
     target.dispatchEvent(event);
 }
 
-KellyTools.injectAddition = function(addition, onload, duplicateIgnore) {
+KellyTools.injectAddition = function(addition, onLoad, duplicateIgnore) {
     
     // remove old node on duplicate ?
     
     if (!duplicateIgnore && this['injection_' + addition]) {
+                
+        if (onLoad) {
+            onLoad();
+        }
         return;
     }
     
@@ -7822,8 +7875,8 @@ KellyTools.injectAddition = function(addition, onload, duplicateIgnore) {
         script.type = 'text/javascript'; 
         script.src = chrome.extension.getURL('env/dynamic/' + addition + '.js'); 
         
-        if (onload) {
-            script.onload = onload;
+        if (onLoad) {
+            script.onload = onLoad;
         }
     
     this['injection_' + addition] = script;
@@ -8321,7 +8374,10 @@ function KellyOptions(cfg) {
         output = '<table>';        
         output += '<tr><td colspan="2"><label><input type="checkbox" value="1" class="' + env.className + 'OptionsSide" ' + (fav.coptions.optionsSide ? 'checked' : '') + '> \
                ' + lng.s('Перенести кнопку настроек из основного в боковое меню фильтров', 'options_side') + '</label></td></tr>';
-         
+               
+        output += '<tr><td colspan="2"><label><input type="checkbox" value="1" class="' + env.className + 'OptionsShowCensored" ' + (fav.coptions.showCensored ? 'checked' : '') + '> \
+               ' + lng.s('Показывать превью заблокированных публикаций (полноразмерное изображение все равно будет не доступно)', 'options_show_censored') + '</label></td></tr>';
+               
         output += '<tr><td>' + lng.s('Игнорировать комментарии', 'ignore_comments') + ' :</td>\
                         <td><input type="text" class="' + env.className + 'Blockcomments" value="' + KellyTools.varListToStr(fav.coptions.comments_blacklist) + '"></td>\
                    </tr>';
@@ -8466,6 +8522,12 @@ function KellyOptions(cfg) {
         fav.coptions.optionsSide = false;
         if (KellyTools.getElementByClass(favContent, env.className + 'OptionsSide').checked) {
             fav.coptions.optionsSide = true;
+        }
+        
+        fav.coptions.showCensored = false;
+        if (KellyTools.getElementByClass(favContent, env.className + 'OptionsShowCensored').checked) {
+            fav.coptions.showCensored = true;
+            refreshPosts = true;
         }
         
         var addToFavSide = KellyTools.getElementByClass(favContent, env.className + 'addToFavSide').checked;
@@ -8843,8 +8905,18 @@ function KellyFavItems(cfg)
         }
         
         handler.addEventPListener(window, "message", function (e) {
-            getMessage(e);
+            getDocumentMessage(e);
         }, 'input_message_');             
+    }
+    
+    function setPreventClose(active) {
+          
+        KellyTools.injectAddition('dispetcher', function() {  
+        
+            window.postMessage({kelly_dynaminc : true, method : 'kelly_dynaminc.' + (active ? 'bind' : 'unbind') + '.beforeunload'}, "*"); 
+            
+        });                                  
+       
     }
     
     function isMediaResource() {
@@ -8857,8 +8929,87 @@ function KellyFavItems(cfg)
         window.parent.postMessage({filename : KellyTools.getUrlFileName(selfUrl, false, true), method : 'mediaReady'}, "*");
         return true;
     }
+    
+    function getApiMessage(request, sender, callback) {
 
-    function getMessage(e) {
+        var response = {
+            method : request.method,
+        }
+        
+        if (request.method == "onUpdateStorage") {       
+                
+            if (callback) callback(response); 			
+            
+            // todo - пока только на обновление списка изображений - 
+            // обновление конфига тригирится в некоторых случаях без изменения - если реализовывать - нужно добавлять проверку
+            if (!request.isCfg && fav.coptions.storage == request.dbOrigName) { 
+                handler.showUpdateStorageDialog(request);
+            }
+            
+        }            
+    }
+        
+    this.showUpdateStorageDialog = function(data, onCancel, onReload) {
+        
+        handler.showSidebarMessage(false);
+        clearSidebarLoadEvents();
+        
+        // + data.isCfg ? '_cfg' : '' - обновляем сразу и только элементы, без настроек
+        
+        var html = '<p>' + lng.s('Данные избранного были обновлены с другой вкладки. Перезагрузить список избранных элементов для текущей страницы? ', 'storage_deprecated') + '</p>';
+            html += '<p class="' + env.className + '-ModalBox-controll-buttons"><a href="#" class="' + env.className + 'Reload">' + lng.s('Перезагрузить', 'reload')  +  '</a>';
+            html += '<a href="#" class="' + env.className + 'Cancel">' + lng.s('Отменить', 'cancel')  +  '</a></p>';   
+            
+        KellyTools.setHTMLData(modalBoxContent, '<div class="' +  env.className + '-updateStorageDialog">' + html + '</div>');
+        
+        var updateReloadButton = KellyTools.getElementByClass(modalBoxContent, env.className + 'Reload');
+        var updateDialog = KellyTools.getElementByClass(modalBoxContent, env.className + '-updateStorageDialog');
+     
+        updateReloadButton.onclick = function() {
+            
+            handler.load('items', function(){
+                
+                handler.updateFavCounter();
+                
+                if (mode == 'fav') {
+                    handler.hideFavoritesBlock();
+                }                     
+                
+                handler.formatPostContainers();
+                
+                //  handler.showFavouriteImages();               
+                
+            }); 
+            
+            if (onReload) {
+                onReload();
+            } else {
+                handler.closeSidebar();  
+            } 
+            
+            return false; 
+        }
+         
+        var onCancelCommon = function() {
+
+            if (onCancel) {
+                onCancel();
+            } else {
+                handler.closeSidebar();  
+            } 
+            
+            return false; 
+        }
+        
+        KellyTools.getElementByClass(modalBoxContent, env.className + 'Cancel').onclick = onCancelCommon;
+        
+        
+        handler.showSidebar(false, onCancelCommon);
+        onSideBarUpdate();
+        return false;
+    }
+    
+    function getDocumentMessage(e) {
         
         if (!e.data || !e.data.method) return false;
 
@@ -9235,7 +9386,7 @@ function KellyFavItems(cfg)
     this.save = function(type, onSave) {
     
         log('save() ' + type);
-        var notSaved = (!type) ? 2 : 1 ;
+        var notSaved = (!type) ? 2 : 1 ; // save items data + config by default
         
         if (!type || type == 'items') {
         
@@ -9374,12 +9525,12 @@ function KellyFavItems(cfg)
         text += '<div class="' + env.className + '-ItemTip-controll">';
         
         if (item.link) {
-            text += '<a href="' + item.link + '" target="_blank">' + lng.s('Показать пост', 'go_to_publication') + '</a>' + '<br>';
+            text += '<a href="' + KellyTools.validateUrlForLocation(item.link, env.location) + '" target="_blank">' + lng.s('Показать пост', 'go_to_publication') + '</a>' + '<br>';
             
         }
         
         if (item.commentLink) {
-            text += '<a href="' + item.commentLink + '" target="_blank">' + lng.s('Показать комментарий', 'go_to_comment') + '</a>' + '<br>';
+            text += '<a href="' + KellyTools.validateUrlForLocation(item.commentLink, env.location) + '" target="_blank">' + lng.s('Показать комментарий', 'go_to_comment') + '</a>' + '<br>';
             
         }
         
@@ -10369,7 +10520,7 @@ function KellyFavItems(cfg)
         if (!imagesAsDownloadItems) {
         
             var postLink = document.createElement('a');
-                postLink.href = item.commentLink ? item.commentLink : item.link;
+                postLink.href = KellyTools.validateUrlForLocation( item.commentLink ? item.commentLink : item.link, env.location);
                 postLink.className = env.className + '-FavItem-overlay-button';
                 postLink.innerText = item.commentLink ? lng.s('Комментарий', 'comment') : lng.s('Публикация', 'publication'); 
                 postLink.setAttribute('target', '_blank');
@@ -11254,20 +11405,15 @@ function KellyFavItems(cfg)
                             },
                             
                             onChangeState : function(self, newState) {
+                                                                
                                 if (newState == 'download') {
                                     
-                                    // add beforeunload
-                                    
-                                    KellyTools.injectAddition('onunload');
-                                    
+                                    setPreventClose(true);
                                     fav.coptions.grabber = self.getOptions();
                                     handler.save('cfg');
                                 } else {
                                     
-                                    if (KellyTools['injection_onunload'] ) {
-                                        KellyTools.injectAddition('onunload', false, true);
-                                    }
-                                    
+                                    setPreventClose(false);
                                     // remove beforeunload
                                 }
                             },
@@ -12631,6 +12777,8 @@ function KellyFavItems(cfg)
         if (favNativeParser.getJobs().length) {
         
             favNativeParser.stop();
+            
+            setPreventClose(false);
             return false;
         }
                         
@@ -12855,9 +13003,8 @@ function KellyFavItems(cfg)
 
         // add beforeunload
         
-        KellyTools.injectAddition('onunload');
-        favNativeParser.exec();   
-        
+        setPreventClose(true);
+        favNativeParser.exec();        
     }
     
     // todo - move parser to separate class
@@ -13193,6 +13340,8 @@ function KellyFavItems(cfg)
             log('Fail to get API functions, safe exit from page ' + document.title, KellyTools.E_ERROR);
             return false; 
         }
+                	
+		KellyTools.getBrowser().runtime.onMessage.addListener(getApiMessage);
         
         // parallel with load resources in initCss
         
@@ -13731,13 +13880,15 @@ function kellyProfileJoyreactor() {
         }
     }
 
+    function isPostCensored(postBlock) {
+        return (postBlock.innerHTML.indexOf('/images/censorship') != -1 || postBlock.innerHTML.indexOf('/images/unsafe_ru') != -1) ? true : false;
+    }
+
     function updateFastSaveButton(postBlock, placeholder, showButton) {
         
         var fastSave = KellyTools.getElementByClass(placeholder,  handler.className + '-fast-save');
         
-        var censored = postBlock.innerHTML.indexOf('/images/censorship') != -1 ? true : false;
-        
-        if (!censored && showButton) {
+        if (!isPostCensored(postBlock) && showButton) {
             
             if (!fastSave) {
                 
@@ -14136,6 +14287,27 @@ function kellyProfileJoyreactor() {
         var addToFav = updateAddToFavButton(postBlock, shareButtonsBlock, coptions.addToFavSide);        
         if (!addToFav) {
             return false;
+        }
+        
+        if (coptions.showCensored && !postBlock.classList.contains(handler.className + '-post-uncensored') && isPostCensored(postBlock)) {
+            
+            var tagList = KellyTools.getElementByClass(postBlock, 'taglist');
+            var cImage = postBlock.getElementsByTagName('img');
+            for (var i = 0; i < cImage.length; i++) {
+                if (cImage[i].src.indexOf('/images/censorship') != -1 || cImage[i].src.indexOf('/images/unsafe_ru') != -1) {
+                    
+                    var censoredPreview = document.createElement('IMG');
+                        censoredPreview.className = handler.className + '-censored-preview';
+                        censoredPreview.src = "//img.joyreactor.cc/pics/thumbnail/post-" + postBlock.id.match(/[0-9]+/g) + ".jpg";
+                    
+                    
+                    cImage[i].classList.add(handler.className + '-censored-notice');
+                    cImage[i].parentNode.insertBefore(censoredPreview, cImage[i]);
+                    postBlock.classList.add(handler.className + '-post-uncensored');
+                    break;
+                }
+            }
+            
         }
         
         var fastSave = updateFastSaveButton(postBlock, shareButtonsBlock, coptions.fastsave.enabled);      

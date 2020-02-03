@@ -166,7 +166,18 @@ function KellyTooltip(cfg) {
         var closeBtn = document.createElement('div');
             closeBtn.className = handler.classGroup + '-close'; 
             closeBtn.setAttribute('style', 'display:' + (handler.closeButton ? 'block' : 'none'));
-            closeBtn.innerText = '+';
+            
+        var closeBtnHtml = '<g>\
+                    <title>x</title>\
+                    <line x1="27.5" x2="145.5" y1="24.9" y2="131.9" stroke-linecap="round" stroke-width="19" stroke="#000"/>\
+                    <line x1="144" x2="28" y1="24.9" y2="131.9" stroke="#000" stroke-linecap="round" stroke-width="19"/>\
+                    </g>';
+                    
+            closeBtnHtml = '<?xml version="1.0" encoding="UTF-8"?>\
+                    <svg viewBox="0 0 170 170" xmlns="http://www.w3.org/2000/svg">' + closeBtnHtml + '</svg>';
+                    
+            addHtml(closeBtn, closeBtnHtml);
+            
             closeBtn.onclick = function() {
                  handler.show(false); 
             }
@@ -205,7 +216,7 @@ function KellyTooltip(cfg) {
             
             //console.log(screen.width + ' ff '  + toolTip.hideAfterWidth)
             
-            if (!checkRequierdWidth()) {
+            if (!checkRequiredWidth()) {
                 handler.show(false);
                 return;
             }
@@ -232,7 +243,7 @@ function KellyTooltip(cfg) {
         return handler;
     }
     
-    function checkRequierdWidth() {
+    function checkRequiredWidth() {
         if (handler.hideAfterWidth && document.body.clientWidth <= handler.hideAfterWidth) return false;
         else return true;
     }
@@ -283,7 +294,7 @@ function KellyTooltip(cfg) {
     
         if (show) {			
         
-            if (!checkRequierdWidth()) return;
+            if (!checkRequiredWidth()) return;
             
             handler.self.className += ' ' + handler.classGroup + '-show';
             if (handler.zIndex) handler.self.style.zIndex = handler.zIndex;
@@ -487,13 +498,17 @@ KellyTooltip.loadDefaultCss = function(className) {
             position: absolute;\
             top: 0px;\
             display: block;\
-            transform: rotate(45deg);\
             cursor: pointer;\
             font-size: 25px;\
             width: 25px;\
             height: 25px;\
+            text-align: center;\
             line-height: 25px;\
             cursor : pointer;\
+        }\
+        .' + className + '-close svg g line {\
+            stroke: #56400c;\
+            fill: #56400c;\
         }\
         .' + className + '-content {\
             text-align: left;\

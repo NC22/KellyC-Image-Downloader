@@ -308,6 +308,28 @@ KellyTools.getParentByTag = function(el, tagName) {
     return parent;
 }
 
+// validate url depends on location
+
+KellyTools.validateUrlForLocation = function(url, location) {
+    
+    // relative url 
+    
+    if (url.indexOf('.') == -1) {
+        
+        if (url.charAt(0) != '/') url = '/' + url;
+        url = location.href + url;
+    }
+    
+    // url without protocol
+    
+    if (url.indexOf('http') == -1) {
+        
+        url = location.protocol + '//' + url;
+    }
+    
+    return url;
+}
+
 KellyTools.getUrlFileName = function(url, excludeExt, noDecode) {
     if (!url) return '';
     
@@ -868,11 +890,15 @@ KellyTools.dispatchEvent = function(target, name) {
     target.dispatchEvent(event);
 }
 
-KellyTools.injectAddition = function(addition, onload, duplicateIgnore) {
+KellyTools.injectAddition = function(addition, onLoad, duplicateIgnore) {
     
     // remove old node on duplicate ?
     
     if (!duplicateIgnore && this['injection_' + addition]) {
+                
+        if (onLoad) {
+            onLoad();
+        }
         return;
     }
     
@@ -881,8 +907,8 @@ KellyTools.injectAddition = function(addition, onload, duplicateIgnore) {
         script.type = 'text/javascript'; 
         script.src = chrome.extension.getURL('env/dynamic/' + addition + '.js'); 
         
-        if (onload) {
-            script.onload = onload;
+        if (onLoad) {
+            script.onload = onLoad;
         }
     
     this['injection_' + addition] = script;
@@ -1063,8 +1089,9 @@ var KellyEDispetcher = new Object;
     
     // todo - check any way to keep temporary alive connection with tab in [persistent = false] mode
     // currently background process die after ~15sec of wait
+    // если потребуется оповещать страницу настроек - добавить отдельное совпадение в matches
     
-    KellyEDispetcher.sendNotification = function(data) {
+    KellyEDispetcher.sendNotification = function(data, excludeTabIds) {
         
         if (!data || !data.method) return;
         
@@ -1076,6 +1103,10 @@ var KellyEDispetcher = new Object;
         
         chrome.tabs.query(query, function(tabs){     
             for (var i=0; i <= tabs.length-1; i++) {
+                
+                if (excludeTabIds && excludeTabIds.indexOf(tabs[i].id) !== -1) {
+                    continue;
+                }
                 
                 KellyTools.log('send message to tab ' + tabs[i].url + ' method : ' + data.method, 'KellyEDispetcher');
                 
@@ -1302,6 +1333,21 @@ var KellyEDispetcher = new Object;
                     response.error = E;
                     
                 }
+                
+                if (response.error) {
+                    
+                } else {                   
+                
+                    response.error = false;
+                    KellyEDispetcher.sendNotification({
+                        method: "onUpdateStorage", 
+                        updateMethod : 'setApiStorageItem', 
+                        dbOrigName : request.dbOrigName, 
+                        dbName :  request.dbName,
+                        isCfg : request.isCfg,
+                        tabId : sender.tab ? sender.tab.id : -1,
+                    }, sender.tab ? [sender.tab.id] : false);
+                }
             }
         
         } else if (request.method == "setApiStorageItem") {
@@ -1317,7 +1363,18 @@ var KellyEDispetcher = new Object;
                 
                     if (KellyEDispetcher.api.runtime.lastError) {
                         response.error = KellyEDispetcher.api.runtime.lastError.message;
-                    } else response.error = false;
+                    } else {
+                        response.error = false;                        
+                        KellyEDispetcher.sendNotification({
+                            method: "onUpdateStorage", 
+                            updateMethod : 'setApiStorageItem', 
+                            dbOrigName : request.dbOrigName, 
+                            dbName :  request.dbName,
+                            isCfg : request.isCfg,
+                            tabId : sender.tab ? sender.tab.id : -1,
+                            
+                        }, sender.tab ? [sender.tab.id] : false);
+                    }
                     
                     if (callback) callback(response);
                 });
