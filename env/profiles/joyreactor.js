@@ -851,14 +851,13 @@ function kellyProfileJoyreactor() {
         
         if (coptions.showCensored && !postBlock.classList.contains(handler.className + '-post-uncensored') && isPostCensored(postBlock)) {
             
-            var tagList = KellyTools.getElementByClass(postBlock, 'taglist');
             var cImage = postBlock.getElementsByTagName('img');
             for (var i = 0; i < cImage.length; i++) {
                 if (cImage[i].src.indexOf('/images/censorship') != -1 || cImage[i].src.indexOf('/images/unsafe_ru') != -1) {
                     
                     var censoredPreview = document.createElement('IMG');
                         censoredPreview.className = handler.className + '-censored-preview';
-                        censoredPreview.src = "//img.joyreactor.cc/pics/thumbnail/post-" + postBlock.id.match(/[0-9]+/g) + ".jpg";
+                        censoredPreview.src = "//img.joyreactor.cc/pics/thumbnail/post-" + postBlock.id.match(/[0-9]+/g)[0] + ".jpg";
                     
                     
                     cImage[i].classList.add(handler.className + '-censored-notice');

@@ -5,7 +5,7 @@
    @description    image view widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.1.8 28.08.19
+   @version        v 1.1.9 08.02.20
    
    ToDo : 
    

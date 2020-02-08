@@ -68,7 +68,7 @@
    @description    creates tooltip elements (attaches to an element or screen) widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.0.1 18.05.19
+   @version        v 1.0.2 08.02.20
    
    ToDo : 
    
@@ -1472,7 +1472,7 @@ function KellyTileGrid(cfg) {
    @description    image view widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.1.8 28.08.19
+   @version        v 1.1.9 08.02.20
    
    ToDo : 
    
@@ -8809,8 +8809,10 @@ function KellyFavItems(cfg)
                 aspectRatioCached = item.pw / item.ph;
             }
             
+            // item proportions newer was cached or missmatched with actual loaded image proportions (cache needed to build grid without waiting load images)
+            
             if (!aspectRatioCached || (handler.aspectRatioAccurCheck && Math.abs(aspectRatioCached - aspectRatio) > handler.aspectRatioAccurCheck)) {
-                imageGridProportions[imageGridProportions.length] = fav.items[favItemIndex].id;
+                imageGridProportions[imageGridProportions.length] = fav.items[favItemIndex].id; // added to list of fav elements that was updated
                 
                 item.pw = imageWH.width;
                 item.ph = imageWH.height;
@@ -8868,8 +8870,8 @@ function KellyFavItems(cfg)
         }
     
         env = cfg.env;
-        
-        if (isMediaResource()) {
+         
+        if (isMediaResource() || window.location !== window.parent.location) { // iframe or media
             
             log(KellyTools.getProgName() + ' load as media item helper | profile ' + env.profile);
             
@@ -9152,7 +9154,10 @@ function KellyFavItems(cfg)
                 
                 // для одного из элементов сетки загружены пропорции
                 
-                onLoadBounds : function(self, boundEl, state) {                
+                onLoadBounds : function(self, boundEl, state) {
+                    
+                    // check proportions of bound element and if its changed - update tile grid after
+                    
                     return imageEvents.onLoadFavGalleryImage(boundEl, state == 'error' ? true : false);
                 },
                 
@@ -14291,14 +14296,13 @@ function kellyProfileJoyreactor() {
         
         if (coptions.showCensored && !postBlock.classList.contains(handler.className + '-post-uncensored') && isPostCensored(postBlock)) {
             
-            var tagList = KellyTools.getElementByClass(postBlock, 'taglist');
             var cImage = postBlock.getElementsByTagName('img');
             for (var i = 0; i < cImage.length; i++) {
                 if (cImage[i].src.indexOf('/images/censorship') != -1 || cImage[i].src.indexOf('/images/unsafe_ru') != -1) {
                     
                     var censoredPreview = document.createElement('IMG');
                         censoredPreview.className = handler.className + '-censored-preview';
-                        censoredPreview.src = "//img.joyreactor.cc/pics/thumbnail/post-" + postBlock.id.match(/[0-9]+/g) + ".jpg";
+                        censoredPreview.src = "//img.joyreactor.cc/pics/thumbnail/post-" + postBlock.id.match(/[0-9]+/g)[0] + ".jpg";
                     
                     
                     cImage[i].classList.add(handler.className + '-censored-notice');

@@ -44,7 +44,7 @@
                 handler.remove();
             } 
             
-            e.source.postMessage(output, "*");
+            e.source.postMessage(response, "*");
         };
         
         KellyDynamicDispetcher.removeBeforeUnload = function() {
