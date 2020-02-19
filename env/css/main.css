@@ -648,6 +648,15 @@
     display : none;
 }
 
+.__BASECLASS__-ModalBox-PreviewContainer {
+    transition : 0.1s opacity;
+}
+
+.__BASECLASS__-ModalBox-PreviewContainer.inactive {
+    opacity : 0.3;
+    pointer-events: none;
+}
+
 .__BASECLASS__-ModalBox-header a {
     text-decoration : none;
     color : #555;

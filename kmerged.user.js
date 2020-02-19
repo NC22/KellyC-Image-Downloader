@@ -6329,7 +6329,10 @@ function KellyGrabber(cfg) {
              if (ext == 'jpg' || ext == 'jpeg') mimetype = 'image/jpeg';
         else if (ext == 'png' ) mimetype = 'image/png';
         else if (ext == 'gif' ) mimetype = 'image/gif';
+        else if (ext == 'webp' ) mimetype = 'image/webp';
         else if (ext == 'zip' ) mimetype = 'application/zip';
+        else if (ext == 'mp4' ) mimetype = 'video/mp4';
+        else if (ext == 'webm' ) mimetype = 'video/webm';
         else if (ext == 'txt' ) mimetype = 'text/plain';
         else if (ext == 'json' ) mimetype = 'application/json';
         
@@ -8374,9 +8377,11 @@ function KellyOptions(cfg) {
         output = '<table>';        
         output += '<tr><td colspan="2"><label><input type="checkbox" value="1" class="' + env.className + 'OptionsSide" ' + (fav.coptions.optionsSide ? 'checked' : '') + '> \
                ' + lng.s('Перенести кнопку настроек из основного в боковое меню фильтров', 'options_side') + '</label></td></tr>';
-               
-        output += '<tr><td colspan="2"><label><input type="checkbox" value="1" class="' + env.className + 'OptionsShowCensored" ' + (fav.coptions.showCensored ? 'checked' : '') + '> \
-               ' + lng.s('Показывать превью заблокированных публикаций (полноразмерное изображение все равно будет не доступно)', 'options_show_censored') + '</label></td></tr>';
+        
+        // todo 
+        
+        // output += '<tr><td colspan="2"><label><input type="checkbox" value="1" class="' + env.className + 'OptionsShowVideo" ' + (fav.coptions.showCensored ? 'checked' : '') + '> \
+        //       ' + lng.s('Показывать видео вместо GIF (in dev)', 'options_show_gif') + '</label></td></tr>';
                
         output += '<tr><td>' + lng.s('Игнорировать комментарии', 'ignore_comments') + ' :</td>\
                         <td><input type="text" class="' + env.className + 'Blockcomments" value="' + KellyTools.varListToStr(fav.coptions.comments_blacklist) + '"></td>\
@@ -8524,9 +8529,9 @@ function KellyOptions(cfg) {
             fav.coptions.optionsSide = true;
         }
         
-        fav.coptions.showCensored = false;
-        if (KellyTools.getElementByClass(favContent, env.className + 'OptionsShowCensored').checked) {
-            fav.coptions.showCensored = true;
+        fav.coptions.showVideo = false;
+        if (KellyTools.getElementByClass(favContent, env.className + 'OptionsShowVideo').checked) {
+            fav.coptions.showVideo = true;
             refreshPosts = true;
         }
         
@@ -8924,7 +8929,7 @@ function KellyFavItems(cfg)
     function isMediaResource() {
         
         var ext = KellyTools.getUrlExt(selfUrl);        
-        var media = ['jpg', 'jpeg', 'png', 'gif'];
+        var media = ['jpg', 'jpeg', 'png', 'gif', 'webm', 'mp4', 'webp'];
         
         if (media.indexOf(ext) == -1) return false;
         
@@ -10247,7 +10252,7 @@ function KellyFavItems(cfg)
         // applay filters 
         
         for (var i = fav.coptions.newFirst ? fav.items.length-1 : 0; fav.coptions.newFirst ? i >= 0 : i < fav.items.length; fav.coptions.newFirst ? i-- : i++) {
-                               
+                                         
             if (excludeFavPosts && !fav.items[i].commentLink) continue;
             if (excludeFavComments && fav.items[i].commentLink) continue;            
             if (imagesAsDownloadItems && !getCoverImageByItem(fav.items[i])) continue;
@@ -11475,6 +11480,8 @@ function KellyFavItems(cfg)
                         showDownloadManagerForm(true);
                     }
                     
+                    updateFilteredData();
+                    
                     handler.updateImagesBlock();                
                     handler.updateImageGrid();
                     return false;
@@ -11967,18 +11974,18 @@ function KellyFavItems(cfg)
         var loadDimensions = selectedInfo && selectedInfo['dimensions'] ? false : true;
         
         // selected preview + controlls
-        var controlls = getSelectedPostMediaControlls(loadDimensions);
+        var controllsAndPreview = getSelectedPostMediaControlls(loadDimensions);
         
         var hidePreview = KellyTools.getElementByClass(modalBox, env.className + '-ModalBox-hide-preview');
         if (hidePreview) {
             hidePreview.innerText = lng.s('Скрыть превью', 'item_preview_hide');
             hidePreview.className = hidePreview.className.replace('hidden', 'active');
             hidePreview.onclick = function() {
-                if (controlls.className.indexOf('hidden') != -1) {             
-                    controlls.className = controlls.className.replace('hidden', 'active');
+                if (controllsAndPreview.className.indexOf('hidden') != -1) {             
+                    controllsAndPreview.className = controllsAndPreview.className.replace('hidden', 'active');
                     hidePreview.innerText = lng.s('Скрыть превью', 'item_preview_hide');
                 } else {
-                    controlls.className = controlls.className.replace('active', 'hidden');
+                    controllsAndPreview.className = controllsAndPreview.className.replace('active', 'hidden');
                     hidePreview.innerText = lng.s('Показать превью', 'item_preview_show');
                 }
                 
@@ -12034,7 +12041,7 @@ function KellyFavItems(cfg)
                     </div>\
                     <div class="' + env.className + 'SavePost">\
                         <div class="' + env.className + 'CatList">' + catsHTML + ' <a href="#" class="' + env.className + 'CatAdd">' +lng.s('Добавить категорию', 'cat_add') + '</a></div>\
-                        <input type="text" placeholder="' +lng.s('Подпись', 'item_notice') + '" title="' + lng.s('', 'item_notice_title') + '" value="" class="' + env.className + 'Name">\
+                        <input type="text" placeholder="' +lng.s('Своя заметка', 'item_notice') + '" title="' + lng.s('', 'item_notice_title') + '" value="" class="' + env.className + 'Name">\
                         <a href="#" class="' + env.className + 'Add">' +lng.s('Сохранить', 'save') + '</a>\
                     </div>\
                     <div class="' + env.className + 'CatAddToPostList"></div>\
@@ -12042,12 +12049,27 @@ function KellyFavItems(cfg)
         ';
 
         KellyTools.setHTMLData(modalBoxContent, html);
-        modalBoxContent.insertBefore(controlls, modalBoxContent.childNodes[0]);        
+        modalBoxContent.insertBefore(controllsAndPreview, modalBoxContent.childNodes[0]);        
         
         KellyTools.getElementByClass(modalBoxContent, env.className + 'CatAdd').onclick = function() { handler.categoryAdd(); return false; }        
         KellyTools.getElementByClass(modalBoxContent, env.className + 'CatCreate').onclick = function () { handler.categoryCreate(); return false; }
         // KellyTools.getElementByClass(modalBoxContent, env.className + 'CatRemove').onclick = function () { handler.categoryRemove(); return false; }
         
+        var onNameChange = function () {
+            
+            var name = KellyTools.val(this.value, 'string');
+            
+            var previewContainer = KellyTools.getElementByClass(modalBoxContent, env.className + '-ModalBox-PreviewContainer');           
+            if (previewContainer) KellyTools.classList(name ? 'add' : 'remove', previewContainer, 'inactive');
+            
+            handler.setSelectionInfo('name', name);
+             
+        }
+        
+        var name = KellyTools.getElementByClass(modalBoxContent, env.className + 'Name');
+            name.onchange = onNameChange;
+            name.onkeyup = onNameChange;
+                
         var savingProcess = false;
         
         var saveItem = function () { 
@@ -12055,7 +12077,7 @@ function KellyFavItems(cfg)
             if (savingProcess) return;
              
             handler.showSidebarMessage(lng.s('', 'saving')); 
-                        
+                    
             var result = getFavItemFromSelected();
             if (result.error) {
                 
@@ -12119,7 +12141,7 @@ function KellyFavItems(cfg)
             categoryId : [], 
             pImage : '', 
             link : '', 
-            name : KellyTools.inputVal(env.className + 'Name', 'string', modalBoxContent), // исключение - todo перенести в selectedInfo
+            name : selectedInfo.name ? selectedInfo.name : '',
             // commentLink : '',
         };
          
@@ -12150,7 +12172,7 @@ function KellyFavItems(cfg)
         if (!postItem.link) {
             return {error : 'post_link_empty', errorText : lng.s('Публикация не имеет ссылки', 'item_bad_url')};
         }  
-
+    
         if (postItem.name) {                        
             return {error : false, postItem : postItem};
         }              
@@ -12198,8 +12220,6 @@ function KellyFavItems(cfg)
         
         return {error : false, postItem : postItem};
     }
-    
-    // noSave = true - only return new item without save and dialog
     
     this.itemAdd = function(postItem, onSave) {
         
@@ -12498,7 +12518,7 @@ function KellyFavItems(cfg)
         
         log(stage);
         
-        // remove beforeunload - maybe dont needed because its may be importent to not close window until safe data to profile
+        // we can safely close window only on autosave data. keep prevent close true in other case 
         
         var notice = KellyTools.getElementByClass(document, env.className + '-exporter-process');
             notice.innerText = '';
@@ -12513,7 +12533,6 @@ function KellyFavItems(cfg)
         var downloadBtn = KellyTools.getElementByClass(document, env.className + '-exporter-button-start');
         if (downloadBtn) downloadBtn.innerText = lng.s('Запустить скачивание страниц', 'download_start');    
         
-        // todo - notify about auto download ?
         log('onDownloadNativeFavPagesEnd : ' + (canceled ? ' canceled' : 'job finished successfull'));
             
         if (!favNativeParser || !favNativeParser.collectedData.items.length) {
@@ -12525,6 +12544,8 @@ function KellyFavItems(cfg)
             return false;
         }
         
+        // notify about profile data was download automaticly
+        
         if (!canceled &&
             fav.coptions.downloader.autosaveEnabled && 
             (favNativeParser.jobSaved || !favNativeParser.jobBeforeAutosave)
@@ -12534,6 +12555,8 @@ function KellyFavItems(cfg)
             favNativeParser.saveData(true, 'onDownloadNativeFavPagesEnd');
             
             saveNoticeHtml += '<br><b>' + lng.s('', 'download_autosaved_ok') + '</b>';    
+                    
+            setPreventClose(false);
             
         } else {
             
@@ -12652,14 +12675,14 @@ function KellyFavItems(cfg)
             worker.collectedData.selected_cats_ids = [];
             selectAutoCategories(worker.collectedData, false);
             
-            if (env.getPostTags && worker.catByTagList) {
+            var sm = handler.getStorageManager();
+                        
+            if (postTags.length > 0 && worker.catByTagList) {
             
                 for(var b = 0; b < worker.catByTagList.length; b++) {
                 
                     if (postTags.indexOf(worker.catByTagList[b]) != -1) {
                 
-                        var sm = handler.getStorageManager();
-                        
                         var itemCatId = sm.getCategoryBy(worker.collectedData, worker.catByTagList[b], 'name');
                             itemCatId = itemCatId.id;
                             
@@ -14293,27 +14316,7 @@ function kellyProfileJoyreactor() {
         if (!addToFav) {
             return false;
         }
-        
-        if (coptions.showCensored && !postBlock.classList.contains(handler.className + '-post-uncensored') && isPostCensored(postBlock)) {
-            
-            var cImage = postBlock.getElementsByTagName('img');
-            for (var i = 0; i < cImage.length; i++) {
-                if (cImage[i].src.indexOf('/images/censorship') != -1 || cImage[i].src.indexOf('/images/unsafe_ru') != -1) {
-                    
-                    var censoredPreview = document.createElement('IMG');
-                        censoredPreview.className = handler.className + '-censored-preview';
-                        censoredPreview.src = "//img.joyreactor.cc/pics/thumbnail/post-" + postBlock.id.match(/[0-9]+/g)[0] + ".jpg";
-                    
-                    
-                    cImage[i].classList.add(handler.className + '-censored-notice');
-                    cImage[i].parentNode.insertBefore(censoredPreview, cImage[i]);
-                    postBlock.classList.add(handler.className + '-post-uncensored');
-                    break;
-                }
-            }
-            
-        }
-        
+               
         var fastSave = updateFastSaveButton(postBlock, shareButtonsBlock, coptions.fastsave.enabled);      
         var toogleCommentsButton = postBlock.getElementsByClassName('toggleComments');
 
