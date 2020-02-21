@@ -231,7 +231,7 @@ function KellyTooltip(cfg) {
             closeBtn.setAttribute('style', 'display:' + (handler.closeButton ? 'block' : 'none'));
             
         var closeBtnHtml = '<g>\
-                    <title>x</title>\
+                    <title></title>\
                     <line x1="27.5" x2="145.5" y1="24.9" y2="131.9" stroke-linecap="round" stroke-width="19" stroke="#000"/>\
                     <line x1="144" x2="28" y1="24.9" y2="131.9" stroke="#000" stroke-linecap="round" stroke-width="19"/>\
                     </g>';
@@ -2685,7 +2685,7 @@ function KellyImgView(cfg) {
         if (name == 'close') {
         
             icon = '<g>\
-                    <title>' + name + '</title>\
+                    <title></title>\
                     <line x1="27.5" x2="145.5" y1="24.9" y2="131.9" stroke-linecap="round" stroke-width="19" stroke="' + color + '"/>\
                     <line x1="144" x2="28" y1="24.9" y2="131.9" stroke="' + color + '" stroke-linecap="round" stroke-width="19"/>\
                     </g>';
@@ -2694,7 +2694,7 @@ function KellyImgView(cfg) {
         
             bounds = '120 120';
             icon = '<g stroke="' + color + '" fill="' + color + '" >\
-                     <title>' + name + '</title>\
+                     <title></title>\
                      <path transform="rotate(' + (name == 'right' ? '90' : '-90') + ' 61.24249267578127,65.71360778808595) " \
                      d="m12.242498,108.588584l48.999996,-85.74996l48.999996,85.74996l-97.999992,0z" \
                      stroke-width="1.5"/>\
@@ -4677,7 +4677,7 @@ function KellyGrabber(cfg) {
     
     var downloadingIds = []; 
   
-    // array of current added throw method addDownloadItem download items
+    // array of current added throw method addDownloadItem download items (all sub items if fav item contain more than one image are separate)
     // 
     // Download item object params :
     //     
@@ -5270,11 +5270,17 @@ function KellyGrabber(cfg) {
         
         continueBtn.style.display = 'none';        
         
-        handler.addControllEl('save_as_json', lng.s('Скачать файл данных', 'grabber_save_as_json'), function() {
+        handler.addControllEl('save_as_json', lng.s('Скачать как профиль', 'grabber_save_as_json'), function() {
         
             fav.downloadFilteredData();            
             return false;
         }); 
+        
+        handler.addControllEl('save_as_txt', lng.s('Скачать как список ссылок', 'grabber_save_as_txt'), function() {
+    
+            fav.downloadFilteredData('txt');            
+            return false;
+        });
 
         var logBtn = handler.addControllEl('save_log', lng.s('Скачать лог', 'grabber_save_log'), function() {
         
@@ -5468,7 +5474,7 @@ function KellyGrabber(cfg) {
         tooltipEl.show(true);
         fav.tooltipBeasy = true;
     }
-    
+       
     this.clearStateForImageGrid = function() {
             
         for (var i = 0; i <= downloads.length-1; i++) {
@@ -7284,18 +7290,17 @@ KellyTools.getParentByTag = function(el, tagName) {
 KellyTools.validateUrlForLocation = function(url, location) {
     
     // relative url 
-    
+        
     if (url.indexOf('.') == -1) {
         
         if (url.charAt(0) != '/') url = '/' + url;
-        url = location.href + url;
+        url = location.href.split('#')[0] + url;
     }
     
     // url without protocol
     
-    if (url.indexOf('http') == -1) {
-        
-        url = location.protocol + '//' + url;
+    if (url.indexOf('http') == -1 && (url.charAt(0) != '/' && url.charAt(1) != '/')) {
+        url = '//' + url;
     }
     
     return url;
@@ -8393,7 +8398,7 @@ function KellyOptions(cfg) {
                 <td><input type="text" class="' + env.className + 'BaseFolder" value="' + (fav.coptions.baseFolder ? fav.coptions.baseFolder : '') + '"></td>\
            </tr>';
         output += '<tr><td colspan="2"><label><input type="checkbox" class="' + env.className + 'OptionsDebug" ' + (fav.coptions.debug ? 'checked' : '') + '> ' + lng.s('Режим отладки', 'debug') + '</label></td></tr>';
-        output += '<tr><td colspan="2"><label>' + lng.s('Версия', 'ext_ver') + ' : ' + KellyTools.getProgName() + '</label></td></tr>';
+        output += '<tr><td colspan="2"><label>' + KellyTools.getProgName() + ' &copy; <a href="' + env.location.protocol + '//' + env.location.host + '/tag/notaRobot">nradiowave</a></label></td></tr>';
                   
         output += '</table>';
         output += '<div><input type="submit" value="' + lng.s('Сохранить', 'save') + '" class="' + env.className + '-OptionsSave"></div>';
@@ -10352,36 +10357,65 @@ function KellyFavItems(cfg)
         imgViewer.addToGallery(galleryImages, 'fav-images', galleryImagesData);  
     }
     
-    this.downloadFilteredData = function(format) {
+    this.downloadFilteredData = function(format, options, indexes) {
         
-        if (!displayedItems || !displayedItems.length) return false;
+        if (!indexes) indexes = displayedItems;
         
-        var storage = handler.getStorageManager().getDefaultData();       
-            storage.ids = fav.ids;
-            storage.categories = [];
+        if (!indexes || !indexes.length) return false;
         
-        // revers order (first added to array will count as "oldes")
-        for (var i = displayedItems.length-1; i >= 0; i--) {
+        if (format != 'txt') format = false; // default save as json profile
+       
+        var sm = handler.getStorageManager();
+        var fname = fav.coptions.baseFolder + '/' + sm.dir.exportFiltered;
+            fname += fav.coptions.storage + '_filtered_' + KellyTools.getTimeStamp() + '.' + (format ? format : sm.format);
+            fname = KellyTools.validateFolderPath(fname);        
+        
+        if (format == 'txt') {
             
-            var item = fav.items[displayedItems[i]];
-            var itemCats = item.categoryId;
+            var storage = '';
+            for (var i = indexes.length-1; i >= 0; i--) {     
             
-            if (itemCats) {
-                for (var c = 0; c < itemCats.length; c++) {
-                    if (handler.getStorageManager().getCategoryById(storage, itemCats[c]).id == -1) {
-                        storage.categories[storage.categories.length] = handler.getStorageManager().getCategoryById(fav, itemCats[c]);
-                    }                    
-                }    
+                var item = fav.items[indexes[i]];
+                
+                if (typeof item.pImage !== 'string') {
+                
+                    for (var b = 0; b <= item.pImage.length-1; b++) {
+                         storage +=  env.getImageDownloadLink(item.pImage[b], options && options.quality == 'hd') + "\r\n";
+                    }
+                    
+                } else {                
+                     storage += env.getImageDownloadLink(item.pImage, options && options.quality == 'hd') + "\r\n";
+                }         
+               
             }
-
-            storage.items[storage.items.length] = item;            
-        }
-  
-        var fname = fav.coptions.baseFolder + '/' + handler.getStorageManager().dir.exportFiltered;
-            fname += fav.coptions.storage + '_filtered_' + KellyTools.getTimeStamp() + '.' + handler.getStorageManager().format;
-            fname = KellyTools.validateFolderPath(fname);
             
-        handler.getDownloadManager().createAndDownloadFile(JSON.stringify(storage), fname);
+        } else {
+                
+            var storage = sm.getDefaultData();       
+                storage.ids = fav.ids;
+                storage.categories = [];
+            
+            // revers order (first added to array will count as "older")
+            for (var i = indexes.length-1; i >= 0; i--) {
+                
+                var item = fav.items[indexes[i]];;
+                var itemCats = item.categoryId;
+                
+                if (itemCats) {
+                    for (var c = 0; c < itemCats.length; c++) {
+                        if (sm.getCategoryById(storage, itemCats[c]).id == -1) {
+                            storage.categories[storage.categories.length] = sm.getCategoryById(fav, itemCats[c]);
+                        }                    
+                    }    
+                }
+
+                storage.items[storage.items.length] = item;            
+            }
+            
+            storage = JSON.stringify(storage);
+        }
+        
+        handler.getDownloadManager().createAndDownloadFile(storage, fname);
         return true;
     }
     
@@ -11327,6 +11361,8 @@ function KellyFavItems(cfg)
             
         var gif = logicButton.cloneNode();            
             gif.className = env.className + '-FavFilter';
+            gif.title = '';
+            
             if (fav.coptions.animateGif) gif.innerText = '+ ' + lng.s('Анимация GIF', 'animate_gifs');
             else gif.innerText = '- ' + lng.s('Анимация GIF', 'animate_gifs');
             

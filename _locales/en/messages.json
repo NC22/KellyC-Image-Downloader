@@ -329,6 +329,9 @@
     "grabber_save_as_json":{  
         "message":"Save as profile"
     },	
+    "grabber_save_as_txt":{  
+        "message":"Save as url list"
+    },
     "grabber_save_as":{  
         "message":"Save as"
     },	
@@ -369,7 +372,7 @@
         "message":"<b>#filename#</b> - original file name<br><b>#id#</b> - unique id in current selected local storage<br><b>#number#</b> - item number in current order<br>"
     },
     "grabber_name_template_help_3":{  
-        "message":"<b>#name#</b> - sign<br>Usage <br>\"<i>#filename#</i>\" - download file with original name (ex. <b>Downloads</b>/dog.jpg)<br>"
+        "message":"Usage <br>\"<i>#filename#</i>\" - download file with original name (ex. <b>Downloads</b>/dog.jpg)<br>"
     },
     "grabber_name_template_help_4":{  
         "message":"\"<i>#category_1#/#filename#</i>\" - download file with original name and put it to subdirectory with name of first category (ex. <b>Downloads</b>/Dogs/dog.jpg)<br><br>"

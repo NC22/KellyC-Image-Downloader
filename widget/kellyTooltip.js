@@ -168,7 +168,7 @@ function KellyTooltip(cfg) {
             closeBtn.setAttribute('style', 'display:' + (handler.closeButton ? 'block' : 'none'));
             
         var closeBtnHtml = '<g>\
-                    <title>x</title>\
+                    <title></title>\
                     <line x1="27.5" x2="145.5" y1="24.9" y2="131.9" stroke-linecap="round" stroke-width="19" stroke="#000"/>\
                     <line x1="144" x2="28" y1="24.9" y2="131.9" stroke="#000" stroke-linecap="round" stroke-width="19"/>\
                     </g>';

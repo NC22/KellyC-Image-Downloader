@@ -1218,7 +1218,7 @@ function KellyImgView(cfg) {
         if (name == 'close') {
         
             icon = '<g>\
-                    <title>' + name + '</title>\
+                    <title></title>\
                     <line x1="27.5" x2="145.5" y1="24.9" y2="131.9" stroke-linecap="round" stroke-width="19" stroke="' + color + '"/>\
                     <line x1="144" x2="28" y1="24.9" y2="131.9" stroke="' + color + '" stroke-linecap="round" stroke-width="19"/>\
                     </g>';
@@ -1227,7 +1227,7 @@ function KellyImgView(cfg) {
         
             bounds = '120 120';
             icon = '<g stroke="' + color + '" fill="' + color + '" >\
-                     <title>' + name + '</title>\
+                     <title></title>\
                      <path transform="rotate(' + (name == 'right' ? '90' : '-90') + ' 61.24249267578127,65.71360778808595) " \
                      d="m12.242498,108.588584l48.999996,-85.74996l48.999996,85.74996l-97.999992,0z" \
                      stroke-width="1.5"/>\
