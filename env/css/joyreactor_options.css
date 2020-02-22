@@ -96,3 +96,7 @@ input[type=submit] {
 	background: #ffd6a4;
 	border-bottom: 1px solid #ffa429;
 }
+
+.__BASECLASS__-copyright-info {
+    font-size: 18px;
+}

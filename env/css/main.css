@@ -1456,6 +1456,19 @@
     text-align: center;
 }
 
+.__BASECLASS__-ModalBox-downloader .kelly-jr-ui-downloader-controll-buttons a.disabled {
+    
+	pointer-events: none;
+    background: rgb(195, 195, 195);   
+    color: #7e7e7e;
+}
+
+.__BASECLASS__-ModalBox-downloader .kelly-jr-ui-downloader-controll-buttons a.__BASECLASS__-downloader-button-save_as_json,
+.__BASECLASS__-ModalBox-downloader .kelly-jr-ui-downloader-controll-buttons a.__BASECLASS__-downloader-button-save_as_txt,
+.__BASECLASS__-ModalBox-downloader .kelly-jr-ui-downloader-controll-buttons a.__BASECLASS__-downloader-button-save_log {
+    background: #ffebc2;
+}
+
 .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a:hover {
    background-color : rgb(253, 117, 1);
 }

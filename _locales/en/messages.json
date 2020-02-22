@@ -202,7 +202,13 @@
     },
     "download_started_cancel":{  
         "message":"Downloading...(Cancel)"
-    },    
+    },        
+    "downloader_not_supported" : {
+        "message": "Download images throw extension is not supported in your browser. <br>You can download url list, or profile data instead."
+    },
+    "downloader_not_supported_options" : {
+        "message": "Download images on options page is unavailable. <br>Please visit original site that related with images list. Or you can download url list, or profile data instead."
+    },
     "download_save":{  
         "message":"Save as profile file"
     },           

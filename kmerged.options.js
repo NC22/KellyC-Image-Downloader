@@ -123,7 +123,7 @@ KellyOptionsPage.init = function() {
 			protocol : 'http:',
 			host : 'joyreactor.cc',
 		};  
-    
+       
         document.title = KellyTools.getProgName();        
         
         var nativeOnExtensionReady = KellyOptionsPage.env.events.onExtensionReady;
@@ -135,7 +135,10 @@ KellyOptionsPage.init = function() {
 			K_FAV.getGlobal('image_events').saveImageProportions = function() { return; }			
 			K_FAV.aspectRatioAccurCheck = false; // копирайт портит проверку соотношения сторон, отключаем
             K_FAV.isDownloadSupported = false; // Обратная связь при скачивании файла до таба настроек не дойдет т.к. не настроен селектор matches, см. KellyEDispetcher.sendNotification
-            K_FAV.showOptionsDialog();
+            K_FAV.showOptionsDialog(); 
+            
+            KellyTools.setHTMLData(KellyOptionsPage.env.getMainContainers().siteContent, '<div class="' + KellyOptionsPage.env.className + '-copyright-info">' + KellyTools.getProgName(KellyOptionsPage.env.location) + '</div>');
+    
         }
                 
         KellyTools.getBrowser().runtime.sendMessage({method: "getCss", items : [KellyOptionsPage.env.profile + '_options']}, onLoadCssResource);

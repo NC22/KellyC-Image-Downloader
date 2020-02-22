@@ -6015,8 +6015,18 @@ function KellyGrabber(cfg) {
             changeState('wait');
             
             if (buttons['init']) {
-                buttons['init'].innerText = lng.s('Начать выгрузку', 'grabber_start');
+                
+                if (!fav.isDownloadSupported) {
+                    KellyTools.classList('add', buttons['init'], 'disabled');
+                }
+                
+                buttons['init'].innerText = lng.s('Начать выгрузку', 'grabber_start');               
                 buttons['init'].onclick = function() { 
+                    
+                    if (!fav.isDownloadSupported) {
+                        return false;
+                    }
+                    
                     downloadsOffset = 0;
                     handler.resetDownloadItems(false);
                      
@@ -7909,10 +7919,18 @@ KellyTools.generateIdWord = function(text) {
     return text.replace(new RegExp(/\W/, 'g'), '');
 }
 
-KellyTools.getProgName = function() { 
-    if (this.PROGNAME) return this.PROGNAME;
-    this.PROGNAME = KellyLoc.s('', 'ext_name') + ' v' + (this.getBrowser() && this.getBrowser().runtime.getManifest ? this.getBrowser().runtime.getManifest().version : '');
-    return this.PROGNAME ;
+KellyTools.getProgName = function(location) { 
+    
+    var result = '';
+    
+    if (!this.PROGNAME) {
+        this.PROGNAME = KellyLoc.s('', 'ext_name') + ' v' + (this.getBrowser() && this.getBrowser().runtime.getManifest ? this.getBrowser().runtime.getManifest().version : '');        
+    }
+    
+    result = this.PROGNAME;
+    
+    if (location) result += ' &copy; <a href="' + location.protocol + '//' + location.host + '/tag/not' + 'aRo' + 'bot" target="_blank">nrad' + 'iowave</a>';
+    return result;
 }
 
 // params - paginationContainer, curPage, onGoTo, classPrefix, pageItemsNum, itemsNum, perPage
@@ -8398,7 +8416,7 @@ function KellyOptions(cfg) {
                 <td><input type="text" class="' + env.className + 'BaseFolder" value="' + (fav.coptions.baseFolder ? fav.coptions.baseFolder : '') + '"></td>\
            </tr>';
         output += '<tr><td colspan="2"><label><input type="checkbox" class="' + env.className + 'OptionsDebug" ' + (fav.coptions.debug ? 'checked' : '') + '> ' + lng.s('Режим отладки', 'debug') + '</label></td></tr>';
-        output += '<tr><td colspan="2"><label>' + KellyTools.getProgName() + ' &copy; <a href="' + env.location.protocol + '//' + env.location.host + '/tag/notaRobot">nradiowave</a></label></td></tr>';
+        output += '<tr><td colspan="2"><label>' + KellyTools.getProgName(env.location) + '</label></td></tr>';
                   
         output += '</table>';
         output += '<div><input type="submit" value="' + lng.s('Сохранить', 'save') + '" class="' + env.className + '-OptionsSave"></div>';
@@ -8740,7 +8758,7 @@ function KellyFavItems(cfg)
     this.aspectRatioAccurCheck = 0.05;
     
     this.sideBarLock = false;
-    this.tooltipBeasy = false; // true if shown something important throw handler.getTooltip(), prevent create another tooltips onmouseover and hide onmouseout
+    this.tooltipBeasy = false; // set true if shown something important throw handler.getTooltip() with close button, prevent create another tooltips onmouseover and hide onmouseout, until close section
     
     // buffer for page loaded as media rosource
     var selfData = false;
@@ -9287,6 +9305,19 @@ function KellyFavItems(cfg)
                 }, 
                 
             });
+            
+            tooltip.resetToDefaultOptions = function() {
+                    
+                tooltip.updateCfg({
+                    closeButton : true,
+                    target : 'screen', 
+                    offset : {left : 40, top : -40}, 
+                    positionY : 'bottom',
+                    positionX : 'left',				
+                    ptypeX : 'inside',
+                    ptypeY : 'inside',
+                });
+            }
         } 
         
         return tooltip;
@@ -9724,16 +9755,7 @@ function KellyFavItems(cfg)
                         
                         self.cancelLoad();
                         
-                        handler.getTooltip().updateCfg({
-                            closeButton : true,
-                            target : 'screen', 
-                            offset : {left : 40, top : -40}, 
-                            positionY : 'bottom',
-                            positionX : 'left',				
-                            ptypeX : 'inside',
-                            ptypeY : 'inside',
-                        });
-                        
+                        handler.getTooltip().resetToDefaultOptions();                        
                         handler.getTooltip().setMessage(lng.s('Не удалось загрузить изображение', 'image_fail'));                        
                         handler.getTooltip().show(true);
                         
@@ -11416,7 +11438,7 @@ function KellyFavItems(cfg)
         additionButtons.appendChild(gotoPage);        
         updateGoToPageButton(gotoPage);
             
-        if (handler.isDownloadSupported && (!favNativeParser || (favNativeParser && !favNativeParser.isBeasy()))) {   
+        if (!favNativeParser || (favNativeParser && !favNativeParser.isBeasy())) {   // handler.isDownloadSupported && 
             
             var showDownloadManagerForm = function(show) {
                 
@@ -11474,7 +11496,8 @@ function KellyFavItems(cfg)
                     
                     dm.showGrabManager();  
                     
-                    downloaderBox.modal.className = downloaderBox.modal.className.replace('hidden', 'active');                    
+                    downloaderBox.modal.className = downloaderBox.modal.className.replace('hidden', 'active');    
+
                 }
                 
                 onSideBarUpdate();
@@ -11520,6 +11543,15 @@ function KellyFavItems(cfg)
                     
                     handler.updateImagesBlock();                
                     handler.updateImageGrid();
+                    
+                    
+                    if (imagesAsDownloadItems && !handler.isDownloadSupported) {
+                        handler.getTooltip().resetToDefaultOptions();                        
+                        handler.getTooltip().setMessage(lng.s('', 'downloader_not_supported' + ( env.hostClass == 'options_page' ? '_options' : '') , {ENV_URL : env.location.href, ENV_URL_TITLE : env.location.host}));                        
+                        handler.getTooltip().show(true); 
+                        handler.tooltipBeasy = true;
+                    }        
+                    
                     return false;
                 }
                 
