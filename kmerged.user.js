@@ -8841,30 +8841,6 @@ function KellyFavItems(cfg)
             
             if (!aspectRatioCached || (handler.aspectRatioAccurCheck && Math.abs(aspectRatioCached - aspectRatio) > handler.aspectRatioAccurCheck)) {
                 
-            if (!window.sTTTT || window.sTTTT< 4) {
-                console.log('cached ratio');
-                console.log(aspectRatioCached);
-                
-                console.log('diff : ' + Math.abs(aspectRatioCached - aspectRatio));
-                
-                console.log('image loaded data');
-                console.log(imgElement.naturalWidth);
-                console.log(imgElement.naturalHeight);
-                console.log(imgElement.width);
-                console.log(imgElement.height);
-                console.log(imgElement.src);
-                console.log('image stored data');
-                console.log(item.pw + ' x ' + item.ph);
-                
-                console.log(item);
-                if (!window.sTTTT) window.sTTTT = 1;
-                else window.sTTTT++;
-                }
-                
-                debugger;
-                
-            
-                
                 imageGridProportions[imageGridProportions.length] = fav.items[favItemIndex].id; // added to list of fav elements that was updated
                 
                 item.pw = imageWH.width;
