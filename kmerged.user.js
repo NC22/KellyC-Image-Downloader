@@ -3999,7 +3999,7 @@ function KellyFavStorageManager(cfg) {
                 hideSoc : true,
                 optionsSide : false,
                 addToFavSide : false,                
-                addToFavNoConfirm : true,
+                addToFavNoConfirm : false,
             };
         }
         
@@ -7642,7 +7642,7 @@ KellyTools.getBrowserName = function() {
         } else if ( bTest == 'edge' ) {
             if (!!window.StyleMedia) return 'edge';
         } else if ( bTest == 'chrome' ) {
-            if (!!window.chrome && !!window.chrome.webstore) return 'chrome';
+            if (!!window.chrome) return 'chrome'; // all chromium based that not match to prev tests. Possible chrome. [window.chrome.webstore] - undefined in chrome since an version, need more accurate test, but not important currently
         } 
     }
     
@@ -8840,6 +8840,31 @@ function KellyFavItems(cfg)
             // item proportions newer was cached or missmatched with actual loaded image proportions (cache needed to build grid without waiting load images)
             
             if (!aspectRatioCached || (handler.aspectRatioAccurCheck && Math.abs(aspectRatioCached - aspectRatio) > handler.aspectRatioAccurCheck)) {
+                
+            if (!window.sTTTT || window.sTTTT< 4) {
+                console.log('cached ratio');
+                console.log(aspectRatioCached);
+                
+                console.log('diff : ' + Math.abs(aspectRatioCached - aspectRatio));
+                
+                console.log('image loaded data');
+                console.log(imgElement.naturalWidth);
+                console.log(imgElement.naturalHeight);
+                console.log(imgElement.width);
+                console.log(imgElement.height);
+                console.log(imgElement.src);
+                console.log('image stored data');
+                console.log(item.pw + ' x ' + item.ph);
+                
+                console.log(item);
+                if (!window.sTTTT) window.sTTTT = 1;
+                else window.sTTTT++;
+                }
+                
+                debugger;
+                
+            
+                
                 imageGridProportions[imageGridProportions.length] = fav.items[favItemIndex].id; // added to list of fav elements that was updated
                 
                 item.pw = imageWH.width;
@@ -9209,6 +9234,11 @@ function KellyFavItems(cfg)
             },
             
         });
+        
+        if (KellyTools.getBrowserName() == 'firefox') {
+            // firefox lose original width \ height if set src before onload
+            imageGrid.useBlankSrc = true;
+        }
         
         return imageGrid;
     }
@@ -10569,7 +10599,7 @@ function KellyFavItems(cfg)
             var src = 'src="' + coverImage + '"';
             
             if (fav.coptions.grid.lazy) {
-                src = 'src="' + imageGrid.gifBase64 + '" data-' + src;                
+                src = ( imageGrid.useBlankSrc ? '' : 'src="' + imageGrid.gifBase64 ) + '" data-' + src;                
             }
             
             var html = '\
