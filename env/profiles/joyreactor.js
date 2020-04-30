@@ -29,7 +29,17 @@ function kellyProfileJoyreactor() {
         protocol : window.location.protocol,
         host : window.location.host,
         href : window.location.href,
-    }
+    };
+    
+    this.hostList = [
+        "joyreactor.cc",
+        "reactor.cc", 
+        "joyreactor.com",
+        "jr-proxy.com",
+        "pornreactor.cc",
+        "thatpervert.com",
+        "safereactor.cc",
+    ];
 	
     this.className = 'kelly-jr-ui'; // base class for every extension container \ element
     
@@ -819,6 +829,9 @@ function kellyProfileJoyreactor() {
                 addToFavButton.innerText = KellyLoc.s('в избранное', 'add_to_fav_comment');
             }
             
+            if (typeof kellyProfileJoyreactorEditTweak != 'undefined') {
+                kellyProfileJoyreactorEditTweak.getInstance().onFormatComment(comments[i]);
+            }
         }
         
         KellyTools.log('formatComments : ' + comments.length + ' - '+ block.id);
@@ -854,31 +867,20 @@ function kellyProfileJoyreactor() {
 
         if (toogleCommentsButton.length) {
             toogleCommentsButton = toogleCommentsButton[0];
-            handler.fav.removeEventPListener(toogleCommentsButton, 'click', 'toogle_comments_' + postBlock.id);
             
-            var onPostCommentsShowClick = function(postBlock, clearTimer) {
-        
-                if (clearTimer) {
-                    commentsBlockTimer = false;
-                    clearTimeout(commentsBlockTimer[postBlock.id]);
-                }
+            handler.fav.removeEventPListener(toogleCommentsButton, 'click', 'toogle_comments_' + postBlock.id);                                
+            handler.fav.addEventPListener(toogleCommentsButton, "click", function (e) {
                 
                 if (commentsBlockTimer[postBlock.id]) return false;
                 
-                var commentsBlock = postBlock.getElementsByClassName('comment_list_post'); // KellyTools.getElementByClass(postBlock, 'comment_list_post'); // check is block loaded  
-                       
-                if (!commentsBlock.length) { // todo exit after num iterations        
-                    commentsBlockTimer[postBlock.id] = setTimeout(function() { onPostCommentsShowClick(postBlock, true); }, 100);
-                    return false;
-                }
-                               
-                handler.formatComments(postBlock);
-                return false;
-            }
-                    
-            handler.fav.addEventPListener(toogleCommentsButton, "click", function (e) {
+                commentsBlockTimer[postBlock.id] = setInterval(function() {
+                      if (postBlock.getElementsByClassName('comment_list_post').length > 0) {
+                          clearInterval(commentsBlockTimer[postBlock.id]);
+                          commentsBlockTimer[postBlock.id] = false;
+                          handler.formatComments(postBlock);
+                      }
+                }, 100);
                 
-                onPostCommentsShowClick(postBlock);                   
                 return false;
                 
             }, 'toogle_comments_' + postBlock.id);
@@ -1189,8 +1191,23 @@ function kellyProfileJoyreactor() {
      
     /* not imp */
     
-    // for ignore some pages if needed, return main | ignore
-    // this.getInitAction = function() { return 'main'}
+    // for ignore pages and domains if needed, return main | ignore
+    
+    this.getInitAction = function() { 
+    
+        // get domain without subdomains - simple solution
+        
+        var hh = this.location.host.split('.');
+        if (hh.length >=2) {
+            hh = hh[hh.length-2] + '.' + hh[hh.length-1];
+        }
+                
+        if (this.hostList.indexOf(hh) == -1) {
+            return 'ignore';
+        }
+        
+        return 'main';
+    }
     
     /* not imp */
     

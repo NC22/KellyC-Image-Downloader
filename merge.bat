@@ -5,11 +5,15 @@ SET background=kmerged.bg.js
 SET options=kmerged.options.js
 SET debug=0
 
+:: joyreactor edit comment test feature, maybe deleted in future, for testing only
+
+SET jeditTweak=0
+
 break>%frontend%
+
 :: or echo.>%frontend% to clear file before write
 copy %frontend% + "%~dp0\SIGN" %frontend%
 
-:: for \r 
 for %%x in (
     "widget\kellyTooltip.js"  
     "widget\kellyTileGrid.js" 
@@ -23,23 +27,37 @@ for %%x in (
     "lib\kellyOptions.js"
     "lib\kellyFavItems.js"
     "env\profiles\joyreactor.js" 
+    "env\profiles\joyreactor.edit.tweak.js" 
 ) do (
 
-    @echo.>> %frontend%
-    @echo.>> %frontend%
-    @echo.>> %frontend%
-    @echo // EXTRACTED FROM FILE %%~x>> %frontend%
-    @echo.>> %frontend%
-    @echo.>> %frontend%
-    @echo.>> %frontend%
+    set "continue="
     
-    copy %frontend% + "%~dp0\%%~x" %frontend%
+    if "%%~x" equ "env\profiles\joyreactor.edit.tweak.js" (
+        if "%jeditTweak%" leq "0" (
+            set continue=1
+            echo "SKIPPED %%~x"
+        )
+    )
+    
+    if not defined continue (
+    
+        @echo.>> %frontend%
+        @echo.>> %frontend%
+        @echo.>> %frontend%
+        @echo // EXTRACTED FROM FILE %%~x>> %frontend%
+        @echo.>> %frontend%
+        @echo.>> %frontend%
+        @echo.>> %frontend%
+        
+        copy %frontend% + "%~dp0\%%~x" %frontend%
+    
+    )
 )
 
 @echo // initialization>> %frontend%
 
 @echo.>> %frontend%
-IF "%debug%" GEQ "1" (
+if "%debug%" geq "1" (
     @echo KellyTools.DEBUG = true;>> %frontend%
 )
 @echo.>> %frontend%
@@ -103,9 +121,9 @@ copy %options% + "%~dp0\init\init.options.js" %options%
 @echo.>> %options%
 @echo // end of file >> %options%
 
-:: copy tmp.js + "%%~x" tmp.js > NUL
 popd
 
+:: optional minification, jsMin required
 :: java -jar "D:\Dropbox\Private\l scripts\jfav\jsmin\closure.jar" --js %frontend% --js_output_file khelper.user.min.js
 
 :: pause

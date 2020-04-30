@@ -322,8 +322,13 @@ KellyTools.validateUrlForLocation = function(url, location) {
     
     // url without protocol
     
-    if (url.indexOf('http') == -1 && (url.charAt(0) != '/' && url.charAt(1) != '/')) {
-        url = '//' + url;
+    if (url.indexOf('http') == -1) {
+        
+        if (url.charAt(0) != '/' && url.charAt(1) != '/') {
+            url = '//' + url;
+        } 
+        
+        url = location.protocol + url;
     }
     
     return url;
@@ -376,7 +381,7 @@ KellyTools.getUrlParam = function(param, url) {
 
 // turn this - '2, 4, 66-99, 44, 78, 8-9, 29-77' to an array of all values [2, 4, 66, 67, 68 ... etc] in range
 
-KellyTools.getPrintValues = function(print, reverse, limitFrom, limitTo) {
+KellyTools.getPrintValues = function(print, reverse, limitFrom, limitTo, input) {
 
     var itemsToSelect = [];
     var options = print.split(',');
@@ -389,13 +394,14 @@ KellyTools.getPrintValues = function(print, reverse, limitFrom, limitTo) {
         limitFrom = false;
     }
     
+    var validOptions = '';
+
     for (var i = 0; i < options.length; i++) {
 
         var option = options[i].trim().split('-');
         if (!option.length || !option[0]) continue;
         if (option.length <= 1) option[1] = -1;
         
-
         option[0] = parseInt(option[0]);
         if (!option[0]) option[0] = 0;
         
@@ -413,31 +419,38 @@ KellyTools.getPrintValues = function(print, reverse, limitFrom, limitTo) {
                 option[0] = option[1];
                 option[1] = switchOp;
             }
+            
+            if (limitFrom !== false && option[0] < limitFrom) option[0] = limitFrom;
+            if (limitTo !== false && option[1] > limitTo) option[1] = limitTo;
+            
+            if (option[0] < option[1] && option[1] - option[0] > 0) {
 
-            for (var b = option[0]; b <= option[1]; b++) {
-                if (limitTo !== false && b > limitTo) continue;
-                if (limitFrom !== false && b < limitFrom) continue;
-                if (itemsToSelect.indexOf(b) == -1) itemsToSelect[itemsToSelect.length] = b;
+                for (var b = option[0]; b <= option[1]; b++) {
+                    if (itemsToSelect.indexOf(b) == -1) itemsToSelect[itemsToSelect.length] = b;
+                }
+
+                validOptions += (validOptions ? ',' : '') + option[0] + '-' + option[1];
             }
 
         } else {
-            if (limitTo !== false && option[0] > limitTo) continue; 
-            if (limitFrom !== false && option[0] < limitFrom) continue;            
+            
+            if (limitTo !== false && option[0] > limitTo) continue;
+            if (limitFrom !== false && option[0] < limitFrom) continue;
+
+            validOptions += (validOptions ? ',' : '') + option[0];
+            
             if (itemsToSelect.indexOf(option[0]) == -1) itemsToSelect[itemsToSelect.length] = option[0];
         }
+        
+        
+    }
+    
+    itemsToSelect.sort(function(a, b) {          
+          return reverse ? b - a : a - b;
+    });
 
-    }
-    
-    if (!reverse) {
-        itemsToSelect.sort(function(a, b) {
-          return a - b;
-        });
-    } else {
-        itemsToSelect.sort(function(a, b) {
-          return b - a;
-        });
-    }
-    
+    if (input) input.value = validOptions;
+
     return itemsToSelect;
 }
 

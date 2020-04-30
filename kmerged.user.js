@@ -4663,10 +4663,9 @@ function KellyThreadWork(cfg) {
 
 // todo 
 
-// - check dublicates during one task
-// - ignore downloaded option
-//   KellyTools.getBrowser().runtime.sendMessage({method: "isFilesDownloaded", filenames : [KellyTools.getUrlFileName(env.getImageDownloadLink(postMedia[0]))]}, onSearch);
-// - revers numbers option
+// check dublicates during one task ( +\- currently dublicates checked during one iteration to prevent write error)
+
+// KellyTools.getBrowser().runtime.sendMessage({method: "isFilesDownloaded", filenames : [KellyTools.getUrlFileName(env.getImageDownloadLink(postMedia[0]))]}, onSearch);
 // for proper use need call - handler.getDownloadManager().onDownloadProcessChanged by chrome.api.downloads.onChanged
 
 function KellyGrabber(cfg) {
@@ -4694,7 +4693,7 @@ function KellyGrabber(cfg) {
         
     // .downloadId values constants
   
-    var downloadsOffset = 0; // start from element N
+    var downloadsOffset = 0; // start from element N, todo - make as extend option
     var ids = 0; // counter for downloads
     
     var acceptItems = false;
@@ -4862,7 +4861,7 @@ function KellyGrabber(cfg) {
         options = {	
             nameTemplate : '#category_1#/#number#_#filename#', 
             baseFolder : 'grabber',
-            maxDownloadsAtTime : 1,
+            maxDownloadsAtTime : 4,
             interval : 1,
             cancelTimer : 3 * 60,  // request timeout timer
             quality : 'hd',
@@ -5134,9 +5133,8 @@ function KellyGrabber(cfg) {
                 
                 this.value = this.value.trim();
                 
-                if (this.value && !KellyTools.getPrintValues(this.value, false, 1, downloads.length).length) {                    
-                    showNotice('grabber_selected_items_not_found', 1);    
-                    this.value = '';
+                if (this.value && !KellyTools.getPrintValues(this.value, false, 1, downloads.length, this).length) {                    
+                    showNotice('grabber_selected_items_not_found', 1);
                 }
                 
                 options.itemsList = this.value;                
@@ -5262,7 +5260,7 @@ function KellyGrabber(cfg) {
             
             downloadsOffset = parseInt(this.getAttribute('data-start-from'));
             
-            handler.download();  
+            handler.download(true);  
             
             updateContinue(true); 
             return false;
@@ -6146,6 +6144,10 @@ function KellyGrabber(cfg) {
         checkAllCanceled();    
     }
     
+    // conflict action for batch download is overwrite, Chrome may show saveAs dialog when cant owerwrite file if file protected frome write - collisionCheck var prevent that 
+    // also this option can produse save dialog if setted - https://github.com/NC22/KellyCFavorites/wiki/%D0%9F%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D1%8B-%D0%B8-%D0%B7%D0%B0%D0%BC%D0%B5%D1%87%D0%B0%D0%BD%D0%B8%D1%8F
+    // todo - make conflictAction uniquify as an extend option 
+    
     this.addDownloadItem = function(item, subItem, conflictAction) {
         
         if (!item) return false;
@@ -6463,19 +6465,19 @@ function KellyGrabber(cfg) {
     // start download of item, return false if fail to initialize, used only in addDownloadWork that marks failed to init items
     
     function downloadItemStart(download) {
-    
+            
+        if (!handler.initDownloadItemFile(download)) {                              
+            handler.updateStateForImageGrid();
+            return false;
+        }
+           
         var baseFileFolder = options.baseFolder;        
         if (!baseFileFolder) baseFileFolder = '';
         
         if (baseFileFolder) {
             baseFileFolder += '/';
-        }
+        }     
         
-        if (!handler.initDownloadItemFile(download)) {                              
-            handler.updateStateForImageGrid();
-            return false;
-        }
-                
         var downloadOptions = {
             filename : baseFileFolder + download.filename + '.' + download.ext, 
             conflictAction : download.conflictAction,
@@ -6703,18 +6705,48 @@ function KellyGrabber(cfg) {
             return;
         } 
         
+        var progressItems = [];
+        
         for (var i = downloadsOffset; i <= downloads.length - 1; i++) {
             
-            if (handler.getDownloadItemState(downloads[i]) != 'wait') continue;
+            var dItemState = handler.getDownloadItemState(downloads[i]);
             
+            if (dItemState == 'in_progress') progressItems.push(i);
+            
+            if (dItemState != 'wait') continue;
+                        
             var downloadItem = downloads[i];
             
             downloadItem.downloadId = KellyGrabber.DOWNLOADID_GET_PROCESS;
             downloadItem.workedout = false;
-                       
-            if (downloadItemStart(downloadItem)) {
+                        
+            // check name collisions in curent WIPs before run request (prevent from saveAs dialog in some cases)
+            // saveAs can shows when server return mismatched with extension mimetype and file with same name and extension already downloaded in current stream set
+            
+            var collisionCheck = true;
+            
+            if (handler.initDownloadItemFile(downloadItem)) {
+            
+                for (var b = 0; b < progressItems.length; b++) {
+                    
+                    if (downloadItem.url == downloads[progressItems[b]].url) { 
+                        
+                        var collisionCheckNotice = 'Дубликат Url или имя файла для ' + downloadItem.url + ' ';
+                            collisionCheckNotice += 'элемент #' + handler.getDownloadItemN(downloads[progressItems[b]]) + ' имеет идентичный Url';
+                            
+                        addFailItem(downloadItem, collisionCheckNotice);
+                        collisionCheck = false;
+                        
+                        break;
+                    }
+                }
+            }    
+            
+            if (collisionCheck && downloadItemStart(downloadItem)) {
                 
                 if (!downloadItem.workedout && options.cancelTimer) {
+                    
+                    progressItems.push(i);
                     addCancelTimer(downloadItem);
                 }
                 
@@ -6729,9 +6761,7 @@ function KellyGrabber(cfg) {
                     
                      toTxtLog('CANT INIT Download item dump ' + JSON.stringify(downloads[i].item));
                     
-                } catch (E) {
-                    
-                }
+                } catch (E) { }
                 
                 resetItem(downloadItem);
                 
@@ -6744,7 +6774,7 @@ function KellyGrabber(cfg) {
             if (newWorkNum <= 0 || searchWorkErrorsLimit <= 0) {
                  break;
             }           
-        }   
+        }
                
         handler.updateStateForImageGrid();
         updateProcessState(); 
@@ -6782,7 +6812,7 @@ function KellyGrabber(cfg) {
         }        
     }
     
-    this.download = function() {
+    this.download = function(keepLog) {
                
         if (mode != 'wait') return false;
         
@@ -6816,8 +6846,7 @@ function KellyGrabber(cfg) {
         handler.updateStartButtonState('stop'); 
         handler.updateStateForImageGrid();
  
-        if (downloadsOffset == 0) {
-                
+        if (!keepLog) {                
             log = '';
             failItems = [];
         }        
@@ -7309,8 +7338,13 @@ KellyTools.validateUrlForLocation = function(url, location) {
     
     // url without protocol
     
-    if (url.indexOf('http') == -1 && (url.charAt(0) != '/' && url.charAt(1) != '/')) {
-        url = '//' + url;
+    if (url.indexOf('http') == -1) {
+        
+        if (url.charAt(0) != '/' && url.charAt(1) != '/') {
+            url = '//' + url;
+        } 
+        
+        url = location.protocol + url;
     }
     
     return url;
@@ -7363,7 +7397,7 @@ KellyTools.getUrlParam = function(param, url) {
 
 // turn this - '2, 4, 66-99, 44, 78, 8-9, 29-77' to an array of all values [2, 4, 66, 67, 68 ... etc] in range
 
-KellyTools.getPrintValues = function(print, reverse, limitFrom, limitTo) {
+KellyTools.getPrintValues = function(print, reverse, limitFrom, limitTo, input) {
 
     var itemsToSelect = [];
     var options = print.split(',');
@@ -7376,13 +7410,14 @@ KellyTools.getPrintValues = function(print, reverse, limitFrom, limitTo) {
         limitFrom = false;
     }
     
+    var validOptions = '';
+
     for (var i = 0; i < options.length; i++) {
 
         var option = options[i].trim().split('-');
         if (!option.length || !option[0]) continue;
         if (option.length <= 1) option[1] = -1;
         
-
         option[0] = parseInt(option[0]);
         if (!option[0]) option[0] = 0;
         
@@ -7400,31 +7435,38 @@ KellyTools.getPrintValues = function(print, reverse, limitFrom, limitTo) {
                 option[0] = option[1];
                 option[1] = switchOp;
             }
+            
+            if (limitFrom !== false && option[0] < limitFrom) option[0] = limitFrom;
+            if (limitTo !== false && option[1] > limitTo) option[1] = limitTo;
+            
+            if (option[0] < option[1] && option[1] - option[0] > 0) {
 
-            for (var b = option[0]; b <= option[1]; b++) {
-                if (limitTo !== false && b > limitTo) continue;
-                if (limitFrom !== false && b < limitFrom) continue;
-                if (itemsToSelect.indexOf(b) == -1) itemsToSelect[itemsToSelect.length] = b;
+                for (var b = option[0]; b <= option[1]; b++) {
+                    if (itemsToSelect.indexOf(b) == -1) itemsToSelect[itemsToSelect.length] = b;
+                }
+
+                validOptions += (validOptions ? ',' : '') + option[0] + '-' + option[1];
             }
 
         } else {
-            if (limitTo !== false && option[0] > limitTo) continue; 
-            if (limitFrom !== false && option[0] < limitFrom) continue;            
+            
+            if (limitTo !== false && option[0] > limitTo) continue;
+            if (limitFrom !== false && option[0] < limitFrom) continue;
+
+            validOptions += (validOptions ? ',' : '') + option[0];
+            
             if (itemsToSelect.indexOf(option[0]) == -1) itemsToSelect[itemsToSelect.length] = option[0];
         }
+        
+        
+    }
+    
+    itemsToSelect.sort(function(a, b) {          
+          return reverse ? b - a : a - b;
+    });
 
-    }
-    
-    if (!reverse) {
-        itemsToSelect.sort(function(a, b) {
-          return a - b;
-        });
-    } else {
-        itemsToSelect.sort(function(a, b) {
-          return b - a;
-        });
-    }
-    
+    if (input) input.value = validOptions;
+
     return itemsToSelect;
 }
 
@@ -8898,21 +8940,26 @@ function KellyFavItems(cfg)
             return;
         }
     
-        env = cfg.env;
-         
+        env = cfg.env;        
+        env.setFav(handler);
+        
+        var action = 'main';  
+        
+             if (cfg.initAction) action = cfg.action;
+        else if (env.getInitAction) {
+            action = env.getInitAction();
+        } 
+            
+        if (action == 'ignore') {
+            // console.log('ignore ' + env.location.host);
+            return;
+        }
+        
         if (isMediaResource() || window.location !== window.parent.location) { // iframe or media
             
             log(KellyTools.getProgName() + ' load as media item helper | profile ' + env.profile);
             
         } else {
-            
-            env.setFav(handler);
-            
-            var action = 'main';  
-                 if (cfg.initAction) action = cfg.action;
-            else if (env.getInitAction) {
-                action = env.getInitAction();
-            } 
             
             if (action == 'main') {
          
@@ -8926,10 +8973,8 @@ function KellyFavItems(cfg)
                             return false;
                         }, 'init_');
                     }
-                });               
-        
-            } else if (action == 'ignore') {
-                return;
+                }); 
+                
             } 
             
             log(KellyTools.getProgName() + ' init | loaded in ' + action + ' mode | profile ' + env.profile + ' | DEBUG ' + (KellyTools.DEBUG ? 'enabled' : 'disabled'));           
@@ -12971,7 +13016,7 @@ function KellyFavItems(cfg)
         
         if (pages && pages.value.length) {
            
-            pagesList = KellyTools.getPrintValues(pages.value, true, 1, customUrl ? false : favNativeParser.pageInfo.pages);
+            pagesList = KellyTools.getPrintValues(pages.value, true, 1, customUrl ? false : favNativeParser.pageInfo.pages, pages);
             
         } else { 
         
@@ -13571,7 +13616,17 @@ function kellyProfileJoyreactor() {
         protocol : window.location.protocol,
         host : window.location.host,
         href : window.location.href,
-    }
+    };
+    
+    this.hostList = [
+        "joyreactor.cc",
+        "reactor.cc", 
+        "joyreactor.com",
+        "jr-proxy.com",
+        "pornreactor.cc",
+        "thatpervert.com",
+        "safereactor.cc",
+    ];
 	
     this.className = 'kelly-jr-ui'; // base class for every extension container \ element
     
@@ -14361,6 +14416,9 @@ function kellyProfileJoyreactor() {
                 addToFavButton.innerText = KellyLoc.s('в избранное', 'add_to_fav_comment');
             }
             
+            if (typeof kellyProfileJoyreactorEditTweak != 'undefined') {
+                kellyProfileJoyreactorEditTweak.getInstance().onFormatComment(comments[i]);
+            }
         }
         
         KellyTools.log('formatComments : ' + comments.length + ' - '+ block.id);
@@ -14396,31 +14454,20 @@ function kellyProfileJoyreactor() {
 
         if (toogleCommentsButton.length) {
             toogleCommentsButton = toogleCommentsButton[0];
-            handler.fav.removeEventPListener(toogleCommentsButton, 'click', 'toogle_comments_' + postBlock.id);
             
-            var onPostCommentsShowClick = function(postBlock, clearTimer) {
-        
-                if (clearTimer) {
-                    commentsBlockTimer = false;
-                    clearTimeout(commentsBlockTimer[postBlock.id]);
-                }
+            handler.fav.removeEventPListener(toogleCommentsButton, 'click', 'toogle_comments_' + postBlock.id);                                
+            handler.fav.addEventPListener(toogleCommentsButton, "click", function (e) {
                 
                 if (commentsBlockTimer[postBlock.id]) return false;
                 
-                var commentsBlock = postBlock.getElementsByClassName('comment_list_post'); // KellyTools.getElementByClass(postBlock, 'comment_list_post'); // check is block loaded  
-                       
-                if (!commentsBlock.length) { // todo exit after num iterations        
-                    commentsBlockTimer[postBlock.id] = setTimeout(function() { onPostCommentsShowClick(postBlock, true); }, 100);
-                    return false;
-                }
-                               
-                handler.formatComments(postBlock);
-                return false;
-            }
-                    
-            handler.fav.addEventPListener(toogleCommentsButton, "click", function (e) {
+                commentsBlockTimer[postBlock.id] = setInterval(function() {
+                      if (postBlock.getElementsByClassName('comment_list_post').length > 0) {
+                          clearInterval(commentsBlockTimer[postBlock.id]);
+                          commentsBlockTimer[postBlock.id] = false;
+                          handler.formatComments(postBlock);
+                      }
+                }, 100);
                 
-                onPostCommentsShowClick(postBlock);                   
                 return false;
                 
             }, 'toogle_comments_' + postBlock.id);
@@ -14731,8 +14778,23 @@ function kellyProfileJoyreactor() {
      
     /* not imp */
     
-    // for ignore some pages if needed, return main | ignore
-    // this.getInitAction = function() { return 'main'}
+    // for ignore pages and domains if needed, return main | ignore
+    
+    this.getInitAction = function() { 
+    
+        // get domain without subdomains - simple solution
+        
+        var hh = this.location.host.split('.');
+        if (hh.length >=2) {
+            hh = hh[hh.length-2] + '.' + hh[hh.length-1];
+        }
+                
+        if (this.hostList.indexOf(hh) == -1) {
+            return 'ignore';
+        }
+        
+        return 'main';
+    }
     
     /* not imp */
     

@@ -39,6 +39,26 @@
                     window.addEventListener('beforeunload', handler.enabledEvents['before_unload']);                    
                 }
                 
+            } else if (e.data.method == handler.messageNameBase + '.getvar') {
+                
+                if (e.data.var_name) {
+                    
+                    var getVarAsString = function(value) {
+                                           
+                        if (typeof value != 'string' && typeof String != 'undefined') {
+                            value = String(value);
+                        }
+                        
+                        return value;
+                    }                    
+                    
+                    response[e.data.var_name] = typeof window[e.data.var_name] != 'undefined' ? getVarAsString(window[e.data.var_name]) : false;  
+                    
+                } else {
+                    
+                    response.error = 'var_name is undefined';
+                }
+                
             } else if (e.data.method == handler.messageNameBase + '.self.remove') {
             
                 handler.remove();

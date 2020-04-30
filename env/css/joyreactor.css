@@ -311,3 +311,30 @@
 #submenu div.submenuitem.__BASECLASS__-MainMenuItem-fav:hover .__BASECLASS__-FavItemsCount {
     opacity : 1;
 }
+
+/* edit tweak */
+
+.__BASECLASS__-comment-editing .comments_bottom {
+    display : none;
+}
+
+.__BASECLASS__-edit-comment input[type="submit"] {
+    margin-right: 16px;
+}
+
+.__BASECLASS__-edit-comment textarea {
+    width : 100%;
+}
+
+input[type="submit"].__BASECLASS__-edit-remove {
+
+    background : #f07b7b;
+}
+
+.__BASECLASS__-comment-editing .image {
+    display : none;
+}
+
+.__BASECLASS__-comment-editing .__BASECLASS__-comment-text  {
+    display : none;
+}
