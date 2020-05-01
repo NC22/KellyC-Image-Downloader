@@ -1232,6 +1232,8 @@ var KellyEDispetcher = new Object;
                 var mimeType = request.download.url.type;                
                 var blob = KellyTools.base64toBlob(request.download.url.base64, mimeType);
                 
+                delete request.download.url.base64;
+                
                 request.download.url = URL.createObjectURL(blob);
                 request.blob = true;
                 
