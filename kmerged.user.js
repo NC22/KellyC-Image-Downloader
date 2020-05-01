@@ -4776,8 +4776,23 @@ function KellyGrabber(cfg) {
     */
     
     var requestMethod = KellyGrabber.REQUEST_IFRAME;
+    
+    // used for REQUEST_IFRAME method only
+    
     var requestIframeId = 0;
-
+    var getIframe = function() {
+    
+        requestIframeId++;
+        
+        var iframe = document.createElement('iframe');
+            iframe.name = className + '-iframe-' + requestIframeId;
+            iframe.style.display = 'none';
+            iframe.style.width   = '1px';
+            iframe.style.height  = '1px';
+            
+        document.getElementsByTagName('body')[0].appendChild(iframe);  
+        return iframe;    
+    }  
     
     var buttons = {};
     
@@ -6126,7 +6141,7 @@ function KellyGrabber(cfg) {
                                 
                 if (downloads[i].dataRequest) {                
                     downloads[i].dataRequest.abort();  
-                    downloads[i].dataRequest = false;
+                    downloads[i].dataRequest = null;
                 }
             
                 if (downloads[i].cancelTimer) {
@@ -6250,91 +6265,109 @@ function KellyGrabber(cfg) {
                     callback(urlOrig, false, -1, 'check connection or domain mismatch (Access-Control-Allow-Origin header) | input url ' + urlOrig);
                 };
 
-                xhr.open('get', urlOrig, true);
+                xhr.open('GET', urlOrig, true);
                 xhr.send();  
             
             return xhr;
             
         } else {
             
-            var getIframe = function() {
+            var iHttpRequest = {};
+                iHttpRequest.type = 'iframe';
             
-                requestIframeId++;
+                iHttpRequest.iframe = getIframe();
                 
-                var iframe = document.createElement('iframe');
-                    iframe.name = className + '-iframe-' + requestIframeId;
-                    iframe.style.display = 'none';
-                    iframe.style.width   = '1px';
-                    iframe.style.height  = '1px';
-                    
-                document.getElementsByTagName('body')[0].appendChild(iframe);  
-                return iframe;    
-            }            
-            
-            var iframe = getIframe();
-            
-            var eventPrefix = 'input_message_' + iframe.name;
-            var closeConnection = false;
-            var onLoadIframe = false;                        
-            
-            onLoadIframe = function(e) {
-                     
-                if (!e.data || !e.data.method || closeConnection) return false;
+                iHttpRequest.eventPrefix = 'input_message_' + iHttpRequest.iframe.name;
+                iHttpRequest.closeConnection = false;
                 
-                if (iframe && iframe.contentWindow === e.source) {        
+                iHttpRequest.onLoadIframe = function(e) {
                     
-                    if (e.data.method.indexOf('mediaReady') != -1) {
+                    var handler = iHttpRequest;
+                    
+                    if (!e.data || !e.data.method || handler.closeConnection) return false;
+                    
+                    if (handler.iframe && handler.iframe.contentWindow === e.source) {        
                         
-                        e.source.postMessage({method : 'getMedia'}, "*");
+                        if (e.data.method.indexOf('mediaReady') != -1) {
+                            
+                            e.source.postMessage({method : 'getMedia'}, "*");
+                            
+                        } else if (e.data.method.indexOf('sendResourceMedia') != -1) {
+                            
+                            handler.closeConnection = true;
+                            
+                            if (e.data.base64) {
+                                
+                                var ext = KellyTools.getUrlExt(urlOrig);
+                                var mimetype = getMimeType(ext);
+                                
+                                callback(urlOrig, {base64 : e.data.base64, type : mimetype});  
+                                
+                            } else {
+                                
+                                // если разорвано подключение \ картинка недоступна - e.data.error = url load fail
+                                // в случае если подключение блокирует adblock или еще какой-либо внешний процесс, то обратная связь пропадает (остается только таймаут)
+                                
+                                callback(urlOrig, false, -1, 'iframe load fail - ' + e.data.error);
+                            }
+                            
+                            handler.abort();                       
+                        }                    
+                    }
+                };
+                
+                iHttpRequest.aborted = false;
+                
+                // required method
+                
+                iHttpRequest.abort = function() {
+                    
+                    if (this.aborted) return;
+                    
+                    var handler = this;
+                    
+                    fav.removeEventPListener(window, "message", this.onLoadIframe, this.eventPrefix);
+                
+                    this.iframe.src = 'about:blank';
+                    this.iframe.onload = function() {};
+                    this.iframe.onerror = function() {};
+                    
+                    this.onLoadIframe = null;
+                    this.send = null;
+                    this.abort = null;
+                    
+                    this.aborted = true;
+                    
+                    setTimeout(function() {
                         
-                    } else if (e.data.method.indexOf('sendResourceMedia') != -1) {
-                        
-                        closeConnection = true;
-                        
-                        if (e.data.base64) {
-                            
-                            var ext = KellyTools.getUrlExt(urlOrig);
-                            var mimetype = getMimeType(ext);
-                            
-                            callback(urlOrig, {base64 : e.data.base64, type : mimetype});  
-                            
-                        } else {
-                            
-                            // если разорвано подключение \ картинка недоступна - e.data.error = url load fail
-                            // в случае если подключение блокирует adblock или еще какой-либо внешний процесс, то обратная связь пропадает (остается только таймаут)
-                            
-                            callback(urlOrig, false, -1, 'iframe load fail - ' + e.data.error);
+                        if (handler.iframe.parentElement) {
+                            handler.iframe.parentElement.removeChild(handler.iframe);
                         }
                         
-                        abortIframe();                       
-                    }                    
-                }
-            }
+                        handler.iframe = null;                        
                         
-            var abortIframe = function() {
-                fav.removeEventPListener(window, "message", onLoadIframe, eventPrefix);
-            
-                iframe.src = '';
-                iframe.onload = function() {}
-                iframe.onerror = function() {}
+                    }, 1200);
+                };
                 
-                if (iframe.parentElement) {
-                    iframe.parentElement.removeChild(iframe);
-                }
-            }
-            
-            iframe.onerror = function() {      
-            
-                callback(urlOrig, false, -1, 'iframe load fail - connection error');                
-                abortIframe();
-            }
+                iHttpRequest.send = function() {
+                    
+                    var handler = this;
+                        
+                    this.iframe.onerror = function() {      
+                    
+                        callback(urlOrig, false, -1, 'iframe load fail - connection error');                
+                        handler.abort();
+                    }
 
-            fav.removeEventPListener(window, "message", onLoadIframe, eventPrefix);	
-            fav.addEventPListener(window, "message", onLoadIframe, eventPrefix);
+                    fav.removeEventPListener(window, "message", this.onLoadIframe, this.eventPrefix);	
+                    fav.addEventPListener(window, "message", this.onLoadIframe, this.eventPrefix);
+                    
+                    this.iframe.src = urlOrig;
+                };
+                
+                iHttpRequest.send();
             
-            iframe.src = urlOrig;
-            
-            return {type : 'iframe', self : iframe, abort : abortIframe};
+            return iHttpRequest;
         }
     }
     
@@ -6538,7 +6571,7 @@ function KellyGrabber(cfg) {
             
             if (mode != 'download') return false;
             
-            download.dataRequest = false;
+            download.dataRequest = null;
             
             if (!fileData) {
             
@@ -6574,7 +6607,7 @@ function KellyGrabber(cfg) {
             
             var onSearch = function(response) {
                    
-                download.dataRequest = false;
+                download.dataRequest = null;
             
                 // process stoped \ canceled by timeout
                 if (mode != 'download') return false;
@@ -6665,7 +6698,7 @@ function KellyGrabber(cfg) {
                             
                     if (downloads[i].dataRequest) {                
                         downloads[i].dataRequest.abort();  
-                        downloads[i].dataRequest = false;
+                        downloads[i].dataRequest = null;
                     }
                     
                     if (downloadItem.downloadId > 0) {                    
@@ -7205,17 +7238,40 @@ KellyTools.nlToBr = function(text) {
 // https://stackoverflow.com/questions/7370943/retrieving-binary-file-content-using-javascript-base64-encode-it-and-reverse-de
 
 KellyTools.blobToBase64 = function(blob, cb) {
-        
-        var reader = new FileReader();
-            reader.onload = function() {
-        
-        var dataUrl = reader.result;
-        var base64 = dataUrl.split(',')[1];
-            cb(base64);
-        };
-
-        reader.readAsDataURL(blob);
+    
+    var reader = new FileReader();
+        reader.onload = function() {
+    
+    var dataUrl = reader.result;
+    var base64 = dataUrl.split(',')[1];
+        cb(base64);
     };
+
+    reader.readAsDataURL(blob);
+};
+
+KellyTools.base64toBlob = function(base64Data, contentType) {
+    
+    contentType = contentType || '';
+    var sliceSize = 1024;
+    var byteCharacters = atob(base64Data);
+    var bytesLength = byteCharacters.length;
+    var slicesCount = Math.ceil(bytesLength / sliceSize);
+    var byteArrays = new Array(slicesCount);
+
+    for (var sliceIndex = 0; sliceIndex < slicesCount; ++sliceIndex) {
+        var begin = sliceIndex * sliceSize;
+        var end = Math.min(begin + sliceSize, bytesLength);
+
+        var bytes = new Array(end - begin);
+        for (var offset = begin, i = 0; offset < end; ++i, ++offset) {
+            bytes[i] = byteCharacters[offset].charCodeAt(0);
+        }
+        byteArrays[sliceIndex] = new Uint8Array(bytes);
+    }
+    
+    return new Blob(byteArrays, { type: contentType });
+};
 
 // html must be completed and valid. For example - input : <table><tr><td></td></tr></table> - ok,  input : <td></td><td></td> - will add nothing 
 

@@ -189,17 +189,40 @@ KellyTools.nlToBr = function(text) {
 // https://stackoverflow.com/questions/7370943/retrieving-binary-file-content-using-javascript-base64-encode-it-and-reverse-de
 
 KellyTools.blobToBase64 = function(blob, cb) {
-        
-        var reader = new FileReader();
-            reader.onload = function() {
-        
-        var dataUrl = reader.result;
-        var base64 = dataUrl.split(',')[1];
-            cb(base64);
-        };
-
-        reader.readAsDataURL(blob);
+    
+    var reader = new FileReader();
+        reader.onload = function() {
+    
+    var dataUrl = reader.result;
+    var base64 = dataUrl.split(',')[1];
+        cb(base64);
     };
+
+    reader.readAsDataURL(blob);
+};
+
+KellyTools.base64toBlob = function(base64Data, contentType) {
+    
+    contentType = contentType || '';
+    var sliceSize = 1024;
+    var byteCharacters = atob(base64Data);
+    var bytesLength = byteCharacters.length;
+    var slicesCount = Math.ceil(bytesLength / sliceSize);
+    var byteArrays = new Array(slicesCount);
+
+    for (var sliceIndex = 0; sliceIndex < slicesCount; ++sliceIndex) {
+        var begin = sliceIndex * sliceSize;
+        var end = Math.min(begin + sliceSize, bytesLength);
+
+        var bytes = new Array(end - begin);
+        for (var offset = begin, i = 0; offset < end; ++i, ++offset) {
+            bytes[i] = byteCharacters[offset].charCodeAt(0);
+        }
+        byteArrays[sliceIndex] = new Uint8Array(bytes);
+    }
+    
+    return new Blob(byteArrays, { type: contentType });
+};
 
 // html must be completed and valid. For example - input : <table><tr><td></td></tr></table> - ok,  input : <td></td><td></td> - will add nothing 
 
@@ -1121,7 +1144,14 @@ var KellyEDispetcher = new Object;
             var query = {url : KellyEDispetcher.api.runtime.getManifest().content_scripts[0].matches};
         }
         
-        chrome.tabs.query(query, function(tabs){     
+        chrome.tabs.query(query, function(tabs){   
+        
+            if (KellyEDispetcher.api.runtime.lastError) {    
+                
+                KellyTools.log('cant get tab list. Error : ' + KellyEDispetcher.api.runtime.lastError.message, 'KellyEDispetcher');
+                return;    
+            }
+            
             for (var i=0; i <= tabs.length-1; i++) {
                 
                 if (excludeTabIds && excludeTabIds.indexOf(tabs[i].id) !== -1) {
@@ -1131,7 +1161,15 @@ var KellyEDispetcher = new Object;
                 KellyTools.log('send message to tab ' + tabs[i].url + ' method : ' + data.method, 'KellyEDispetcher');
                 
                 KellyEDispetcher.api.tabs.sendMessage(tabs[i].id, data, function(response) {
-                 
+                    
+                    if (KellyEDispetcher.api.runtime.lastError) {    
+                        
+                                
+                        KellyTools.log('tab is unsubbed or offline, skip. Notice : ' + KellyEDispetcher.api.runtime.lastError.message, 'KellyEDispetcher');
+                        return;  
+                        
+                    } 
+                    
                 });
             }
             
@@ -1188,50 +1226,32 @@ var KellyEDispetcher = new Object;
         } else if (request.method == 'downloads.download') {
             
             response.downloadId = -1;
-        
-            var base64toBlob = function(base64Data, contentType) {
-                
-                contentType = contentType || '';
-                var sliceSize = 1024;
-                var byteCharacters = atob(base64Data);
-                var bytesLength = byteCharacters.length;
-                var slicesCount = Math.ceil(bytesLength / sliceSize);
-                var byteArrays = new Array(slicesCount);
-
-                for (var sliceIndex = 0; sliceIndex < slicesCount; ++sliceIndex) {
-                    var begin = sliceIndex * sliceSize;
-                    var end = Math.min(begin + sliceSize, bytesLength);
-
-                    var bytes = new Array(end - begin);
-                    for (var offset = begin, i = 0; offset < end; ++i, ++offset) {
-                        bytes[i] = byteCharacters[offset].charCodeAt(0);
-                    }
-                    byteArrays[sliceIndex] = new Uint8Array(bytes);
-                }
-                
-                return new Blob(byteArrays, { type: contentType });
-            }
-            
+                    
             if (typeof request.download.url == 'object') {
                 
                 var mimeType = request.download.url.type;                
-                var blob = base64toBlob(request.download.url.base64, mimeType);
+                var blob = KellyTools.base64toBlob(request.download.url.base64, mimeType);
                 
                 request.download.url = URL.createObjectURL(blob);
-                request.blob = true;   
+                request.blob = true;
+                
                 KellyTools.log('array of data recieved | data type ' + mimeType , 'KellyEDispetcher');
             }
             
             KellyTools.getBrowser().downloads.download(request.download, function (downloadId) {
                 
-                response.downloadId = downloadId;
+                if (KellyEDispetcher.api.runtime.lastError) {    
                 
-                if (!downloadId || downloadId < 0) {
-                    response.downloadId = -1;
-                }
-                
-                if (KellyEDispetcher.api.runtime.lastError) {                    
                     response.error = KellyEDispetcher.api.runtime.lastError.message;
+                    response.downloadId = -1;
+                    
+                } else {
+                
+                    response.downloadId = downloadId;
+                    
+                    if (!downloadId || downloadId < 0) {
+                        response.downloadId = -1;
+                    }
                 }
                 
                 if (request.blob) {                    
@@ -1265,14 +1285,17 @@ var KellyEDispetcher = new Object;
                     
                     var onSearchResult = function(result) {
                        
-                        if (!result || !result.length) {
-                            response.matchResults[response.matchResults.length] = {filename : filename};
-                        } else {
-                            response.matchResults[response.matchResults.length] = {filename : filename, match : result[0]};
-                        }
+                        if (KellyEDispetcher.api.runtime.lastError) {
                         
-                        if (KellyEDispetcher.api.runtime.lastError) {						
                             response.error = KellyEDispetcher.api.runtime.lastError.message;
+                            
+                        } else {
+                            
+                            if (!result || !result.length) {
+                                response.matchResults[response.matchResults.length] = {filename : filename};
+                            } else {
+                                response.matchResults[response.matchResults.length] = {filename : filename, match : result[0]};
+                            }
                         }
                         
                         if (response.matchResults.length == request.filenames.length && callback) {
@@ -1344,6 +1367,7 @@ var KellyEDispetcher = new Object;
         } else if (request.method == "setLocalStorageItem") {
             
             if (request.dbName && request.data) {
+                
                 try {
                     
                     localStorage.setItem(request.dbName, JSON.stringify(request.data));
@@ -1359,13 +1383,16 @@ var KellyEDispetcher = new Object;
                 } else {                   
                 
                     response.error = false;
+                    
                     KellyEDispetcher.sendNotification({
+                        
                         method: "onUpdateStorage", 
                         updateMethod : 'setApiStorageItem', 
                         dbOrigName : request.dbOrigName, 
                         dbName :  request.dbName,
                         isCfg : request.isCfg,
                         tabId : sender.tab ? sender.tab.id : -1,
+                        
                     }, sender.tab ? [sender.tab.id] : false);
                 }
             }
@@ -1382,10 +1409,15 @@ var KellyEDispetcher = new Object;
                 KellyEDispetcher.api.storage.local.set(request.data, function() {
                 
                     if (KellyEDispetcher.api.runtime.lastError) {
+                        
                         response.error = KellyEDispetcher.api.runtime.lastError.message;
+                        
                     } else {
-                        response.error = false;                        
+                        
+                        response.error = false;
+                        
                         KellyEDispetcher.sendNotification({
+                            
                             method: "onUpdateStorage", 
                             updateMethod : 'setApiStorageItem', 
                             dbOrigName : request.dbOrigName, 
@@ -1461,6 +1493,7 @@ var KellyEDispetcher = new Object;
                     
                     response.bytes = bytes;
                     if (callback) callback(response);
+                    
                 });
                 
                 return true; // async mode
