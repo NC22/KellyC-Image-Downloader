@@ -1436,6 +1436,28 @@
     text-align : center;
 }
 
+.__BASECLASS__-downloader-controll-rangeSwitch  {
+    margin-right : 6px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.__BASECLASS__-downloader-controll-rangeSwitch.active  {
+    
+    background: #e1e1e1;
+    text-decoration: none;
+}
+
+.__BASECLASS__-downloader-controll-rangeInput {
+    display : none;
+}  
+
+.__BASECLASS__-downloader-controll-rangeInput.active {
+    
+    display : block;
+}
+
+
 .__BASECLASS__-downloader-controll .__BASECLASS__-downloader-range-tr input[type=text]  {
     
     width : 45%;

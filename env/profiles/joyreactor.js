@@ -12,16 +12,8 @@ function kellyProfileJoyreactor() {
     }
     
     var publicationClass = 'postContainer';
-    
-    var mainDomain = 'joyreactor.cc';    
-    var mainContainers = false;
-    
-    var commentsBlockTimer = [];
-    
-    var sideBarPaddingTop = 24;
-    var publications = false;
-      
-    var sideBarDisabled = -1; // 1 - sidebar not found or hidden (jras - sidebar can be hidden)
+
+    this.className = 'kelly-jr-ui'; // base class for every extension container \ element
     
     /* imp */
         
@@ -31,8 +23,21 @@ function kellyProfileJoyreactor() {
         href : window.location.href,
     };
     
+    // get current main subdomain
+    
+    this.domainParts = this.location.host.split('.');
+    if (this.domainParts.length >= 2) {
+        this.location.domain = this.domainParts[this.domainParts.length-2] + '.' + this.domainParts[this.domainParts.length-1];           
+    } else {
+        this.location.domain = this.location.host;
+    }    
+    
+    console.log(this.location);
+    
+    this.hostClass = handler.className + '-' + this.domainParts.join("-"); 
+        
     this.hostList = [
-        "joyreactor.cc",
+        "joyreactor.cc", 
         "reactor.cc", 
         "joyreactor.com",
         "jr-proxy.com",
@@ -41,10 +46,16 @@ function kellyProfileJoyreactor() {
         "safereactor.cc",
     ];
 	
-    this.className = 'kelly-jr-ui'; // base class for every extension container \ element
-    
     this.profile = 'joyreactor';
-    this.hostClass = handler.className + '-' + handler.location.host.split(".").join("-"); 
+         
+    var mainContainers = false;
+    
+    var commentsBlockTimer = [];
+    
+    var sideBarPaddingTop = 24;
+    var publications = false;
+      
+    var sideBarDisabled = -1; // 1 - sidebar not found or hidden (jras - sidebar can be hidden)
     
     this.fav = false;   
     
@@ -153,7 +164,7 @@ function kellyProfileJoyreactor() {
             
             // get fandom css for buttons
             
-            if (handler.location.host == handler.mainDomain || handler.location.host.indexOf('old.') == -1) {
+            if (handler.location.domain == 'joyreactor.cc' || (handler.location.domain == 'reactor.cc' && handler.location.host != 'old.reactor.cc')) {
 
                 var bar = document.getElementById('searchBar');
                 
@@ -1016,7 +1027,7 @@ function kellyProfileJoyreactor() {
             
             // todo test assoc main image with gifs
             
-            if (data.length == 1 && image && mainImage && image.indexOf(handler.getImageDownloadLink(mainImage.url, false, true)) != -1) {
+            if (data.length == 1 && image && mainImage && image.indexOf(handler.getImageDownloadLink(mainImage.url, false)) != -1) {
                 handler.fav.setSelectionInfo('dimensions', mainImage);
             } else if (data.length == 1 && image && mainImage) {                
                 KellyTools.log('Main image in schema org for publication is exist, but not mutched with detected first image in publication');    
@@ -1038,9 +1049,9 @@ function kellyProfileJoyreactor() {
     
     /* imp */
     // route format
-    // [image-server-subdomain].[domain].cc/pics/[comment|post]/full/[title]-[image-id].[extension]
+    // [image-server-subdomain].[domain]/pics/[comment|post]/full/[title]-[image-id].[extension]
     
-    this.getImageDownloadLink = function(url, full, relative) {
+    this.getImageDownloadLink = function(url, full) {
         
              url = url.trim();
         if (!url || url.length < 10) return url;
@@ -1057,7 +1068,11 @@ function kellyProfileJoyreactor() {
             
             imgServer = imgServer[0];
             var type = url.indexOf('comment') == -1 ? 'post' : 'comment';
-            url = handler.location.protocol + '//' + imgServer + '.' + handler.location.host + '/pics/' + type + '/' + (full ? 'full/' : '') + filename;
+            
+            // prevent 301 redirect in fandoms subdomains
+            var domain = this.location.domain == 'reactor.cc' ? this.location.domain : handler.location.host;
+            
+            url = handler.location.protocol + '//' + imgServer + '.' + domain + '/pics/' + type + '/' + (full ? 'full/' : '') + filename;
         }
         
         
@@ -1067,18 +1082,19 @@ function kellyProfileJoyreactor() {
     /* imp */
     // return same url if not supported
     
-    this.getStaticImage = function(source) {
+    this.getStaticImage = function(url) {
 
-        if (source.indexOf('reactor') != -1) {
-        
-            if (source.indexOf('static') !== -1 || source.indexOf('.gif') == -1) return source;
+        var imgServer = url.match(/img(\d+)/);
+        if (imgServer &&  imgServer.length) {
             
-            source = source.replace('pics/comment/', 'pics/comment/static/');
-            source = source.replace('post/', 'post/static/');
-            source = source.replace('.gif', '.jpeg');
+            if (url.indexOf('static') !== -1 || url.indexOf('.gif') == -1) return url;
+            
+            url = url.replace('pics/comment/', 'pics/comment/static/');
+            url = url.replace('post/', 'post/static/');
+            url = url.replace('.gif', '.jpeg');
         }
         
-        return source;
+        return url;
     },
     
     /* not imp */
@@ -1195,18 +1211,11 @@ function kellyProfileJoyreactor() {
     
     this.getInitAction = function() { 
     
-        // get domain without subdomains - simple solution
+        if (this.hostList.indexOf(this.location.domain) != -1) {
+            return 'main';
+        } 
         
-        var hh = this.location.host.split('.');
-        if (hh.length >=2) {
-            hh = hh[hh.length-2] + '.' + hh[hh.length-1];
-        }
-                
-        if (this.hostList.indexOf(hh) == -1) {
-            return 'ignore';
-        }
-        
-        return 'main';
+        return 'ignore';
     }
     
     /* not imp */

@@ -68,7 +68,7 @@
    @description    creates tooltip elements (attaches to an element or screen) widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.0.2 08.02.20
+   @version        v 1.0.3 06.05.20
    
    ToDo : 
    
@@ -108,6 +108,7 @@ function KellyTooltip(cfg) {
     
     this.contentId = '';
     this.avoidOutOfBounds = true;
+    this.avoidLostTarget = true;
     
     this.userEvents = getDefaultUserEvents();
     
@@ -137,7 +138,21 @@ function KellyTooltip(cfg) {
             updateContainerClass = true;
         }
                 
-        var settings = ['avoidOutOfBounds', 'target', 'message', 'hideWidth', 'offset', 'minWidth', 'closeByBody', 'classGroup', 'selfClass', 'zIndex', 'closeButton', 'removeOnClose'];
+        var settings = [
+            'avoidOutOfBounds',
+            'avoidLostTarget',
+            'target', 
+            'message',
+            'hideWidth',
+            'offset', 
+            'minWidth', 
+            'closeByBody',
+            'classGroup', 
+            'selfClass', 
+            'zIndex', 
+            'closeButton', 
+            'removeOnClose',
+        ];
         
         for (var i=0; i < settings.length; i++) {
             
@@ -433,8 +448,15 @@ function KellyTooltip(cfg) {
         var screenBoundEl = (document.compatMode === "CSS1Compat") ? document.documentElement : document.body;
         var screenBounds = { width : screenBoundEl.clientWidth, height : screenBoundEl.clientHeight};
         
-        if (handler.getTarget()) {			
-            var pos = handler.getTarget().getBoundingClientRect();	
+        if (handler.getTarget()) {	
+            
+            if (handler.avoidLostTarget && !handler.getTarget().parentElement) {
+                this.show(false);
+                return false;
+            }
+            
+            var pos = handler.getTarget().getBoundingClientRect();
+            
         } else if (handler.target == 'screen') {            
             var pos = {left : 0, top : 0, width : screenBounds.width, height : screenBounds.height};
         
@@ -4693,7 +4715,7 @@ function KellyGrabber(cfg) {
         
     // .downloadId values constants
   
-    var downloadsOffset = 0; // start from element N, todo - make as extend option
+    var downloadsOffset = 0; // skip N elements from begin of downloads[], inverted numeration of items not affect on offset. Download always starts from zero to last element
     var ids = 0; // counter for downloads
     
     var acceptItems = false;
@@ -4780,19 +4802,6 @@ function KellyGrabber(cfg) {
     // used for REQUEST_IFRAME method only
     
     var requestIframeId = 0;
-    var getIframe = function() {
-    
-        requestIframeId++;
-        
-        var iframe = document.createElement('iframe');
-            iframe.name = className + '-iframe-' + requestIframeId;
-            iframe.style.display = 'none';
-            iframe.style.width   = '1px';
-            iframe.style.height  = '1px';
-            
-        document.getElementsByTagName('body')[0].appendChild(iframe);  
-        return iframe;    
-    }  
     
     var buttons = {};
     
@@ -4988,9 +4997,13 @@ function KellyGrabber(cfg) {
                         <input type="text" placeholder="' + lng.s('Директория', 'folder') + '" class="' + className + '-controll-baseFolder" value="' + options.baseFolder + '">\
                     </td></tr>\
                     <tr><td>\
-                        <label>' + lng.s('Элементы', 'grabber_selected_items') + '</label>\
+                        <label class="' + className + '-controll-range">\
+                            <a href="#" class="' + className + '-controll-rangeSwitch ' + className + '-controll-itemsListBtn active" data-pointer="itemsList">' + lng.s('Элементы', 'grabber_selected_items') + '</a>\
+                            <a href="#" class="' + className + '-controll-rangeSwitch ' + className + '-controll-startFromBtn" data-pointer="startFrom">' + lng.s('Начать с', 'grabber_start_from') + '</a>\
+                        </label>\
                     </td><td>\
-                        <input type="text" placeholder="1-2, 44-823, 1-999..." class="' + className + '-itemsList" value="' + options.itemsList + '">\
+                        <input type="text" placeholder="1-2, 44-823, 1-999..." class="' + className + '-controll-rangeInput ' + className + '-itemsList active" value="' + options.itemsList + '">\
+                        <input type="text" placeholder="' + lng.s('Продолжить с N элемента', 'grabber_start_from_input') + '" class="' + className + '-controll-rangeInput ' + className + '-startFrom" value="' + options.itemsList + '">\
                     </td></tr>\
                     <!--tr class="' + className + '-range-tr"><td>\
                         <label>' + lng.s('Диапазон', 'grabber_range') + '</label>\
@@ -5141,21 +5154,93 @@ function KellyGrabber(cfg) {
                 this.value = options.baseFolder;
                 delayUpdateOptionsEvent();
                 return;
-            }        
+            };
+        
+        var rangeSwitches = handler.container.getElementsByClassName(className + '-controll-rangeSwitch');
+        for (var i = 0; i < rangeSwitches.length; i++) {
             
+            rangeSwitches[i].onclick = function() {
+            
+                var pointer = this.getAttribute('data-pointer');
+                var rangeInputs = handler.container.getElementsByClassName(className + '-controll-rangeInput');
+                var rangeSwitches = handler.container.getElementsByClassName(className + '-controll-rangeSwitch');
+                
+                for (var i = 0; i < rangeSwitches.length; i++) {
+                    KellyTools.classList(rangeSwitches[i] == this ? 'add' : 'remove', rangeSwitches[i], 'active');                
+                }
+                
+                for (var i = 0; i < rangeInputs.length; i++) {
+                    KellyTools.classList(rangeInputs[i].className.indexOf(pointer) == -1 ? 'remove' : 'add', rangeInputs[i], 'active');                
+                }
+                
+                return false;
+            };                
+        }  
+                    
         var itemsList = KellyTools.getElementByClass(handler.container, className + '-itemsList');
             itemsList.onchange = function() {
+                                          
+                if (mode != 'wait') return false;
                 
-                this.value = this.value.trim();
+                var inputValue = this.value.trim();                
+                var count = KellyTools.getPrintValues(inputValue, false, 1, downloads.length, this).length;
                 
-                if (this.value && !KellyTools.getPrintValues(this.value, false, 1, downloads.length, this).length) {                    
+                if (!this.value && inputValue && !count) {                    
                     showNotice('grabber_selected_items_not_found', 1);
                 }
                 
-                options.itemsList = this.value;                
+                options.itemsList = this.value; 
+                                
                 updateContinue(true);
+                
+                count ? updateProgressBar(0, count) : updateProgressBar();
+                  
                 return;
-            }  
+            }
+
+        var startFrom = KellyTools.getElementByClass(handler.container, className + '-startFrom');
+            startFrom.onchange = function() {
+              
+                var itemN = this.value.trim();
+                    itemN = parseInt(itemN);
+                
+                var offsetKey = (options.invertNumeration ? (downloads.length - 1) - (itemN - 1) : itemN - 1);
+                   
+                if (!downloads.length || !offsetKey || offsetKey <= 0) {
+                    offsetKey = 0;
+                } else if (offsetKey > downloads.length - 1) {
+                    offsetKey = downloads.length-1;            
+                } 
+           
+                if (offsetKey) {
+                    
+                    buttons['continue'].setAttribute('data-start-from', offsetKey);   
+                    buttons['continue'].style.display = 'block';
+                    
+                    this.value = options.invertNumeration ? downloads.length - offsetKey : offsetKey + 1;   
+
+                } else {
+                    buttons['continue'].style.display = 'none';
+                    this.value = '';
+                }
+                
+                if (downloads.length) {
+                    
+                    handler.resetDownloadItems(false);
+                    
+                    for (var i=0; i < offsetKey; ++i) {
+                        
+                        downloads[i].downloadDelta = {id : -1, state : {current : 'complete'} };
+                                       
+                    } 
+                    
+                    handler.clearStateForImageGrid();
+                    handler.updateStateForImageGrid();
+                }
+                
+                return;
+            }
+            
 
         var invertNumeration = KellyTools.getElementByClass(handler.container, className + '-invertNumeration');
             invertNumeration.onchange = function() {
@@ -5307,19 +5392,27 @@ function KellyGrabber(cfg) {
         updateProgressBar();        
     }
     
-    function updateProgressBar() {
+    function updateProgressBar(current, total) {
         
         if (downloadProgress && downloadProgress.line) { 
-        
-            var total = downloads.length;
-            if (acceptItems) {
-                total = acceptItems.length;
+            
+            if (typeof total == 'undefined') {
+                
+                total = downloads.length;
+                
+                if (acceptItems) {
+                    total = acceptItems.length;
+                }
             }
             
-            var current = handler.countCurrent('complete');
-            if (current > total) {
-                toTxtLog('COUNTER more that total items. CHECK COUNTER ' + current + ' / ' + total);
-                current = total;
+            if (typeof current == 'undefined') {
+                
+                current = handler.countCurrent('complete');
+                
+                if (current > total) {
+                    toTxtLog('COUNTER more that total items. CHECK COUNTER ' + current + ' / ' + total);
+                    current = total;
+                }
             }
             
             var complete = Math.round(current / (total / 100));
@@ -6070,31 +6163,45 @@ function KellyGrabber(cfg) {
         }       
     }
     
-    // show \ hide continue button, update continue button cursor if current process wasnt fully finished
+    // show \ hide continue button, update continue button cursor if current process wasn't fully finished
     
-    function updateContinue(hide) {
+    function updateContinue(hide, lastReadyIndex) {
         
         if (!buttons['continue']) return;
         
+        var offsetInput = KellyTools.getElementByClass(handler.container, className + '-startFrom');
+        
         if (hide) {
             buttons['continue'].style.display = 'none';
+            offsetInput.value = '';
             return;
         }
         
-        var lastReadyIndex = 0;
-        for (var i = downloadsOffset; i <= downloads.length-1; i++) {
-            var state = handler.getDownloadItemState(downloads[i]);            
-            if (state != 'complete' && state != 'skip') {
-                break;
-            } else {               
-               lastReadyIndex = i;
+        if (!lastReadyIndex) {
+            
+            lastReadyIndex = 0;
+            
+            for (var i = downloadsOffset; i <= downloads.length-1; i++) {
+                
+                var state = handler.getDownloadItemState(downloads[i]);            
+                if (state != 'complete' && state != 'skip') {
+                    break;
+                } else {               
+                   lastReadyIndex = i + 1;
+                }
             }
+            
         }
-        
+  
+        if (offsetInput) offsetInput.value = lastReadyIndex ? (options.invertNumeration ? downloads.length - lastReadyIndex : lastReadyIndex + 1): '';
+
         if (lastReadyIndex) {
-            buttons['continue'].setAttribute('data-start-from', lastReadyIndex);            
-            buttons['continue'].style.display = 'block';
+            
+            buttons['continue'].setAttribute('data-start-from', lastReadyIndex);   
+            buttons['continue'].style.display = 'block';  
+          
         } else {
+            
             buttons['continue'].style.display = 'none';
         }
     }
@@ -6278,11 +6385,27 @@ function KellyGrabber(cfg) {
             
             var iHttpRequest = {};
                 iHttpRequest.type = 'iframe';
-            
-                iHttpRequest.iframe = getIframe();
+                iHttpRequest.iframe = null;                
+                iHttpRequest.eventPrefix = null;
                 
-                iHttpRequest.eventPrefix = 'input_message_' + iHttpRequest.iframe.name;
                 iHttpRequest.closeConnection = false;
+                
+                iHttpRequest.initIframe = function() {
+                    
+                    if (this.iframe) return this.iframe;
+                    
+                    requestIframeId++;
+                    
+                    this.iframe = document.createElement('iframe');
+                    this.iframe.name = className + '-iframe-' + requestIframeId;
+                    this.iframe.setAttribute('style', 'display : none; width : 1px; height : 1px;');
+                    
+                    this.eventPrefix = 'input_message_' + this.iframe.name;
+                    
+                    document.getElementsByTagName('body')[0].appendChild(this.iframe);  
+                    
+                    return this.iframe;    
+                };
                 
                 iHttpRequest.onLoadIframe = function(e) {
                     
@@ -6326,7 +6449,7 @@ function KellyGrabber(cfg) {
                 
                 iHttpRequest.abort = function() {
                     
-                    if (this.aborted) return;
+                    if (!this.iframe || this.aborted) return;
                     
                     var handler = this;
                     
@@ -6339,6 +6462,7 @@ function KellyGrabber(cfg) {
                     this.onLoadIframe = null;
                     this.send = null;
                     this.abort = null;
+                    this.initIframe = null;
                     
                     this.aborted = true;
                     
@@ -6357,7 +6481,9 @@ function KellyGrabber(cfg) {
                 iHttpRequest.send = function() {
                     
                     var handler = this;
-                        
+                    
+                    this.initIframe();
+                    
                     this.iframe.onerror = function() {      
                     
                         callback(urlOrig, false, -1, 'iframe load fail - connection error');                
@@ -13660,16 +13786,8 @@ function kellyProfileJoyreactor() {
     }
     
     var publicationClass = 'postContainer';
-    
-    var mainDomain = 'joyreactor.cc';    
-    var mainContainers = false;
-    
-    var commentsBlockTimer = [];
-    
-    var sideBarPaddingTop = 24;
-    var publications = false;
-      
-    var sideBarDisabled = -1; // 1 - sidebar not found or hidden (jras - sidebar can be hidden)
+
+    this.className = 'kelly-jr-ui'; // base class for every extension container \ element
     
     /* imp */
         
@@ -13679,8 +13797,21 @@ function kellyProfileJoyreactor() {
         href : window.location.href,
     };
     
+    // get current main subdomain
+    
+    this.domainParts = this.location.host.split('.');
+    if (this.domainParts.length >= 2) {
+        this.location.domain = this.domainParts[this.domainParts.length-2] + '.' + this.domainParts[this.domainParts.length-1];           
+    } else {
+        this.location.domain = this.location.host;
+    }    
+    
+    console.log(this.location);
+    
+    this.hostClass = handler.className + '-' + this.domainParts.join("-"); 
+        
     this.hostList = [
-        "joyreactor.cc",
+        "joyreactor.cc", 
         "reactor.cc", 
         "joyreactor.com",
         "jr-proxy.com",
@@ -13689,10 +13820,16 @@ function kellyProfileJoyreactor() {
         "safereactor.cc",
     ];
 	
-    this.className = 'kelly-jr-ui'; // base class for every extension container \ element
-    
     this.profile = 'joyreactor';
-    this.hostClass = handler.className + '-' + handler.location.host.split(".").join("-"); 
+         
+    var mainContainers = false;
+    
+    var commentsBlockTimer = [];
+    
+    var sideBarPaddingTop = 24;
+    var publications = false;
+      
+    var sideBarDisabled = -1; // 1 - sidebar not found or hidden (jras - sidebar can be hidden)
     
     this.fav = false;   
     
@@ -13801,7 +13938,7 @@ function kellyProfileJoyreactor() {
             
             // get fandom css for buttons
             
-            if (handler.location.host == handler.mainDomain || handler.location.host.indexOf('old.') == -1) {
+            if (handler.location.domain == 'joyreactor.cc' || (handler.location.domain == 'reactor.cc' && handler.location.host != 'old.reactor.cc')) {
 
                 var bar = document.getElementById('searchBar');
                 
@@ -14664,7 +14801,7 @@ function kellyProfileJoyreactor() {
             
             // todo test assoc main image with gifs
             
-            if (data.length == 1 && image && mainImage && image.indexOf(handler.getImageDownloadLink(mainImage.url, false, true)) != -1) {
+            if (data.length == 1 && image && mainImage && image.indexOf(handler.getImageDownloadLink(mainImage.url, false)) != -1) {
                 handler.fav.setSelectionInfo('dimensions', mainImage);
             } else if (data.length == 1 && image && mainImage) {                
                 KellyTools.log('Main image in schema org for publication is exist, but not mutched with detected first image in publication');    
@@ -14686,9 +14823,9 @@ function kellyProfileJoyreactor() {
     
     /* imp */
     // route format
-    // [image-server-subdomain].[domain].cc/pics/[comment|post]/full/[title]-[image-id].[extension]
+    // [image-server-subdomain].[domain]/pics/[comment|post]/full/[title]-[image-id].[extension]
     
-    this.getImageDownloadLink = function(url, full, relative) {
+    this.getImageDownloadLink = function(url, full) {
         
              url = url.trim();
         if (!url || url.length < 10) return url;
@@ -14705,7 +14842,11 @@ function kellyProfileJoyreactor() {
             
             imgServer = imgServer[0];
             var type = url.indexOf('comment') == -1 ? 'post' : 'comment';
-            url = handler.location.protocol + '//' + imgServer + '.' + handler.location.host + '/pics/' + type + '/' + (full ? 'full/' : '') + filename;
+            
+            // prevent 301 redirect in fandoms subdomains
+            var domain = this.location.domain == 'reactor.cc' ? this.location.domain : handler.location.host;
+            
+            url = handler.location.protocol + '//' + imgServer + '.' + domain + '/pics/' + type + '/' + (full ? 'full/' : '') + filename;
         }
         
         
@@ -14715,18 +14856,19 @@ function kellyProfileJoyreactor() {
     /* imp */
     // return same url if not supported
     
-    this.getStaticImage = function(source) {
+    this.getStaticImage = function(url) {
 
-        if (source.indexOf('reactor') != -1) {
-        
-            if (source.indexOf('static') !== -1 || source.indexOf('.gif') == -1) return source;
+        var imgServer = url.match(/img(\d+)/);
+        if (imgServer &&  imgServer.length) {
             
-            source = source.replace('pics/comment/', 'pics/comment/static/');
-            source = source.replace('post/', 'post/static/');
-            source = source.replace('.gif', '.jpeg');
+            if (url.indexOf('static') !== -1 || url.indexOf('.gif') == -1) return url;
+            
+            url = url.replace('pics/comment/', 'pics/comment/static/');
+            url = url.replace('post/', 'post/static/');
+            url = url.replace('.gif', '.jpeg');
         }
         
-        return source;
+        return url;
     },
     
     /* not imp */
@@ -14843,18 +14985,11 @@ function kellyProfileJoyreactor() {
     
     this.getInitAction = function() { 
     
-        // get domain without subdomains - simple solution
+        if (this.hostList.indexOf(this.location.domain) != -1) {
+            return 'main';
+        } 
         
-        var hh = this.location.host.split('.');
-        if (hh.length >=2) {
-            hh = hh[hh.length-2] + '.' + hh[hh.length-1];
-        }
-                
-        if (this.hostList.indexOf(hh) == -1) {
-            return 'ignore';
-        }
-        
-        return 'main';
+        return 'ignore';
     }
     
     /* not imp */

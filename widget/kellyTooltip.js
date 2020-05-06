@@ -5,7 +5,7 @@
    @description    creates tooltip elements (attaches to an element or screen) widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.0.2 08.02.20
+   @version        v 1.0.3 06.05.20
    
    ToDo : 
    
@@ -45,6 +45,7 @@ function KellyTooltip(cfg) {
     
     this.contentId = '';
     this.avoidOutOfBounds = true;
+    this.avoidLostTarget = true;
     
     this.userEvents = getDefaultUserEvents();
     
@@ -74,7 +75,21 @@ function KellyTooltip(cfg) {
             updateContainerClass = true;
         }
                 
-        var settings = ['avoidOutOfBounds', 'target', 'message', 'hideWidth', 'offset', 'minWidth', 'closeByBody', 'classGroup', 'selfClass', 'zIndex', 'closeButton', 'removeOnClose'];
+        var settings = [
+            'avoidOutOfBounds',
+            'avoidLostTarget',
+            'target', 
+            'message',
+            'hideWidth',
+            'offset', 
+            'minWidth', 
+            'closeByBody',
+            'classGroup', 
+            'selfClass', 
+            'zIndex', 
+            'closeButton', 
+            'removeOnClose',
+        ];
         
         for (var i=0; i < settings.length; i++) {
             
@@ -370,8 +385,15 @@ function KellyTooltip(cfg) {
         var screenBoundEl = (document.compatMode === "CSS1Compat") ? document.documentElement : document.body;
         var screenBounds = { width : screenBoundEl.clientWidth, height : screenBoundEl.clientHeight};
         
-        if (handler.getTarget()) {			
-            var pos = handler.getTarget().getBoundingClientRect();	
+        if (handler.getTarget()) {	
+            
+            if (handler.avoidLostTarget && !handler.getTarget().parentElement) {
+                this.show(false);
+                return false;
+            }
+            
+            var pos = handler.getTarget().getBoundingClientRect();
+            
         } else if (handler.target == 'screen') {            
             var pos = {left : 0, top : 0, width : screenBounds.width, height : screenBounds.height};
         
