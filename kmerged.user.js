@@ -5223,16 +5223,12 @@ function KellyGrabber(cfg) {
                     buttons['continue'].style.display = 'none';
                     this.value = '';
                 }
-                
-                console.log('set key ' + offsetKey );
             }
             
             startFrom.onchange = function() {
               
                 var offsetKey = parseInt(buttons['continue'].getAttribute('data-start-from'));
-                
-                console.log('accept key ' + offsetKey );
-                
+                                
                 if (offsetKey && downloads.length) {
                     
                     handler.resetDownloadItems(false);
