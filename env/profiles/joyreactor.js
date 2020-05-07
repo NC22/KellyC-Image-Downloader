@@ -32,8 +32,6 @@ function kellyProfileJoyreactor() {
         this.location.domain = this.location.host;
     }    
     
-    console.log(this.location);
-    
     this.hostClass = handler.className + '-' + this.domainParts.join("-"); 
         
     this.hostList = [
@@ -1070,7 +1068,11 @@ function kellyProfileJoyreactor() {
             var type = url.indexOf('comment') == -1 ? 'post' : 'comment';
             
             // prevent 301 redirect in fandoms subdomains
+            
             var domain = this.location.domain == 'reactor.cc' ? this.location.domain : handler.location.host;
+            
+            // prevent watermark show for jr-proxy (not all images, untested domain, dont have access)
+            // if (this.location.domain == 'jr-proxy.com') imgServer = 'img1';
             
             url = handler.location.protocol + '//' + imgServer + '.' + domain + '/pics/' + type + '/' + (full ? 'full/' : '') + filename;
         }

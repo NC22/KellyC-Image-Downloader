@@ -292,7 +292,13 @@
     },
     "grabber_selected_items":{  
         "message":"Items"
+    },    
+    "grabber_start_from":{  
+        "message":"Continue from"
     }, 
+    "grabber_start_from_input":{  
+        "message":"Continue from N element"
+    },
     "grabber_selected_items_not_found":{  
         "message":"Cant select any items for download by \"Items\" field"
     },

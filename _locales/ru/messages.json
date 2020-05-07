@@ -292,6 +292,12 @@
     },
     "grabber_selected_items":{  
         "message":"Элементы"
+    }, 
+    "grabber_start_from":{  
+        "message":"Продолжить с"
+    }, 
+    "grabber_start_from_input":{  
+        "message":"Продолжить с N элемента"
     },
     "grabber_selected_items_not_found":{  
         "message":"Список элементов определенный полем \"Элементы\" пуст"

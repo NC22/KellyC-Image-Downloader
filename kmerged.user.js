@@ -4999,7 +4999,7 @@ function KellyGrabber(cfg) {
                     <tr><td>\
                         <label class="' + className + '-controll-range">\
                             <a href="#" class="' + className + '-controll-rangeSwitch ' + className + '-controll-itemsListBtn active" data-pointer="itemsList">' + lng.s('Элементы', 'grabber_selected_items') + '</a>\
-                            <a href="#" class="' + className + '-controll-rangeSwitch ' + className + '-controll-startFromBtn" data-pointer="startFrom">' + lng.s('Начать с', 'grabber_start_from') + '</a>\
+                            <a href="#" class="' + className + '-controll-rangeSwitch ' + className + '-controll-startFromBtn" data-pointer="startFrom">' + lng.s('Продолжить с', 'grabber_start_from') + '</a>\
                         </label>\
                     </td><td>\
                         <input type="text" placeholder="1-2, 44-823, 1-999..." class="' + className + '-controll-rangeInput ' + className + '-itemsList active" value="' + options.itemsList + '">\
@@ -5193,14 +5193,14 @@ function KellyGrabber(cfg) {
                                 
                 updateContinue(true);
                 
-                count ? updateProgressBar(0, count) : updateProgressBar();
+                count ? updateProgressBar(0, count) : updateProgressBar(0);
                   
                 return;
             }
 
         var startFrom = KellyTools.getElementByClass(handler.container, className + '-startFrom');
-            startFrom.onchange = function() {
-              
+            startFrom.onkeyup = function() {
+                
                 var itemN = this.value.trim();
                     itemN = parseInt(itemN);
                 
@@ -5224,14 +5224,22 @@ function KellyGrabber(cfg) {
                     this.value = '';
                 }
                 
-                if (downloads.length) {
+                console.log('set key ' + offsetKey );
+            }
+            
+            startFrom.onchange = function() {
+              
+                var offsetKey = parseInt(buttons['continue'].getAttribute('data-start-from'));
+                
+                console.log('accept key ' + offsetKey );
+                
+                if (offsetKey && downloads.length) {
                     
                     handler.resetDownloadItems(false);
                     
                     for (var i=0; i < offsetKey; ++i) {
                         
-                        downloads[i].downloadDelta = {id : -1, state : {current : 'complete'} };
-                                       
+                        downloads[i].downloadDelta = {id : -1, state : {current : 'complete'} };                                       
                     } 
                     
                     handler.clearStateForImageGrid();
@@ -13806,8 +13814,6 @@ function kellyProfileJoyreactor() {
         this.location.domain = this.location.host;
     }    
     
-    console.log(this.location);
-    
     this.hostClass = handler.className + '-' + this.domainParts.join("-"); 
         
     this.hostList = [
@@ -14844,7 +14850,11 @@ function kellyProfileJoyreactor() {
             var type = url.indexOf('comment') == -1 ? 'post' : 'comment';
             
             // prevent 301 redirect in fandoms subdomains
+            
             var domain = this.location.domain == 'reactor.cc' ? this.location.domain : handler.location.host;
+            
+            // prevent watermark show for jr-proxy (not all images, untested domain, dont have access)
+            // if (this.location.domain == 'jr-proxy.com') imgServer = 'img1';
             
             url = handler.location.protocol + '//' + imgServer + '.' + domain + '/pics/' + type + '/' + (full ? 'full/' : '') + filename;
         }
