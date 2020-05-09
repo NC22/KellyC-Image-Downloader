@@ -652,10 +652,15 @@ KellyTools.getBrowser = function() {
     }
 }
 
+// str - full filename string
+// limit - optional, check extension name on max length, return false if extension length more then limit
+
 KellyTools.getExt = function(str, limit) {
     
-    var dot = str.lastIndexOf('.');
+    if (!str) return '';   
+    str = str.trim();
     
+    var dot = str.lastIndexOf('.');
     if (dot === -1) return false;
     
     var ext =  str.substr(dot).split(".");
@@ -1224,6 +1229,8 @@ var KellyEDispetcher = new Object;
             }
                     
         } else if (request.method == 'downloads.download') {
+            
+            // request.download - download options - where url can be base64 binary data \ blob url or direct url string
             
             response.downloadId = -1;
                     

@@ -41,6 +41,7 @@ function kellyProfileJoyreactor() {
         "jr-proxy.com",
         "pornreactor.cc",
         "thatpervert.com",
+        "fapreactor.com",
         "safereactor.cc",
     ];
 	
@@ -1047,9 +1048,10 @@ function kellyProfileJoyreactor() {
     
     /* imp */
     // route format
-    // [image-server-subdomain].[domain]/pics/[comment|post]/full/[title]-[image-id].[extension]
+    // [image-server-subdomain].[domain]/pics/[comment|post]/[full|animation format]/[title]-[image-id].[extension]
+    // format - optional, unvalidated
     
-    this.getImageDownloadLink = function(url, full) {
+    this.getImageDownloadLink = function(url, full, format) {
         
              url = url.trim();
         if (!url || url.length < 10) return url;
@@ -1074,7 +1076,19 @@ function kellyProfileJoyreactor() {
             // prevent watermark show for jr-proxy (not all images, untested domain, dont have access)
             // if (this.location.domain == 'jr-proxy.com') imgServer = 'img1';
             
-            url = handler.location.protocol + '//' + imgServer + '.' + domain + '/pics/' + type + '/' + (full ? 'full/' : '') + filename;
+            if (format) {
+                
+                filename = filename.split('.')[0] + '.' + format;
+                
+                if (['mp4', 'webm'].indexOf(format) == -1) {
+                    format = '';
+                } else {
+                    full = false; // full accepted for all formats except videos
+                }
+            }
+            
+            url  = handler.location.protocol + '//' + imgServer + '.' + domain + '/pics/' + type + '/';
+            url += (format ? format + '/' : '') + (full ? 'full/' : '') + filename;
         }
         
         

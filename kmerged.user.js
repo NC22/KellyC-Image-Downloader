@@ -4862,6 +4862,8 @@ function KellyGrabber(cfg) {
         });
 		
 	}
+    
+    this.allowedAnimationFormats = ['gif', 'mp4', 'webm'];
 	
     this.getState = function() {    
         return mode;
@@ -4891,7 +4893,8 @@ function KellyGrabber(cfg) {
             quality : 'hd',
             itemsList : '',
             invertNumeration : true,
-            skipDownloaded : false, 
+            skipDownloaded : false,
+            animationFormat : 'gif',
         }        
     }
     
@@ -4920,7 +4923,16 @@ function KellyGrabber(cfg) {
                     if (typeof cfg.options[k] != 'undefined') {
                         
                         if (k == 'baseFolder') {
+                            
                             handler.setBaseFolder(cfg.options.baseFolder);
+                            
+                        } else if (k == 'animationFormat') {
+
+                            var selectIndex = handler.allowedAnimationFormats.indexOf(cfg.options[k]);
+                            if (selectIndex != -1) {
+                                options[k] = handler.allowedAnimationFormats[selectIndex];
+                            }                          
+                          
                         } else {
                             options[k] = cfg.options[k];
                         }
@@ -4931,7 +4943,6 @@ function KellyGrabber(cfg) {
             if (cfg.className) {
                 className = cfg.className;
             }
-            
             
             if (cfg.fav) {
                 fav = cfg.fav;
@@ -4987,6 +4998,16 @@ function KellyGrabber(cfg) {
         if (!options.baseFolder) {
             handler.setBaseFolder(fav.getGlobal('env').profile + '/Downloads');
         }
+        
+        var htmlAnimSelect = '';
+        for (var i = 0; i < handler.allowedAnimationFormats.length; i++) {
+            
+            var format = handler.allowedAnimationFormats[i];
+            
+            htmlAnimSelect += '<option value="' + format + '" ' + (options.animationFormat == format ? 'selected' : '') +'>' + format + '</option>';
+        }
+        
+        htmlAnimSelect = '<select class="' + className + '-animationFormat">' + htmlAnimSelect + '</select>';
        
         var html = '\
             <div class="' + className + '-controll">\
@@ -5022,6 +5043,9 @@ function KellyGrabber(cfg) {
                         <label>' + lng.s('Шаблон названия', 'grabber_name_template') + ' (<a href="#" class="' + className + '-nameTemplate-help">' + lng.s('Подсказка', 'tip') + '</a>)</label>\
                     </td><td>\
                         <input type="text" placeholder="" class="' + className + '-nameTemplate" value="' + options.nameTemplate + '">\
+                    </td></tr>\
+                    <tr class="' + extendedClass + '"><td colspan="2">\
+                        <label>' + lng.s('Формат для больших гифок', 'grabber_anim_format') + ' ' + htmlAnimSelect + '</label>\
                     </td></tr>\
                     <tr class="' + extendedClass + '"><td colspan="2">\
                         <label><input type="checkbox" class="' + className + '-invertNumeration" ' + (options.invertNumeration ? 'checked' : '') + '>\
@@ -5146,13 +5170,24 @@ function KellyGrabber(cfg) {
             
             return false;
         }        
+                     
+        var animationFormat = KellyTools.getElementByClass(handler.container, className + '-animationFormat');
+            animationFormat.onchange = function() {
+                
+                handler.updateCfg({ options : {animationFormat : this.options[this.selectedIndex].value} });
+                delayUpdateOptionsEvent();
+                
+                return;
+            };
             
         var baseFolderInput = KellyTools.getElementByClass(handler.container, className + '-controll-baseFolder');
             baseFolderInput.onchange = function() {
                 
-                handler.setBaseFolder(this.value);                
+                handler.updateCfg({ options : {baseFolder : this.value} });              
                 this.value = options.baseFolder;
-                delayUpdateOptionsEvent();
+                
+                delayUpdateOptionsEvent();  
+                
                 return;
             };
         
@@ -5940,34 +5975,37 @@ function KellyGrabber(cfg) {
     
     this.initDownloadItemFile = function(ditem) {
         
+        // already initialized
+        
         if (ditem.filename !== false) {
             return ditem;
         }
         
         var item = ditem.item;
         
-        if (typeof item.pImage !== 'string') {                           
-            ditem.url = fav.getGlobal('env').getImageDownloadLink(item.pImage[ditem.subItem], options.quality == 'hd');            
-        } else {        
-            ditem.url = fav.getGlobal('env').getImageDownloadLink(item.pImage, options.quality == 'hd');
-        }        
+        ditem.url = typeof item.pImage !== 'string' ? item.pImage[ditem.subItem] : item.pImage;
+        ditem.ext = KellyTools.getExt(ditem.url);
+        
+        var videoFormat = false; 
+        if (ditem.ext == 'gif' && options.animationFormat != 'gif') {
+            ditem.ext = options.animationFormat;
+            videoFormat = ditem.ext; 
+        }
+        
+        ditem.url = fav.getGlobal('env').getImageDownloadLink(ditem.url, options.quality == 'hd', videoFormat);
                
         if (!ditem.url || ditem.url.length < 6) {
                         
             addFailItem(ditem, 'Некорректный Url скачиваемого файла ' + ditem.url);
             return false;
             
-        } else {
+        } 
             
-            ditem.ext = KellyTools.getExt(ditem.url);
-            
-            if (!ditem.ext) {  
-                
-                addFailItem(ditem, 'Неопределено расширение для загружаемого файла ' + ditem.url);
-                return false;
-            }
+        if (!ditem.ext) {
+            addFailItem(ditem, 'Неопределено расширение для загружаемого файла ' + ditem.url);
+            return false;
         }
-                
+            
         var fileName = getNameTemplate();       
         if (item.categoryId) {            
         
@@ -6439,7 +6477,13 @@ function KellyGrabber(cfg) {
                                 // если разорвано подключение \ картинка недоступна - e.data.error = url load fail
                                 // в случае если подключение блокирует adblock или еще какой-либо внешний процесс, то обратная связь пропадает (остается только таймаут)
                                 
-                                callback(urlOrig, false, -1, 'iframe load fail - ' + e.data.error);
+                                var code = -1;
+                                
+                                if (e.data.error && e.data.error.indexOf('404') != -1) {
+                                    code = 404;
+                                }
+                                
+                                callback(urlOrig, false, code, 'iframe load fail - ' + e.data.error);
                             }
                             
                             handler.abort();                       
@@ -6709,23 +6753,25 @@ function KellyGrabber(cfg) {
             download.dataRequest = null;
             
             if (!fileData) {
-            
-                // get DATA ARRAY OR BLOB fail, download as url - bad way, due to copyright marks, so call onDownloadApi event with error
                 
-                /*
-                    toTxtLog('file NOT LOADED as DATA ARRAY OR BLOB ' + download.url + ', attempt to download by download api without DATA ARRAY OR BLOB - BAD HEADERS : ' + downloadOptions.filename);
-                    toTxtLog('LOAD FAIL NOTICE error code ' + errorCode + ', message : ' + errorNotice);
+                // check is attempt to download gif as video 
                 
-                    KellyTools.log('onLoadFile : bad blob data for download ' + download.url + '; error : ' + errorCode + ' | error message : ' + errorNotice);
-                        
-                    downloadOptions.url = download.url;
-                    handler.downloadUrl(downloadOptions, onDownloadApiStart);
-                */
-                
-                toTxtLog('DOWNLOADID ' + download.id + ' | file NOT LOADED as DATA ARRAY OR BLOB ' + download.url + ' : ' + downloadOptions.filename);
-                toTxtLog('DOWNLOADID ' + download.id + ' | LOAD FAIL NOTICE error code ' + errorCode + ', message : ' + errorNotice);
+                if (download.ext == options.animationFormat && download.ext != 'gif' && errorCode == 404) {
 
-                onDownloadApiStart({downloadId : false, error : 'DATA ARRAY get fail. Error code : ' + errorCode + ' |  error message : ' + errorNotice});                
+                    download.url = fav.getGlobal('env').getImageDownloadLink(download.url, options.quality == 'hd', 'gif');
+                    download.dataRequest = handler.getDataFromUrl(download.url, onLoadFile); 
+                    
+                    toTxtLog('DOWNLOADID ' + download.id + ' | Video format ' + options.animationFormat + ' not found. Attempt to get file as gif ' + download.url);
+                    
+                } else {                    
+                    
+                    // get DATA ARRAY OR BLOB fail, download as url - bad way, due to copyright marks, so call onDownloadApi event with error
+                                   
+                    toTxtLog('DOWNLOADID ' + download.id + ' | file NOT LOADED as DATA ARRAY OR BLOB ' + download.url + ' : ' + downloadOptions.filename);
+                    toTxtLog('DOWNLOADID ' + download.id + ' | LOAD FAIL NOTICE error code ' + errorCode + ', message : ' + errorNotice);
+
+                    onDownloadApiStart({downloadId : false, error : 'DATA ARRAY get fail. Error code : ' + errorCode + ' |  error message : ' + errorNotice});                
+                }
                 
             } else {
                 
@@ -6740,51 +6786,55 @@ function KellyGrabber(cfg) {
             
             // search by file name. todo may be some other search methods
             
-            var onSearch = function(response) {
+            var searchRequest = new Object;
+                searchRequest.canceled = false;
+                searchRequest.onSearch = function(response) {
                    
-                download.dataRequest = null;
-            
-                // process stoped \ canceled by timeout
-                if (mode != 'download') return false;
-            
-                if (response && response.matchResults && response.matchResults[0].match && response.matchResults[0].match.state == 'complete') {
-                                        
-                    download.downloadDelta = response.matchResults[0].match;
-                    download.downloadDelta.found = true;
-                    download.downloadDelta.state = {current : download.downloadDelta.state};
-                           
-                    if (download.cancelTimer) {
-                        clearTimeout(download.cancelTimer);
-                        download.cancelTimer = false;
+                    // process stoped \ canceled by timeout
+                    if (this.canceled || mode != 'download') {
+                        
+                        return false;
                     }
-                     
-                    download.workedout = true;
-                    
-                    updateProgressBar();
-                    handler.onDownloadEnd(download);
-                    
-                    toTxtLog('DOWNLOADID ' + download.id + ' | SKIPPED - ALREADY Downloaded');
-                                        
-                    handler.updateStateForImageGrid();
+                                   
+                    download.dataRequest = null;
+                
+                    if (response && response.matchResults && response.matchResults[0].match && response.matchResults[0].match.state == 'complete') {
+                                            
+                        download.downloadDelta = response.matchResults[0].match;
+                        download.downloadDelta.found = true;
+                        download.downloadDelta.state = {current : download.downloadDelta.state};
+                               
+                        if (download.cancelTimer) {
+                            clearTimeout(download.cancelTimer);
+                            download.cancelTimer = false;
+                        }
+                         
+                        download.workedout = true;
+                        
+                        updateProgressBar();
+                        handler.onDownloadEnd(download);
+                        
+                        toTxtLog('DOWNLOADID ' + download.id + ' | SKIPPED - ALREADY Downloaded');
+                                            
+                        handler.updateStateForImageGrid();
 
-                } else {
-                    
-                    download.dataRequest = handler.getDataFromUrl(download.url, onLoadFile);
-        
-                }
-            } 
+                    } else {                        
+                        download.dataRequest = handler.getDataFromUrl(download.url, onLoadFile);
+                    }
+                };
+                
+                searchRequest.abort = function() {
+                    this.canceled = true; // is terminate method for search action exist ?
+                    this.onSearch = null;
+                    this.abort = null;
+                };
              
             KellyTools.getBrowser().runtime.sendMessage({
                 method: "isFilesDownloaded", 
-                filenames : [downloadOptions.filename] // download.filename - filename, downloadOptions.filename - full path with extension 
-            }, onSearch);            
+                filenames : [baseFileFolder + download.filename] // download.filename - filename, downloadOptions.filename - full path with extension 
+            }, searchRequest.onSearch);            
             
-            download.dataRequest = {
-                abort : function() {
-                    onSearch = function() {} // is terminate method for search action exist ?
-                }
-            }
-        
+            download.dataRequest = searchRequest;        
             
         } else {
                         
@@ -7836,10 +7886,15 @@ KellyTools.getBrowser = function() {
     }
 }
 
+// str - full filename string
+// limit - optional, check extension name on max length, return false if extension length more then limit
+
 KellyTools.getExt = function(str, limit) {
     
-    var dot = str.lastIndexOf('.');
+    if (!str) return '';   
+    str = str.trim();
     
+    var dot = str.lastIndexOf('.');
     if (dot === -1) return false;
     
     var ext =  str.substr(dot).split(".");
@@ -13819,6 +13874,7 @@ function kellyProfileJoyreactor() {
         "jr-proxy.com",
         "pornreactor.cc",
         "thatpervert.com",
+        "fapreactor.com",
         "safereactor.cc",
     ];
 	
@@ -14825,9 +14881,10 @@ function kellyProfileJoyreactor() {
     
     /* imp */
     // route format
-    // [image-server-subdomain].[domain]/pics/[comment|post]/full/[title]-[image-id].[extension]
+    // [image-server-subdomain].[domain]/pics/[comment|post]/[full|animation format]/[title]-[image-id].[extension]
+    // format - optional, unvalidated
     
-    this.getImageDownloadLink = function(url, full) {
+    this.getImageDownloadLink = function(url, full, format) {
         
              url = url.trim();
         if (!url || url.length < 10) return url;
@@ -14852,7 +14909,19 @@ function kellyProfileJoyreactor() {
             // prevent watermark show for jr-proxy (not all images, untested domain, dont have access)
             // if (this.location.domain == 'jr-proxy.com') imgServer = 'img1';
             
-            url = handler.location.protocol + '//' + imgServer + '.' + domain + '/pics/' + type + '/' + (full ? 'full/' : '') + filename;
+            if (format) {
+                
+                filename = filename.split('.')[0] + '.' + format;
+                
+                if (['mp4', 'webm'].indexOf(format) == -1) {
+                    format = '';
+                } else {
+                    full = false; // full accepted for all formats except videos
+                }
+            }
+            
+            url  = handler.location.protocol + '//' + imgServer + '.' + domain + '/pics/' + type + '/';
+            url += (format ? format + '/' : '') + (full ? 'full/' : '') + filename;
         }
         
         
