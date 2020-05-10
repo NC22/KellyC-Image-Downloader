@@ -445,7 +445,16 @@
     },  
     "grabber_skip_downloaded":{  
         "message":"Skip already downloaded in dir (by history)"
-    }, 
+    },  
+    "grabber_anim_format":{  
+        "message":"Save big gifs as"
+    },     
+    "grabber_fail_errors_list_notice":{  
+        "message":"Error log. More extended info can be found in log file"
+    },  
+    "grabber_fail_items_list_notice":{  
+        "message":"List of failed items. Copy list to \"Elements\" input for retry"
+    },
     "goto_page":{  
         "message":"Go to page"
     },

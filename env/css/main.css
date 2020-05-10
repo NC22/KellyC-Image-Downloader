@@ -1541,9 +1541,8 @@
 .__BASECLASS__-downloader-error-list {
     
 	width : 100%;
-	height : 200px;
 	overflow-y : auto;
-	max-height : 200px;
+	max-height : 600px;
 	border: 1px solid #b7b7b7;
     padding: 6px;
     border-radius: 3px;
@@ -1553,13 +1552,15 @@
     font-size : 12px;
 }
 
-.__BASECLASS__-downloader-error-list p.__BASECLASS__-downloader-error-list-itemsline {
-    
-    padding-bottom: 64px;
-    padding-top: 64px;
-
+.__BASECLASS__-downloader-error-list-itemsline textarea {
+    width: 100%;
+    height: 50px;
 }
 
+.__BASECLASS__-downloader-error-list-errorsLine textarea {
+    width: 100%;
+    height: 200px;
+}
 
 .__BASECLASS__-downloader-progressbar {
     text-align: center;

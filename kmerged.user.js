@@ -5098,6 +5098,7 @@ function KellyGrabber(cfg) {
             counter : KellyTools.getElementByClass(handler.container, className + '-error-counter'),
             tooltip : false,
             rendered : false,
+            maxErrorsShow : 1000,
             updateTooltip : function() {
                
                 if (!this.tooltip) {
@@ -5106,8 +5107,7 @@ function KellyGrabber(cfg) {
                 
                 if (this.rendered !== false && this.rendered == failItems.length) {
                     return;
-                }
-                 
+                }                 
                  
                 var failedList = '';
                  
@@ -5116,12 +5116,22 @@ function KellyGrabber(cfg) {
                     
                     failedList += (failedList ? ',' : '') + failItems[i].num;
                     
-                    html+= '<p><b>#' + failItems[i].num + '</b> - ' + failItems[i].reason + '</p>';
+                    if (i+1 <= this.maxErrorsShow) {
+                        html+= '#' + failItems[i].num + ' - [DownloadId ' + failItems[i].id + '] - ' + failItems[i].reason + '\n\n';
+                    }
                 }
+                
+                html = '<div class="' + className + '-error-list-errorsLine">\
+                            <p>' + lng.s('', 'grabber_fail_errors_list_notice') + '</p>\
+                            <p><textarea>' + html + '</textarea></p>\
+                       </div>';
                 
                 if (failedList) {
                     
-                    html = '<p class="'  + className + '-error-list-itemsline">' + failedList + '</p>' + html;
+                    html = '<div class="'  + className + '-error-list-itemsline">\
+                                <p>' + lng.s('', 'grabber_fail_items_list_notice') + '</p>\
+                                <p><textarea>' + failedList + '</textarea></p>\
+                            </div>' + html;
                 }
 
                 var tcontainer = this.tooltip.getContent();
@@ -6655,6 +6665,7 @@ function KellyGrabber(cfg) {
         
         failItems[failItems.length] = {
             num : handler.getDownloadItemN(item),
+            id : item.id,
             reason : reason,
         }
     }
@@ -6764,6 +6775,12 @@ function KellyGrabber(cfg) {
                     toTxtLog('DOWNLOADID ' + download.id + ' | Video format ' + options.animationFormat + ' not found. Attempt to get file as gif ' + download.url);
                     
                 } else {                    
+                    
+                    // if (options.attemptCount > 1) {
+                    //    
+                    // todo - add optional retry's until timeout   
+                    //    
+                    // }
                     
                     // get DATA ARRAY OR BLOB fail, download as url - bad way, due to copyright marks, so call onDownloadApi event with error
                                    

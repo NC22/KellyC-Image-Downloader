@@ -451,7 +451,16 @@
     },   
     "grabber_skip_downloaded":{  
         "message":"Пропускать уже загруженные в директорию (по истории загрузок)"
-    }, 
+    },  
+    "grabber_anim_format":{  
+        "message":"Формат для больших гифок"
+    },
+    "grabber_fail_errors_list_notice":{  
+        "message":"Ошибки выполнения. Более подробную информацию можно узнать скачав лог-файл"
+    },  
+    "grabber_fail_items_list_notice":{  
+        "message":"Список элементов, которые не удалось загрузить <br> (для повторной попытки скачать скопируйте в \"Элементы\")"
+    },
     "grabber_errors_counter":{  
         "message":"Ошибки загрузки : __ERRORSNUM__"
     },  
