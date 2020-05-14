@@ -5238,6 +5238,7 @@ function KellyGrabber(cfg) {
                                 
                 updateContinue(true);
                 
+                failItems = [];
                 count ? updateProgressBar(0, 0, count) : updateProgressBar(0, 0);
                   
                 return;
