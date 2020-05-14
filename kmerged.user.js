@@ -6417,8 +6417,6 @@ function KellyGrabber(cfg) {
                     } else {
                         callback(urlOrig, false, this.status, this.statusText);
                     }
-                    
-                    xhr = null;
                 };
 
                 xhr.onerror = function(e) {
@@ -7443,10 +7441,10 @@ KellyTools.blobToBase64 = function(blob, cb) {
     
     var reader = new FileReader();
         reader.onload = function() {
-    
-    var dataUrl = reader.result;
-    var base64 = dataUrl.split(',')[1];
-        cb(base64);
+        
+        var dataUrl = reader.result;
+        var base64 = dataUrl.split(',')[1];
+            cb(base64);
     };
 
     reader.readAsDataURL(blob);
