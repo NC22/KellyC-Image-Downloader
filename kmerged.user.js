@@ -9324,7 +9324,7 @@ function KellyFavItems(cfg)
     this.sideBarLock = false;
     this.tooltipBeasy = false; // set true if shown something important throw handler.getTooltip() with close button, prevent create another tooltips onmouseover and hide onmouseout, until close section
     
-    // buffer for page loaded as media rosource
+    // buffer for page loaded as media resource
     var selfData = false;
     var selfUrl = window.location.href;
    
@@ -9427,55 +9427,26 @@ function KellyFavItems(cfg)
     }
     
     function constructor(cfg) {
-        
-        // todo - use chrome.tabs.executeScript(tabId, {file: filename}, function() {  handler.exec(); }); to inject custom environments instead of eval \ presets
-        
-        // if (window.location.host.indexOf('tumblr') != -1) 
-        // K_DEFAULT_ENVIRONMENT = kellyProfileTumblr.getInstance();
-        
-        K_DEFAULT_ENVIRONMENT = kellyProfileJoyreactor.getInstance();
-        
-        if (!cfg) {
-            cfg = {};
-        }
-        
-        if (!cfg.env) {
-            cfg.env = K_DEFAULT_ENVIRONMENT;        
-        }
-        
-        if (!cfg.env) {          
+     
+        if (!cfg || !cfg.env) {          
             log('Unknown servise or site, cant find profile for ' + window.location.host, KellyTools.E_ERROR);
             return;
         } 
-                
-        handler.exec(cfg);
+        
+        env = cfg.env;
+        env.setLocation(cfg.location);          
+        env.setFav(handler);
     }
     
-    this.exec = function(cfg) {
-        
-        if (env) {
-            return;
-        }
-        
-        if (!cfg || !cfg.env) {
+    this.exec = function() {
+    
+        if (!env) {
             log('empty environment attribute or profile name', KellyTools.E_ERROR);
             return;
         }
-    
-        env = cfg.env;        
-        env.setFav(handler);
-        
-        var action = 'main';  
-        
-             if (cfg.initAction) action = cfg.action;
-        else if (env.getInitAction) {
-            action = env.getInitAction();
-        } 
             
-        if (action == 'ignore') {
-            // console.log('ignore ' + env.location.host);
-            return;
-        }
+        var action = env.getInitAction ? env.getInitAction() : 'main';            
+        if (action == 'ignore') return;
         
         if (isMediaResource() || window.location !== window.parent.location) { // iframe or media
             
@@ -9488,10 +9459,10 @@ function KellyFavItems(cfg)
                 handler.load(false, function() {
                     
                     if (env.getPosts()) {
-                        handler.initOnPageReady();
+                        handler.initFormatPage();
                     } else {
                         handler.addEventPListener(window, "load", function (e) {
-                            handler.initOnPageReady();
+                            handler.initFormatPage();
                             return false;
                         }, 'init_');
                     }
@@ -13976,7 +13947,9 @@ function KellyFavItems(cfg)
             handler.isDownloadSupported = response.isDownloadSupported;
                  
             if (!handler.isDownloadSupported) {
+                
                 log('browser not support download API. Most of functional is turned OFF');
+                
                 if (fav.coptions && fav.coptions.fastsave) {
                     fav.coptions.fastsave.enabled = false;
                 }
@@ -13991,7 +13964,7 @@ function KellyFavItems(cfg)
         return true;
     }
         
-    this.initOnPageReady = function() {
+    this.initFormatPage = function() {
         
         if (init) return false;
         init = true;
@@ -14123,31 +14096,7 @@ function kellyProfileJoyreactor() {
     var publicationClass = 'postContainer';
 
     this.className = 'kelly-jr-ui'; // base class for every extension container \ element
-    
-    /* imp */
-        
-    this.location = {
-        protocol : window.location.protocol,
-        host : window.location.host,
-        href : window.location.href,
-        hostParts : window.location.host.split('.'),
-        domain : null, // subdomain without fandom level
-        mediaDomain : null,
-    };
-        
-    if (this.location.hostParts.length >= 2) {
-        this.location.domain  = this.location.hostParts[this.location.hostParts.length-2];
-        this.location.domain += '.' + this.location.hostParts[this.location.hostParts.length-1];           
-    } else {
-        this.location.domain = this.location.host;
-    }
-    
-    // prevent 301 redirect in fandoms for media requests
-            
-    this.location.mediaDomain = this.location.domain == 'reactor.cc' ? 'reactor.cc' : handler.location.host;
-    
-    this.hostClass = handler.className + '-' + this.location.hostParts.join("-"); 
-        
+  
     this.hostList = [
         "joyreactor.cc", 
         "reactor.cc", 
@@ -14172,7 +14121,34 @@ function kellyProfileJoyreactor() {
       
     var sideBarDisabled = -1; // 1 - sidebar not found or hidden (jras - sidebar can be hidden)
     
-    this.fav = false;   
+    this.fav = false;
+    
+    /* imp */
+    
+    this.setLocation = function(location) {
+        
+        handler.location = {
+            protocol : location.protocol,
+            host : location.host,
+            href : location.href,
+            hostParts : location.host.split('.'),
+            domain : null, // subdomain without fandom level
+            mediaDomain : null,
+        };
+            
+        if (handler.location.hostParts.length >= 2) {
+            handler.location.domain  = handler.location.hostParts[handler.location.hostParts.length-2];
+            handler.location.domain += '.' + handler.location.hostParts[handler.location.hostParts.length-1];           
+        } else {
+            handler.location.domain = handler.location.host;
+        }
+        
+        // prevent 301 redirect in fandoms for media requests
+                
+        handler.location.mediaDomain = handler.location.domain == 'reactor.cc' ? 'reactor.cc' : handler.location.host; 
+        
+        handler.hostClass = handler.className + '-' + handler.location.hostParts.join("-");
+    }
     
     this.isNSFW = function() {
         
@@ -14240,7 +14216,7 @@ function kellyProfileJoyreactor() {
         
         /* 
             calls on document.ready, or if getPosts find some data
-            if return true prevent native init environment logic (initOnPageReady -> InitWorktop)
+            if return true prevent native init environment logic (initFormatPage -> InitWorktop)
         */        
         
         onPageReady : function() {
@@ -15326,8 +15302,7 @@ function kellyProfileJoyreactor() {
             
         }
         
-    }
-    
+    }   
 }
 
 kellyProfileJoyreactor.getInstance = function() {
@@ -15339,12 +15314,11 @@ kellyProfileJoyreactor.getInstance = function() {
 }// initialization
 
 
-if (typeof K_DEFAULT_ENVIRONMENT == 'undefined' || !K_DEFAULT_ENVIRONMENT) {
-    var K_DEFAULT_ENVIRONMENT = false;
-}
+// use chrome.tabs.executeScript(tabId, {file: filename}, function() {  handler.exec(); }); to inject custom environments instead of preseted
 
 if (typeof K_FAV == 'undefined') {
-    var K_FAV = new KellyFavItems();
+    var K_FAV = new KellyFavItems({env : kellyProfileJoyreactor.getInstance(), location : window.location});
+        K_FAV.exec();
 }
 
 // keep empty space to prevent syntax errors if some symbols will added at end

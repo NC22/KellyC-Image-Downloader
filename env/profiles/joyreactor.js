@@ -14,31 +14,7 @@ function kellyProfileJoyreactor() {
     var publicationClass = 'postContainer';
 
     this.className = 'kelly-jr-ui'; // base class for every extension container \ element
-    
-    /* imp */
-        
-    this.location = {
-        protocol : window.location.protocol,
-        host : window.location.host,
-        href : window.location.href,
-        hostParts : window.location.host.split('.'),
-        domain : null, // subdomain without fandom level
-        mediaDomain : null,
-    };
-        
-    if (this.location.hostParts.length >= 2) {
-        this.location.domain  = this.location.hostParts[this.location.hostParts.length-2];
-        this.location.domain += '.' + this.location.hostParts[this.location.hostParts.length-1];           
-    } else {
-        this.location.domain = this.location.host;
-    }
-    
-    // prevent 301 redirect in fandoms for media requests
-            
-    this.location.mediaDomain = this.location.domain == 'reactor.cc' ? 'reactor.cc' : handler.location.host;
-    
-    this.hostClass = handler.className + '-' + this.location.hostParts.join("-"); 
-        
+  
     this.hostList = [
         "joyreactor.cc", 
         "reactor.cc", 
@@ -63,7 +39,34 @@ function kellyProfileJoyreactor() {
       
     var sideBarDisabled = -1; // 1 - sidebar not found or hidden (jras - sidebar can be hidden)
     
-    this.fav = false;   
+    this.fav = false;
+    
+    /* imp */
+    
+    this.setLocation = function(location) {
+        
+        handler.location = {
+            protocol : location.protocol,
+            host : location.host,
+            href : location.href,
+            hostParts : location.host.split('.'),
+            domain : null, // subdomain without fandom level
+            mediaDomain : null,
+        };
+            
+        if (handler.location.hostParts.length >= 2) {
+            handler.location.domain  = handler.location.hostParts[handler.location.hostParts.length-2];
+            handler.location.domain += '.' + handler.location.hostParts[handler.location.hostParts.length-1];           
+        } else {
+            handler.location.domain = handler.location.host;
+        }
+        
+        // prevent 301 redirect in fandoms for media requests
+                
+        handler.location.mediaDomain = handler.location.domain == 'reactor.cc' ? 'reactor.cc' : handler.location.host; 
+        
+        handler.hostClass = handler.className + '-' + handler.location.hostParts.join("-");
+    }
     
     this.isNSFW = function() {
         
@@ -131,7 +134,7 @@ function kellyProfileJoyreactor() {
         
         /* 
             calls on document.ready, or if getPosts find some data
-            if return true prevent native init environment logic (initOnPageReady -> InitWorktop)
+            if return true prevent native init environment logic (initFormatPage -> InitWorktop)
         */        
         
         onPageReady : function() {
@@ -1217,8 +1220,7 @@ function kellyProfileJoyreactor() {
             
         }
         
-    }
-    
+    }   
 }
 
 kellyProfileJoyreactor.getInstance = function() {

@@ -87,7 +87,7 @@ KellyOptionsPage.init = function() {
           
     var onLoadFrontendController = function() {
 		
-        var onLoadCssResource = function(response) {
+        var onLoadOptionsCss = function(response) {
         
 			// console.log(response.url);
 			
@@ -105,24 +105,25 @@ KellyOptionsPage.init = function() {
 			}
 			
 			K_FAV.addCss(KellyTools.replaceAll(response.data.css, '__BASECLASS__', KellyOptionsPage.env.className));
+            
+            // instead of K_FAV.exec();
 			K_FAV.load(false, function() {
-				 K_FAV.initOnPageReady();
+				 K_FAV.initFormatPage();
 			});
 		};  
 		
 		KellyOptionsPage.showProfileSandbox();
 		
-        K_FAV = new KellyFavItems({initAction : 'ignore'});
-		
-        KellyTools.DEBUG = true;
-        
-        KellyOptionsPage.env = K_FAV.getGlobal('env');        
-        KellyOptionsPage.env.hostClass = 'options_page';
-		KellyOptionsPage.env.location = {
+        K_FAV = new KellyFavItems({env : kellyProfileJoyreactor.getInstance(), location : {
 			href : 'http:' + '//' + 'joyreactor.cc' + '/',
 			protocol : 'http:',
 			host : 'joyreactor.cc',
-		};  
+		}});
+		
+        KellyTools.DEBUG = true;
+        
+        KellyOptionsPage.env = K_FAV.getGlobal('env');
+        KellyOptionsPage.env.hostClass = 'options_page';
        
         document.title = KellyTools.getProgName();        
         
@@ -141,7 +142,7 @@ KellyOptionsPage.init = function() {
     
         }
                 
-        KellyTools.getBrowser().runtime.sendMessage({method: "getCss", items : [KellyOptionsPage.env.profile + '_options']}, onLoadCssResource);
+        KellyTools.getBrowser().runtime.sendMessage({method: "getCss", items : [KellyOptionsPage.env.profile + '_options']}, onLoadOptionsCss);
     }
      
     this.loadDiskete(this.front, onLoadFrontendController);
