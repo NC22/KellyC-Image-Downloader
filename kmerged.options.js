@@ -76,50 +76,50 @@ KellyOptionsPage.loadDiskete = function(src, onLoad) {
 }
 
 KellyOptionsPage.getContainer = function() {
-	
-	if (this.sandBox) return this.sandBox;
-	
-	this.sandBox = document.getElementById('page-sandbox');
-	return this.sandBox;	
+    
+    if (this.sandBox) return this.sandBox;
+    
+    this.sandBox = document.getElementById('page-sandbox');
+    return this.sandBox;    
 }
 
 KellyOptionsPage.init = function() {
           
     var onLoadFrontendController = function() {
-		
+        
         var onLoadOptionsCss = function(response) {
         
-			// console.log(response.url);
-			
-			if (!response || response.data === false) {	
-				KellyTools.log('onLoadCssResource : bad init data');
-				return false;
-			}
-			
-			if (!response.data.css) {
-				
-				KellyTools.log('onLoadCssResource : css empty');
-				KellyTools.log('onLoadCssResource : Browser API response : ' + response.data.notice);
-				
-				return false; 
-			}
-			
-			K_FAV.addCss(KellyTools.replaceAll(response.data.css, '__BASECLASS__', KellyOptionsPage.env.className));
+            // console.log(response.url);
+            
+            if (!response || response.data === false) {    
+                KellyTools.log('onLoadCssResource : bad init data');
+                return false;
+            }
+            
+            if (!response.data.css) {
+                
+                KellyTools.log('onLoadCssResource : css empty');
+                KellyTools.log('onLoadCssResource : Browser API response : ' + response.data.notice);
+                
+                return false; 
+            }
+            
+            K_FAV.addCss(KellyTools.replaceAll(response.data.css, '__BASECLASS__', KellyOptionsPage.env.className));
             
             // instead of K_FAV.exec();
-			K_FAV.load(false, function() {
-				 K_FAV.initFormatPage();
-			});
-		};  
-		
-		KellyOptionsPage.showProfileSandbox();
-		
+            K_FAV.load(false, function() {
+                 K_FAV.initFormatPage();
+            });
+        };  
+        
+        KellyOptionsPage.showProfileSandbox();
+        
         K_FAV = new KellyFavItems({env : kellyProfileJoyreactor.getInstance(), location : {
-			href : 'http:' + '//' + 'joyreactor.cc' + '/',
-			protocol : 'http:',
-			host : 'joyreactor.cc',
-		}});
-		
+            href : 'http:' + '//' + 'joyreactor.cc' + '/',
+            protocol : 'http:',
+            host : 'joyreactor.cc',
+        }});
+        
         KellyTools.DEBUG = true;
         
         KellyOptionsPage.env = K_FAV.getGlobal('env');
@@ -128,13 +128,13 @@ KellyOptionsPage.init = function() {
         document.title = KellyTools.getProgName();        
         
         var nativeOnExtensionReady = KellyOptionsPage.env.events.onExtensionReady;
-				
+                
         KellyOptionsPage.env.events.onExtensionReady = function() {
             
             if (nativeOnExtensionReady) nativeOnExtensionReady();
             
-			K_FAV.getGlobal('image_events').saveImageProportions = function() { return; }			
-			K_FAV.aspectRatioAccurCheck = false; // копирайт портит проверку соотношения сторон, отключаем
+            K_FAV.getGlobal('image_events').saveImageProportions = function() { return; }            
+            K_FAV.aspectRatioAccurCheck = false; // копирайт портит проверку соотношения сторон, отключаем
             K_FAV.isDownloadSupported = false; // Обратная связь при скачивании файла до таба настроек не дойдет т.к. не настроен селектор matches, см. KellyEDispetcher.sendNotification
             K_FAV.showOptionsDialog(); 
             
@@ -172,7 +172,7 @@ KellyOptionsPage.showProfileSandbox = function() {
             </div>\
         </div>\
     ';
-	
+    
     if (!this.getContainer()) {
         
         KellyTools.log('KellyOptionsPage : cant get container');
@@ -180,7 +180,7 @@ KellyOptionsPage.showProfileSandbox = function() {
     }
     
     KellyTools.setHTMLData(this.getContainer(), sandboxHtml);
-	return true;
+    return true;
 }
 
 // initialization
