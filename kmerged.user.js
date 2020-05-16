@@ -6465,12 +6465,8 @@ function KellyGrabber(cfg) {
             })
             .then(function(response) {
                 
-                 console.log('ok start get blob');
-                     
                 return response.blob().then(function(blob) {
                     
-                     console.log('get blob ' + response.headers.get("Content-Type"));
-                     
                     if (transportMethod == KellyGrabber.TRANSPORT_BLOBBASE64) {
                             
                         KellyTools.blobToBase64(blob, function(base64) {
