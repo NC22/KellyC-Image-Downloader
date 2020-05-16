@@ -4074,6 +4074,8 @@ function KellyFavStorageManager(cfg) {
             
             data.coptions.fastsave = {
                 baseFolder : env.profile + '/' + 'Fast',
+                baseFolderConfigurable : env.profile + '/' + 'Fast',
+                qualityConfigurable : 'hd',
                 // nameTemplate : '#category_1#/#id#_#category_1#_#category_2#_#category_3#',
                 enabled : false,
                 check : false,
@@ -7323,14 +7325,16 @@ function KellyFastSave(cfg) {
             options.fastsave.qualityConfigurable = lastQuality;
             options.fastsave.baseFolderConfigurable = KellyTools.validateFolderPath(KellyTools.getElementByClass(container, baseClass + 'download-folder').value); 
             
-            handler.favEnv.save('cfg');
-            
             handler.downloadTooltip.show(false);
-            handler.downloadPostData(postData, onDownloadEnd, onDownloadInit, {
-                baseFolder : options.fastsave.baseFolderConfigurable,
-                quality : lastQuality,
+            
+            handler.favEnv.save('cfg', function() {
+                
+                handler.downloadPostData(postData, onDownloadEnd, onDownloadInit, {
+                    baseFolder : options.fastsave.baseFolderConfigurable,
+                    quality : lastQuality,
+                });
+                
             });
-
             return false; 
         };
         
