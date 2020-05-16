@@ -157,6 +157,12 @@
     },
     "download":{  
         "message":"Download"
+    },  
+    "download_hd":{  
+        "message":"Download hd"
+    },   
+    "download_preview":{  
+        "message":"Download preview"
     },
     "download_example":{  
         "message":"Please enter pages, that need to be downloaded (ex. 2, 4, 66-99, 44, 78, 8-9, 29-77 etc."
@@ -254,6 +260,9 @@
     "fast_save_enabled":{  
         "message":"Display fast save button"
     },  
+    "fast_save_configurable_enabled":{  
+        "message":"Display configurable fast save button"
+    },  
     "fix_proportions":{  
         "message":"Update proportions"
     },  
@@ -273,7 +282,7 @@
         "message":"Save to"
     },
     "fast_save_check":{  
-        "message":"Check file already downloaded"
+        "message":"Check file already downloaded (beta)"
     }, 
     "fast_save_check_notice":{  
         "message":"If file already downloaded, then green marker will be added to download button"

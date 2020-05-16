@@ -137,6 +137,35 @@
     color : #fff;
 }
 
+.__BASECLASS__-download-tooltipster .__BASECLASS__-tooltipster-container {
+    background: rgba(255, 255, 255, 0.949);
+    border: 2px solid #1ec1ff;
+}
+
+.__BASECLASS__-download-tooltipster .__BASECLASS__-tooltipster-content a {
+    padding: 6px;
+    display: inline-block;
+    color: #000;
+}
+
+.__BASECLASS__-download-tooltipster .__BASECLASS__-tooltipster-content a.active {
+    background: #fecc65;
+}
+
+.__BASECLASS__-download-tooltipster .__BASECLASS__-tooltipster-close {
+
+    border: 2px solid #1ec1ff;
+    width: 26px;
+    height: 26px;
+    line-height: 21px;
+    background: #fff;
+}
+
+.__BASECLASS__-download-tooltipster .__BASECLASS__-tooltipster-close svg g line {
+    stroke: #000;
+    fill: #000;
+}
+
 .__BASECLASS__-tooltipster-close {
     
     top: -32px;
@@ -151,7 +180,7 @@
     */
     
     text-align: center;
-    border-radius: 13px;
+    border-radius: 6px;
     
 	left: 0px;
 	right: auto;
@@ -1118,11 +1147,15 @@
 }
 
 .__BASECLASS__-icon-gear {
-    background-image : url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAYCAYAAAAPtVbGAAADz0lEQVRIiaXWz29UVRQH8M+bTjtzaSEdCAuEHf4FxBDEGKFiWLhWoywwTVwQYGNKAhY3CClqd6hdSEyQQGKMiUZdmEj5kRQbFsa4M5GwkEoCoa1l6Jtphz4X970yHURMPMnNvHfvO+d77vmeHyPLMo9bhQxTO8Y8smIdY36YmidIlmVKSZJoX4eSJBxKkpAkCRgirOF6L+H2ANO7uD1Ab74/RCgMDhHa3wspt78MU1vD9XJ83tyM2wmqAeufzTVahHHuURUNq1Bdy/VWrnuCmcJu0gmwitqB8VNuTf724Ow7H2VlyhXsPyKaLKTBxyM0SVvow2s7hHOXaDAzlwNlWRZvUoQkUDvwy9eUl2yYP9i1Gq/uJPSgpyMGPQzuptkSvhznrcPxloNdfHZBTQzlRqRJAbKBu2+PnwrWP8V3e1mo06D5K5UtKP0Lu0ttgW9x9wpnLktvse7DLEuXVVs0Tg0c5MZVGvW4WaXyTASYm+TeBPWJ+Ds3mSuWOphtcf5ytPc4TqZ6CYO7CdvavG+weoSj6MYijuNeJ08txt7jHukcGwvyS0W4mjngA7EQlsPQYGyEw6RZJDnNSA+Tjo3Ec0srIwer+XOYtZC0pW21TBh8kb7tEb4+wZkfmcUsT3uYlilCPzf7CXt30fdcPKhP8M0V7i48zLLyGqbKhMGX6O6hd4vlWigAjkYHZzDdFpyA6nHxu/15DfU9z8tJDMnn42qYKmWEEvo/+Fbv+99TeWhlMXKQbo2p2A4A01vZ3E222HHQv51KhT07Kef2o3RX4vpnaT5m/y9tWdQprdzRUhLjS3OBZnMFiXkmhWtc92hPCtf4fZHQ3Wl9iftNNl2UNjm/THyVaonwZgeJOS/pLJsUDuUgjxBfiu7Xr3L6AveZmWXjcsUjrOdmL2H/uyL5S1iIKTxN2pXbWRJTfS1h3xGx5eQH85Oc/oFGXiuBmRKMklby8ljRPUqosu8IJwkJoZz/niwAqiuVEnTlz00aR/M9Q/EWU4Hawc4qzmM8N0nyICpkyLpYs63ju+KaC3wyIr3BulHS5a5TpvrGCx7pQ4WXjxjMwZs/s9ik1MWqrbl+mdd3MruW0a/aTLZonLssDJbzim/x6UleGaBS7uhlOcD8NdIFzl2MW4Mt+rZRn+TsRf5oCyEeDq0qtT07+OKStJ47ViE8aWiJx2HPDorBdYeNo8U86QQqYzqO34Y861YT9g1bbjljJ2K3vZOndoVq0QNbNObaRvCKGX+CmXyaGc1rYij3OyXc+YlyidbScsE0kObfpoVuu/5/lv/zlwj+Bj5ff0CCjHTwAAAAAElFTkSuQmCC');
+    background-image : url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAYCAMAAAA4a6b0AAAAmVBMVEUAAABvAACJAAB7AACJAAB1AACDAACNAACVAACNAACRAAAAAAA2AAAAAAA2AADmhmzuQQAEAACEAACBAAB0AADeUwD/gAD/fQCVAAD/eQDzQwCRAACOAAD2RwCIAAAAAADvQwDqQgDsPwCEAADxRgAMAAD/z7P/gwD3SwDsQQD/07X/1K7/vpOaAQD/2bz/1Lr/snP/hwykBgCbKPzjAAAAFnRSTlMACfYR7hL29vbu9u4cEhH89vbupSMJy3szKwAAATVJREFUKM91UtlywyAMtATYuXtz+07SuEl6/f/HFYHrjB+yY8/ALItWWrIJLK/rOmfZDADh575tWs+BttNpvmRMoDbSaBTAlpz9E+7yUPlAyEAVuOhcooC741npoZSEsrkaZR0HYorL+Ueak5IJKnxdAUnzLQl7a+0+rkzSZAx1SdtD5auDIZXGVEegK6l2joi5NpFBQc4KZ5W0un8VAkSurZT2l9yhb0Jxpft6Gy7Y1r0OFprGYVb548e7VB43GWFTeUXmBx+Yr8/I7CKzw8S0VYakodvWsYV1vE21Ty/BwcpRUZ0LgNGBsv4ZomutZq5l6VJDjJhbp8RoHKdjZtOhU4s00S5IpnmebBnae3xLGqvMtRlTGJyzxq5gTK5bYDElhy5EB1PacEs7TJKzey+EFPdf1R99cSQu29ieZAAAAABJRU5ErkJggg==')
 }
 
 .__BASECLASS__-icon-download {
     background-image : url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAgCAYAAAAFQMh/AAAAvUlEQVRIie2X0RGDIBBE9xyrSRE2YRFJSVJEaiQfziaj5oDLCNxMfL8oyxPmOAUAYozQeN4E8wT9ge9IcjAAQ26GeTJGFjKqI4/koisEVw48BjcKJEOP0E9wB67gZvBUWytTjtx88n+fuvses4Kcvdd73pWquzGpZX6oyW6MyVnm6u3jzpj8ap69Z90ak1Lz4o7CvTHRzM29kwPjpfDgro2hmN7ZE2SdIPULowRvMS5AhMH36rfSNjhcHUhDXif2HMDvUkxoAAAAAElFTkSuQmCC');
+}
+
+.__BASECLASS__-icon-download-configurable {
+    background-image : url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAgAQMAAAA/jlo8AAAABlBMVEUAAAAewf9MPD43AAAAAXRSTlMAQObYZgAAADRJREFUCNdjYKj/wUAaUf///w90Qv7//wcQgv3//wYIwfj/HwOIQDFA/gGMYG+AEHCA1WQAN5c/SQvheqcAAAAASUVORK5CYII=')
 }
 
 .__BASECLASS__-fast-save, .__BASECLASS__-sidebar-addtofav {
@@ -1550,16 +1583,19 @@
     background : #fff;
     color : #000;
     font-size : 12px;
+    box-sizing: border-box;
 }
 
 .__BASECLASS__-downloader-error-list-itemsline textarea {
     width: 100%;
     height: 50px;
+    box-sizing: border-box;
 }
 
 .__BASECLASS__-downloader-error-list-errorsLine textarea {
     width: 100%;
-    height: 200px;
+    height: 200px; 
+    box-sizing: border-box;
 }
 
 .__BASECLASS__-downloader-progressbar {

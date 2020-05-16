@@ -68,7 +68,7 @@
    @description    creates tooltip elements (attaches to an element or screen) widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.0.3 06.05.20
+   @version        v 1.0.4 14.05.20
    
    ToDo : 
    
@@ -89,6 +89,7 @@ function KellyTooltip(cfg) {
     this.hideWidth = false;
     this.minWidth = false;
     
+    var closeByBodyPrevent = false; // skip onclick event after show (maybe disable body event complitely when show - false)
     this.closeByBody = false;
     
     this.self = false;
@@ -103,6 +104,8 @@ function KellyTooltip(cfg) {
     this.offset = {left : 0, top : -20};
     
     this.removeOnClose = false;
+    this.removeSelfDelay = 600;
+    
     this.closeButton = true;
     this.zIndex = false;
     
@@ -152,6 +155,7 @@ function KellyTooltip(cfg) {
             'zIndex', 
             'closeButton', 
             'removeOnClose',
+            'removeSelfDelay',
         ];
         
         for (var i=0; i < settings.length; i++) {
@@ -279,7 +283,7 @@ function KellyTooltip(cfg) {
      
         events.onBodyClick = function(e) {
             
-            if (handler.closeByBody && !handler.isChild(e.target, handler.self)) {
+            if (handler.closeByBody && handler.isShown() && !closeByBodyPrevent && !handler.isChild(e.target, handler.self)) {
                 handler.show(false);
             }
         };
@@ -383,6 +387,12 @@ function KellyTooltip(cfg) {
             
             handler.contentId = contentId;
             
+            
+            closeByBodyPrevent = true;            
+            if (handler.closeByBody) {
+                setTimeout(function() { closeByBodyPrevent = false; }, 100);
+            }
+            
         } else {
             if (handler.userEvents.onClose) handler.userEvents.onClose(handler);
             
@@ -399,7 +409,11 @@ function KellyTooltip(cfg) {
     
     this.remove = function() {
         if (handler.self) {
-            handler.self.parentNode.removeChild(handler.self);
+            
+            var self = handler.self;
+            
+            setTimeout(function() { self.parentNode.removeChild(self); }, handler.removeSelfDelay);
+            
             handler.self = false;
             
             // но можно и добавлять \ удалять события при показе \ скрытии подсказки
@@ -4051,6 +4065,7 @@ function KellyFavStorageManager(cfg) {
                 cssItem : '',
                 perPage : 60,                
                 viewerShowAs : 'hd',
+                autoScroll : 1,
                 lazy : true,
             };
         }  
@@ -4063,6 +4078,7 @@ function KellyFavStorageManager(cfg) {
                 enabled : false,
                 check : false,
                 conflict : 'overwrite',
+                configurableEnabled : false,
             };
         }
         
@@ -5562,7 +5578,7 @@ function KellyGrabber(cfg) {
             positionX : 'left',				
             ptypeX : 'inside',
             ptypeY : 'inside',
-           // closeByBody : true,
+            closeByBody : true,
             closeButton : true,
             removeOnClose : true,                    
             selfClass : envVars.hostClass + ' ' + envVars.className + '-tooltipster-help',
@@ -5581,11 +5597,7 @@ function KellyGrabber(cfg) {
         KellyTools.setHTMLData(tcontainer, '<div>' + html + '</div>');
         
         tooltip.show(true);   
-        tooltip.updatePosition();
-        
-        setTimeout(function() {
-            tooltip.updateCfg({closeByBody : true});            
-        }, 400);     
+        tooltip.updatePosition();   
                     
         return true;
     }
@@ -6402,28 +6414,6 @@ function KellyGrabber(cfg) {
         
         if (requestMethod == KellyGrabber.REQUEST_XML) {
         
-        /*
-            could be replaced by fetch implementation if needed
-       
-            var controller = new AbortController();
-            var signal = controller.signal;
-            
-            fetch(urlOrig, {signal: controller.signal, mode: 'cors'})
-            .then(function(response) {
-                return response.blob().then(...);
-            })
-            .then(function(text) {
-                console.log('success', text);
-            })
-            .catch(function(error) {
-                console.log('fail', error)
-            });
-              
-            return controller;
-            
-        */
-        
-        
             var xhr = new XMLHttpRequest();
                 xhr.responseType = 'blob';
 
@@ -6459,6 +6449,55 @@ function KellyGrabber(cfg) {
                 xhr.send();  
             
             return xhr;
+            
+        } else if (requestMethod == KellyGrabber.REQUEST_FETCH) {
+            
+            var controller = new AbortController();
+
+            fetch(urlOrig, {
+                signal: controller.signal, 
+                method: 'GET',
+                cache: 'no-cache',
+                mode: 'cors',
+                referrer:  fav.getGlobal('env').location.protocol  + '//' + fav.getGlobal('env').location.domain + '/',
+                redirect: 'follow',
+                referrerPolicy : 'no-referrer-when-downgrade',
+            })
+            .then(function(response) {
+                
+                 console.log('ok start get blob');
+                     
+                return response.blob().then(function(blob) {
+                    
+                     console.log('get blob ' + response.headers.get("Content-Type"));
+                     
+                    if (transportMethod == KellyGrabber.TRANSPORT_BLOBBASE64) {
+                            
+                        KellyTools.blobToBase64(blob, function(base64) {
+                            
+                            callback(urlOrig, {base64 : base64, type : response.headers.get("Content-Type")});
+                          
+                        });
+                        
+                    } else {
+                    
+                        callback(urlOrig, blob);
+                    }
+                        
+                });
+                
+            })
+            .then(function(text) {
+               // console.log('success', text);
+            })
+            .catch(function(error) {
+                                    
+                callback(urlOrig, false, -1, 'check connection or domain mismatch (Access-Control-Allow-Origin header) | input url ' + urlOrig);
+                    
+                // console.log('fail', error)
+            });
+              
+            return controller;
             
         } else {
             
@@ -7132,6 +7171,7 @@ KellyGrabber.TRANSPORT_BLOBBASE64 = 1002;
 
 KellyGrabber.REQUEST_IFRAME = 2001;
 KellyGrabber.REQUEST_XML = 2002;
+KellyGrabber.REQUEST_FETCH = 2003;
 
 KellyGrabber.DOWNLOADID_GET_PROCESS = -1;
 KellyGrabber.DOWNLOADID_INACTIVE = false;
@@ -7139,7 +7179,7 @@ KellyGrabber.DOWNLOADID_INACTIVE = false;
 KellyGrabber.validateDriver = function(driver) {
             
     var availableTransport = [KellyGrabber.TRANSPORT_BLOB, KellyGrabber.TRANSPORT_BLOBBASE64];          
-    var availableRequest = [KellyGrabber.REQUEST_XML, KellyGrabber.REQUEST_IFRAME];
+    var availableRequest = [KellyGrabber.REQUEST_XML, KellyGrabber.REQUEST_IFRAME, KellyGrabber.REQUEST_FETCH];
     
     var defaultDriver = {
            requestMethod : availableRequest[0], 
@@ -7175,6 +7215,8 @@ function KellyFastSave(cfg) {
     
     var handler = this;   
     
+    this.downloadTooltip = false;
+    
     this.favEnv = false;
     
     /*
@@ -7186,8 +7228,9 @@ function KellyFastSave(cfg) {
     this.isAvailable = function() {
                 
         if (
-            !handler.favEnv.isDownloadSupported || 
-            !handler.favEnv.getGlobal('fav').coptions.fastsave.enabled
+            !handler.favEnv.isDownloadSupported
+            // || !handler.favEnv.getGlobal('fav').coptions.fastsave.enabled
+            // || !handler.favEnv.getGlobal('fav').coptions.fastsave.configurableEnabled
         ) {
             return false;
         } else return true;
@@ -7203,6 +7246,148 @@ function KellyFastSave(cfg) {
         handler.favEnv.getDownloadManager().cancelDownloads();
     }
     
+    this.showFastSaveButton = function(postBlock, placeholder, showButton, configurable, classPrefix) {
+        
+        var buttonClass =  classPrefix + '-fast-save' + (configurable ? ' ' + classPrefix + '-fast-save-configurable' : '');
+        var iconClass =  classPrefix + '-icon-download' + (configurable ? '-configurable' : '');
+        
+        var fastSave = KellyTools.getElementByClass(placeholder, buttonClass);
+        
+        if (showButton) {
+            
+            if (!fastSave) {
+                
+                fastSave = document.createElement('DIV'); 
+                fastSave.title = KellyLoc.s('', 'fast_download');     
+                
+                placeholder.appendChild(fastSave); 
+                    
+                var fastSaveBaseClass =  handler.favEnv.getGlobal('env').hostClass + ' ' + classPrefix + '-post-button-base ' + buttonClass + ' ' + iconClass + ' ';
+            
+                fastSave.className = fastSaveBaseClass + (configurable ? '' : classPrefix + '-fast-save-unchecked');
+                fastSave.onclick = function() {
+                    
+                    if (this.className.indexOf('unavailable') != -1) return false;
+                    
+                    if (this.className.indexOf('loading') != -1) {
+                        
+                        handler.downloadCancel();
+                        fastSave.classList.remove(classPrefix + '-fast-save-loading');                          
+                        
+                    } else {
+                        
+                        var onDownloadSuccess = function(success) {
+                            fastSave.classList.remove(classPrefix + '-fast-save-loading');
+                            fastSave.className = fastSaveBaseClass + classPrefix + '-fast-save-' + (success ? '' : 'not') + 'downloaded';
+                        };
+                        
+                        var onDownloadInit = function() {
+                            fastSave.classList.remove(classPrefix + '-fast-save-unchecked');
+                            fastSave.classList.add(classPrefix + '-fast-save-loading');
+                        };
+                        
+                        if (configurable) {
+                            handler.showDownloadPostDataForm(fastSave, postBlock, onDownloadSuccess, onDownloadInit);
+                        } else {                        
+                            handler.downloadPostData(postBlock, onDownloadSuccess, onDownloadInit);
+                        }
+                        
+                    }
+                    
+                    return false;
+                }  
+            } 
+            
+        } else {
+            
+            if (fastSave) {
+                fastSave.parentNode.removeChild(fastSave);
+            }
+                        
+            fastSave = false;
+        }
+        
+        return fastSave;
+    }
+    
+    this.showDownloadPostDataForm = function(target, postData, onDownloadEnd, onDownloadInit) {
+        
+        var env = handler.favEnv.getGlobal('env');
+        var baseClass = env.className + '-download-tooltipster-';                 
+        var options = handler.favEnv.getGlobal('fav').coptions;
+        
+        var lastQuality = !options.fastsave.qualityConfigurable ? 'hd' : options.fastsave.qualityConfigurable;
+        
+        var downloadClick = function(qualitySelector) { 
+        
+            if (qualitySelector) {
+                lastQuality = qualitySelector.getAttribute('data-quality') == 'hd' ? 'hd' : 'preview';
+            }
+            
+            options.fastsave.qualityConfigurable = lastQuality;
+            options.fastsave.baseFolderConfigurable = KellyTools.validateFolderPath(KellyTools.getElementByClass(container, baseClass + 'download-folder').value); 
+            
+            handler.favEnv.save('cfg');
+            
+            handler.downloadTooltip.show(false);
+            handler.downloadPostData(postData, onDownloadEnd, onDownloadInit, {
+                baseFolder : options.fastsave.baseFolderConfigurable,
+                quality : lastQuality,
+            });
+
+            return false; 
+        };
+        
+         if (this.downloadTooltip && this.downloadTooltip.isShown() && this.downloadTooltip.getTarget() == target) {
+             // handler.downloadTooltip.show(false);
+             downloadClick();
+             return;
+         }
+        
+         if (!this.downloadTooltip) {
+             this.downloadTooltip = new KellyTooltip({
+                    target : target, 
+                    offset : {left : 0, top : 8}, 
+                    positionY : 'bottom',
+                    positionX : 'right',
+                    ptypeX : 'inside',                
+                    ptypeY : 'outside',
+                    avoidOutOfBounds : false,
+                    closeButton : true,
+                    closeByBody : true,
+                    removeOnClose : false,                    
+                    selfClass : env.hostClass + ' ' + env.className + '-download-tooltipster',
+                    classGroup : env.className + '-tooltipster',
+                });
+         } else {
+             this.downloadTooltip.updateCfg({
+                 target : target,
+             });
+         }
+        
+        var baseFolder = options.fastsave.baseFolderConfigurable ? options.fastsave.baseFolderConfigurable : options.fastsave.baseFolder;
+                 
+        var html = '\
+            <div class="' + env.className + '-download-tooltipster-content">\
+                <div>\
+                    <p><input type="text" placeholder="' + KellyLoc.s('Сохранять в папку', 'fast_save_to') + '" value="' + baseFolder + '" class="' + baseClass + 'download-folder"></p>\
+                    <p>\
+                        <a href="#" data-quality="hd" class="' + baseClass + 'download-hd ' + (lastQuality == 'hd' ? 'active' : '')+ '">' + KellyLoc.s('Скачать оригинал (HD)', 'dowload_hd') + '</a>\
+                        <a href="#" data-quality="preview" class="' + baseClass + 'download ' + (lastQuality != 'hd' ? 'active' : '')+ '">' + KellyLoc.s('Скачать превью', 'dowload_preview') + '</a>\
+                    </p>\
+                </div>\
+            </div>';
+            
+             
+        var container = this.downloadTooltip.getContent();
+        KellyTools.setHTMLData(container, html);
+        
+        KellyTools.getElementByClass(container, baseClass + 'download').onclick = function() { return downloadClick(this); };
+        KellyTools.getElementByClass(container, baseClass + 'download-hd').onclick =  function() { return downloadClick(this); };
+        
+        this.downloadTooltip.show(true);
+    }
+    
     /*
         Asyc download publication. Download folder \ overwrite rules taken from main config - fav.coptions (handler.favEnv.getGlobal('fav'))
         
@@ -7211,22 +7396,31 @@ function KellyFastSave(cfg) {
         
     */
     
-    this.downloadPostData = function(postData, onDownload) {
+    this.downloadPostData = function(postData, onDownloadEnd, onDownloadInit, dmOptions) {
         
         if (!handler.isAvailable()) {
-            if (onDownload) onDownload(false);
+            
+            KellyTools.log('downloadPostData - download is not available', 'KellyFastSave');
+            
+            if (onDownloadEnd) onDownloadEnd(false);
             return false;
         }
                       
         var postMedia = handler.favEnv.getGlobal('env').getAllMedia(postData);        
-        if (!postMedia || !postMedia.length) {            
-            if (onDownload) onDownload(false);
+        if (!postMedia || !postMedia.length) {
+        
+            KellyTools.log('downloadPostData - fail to get media from post', 'KellyFastSave');
+            
+            if (onDownloadEnd) onDownloadEnd(false);
             return false;
         }
         
         var dm = handler.favEnv.getDownloadManager();
-        if (dm.getState() != 'wait') {            
-            if (onDownload) onDownload(false);
+        if (dm.getState() != 'wait') {
+            
+            KellyTools.log('downloadPostData - beasy state ' + dm.getState(), 'KellyFastSave');
+            
+            if (onDownloadEnd) onDownloadEnd(false);
             return false;
         }
         
@@ -7241,11 +7435,15 @@ function KellyFastSave(cfg) {
             events : false,
         });
         
-        dm.updateCfg({
-            options : {    
+        if (!dmOptions) {
+            dmOptions = {    
                 baseFolder : options.fastsave.baseFolder,
                 nameTemplate : '#filename#',
-            },
+            };
+        }
+        
+        dm.updateCfg({
+            options : dmOptions,
             events : {
                 
                 onOptionsUpdate : function() {
@@ -7263,7 +7461,7 @@ function KellyFastSave(cfg) {
                     KellyTools.log(result, 'KellyFastSave | downloadPostData');   
                     var success = (result.complete == postMedia.length) ? true : false;
                     
-                    if (onDownload) onDownload(success);
+                    if (onDownloadEnd) onDownloadEnd(success);
                 },
             }
         });
@@ -7277,9 +7475,10 @@ function KellyFastSave(cfg) {
         }
         
         if (!dm.download()) {
-            if (onDownload) onDownload(false);   
+            if (onDownloadEnd) onDownloadEnd(false);   
         }
-
+        
+        if (onDownloadInit) onDownloadInit();
         return true;
     }
  
@@ -8453,10 +8652,15 @@ function KellyOptions(cfg) {
         
         if (handler.favEnv.isDownloadSupported) {
             
+            var htmlFastIcon = '<div class="' + env.hostClass + ' ' + env.className + '-fast-save ' + env.className +'-icon-download" style="display:  inline-block; margin: 0;margin-left: 8px; margin-right: 8px;"></div>';
+            var htmlFastIconConfigurable = htmlFastIcon.replace('icon-download', 'icon-download-configurable');
+            
             output += '<h3>' + lng.s('Быстрое сохранение', 'fast_download') + '</h3>';	
             
             output += '<table class="' + env.className + '-options-table">\
-                <tr><td colspan="2"><label><input type="checkbox" class="' + env.className + 'FastSaveEnabled" ' + (fav.coptions.fastsave.enabled ? 'checked' : '') + '> ' + lng.s('Показывать кнопку быстрого сохранения для публикаций', 'fast_save_enabled') + '</label></td></tr>\
+                <tr><td colspan="2">\
+                    <label><input type="checkbox" class="' + env.className + 'FastSaveEnabled" ' + (fav.coptions.fastsave.enabled ? 'checked' : '') + '> ' + htmlFastIcon + lng.s('Показывать кнопку быстрого сохранения для публикаций', 'fast_save_enabled') + '</label>\
+                </td></tr>\
                 <tr><td>' + lng.s('Сохранять в папку', 'fast_save_to') + '</td><td><input type="text" class="' + env.className + 'FastSaveBaseFolder" placeholder="' + env.profile + '/Fast' + '" value="' +  fav.coptions.fastsave.baseFolder + '"></td></tr>\
                 <tr class="radioselect"><td colspan="2">\
                     \
@@ -8473,6 +8677,10 @@ function KellyOptions(cfg) {
                     <p>' + lng.s('Если файл уже скачан ранее, к кнопке сохранения будет добавлен зеленый маркер', 'fast_save_check_notice') + '</p>\
                     </td>\
                 </tr>\
+                <tr><td colspan="2">\
+                    <label><input type="checkbox" class="' + env.className + 'FastSaveConfigurableEnabled" ' + (fav.coptions.fastsave.configurableEnabled ? 'checked' : '') + '>\
+                    ' + htmlFastIconConfigurable + lng.s('Показывать кнопку настраевомого быстрого сохранения для публикаций', 'fast_save_configurable_enabled') + '</label>\
+                </td></tr>\
                 <!--tr><td>Шаблон имени файла</td><td><input type="text" class="' + env.className + 'FastSaveNameTemplate" value="' +  fav.coptions.fastsave.nameTemplate + '"></td></tr-->\
             ';
             
@@ -8563,6 +8771,7 @@ function KellyOptions(cfg) {
             output += '<select class="' + env.className + 'GrabberRequest">';
             output += '<option value="' + KellyGrabber.REQUEST_XML + '" ' + (fav.coptions.grabberDriver.requestMethod == KellyGrabber.REQUEST_XML ? 'selected' : '') + '>' + lng.s('', 'grabber_request_xml') + '</option>';
             output += '<option value="' + KellyGrabber.REQUEST_IFRAME + '" ' + (fav.coptions.grabberDriver.requestMethod == KellyGrabber.REQUEST_IFRAME ? 'selected' : '') + '>' + lng.s('', 'grabber_request_iframe') + '</option>';
+            output += '<option value="' + KellyGrabber.REQUEST_FETCH + '" ' + (fav.coptions.grabberDriver.requestMethod == KellyGrabber.REQUEST_FETCH ? 'selected' : '') + '>' + lng.s('Fetch', 'grabber_request_fetch') + '</option>';
             output += '</select>&nbsp;&nbsp;&nbsp;(<a href="#" class="' + env.className + '-help" data-tip="grabber_request_help">' + lng.s('', 'tip') + '</a>)';
             
             output += '</td></tr>';           
@@ -8631,7 +8840,8 @@ function KellyOptions(cfg) {
                     ptypeX : 'inside',
                     ptypeY : 'inside',
                     closeButton : true,
-                    removeOnClose : true,                    
+                    removeOnClose : true, 
+                    closeByBody : true,
                     selfClass : env.hostClass + ' ' + env.className + '-tooltipster-help',
                     classGroup : env.className + '-tooltipster',
                 });
@@ -8644,13 +8854,7 @@ function KellyOptions(cfg) {
                 var tcontainer = tooltip.getContent();
                 KellyTools.setHTMLData(tcontainer, '<div>' + html + '</div>');
                 
-                setTimeout(function() {
-                    
-                    tooltip.show(true);                    
-                    tooltip.updatePosition();
-                    tooltip.updateCfg({closeByBody : true});
-                    
-                }, 100);
+                tooltip.show(true);
                 return false;
             }
         }
@@ -8824,6 +9028,11 @@ function KellyOptions(cfg) {
             if (fastSaveCurrent != fav.coptions.fastsave.enabled) {
                 refreshPosts = true;
             }
+                 
+            var fastSaveCCurrent = KellyTools.getElementByClass(favContent, env.className + 'FastSaveConfigurableEnabled').checked ? true : false;            
+            if (fastSaveCCurrent != fav.coptions.fastsave.configurableEnabled) {
+                refreshPosts = true;
+            }    
             
             var fconflictActions = document.getElementsByClassName(env.className + '-conflict');
             var fconflict = 'overwrite';
@@ -8843,6 +9052,7 @@ function KellyOptions(cfg) {
                 enabled : fastSaveCurrent,
                 check :  KellyTools.getElementByClass(favContent, env.className + 'FastSaveCheck').checked ? true : false,
                 conflict : fconflict,
+                configurableEnabled : fastSaveCCurrent,
             };
             
         }
@@ -13898,16 +14108,20 @@ function kellyProfileJoyreactor() {
         protocol : window.location.protocol,
         host : window.location.host,
         href : window.location.href,
+        domain : null, // subdomain without fandom level
+        mediaDomain : null,
     };
-    
-    // get current main subdomain
-    
+        
     this.domainParts = this.location.host.split('.');
     if (this.domainParts.length >= 2) {
         this.location.domain = this.domainParts[this.domainParts.length-2] + '.' + this.domainParts[this.domainParts.length-1];           
     } else {
         this.location.domain = this.location.host;
-    }    
+    }
+    
+    // prevent 301 redirect in fandoms for media requests
+            
+    this.location.mediaDomain = this.location.domain == 'reactor.cc' ? 'reactor.cc' : handler.location.host;
     
     this.hostClass = handler.className + '-' + this.domainParts.join("-"); 
         
@@ -13916,6 +14130,8 @@ function kellyProfileJoyreactor() {
         "reactor.cc", 
         "joyreactor.com",
         "jr-proxy.com",
+        "jrproxy.com",
+        "cookreactor.com",
         "pornreactor.cc",
         "thatpervert.com",
         "fapreactor.com",
@@ -14341,59 +14557,6 @@ function kellyProfileJoyreactor() {
         return (postBlock.innerHTML.indexOf('/images/censorship') != -1 || postBlock.innerHTML.indexOf('/images/unsafe_ru') != -1) ? true : false;
     }
 
-    function updateFastSaveButton(postBlock, placeholder, showButton) {
-        
-        var fastSave = KellyTools.getElementByClass(placeholder,  handler.className + '-fast-save');
-        
-        if (!isPostCensored(postBlock) && showButton) {
-            
-            if (!fastSave) {
-                
-                fastSave = document.createElement('DIV'); 
-                fastSave.title = KellyLoc.s('', 'fast_download');     
-                
-                placeholder.appendChild(fastSave); 
-                    
-                var fastSaveBaseClass =  handler.hostClass + ' ' + handler.className + '-post-button-base ' + handler.className + '-fast-save ' + handler.className + '-icon-download ';
-            
-                fastSave.className = fastSaveBaseClass + handler.className + '-fast-save-unchecked';
-                fastSave.onclick = function() {
-                    
-                    if (this.className.indexOf('unavailable') != -1) return false;
-                    
-                    if (this.className.indexOf('loading') != -1) {
-                        
-                        handler.fav.getFastSave().downloadCancel();
-                        fastSave.classList.remove(handler.className + '-fast-save-loading');                          
-                        
-                    } else {
-                                
-                        var downloadEnabled = handler.fav.getFastSave().downloadPostData(postBlock, function(success) {
-                            fastSave.classList.remove(handler.className + '-fast-save-loading');
-                            fastSave.className = fastSaveBaseClass + handler.className + '-fast-save-' + (success ? '' : 'not') + 'downloaded';
-                        });
-                        
-                        if (downloadEnabled) {
-                            fastSave.classList.remove(handler.className + '-fast-save-unchecked');
-                            fastSave.classList.add(handler.className + '-fast-save-loading');
-                        }
-                    }
-                    
-                    return false;
-                }  
-            } 
-            
-        } else {
-            
-            if (fastSave) {
-                fastSave.parentNode.removeChild(fastSave);
-            }
-                        
-            fastSave = false;
-        }
-        
-        return fastSave;
-    }
 
     function updateSidebarProportions(sideBarWrap) {
         
@@ -14748,8 +14911,14 @@ function kellyProfileJoyreactor() {
         if (!addToFav) {
             return false;
         }
-               
-        var fastSave = updateFastSaveButton(postBlock, shareButtonsBlock, coptions.fastsave.enabled);      
+        
+        var fastSave = handler.fav.getFastSave();
+        if (!isPostCensored(postBlock)) {
+                           
+            fastSave.showFastSaveButton(postBlock, shareButtonsBlock, coptions.fastsave.enabled, false, handler.className);   
+            fastSave.showFastSaveButton(postBlock, shareButtonsBlock, coptions.fastsave.configurableEnabled, true, handler.className);            
+        }
+
         var toogleCommentsButton = postBlock.getElementsByClassName('toggleComments');
 
         if (toogleCommentsButton.length) {
@@ -14945,11 +15114,7 @@ function kellyProfileJoyreactor() {
             
             imgServer = imgServer[0];
             var type = url.indexOf('comment') == -1 ? 'post' : 'comment';
-            
-            // prevent 301 redirect in fandoms subdomains
-            
-            var domain = this.location.domain == 'reactor.cc' ? this.location.domain : handler.location.host;
-            
+      
             // prevent watermark show for jr-proxy (not all images, untested domain, dont have access)
             // if (this.location.domain == 'jr-proxy.com') imgServer = 'img1';
             
@@ -14964,7 +15129,7 @@ function kellyProfileJoyreactor() {
                 }
             }
             
-            url  = handler.location.protocol + '//' + imgServer + '.' + domain + '/pics/' + type + '/';
+            url  = handler.location.protocol + '//' + imgServer + '.' + handler.location.mediaDomain + '/pics/' + type + '/';
             url += (format ? format + '/' : '') + (full ? 'full/' : '') + filename;
         }
         

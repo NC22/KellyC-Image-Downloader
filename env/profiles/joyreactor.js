@@ -21,16 +21,20 @@ function kellyProfileJoyreactor() {
         protocol : window.location.protocol,
         host : window.location.host,
         href : window.location.href,
+        domain : null, // subdomain without fandom level
+        mediaDomain : null,
     };
-    
-    // get current main subdomain
-    
+        
     this.domainParts = this.location.host.split('.');
     if (this.domainParts.length >= 2) {
         this.location.domain = this.domainParts[this.domainParts.length-2] + '.' + this.domainParts[this.domainParts.length-1];           
     } else {
         this.location.domain = this.location.host;
-    }    
+    }
+    
+    // prevent 301 redirect in fandoms for media requests
+            
+    this.location.mediaDomain = this.location.domain == 'reactor.cc' ? 'reactor.cc' : handler.location.host;
     
     this.hostClass = handler.className + '-' + this.domainParts.join("-"); 
         
@@ -39,6 +43,8 @@ function kellyProfileJoyreactor() {
         "reactor.cc", 
         "joyreactor.com",
         "jr-proxy.com",
+        "jrproxy.com",
+        "cookreactor.com",
         "pornreactor.cc",
         "thatpervert.com",
         "fapreactor.com",
@@ -464,59 +470,6 @@ function kellyProfileJoyreactor() {
         return (postBlock.innerHTML.indexOf('/images/censorship') != -1 || postBlock.innerHTML.indexOf('/images/unsafe_ru') != -1) ? true : false;
     }
 
-    function updateFastSaveButton(postBlock, placeholder, showButton) {
-        
-        var fastSave = KellyTools.getElementByClass(placeholder,  handler.className + '-fast-save');
-        
-        if (!isPostCensored(postBlock) && showButton) {
-            
-            if (!fastSave) {
-                
-                fastSave = document.createElement('DIV'); 
-                fastSave.title = KellyLoc.s('', 'fast_download');     
-                
-                placeholder.appendChild(fastSave); 
-                    
-                var fastSaveBaseClass =  handler.hostClass + ' ' + handler.className + '-post-button-base ' + handler.className + '-fast-save ' + handler.className + '-icon-download ';
-            
-                fastSave.className = fastSaveBaseClass + handler.className + '-fast-save-unchecked';
-                fastSave.onclick = function() {
-                    
-                    if (this.className.indexOf('unavailable') != -1) return false;
-                    
-                    if (this.className.indexOf('loading') != -1) {
-                        
-                        handler.fav.getFastSave().downloadCancel();
-                        fastSave.classList.remove(handler.className + '-fast-save-loading');                          
-                        
-                    } else {
-                                
-                        var downloadEnabled = handler.fav.getFastSave().downloadPostData(postBlock, function(success) {
-                            fastSave.classList.remove(handler.className + '-fast-save-loading');
-                            fastSave.className = fastSaveBaseClass + handler.className + '-fast-save-' + (success ? '' : 'not') + 'downloaded';
-                        });
-                        
-                        if (downloadEnabled) {
-                            fastSave.classList.remove(handler.className + '-fast-save-unchecked');
-                            fastSave.classList.add(handler.className + '-fast-save-loading');
-                        }
-                    }
-                    
-                    return false;
-                }  
-            } 
-            
-        } else {
-            
-            if (fastSave) {
-                fastSave.parentNode.removeChild(fastSave);
-            }
-                        
-            fastSave = false;
-        }
-        
-        return fastSave;
-    }
 
     function updateSidebarProportions(sideBarWrap) {
         
@@ -871,8 +824,14 @@ function kellyProfileJoyreactor() {
         if (!addToFav) {
             return false;
         }
-               
-        var fastSave = updateFastSaveButton(postBlock, shareButtonsBlock, coptions.fastsave.enabled);      
+        
+        var fastSave = handler.fav.getFastSave();
+        if (!isPostCensored(postBlock)) {
+                           
+            fastSave.showFastSaveButton(postBlock, shareButtonsBlock, coptions.fastsave.enabled, false, handler.className);   
+            fastSave.showFastSaveButton(postBlock, shareButtonsBlock, coptions.fastsave.configurableEnabled, true, handler.className);            
+        }
+
         var toogleCommentsButton = postBlock.getElementsByClassName('toggleComments');
 
         if (toogleCommentsButton.length) {
@@ -1068,11 +1027,7 @@ function kellyProfileJoyreactor() {
             
             imgServer = imgServer[0];
             var type = url.indexOf('comment') == -1 ? 'post' : 'comment';
-            
-            // prevent 301 redirect in fandoms subdomains
-            
-            var domain = this.location.domain == 'reactor.cc' ? this.location.domain : handler.location.host;
-            
+      
             // prevent watermark show for jr-proxy (not all images, untested domain, dont have access)
             // if (this.location.domain == 'jr-proxy.com') imgServer = 'img1';
             
@@ -1087,7 +1042,7 @@ function kellyProfileJoyreactor() {
                 }
             }
             
-            url  = handler.location.protocol + '//' + imgServer + '.' + domain + '/pics/' + type + '/';
+            url  = handler.location.protocol + '//' + imgServer + '.' + handler.location.mediaDomain + '/pics/' + type + '/';
             url += (format ? format + '/' : '') + (full ? 'full/' : '') + filename;
         }
         

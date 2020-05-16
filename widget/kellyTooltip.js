@@ -5,7 +5,7 @@
    @description    creates tooltip elements (attaches to an element or screen) widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.0.3 06.05.20
+   @version        v 1.0.4 14.05.20
    
    ToDo : 
    
@@ -26,6 +26,7 @@ function KellyTooltip(cfg) {
     this.hideWidth = false;
     this.minWidth = false;
     
+    var closeByBodyPrevent = false; // skip onclick event after show (maybe disable body event complitely when show - false)
     this.closeByBody = false;
     
     this.self = false;
@@ -40,6 +41,8 @@ function KellyTooltip(cfg) {
     this.offset = {left : 0, top : -20};
     
     this.removeOnClose = false;
+    this.removeSelfDelay = 600;
+    
     this.closeButton = true;
     this.zIndex = false;
     
@@ -89,6 +92,7 @@ function KellyTooltip(cfg) {
             'zIndex', 
             'closeButton', 
             'removeOnClose',
+            'removeSelfDelay',
         ];
         
         for (var i=0; i < settings.length; i++) {
@@ -216,7 +220,7 @@ function KellyTooltip(cfg) {
      
         events.onBodyClick = function(e) {
             
-            if (handler.closeByBody && !handler.isChild(e.target, handler.self)) {
+            if (handler.closeByBody && handler.isShown() && !closeByBodyPrevent && !handler.isChild(e.target, handler.self)) {
                 handler.show(false);
             }
         };
@@ -320,6 +324,12 @@ function KellyTooltip(cfg) {
             
             handler.contentId = contentId;
             
+            
+            closeByBodyPrevent = true;            
+            if (handler.closeByBody) {
+                setTimeout(function() { closeByBodyPrevent = false; }, 100);
+            }
+            
         } else {
             if (handler.userEvents.onClose) handler.userEvents.onClose(handler);
             
@@ -336,7 +346,11 @@ function KellyTooltip(cfg) {
     
     this.remove = function() {
         if (handler.self) {
-            handler.self.parentNode.removeChild(handler.self);
+            
+            var self = handler.self;
+            
+            setTimeout(function() { self.parentNode.removeChild(self); }, handler.removeSelfDelay);
+            
             handler.self = false;
             
             // но можно и добавлять \ удалять события при показе \ скрытии подсказки
