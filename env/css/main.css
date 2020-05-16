@@ -139,13 +139,14 @@
 
 .__BASECLASS__-download-tooltipster .__BASECLASS__-tooltipster-container {
     background: rgba(255, 255, 255, 0.949);
-    border: 2px solid #1ec1ff;
+    border: 2px solid #1ec1ff;   
+    color: #282828;
 }
 
 .__BASECLASS__-download-tooltipster .__BASECLASS__-tooltipster-content a {
     padding: 6px;
     display: inline-block;
-    color: #000;
+    color: #282828;
 }
 
 .__BASECLASS__-download-tooltipster .__BASECLASS__-tooltipster-content a.active {

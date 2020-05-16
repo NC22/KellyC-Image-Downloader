@@ -21,13 +21,14 @@ function kellyProfileJoyreactor() {
         protocol : window.location.protocol,
         host : window.location.host,
         href : window.location.href,
+        hostParts : window.location.host.split('.'),
         domain : null, // subdomain without fandom level
         mediaDomain : null,
     };
         
-    this.domainParts = this.location.host.split('.');
-    if (this.domainParts.length >= 2) {
-        this.location.domain = this.domainParts[this.domainParts.length-2] + '.' + this.domainParts[this.domainParts.length-1];           
+    if (this.location.hostParts.length >= 2) {
+        this.location.domain  = this.location.hostParts[this.location.hostParts.length-2];
+        this.location.domain += '.' + this.location.hostParts[this.location.hostParts.length-1];           
     } else {
         this.location.domain = this.location.host;
     }
@@ -36,7 +37,7 @@ function kellyProfileJoyreactor() {
             
     this.location.mediaDomain = this.location.domain == 'reactor.cc' ? 'reactor.cc' : handler.location.host;
     
-    this.hostClass = handler.className + '-' + this.domainParts.join("-"); 
+    this.hostClass = handler.className + '-' + this.location.hostParts.join("-"); 
         
     this.hostList = [
         "joyreactor.cc", 
@@ -870,7 +871,7 @@ function kellyProfileJoyreactor() {
        
     /* not imp */
     
-    this.getPostTags = function(publication, limitTags) {
+    this.getPostTags = function(publication, limitTags, full, homeTagsOnly) {
         
         if (!limitTags) limitTags = false;
         
@@ -880,12 +881,17 @@ function kellyProfileJoyreactor() {
         
         var nativeTags = nativeTags.getElementsByTagName('A');
         if (!nativeTags || !nativeTags.length) return tags;
-    
+        
+        
         for (var i = 0; i < nativeTags.length; i++) {
            var tagName = nativeTags[i].innerHTML.trim(); 
            if (!tagName) continue;
            
-           tags[tags.length] = tagName;
+           if (homeTagsOnly && (nativeTags[i].href.indexOf('.reactor.cc') == -1 || nativeTags[i].href.indexOf('/tag/') != -1)) {
+               continue;
+           }
+           
+           tags[tags.length] = full ? {tagName : tagName, url : nativeTags[i].href} : tagName;
            if (limitTags && tags.length >= limitTags) return tags;
         }
         
