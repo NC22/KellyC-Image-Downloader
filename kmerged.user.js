@@ -7372,9 +7372,7 @@ function KellyFastSave(cfg) {
          }
         
         var baseFolder = !options.fastsave.baseFolderConfigurable ? options.fastsave.baseFolder : options.fastsave.baseFolderConfigurable;
-                 
-                 console.log(options.fastsave);
-                 
+  
         var html = '\
             <div class="' + env.className + '-download-tooltipster-content">\
                 <div>\
