@@ -256,13 +256,22 @@
     },
     "folder":{  
         "message":"Директория"
+    },    
+    "fast_save_help":{  
+        "message":"Доступны переменные<br><br>"
+    },    
+    "fast_save_help_1":{  
+        "message":"<b>#CURRENT_LOCATION#</b> - текущий сайт (например reactor, at, wakfu и т.д.)<br>"
+    },    
+    "fast_save_help_2":{  
+        "message":"<b>#PUBLICATION_HOME#</b> - зависит от фэндома поста. Если фэндом не найден то равен текущему сайту<br>"
     },
     "fast_save_enabled":{  
         "message":"Показывать кнопку быстрого сохранения для публикаций"
     },  
     "fast_save_configurable_enabled":{  
         "message":"Показывать кнопку настраевомого быстрого сохранения для публикаций"
-    }, 
+    },    
     "fix_proportions":{  
         "message":"Обновить пропорции"
     },  
@@ -417,16 +426,19 @@
         "message":"Способ скачивания изображений"
     },
     "grabber_request_xml":{  
-        "message":"Прямой запрос"
+        "message":"Прямой запрос (XMLHttpRequest)"
     },
     "grabber_request_iframe":{  
         "message":"Iframe hook"
+    },    
+    "grabber_request_fetch":{  
+        "message":"Прямой запрос (Fetch)"
     },
     "grabber_flip_numbers":{  
         "message":"Инвертировать нумерацию"
     },
     "grabber_request_help":{  
-        "message": "<b>Прямой запрос</b> - Прямой запрос через API XMLHttpRequest (XMLHttpRequest -> Blob) <br>"
+        "message": "<b>Прямой запрос</b> - Прямой запрос через API XMLHttpRequest или Fetch (XMLHttpRequest | Fetch -> Blob) <br>"
     },
     "grabber_request_help_1":{  
         "message": "<b>Iframe hook</b> - Запрашивать изображение в дочернем окне и перехватывать расширением бинарные данные (Iframe -> Self XMLHttpRequest -> Blob)<br>"
@@ -757,7 +769,10 @@
     }, 
     "sync_by_add":{  
         "message":"Дублировать в \"Закладки\" пользователя, если авторизован"
-    },        
+    },      
+    "show_images_options_notice":{  
+        "message":"Изображения могут отображатся некорректно со страницы настроек.<br><br>Перейдите на основной сайт - <a href=\"__ENV_URL__\">__ENV_URL_TITLE__</a>"
+    },     
     "tip":{  
         "message":"подсказка"
     },  

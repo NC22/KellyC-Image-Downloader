@@ -8687,7 +8687,7 @@ function KellyOptions(cfg) {
                 <tr><td colspan="2">\
                     <label><input type="checkbox" class="' + env.className + 'FastSaveEnabled" ' + (fav.coptions.fastsave.enabled ? 'checked' : '') + '> ' + htmlFastIcon + lng.s('Показывать кнопку быстрого сохранения для публикаций', 'fast_save_enabled') + '</label>\
                 </td></tr>\
-                <tr><td>' + lng.s('Сохранять в папку', 'fast_save_to') + '</td><td><input type="text" class="' + env.className + 'FastSaveBaseFolder" placeholder="' + env.profile + '/Fast' + '" value="' +  fav.coptions.fastsave.baseFolder + '"></td></tr>\
+                <tr><td>' + lng.s('Сохранять в папку', 'fast_save_to') + ' &nbsp;&nbsp;&nbsp;(<a href="#" class="' + env.className + '-help" data-tip="fast_save_help">' + lng.s('', 'tip') + '</a>)</td><td><input type="text" class="' + env.className + 'FastSaveBaseFolder" placeholder="' + env.profile + '/Fast' + '" value="' +  fav.coptions.fastsave.baseFolder + '"></td></tr>\
                 <tr class="radioselect"><td colspan="2">\
                     \
                         <label><input type="radio" name="' + env.className + '-conflict" value="overwrite" class="' + env.className + '-conflict" ' + (!fav.coptions.fastsave.conflict || fav.coptions.fastsave.conflict == 'overwrite' ? 'checked' : '') + '> \
@@ -9072,6 +9072,11 @@ function KellyOptions(cfg) {
                 }
             }
             
+            var fastSaveConstant = {
+                qualityConfigurable : fav.coptions.fastsave.qualityConfigurable,
+                baseFolderConfigurable : fav.coptions.fastsave.baseFolderConfigurable,
+            }
+            
             fav.coptions.fastsave = {
                 baseFolder : KellyTools.validateFolderPath(KellyTools.inputVal(env.className + 'FastSaveBaseFolder', 'string', favContent)),
                 // nameTemplate : KellyTools.getElementByClass(favContent, env.className + 'FastSaveNameTemplate').value,
@@ -9079,6 +9084,9 @@ function KellyOptions(cfg) {
                 check :  KellyTools.getElementByClass(favContent, env.className + 'FastSaveCheck').checked ? true : false,
                 conflict : fconflict,
                 configurableEnabled : fastSaveCCurrent,
+                
+                qualityConfigurable : fastSaveConstant.qualityConfigurable,
+                baseFolderConfigurable : fastSaveConstant.baseFolderConfigurable,
             };
             
         }
@@ -10080,7 +10088,7 @@ function KellyFavItems(cfg)
         if (!style) {
             
             var head = document.head || document.getElementsByTagName('head')[0];
-            var    style = document.createElement('style');
+            var style = document.createElement('style');
                 style.type = 'text/css';
                 style.id = env.className + '-mainCss';
             
@@ -12090,15 +12098,9 @@ function KellyFavItems(cfg)
                     updateFilteredData();
                     
                     handler.updateImagesBlock();                
-                    handler.updateImageGrid();
-                    
-                    
-                    if (imagesAsDownloadItems && !handler.isDownloadSupported) {
-                        handler.getTooltip().resetToDefaultOptions();                        
-                        handler.getTooltip().setMessage(lng.s('', 'downloader_not_supported' + ( env.hostClass == 'options_page' ? '_options' : '') , {ENV_URL : env.location.href, ENV_URL_TITLE : env.location.host}));                        
-                        handler.getTooltip().show(true); 
-                        handler.tooltipBeasy = true;
-                    }        
+                    handler.updateImageGrid();  
+                                
+                    if (env.events.onShowFavouriteImages) env.events.onShowFavouriteImages(imagesAsDownloadItems);
                     
                     return false;
                 }
@@ -12177,6 +12179,8 @@ function KellyFavItems(cfg)
         
         displayFavouritesBlock('fav');
         handler.updateImageGrid();
+        
+        if (env.events.onShowFavouriteImages) env.events.onShowFavouriteImages(imagesAsDownloadItems);
         
         return false;
     }
@@ -14379,6 +14383,29 @@ function kellyProfileJoyreactor() {
             
         },
         
+        
+        onShowFavouriteImages : function(imagesAsDownloadItems) {
+            
+            var notice = false;
+            if (!handler.fav.isDownloadSupported) {
+                if (imagesAsDownloadItems) {                    
+                    notice = KellyLoc.s('', 'downloader_not_supported' + ( handler.hostClass == 'options_page' ? '_options' : ''), {ENV_URL : handler.location.href, ENV_URL_TITLE : handler.location.host});                    
+                } else if (handler.hostClass == 'options_page') {                    
+                    notice = KellyLoc.s('', 'show_images_options_notice', {ENV_URL : handler.location.href, ENV_URL_TITLE : handler.location.host});
+                }
+            }  
+
+            if (notice !== false) {
+                
+                var tooltip = handler.fav.getTooltip();
+                    tooltip.resetToDefaultOptions();                        
+                    tooltip.setMessage(notice);                        
+                    tooltip.show(true); 
+                    
+                handler.fav.tooltipBeasy = true; 
+            }           
+        },
+                    
         onBeforeGoToFavPage : function(newPage) {
               
             var autoScrollRow = handler.fav.getGlobal('fav').coptions.grid.autoScroll;            
@@ -15277,7 +15304,7 @@ function kellyProfileJoyreactor() {
     
     this.getInitAction = function() { 
     
-        if (this.hostList.indexOf(this.location.domain) != -1) {
+        if (this.hostList.indexOf(this.location.domain) != -1 && !document.getElementById(this.className + '-mainCss')) {
             return 'main';
         } 
         

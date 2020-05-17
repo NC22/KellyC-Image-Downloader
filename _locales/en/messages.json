@@ -256,13 +256,22 @@
     },
     "folder":{  
         "message":"Folder"
+    },    
+    "fast_save_help":{  
+        "message":"Available variables<br><br>"
+    },    
+    "fast_save_help_1":{  
+        "message":"<b>#CURRENT_LOCATION#</b> - current site (ex. reactor, at, wakfu etc.)<br>"
+    },    
+    "fast_save_help_2":{  
+        "message":"<b>#PUBLICATION_HOME#</b> - depends of site of publication. If home site not found then use current site sub domain<br>"
     },
     "fast_save_enabled":{  
         "message":"Display fast save button"
     },  
     "fast_save_configurable_enabled":{  
         "message":"Display configurable fast save button"
-    },  
+    }, 
     "fix_proportions":{  
         "message":"Update proportions"
     },  
@@ -424,6 +433,9 @@
     },
     "grabber_request_iframe":{  
         "message":"Iframe"
+    },    
+    "grabber_request_fetch":{  
+        "message":"Fetch"
     },
     "grabber_request_help":{  
         "message": "Browser cant download file directly for security reasons if image domain and site domain differs<br>"
@@ -435,10 +447,10 @@
         "message": "We can use - \"Iframe\", that will answer by specified format<br>"
     },  
     "grabber_request_help_3":{  
-        "message": "Also if you still want to use direct download by XMLHttpRequest method, just search extension that disable security options ex. \"Allow-Control-Allow-Origin: * extension\"<br>"
+        "message": "Also if you still want to use direct download by XMLHttpRequest | Fetch method, just search extension that disable security options ex. \"Allow-Control-Allow-Origin: * extension\"<br>"
     },
     "grabber_request_help_4":{  
-        "message": "<b>Change this option only if \"XMLHttpRequest\" dont work</b><br>"
+        "message": "<b>Change this option only if \"XMLHttpRequest\" | \"Fetch\" dont work</b><br>"
     },
     "grabber_transport_help":{  
         "message":"1. <b>Blob URL</b> - Send url that refer to data to background process (Blob -> Download API)<br>"
@@ -748,7 +760,10 @@
     }, 
     "sync_by_add":{  
         "message":"If user is logged in, duplicates publication to main favorites storage"
-    },  
+    }, 
+    "show_images_options_notice":{  
+        "message":"Images could be shown incorrect from options page.<br><br>Visit main site - <a href=\"__ENV_URL__\">__ENV_URL_TITLE__</a>"
+    },       
     "tip":{  
         "message":"notice"
     },    

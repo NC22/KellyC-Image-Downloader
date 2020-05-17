@@ -293,6 +293,29 @@ function kellyProfileJoyreactor() {
             
         },
         
+        
+        onShowFavouriteImages : function(imagesAsDownloadItems) {
+            
+            var notice = false;
+            if (!handler.fav.isDownloadSupported) {
+                if (imagesAsDownloadItems) {                    
+                    notice = KellyLoc.s('', 'downloader_not_supported' + ( handler.hostClass == 'options_page' ? '_options' : ''), {ENV_URL : handler.location.href, ENV_URL_TITLE : handler.location.host});                    
+                } else if (handler.hostClass == 'options_page') {                    
+                    notice = KellyLoc.s('', 'show_images_options_notice', {ENV_URL : handler.location.href, ENV_URL_TITLE : handler.location.host});
+                }
+            }  
+
+            if (notice !== false) {
+                
+                var tooltip = handler.fav.getTooltip();
+                    tooltip.resetToDefaultOptions();                        
+                    tooltip.setMessage(notice);                        
+                    tooltip.show(true); 
+                    
+                handler.fav.tooltipBeasy = true; 
+            }           
+        },
+                    
         onBeforeGoToFavPage : function(newPage) {
               
             var autoScrollRow = handler.fav.getGlobal('fav').coptions.grid.autoScroll;            
@@ -1191,7 +1214,7 @@ function kellyProfileJoyreactor() {
     
     this.getInitAction = function() { 
     
-        if (this.hostList.indexOf(this.location.domain) != -1) {
+        if (this.hostList.indexOf(this.location.domain) != -1 && !document.getElementById(this.className + '-mainCss')) {
             return 'main';
         } 
         
