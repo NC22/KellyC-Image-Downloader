@@ -7310,6 +7310,11 @@ function KellyFastSave(cfg) {
     
     this.showDownloadPostDataForm = function(target, postData, onDownloadEnd, onDownloadInit) {
         
+        var dm = handler.favEnv.getDownloadManager();
+        if (dm.getState() != 'wait') {
+            return;
+        }
+        
         var env = handler.favEnv.getGlobal('env');
         var baseClass = env.className + '-download-tooltipster-';                 
         var options = handler.favEnv.getGlobal('fav').coptions;
@@ -7323,7 +7328,7 @@ function KellyFastSave(cfg) {
             }
             
             options.fastsave.qualityConfigurable = lastQuality;
-            options.fastsave.baseFolderConfigurable = KellyTools.validateFolderPath(KellyTools.getElementByClass(container, baseClass + 'download-folder').value); 
+            options.fastsave.baseFolderConfigurable = KellyTools.validateFolderPath(KellyTools.getElementByClass(handler.downloadTooltip.getContent(), baseClass + 'download-folder').value); 
             
             handler.downloadTooltip.show(false);
             
@@ -7335,6 +7340,7 @@ function KellyFastSave(cfg) {
                 });
                 
             });
+            
             return false; 
         };
         
@@ -7365,7 +7371,9 @@ function KellyFastSave(cfg) {
              });
          }
         
-        var baseFolder = options.fastsave.baseFolderConfigurable ? options.fastsave.baseFolderConfigurable : options.fastsave.baseFolder;
+        var baseFolder = !options.fastsave.baseFolderConfigurable ? options.fastsave.baseFolder : options.fastsave.baseFolderConfigurable;
+                 
+                 console.log(options.fastsave);
                  
         var html = '\
             <div class="' + env.className + '-download-tooltipster-content">\
@@ -7379,12 +7387,10 @@ function KellyFastSave(cfg) {
                 </div>\
             </div>';
             
-             
-        var container = this.downloadTooltip.getContent();
-        KellyTools.setHTMLData(container, html);
-        
-        KellyTools.getElementByClass(container, baseClass + 'download').onclick = function() { return downloadClick(this); };
-        KellyTools.getElementByClass(container, baseClass + 'download-hd').onclick =  function() { return downloadClick(this); };
+        KellyTools.setHTMLData(handler.downloadTooltip.getContent(), html);
+
+        KellyTools.getElementByClass(handler.downloadTooltip.getContent(), baseClass + 'download').onclick = function() { return downloadClick(this); };
+        KellyTools.getElementByClass(handler.downloadTooltip.getContent(), baseClass + 'download-hd').onclick =  function() { return downloadClick(this); };
         
         this.downloadTooltip.show(true);
     }
@@ -8368,6 +8374,7 @@ KellyTools.getElementByClass = function(parent, className) {
         
         console.log('unexpected type - ' + typeof parent);
         console.log(parent);
+        console.log(className);
         return false;
     }
     
