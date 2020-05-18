@@ -8692,7 +8692,13 @@ function KellyOptions(cfg) {
                 <tr><td colspan="2">\
                     <label><input type="checkbox" class="' + env.className + 'FastSaveEnabled" ' + (fav.coptions.fastsave.enabled ? 'checked' : '') + '> ' + htmlFastIcon + lng.s('Показывать кнопку быстрого сохранения для публикаций', 'fast_save_enabled') + '</label>\
                 </td></tr>\
-                <tr><td>' + lng.s('Сохранять в папку', 'fast_save_to') + ' &nbsp;&nbsp;&nbsp;(<a href="#" class="' + env.className + '-help" data-tip="fast_save_help">' + lng.s('', 'tip') + '</a>)</td><td><input type="text" class="' + env.className + 'FastSaveBaseFolder" placeholder="' + env.profile + '/Fast' + '" value="' +  fav.coptions.fastsave.baseFolder + '"></td></tr>\
+                <tr>\
+                    <td>' + lng.s('Сохранять в папку', 'fast_save_to') + '</td>\
+                    <td>\
+                        <input type="text" class="' + env.className + 'FastSaveBaseFolder" placeholder="' + env.profile + '/Fast' + '" value="' +  fav.coptions.fastsave.baseFolder + '">\
+                         &nbsp;&nbsp;&nbsp;(<a href="#" class="' + env.className + '-help" data-tip="fast_save_help">' + lng.s('', 'tip') + '</a>)\
+                    </td>\
+                </tr>\
                 <tr class="radioselect"><td colspan="2">\
                     \
                         <label><input type="radio" name="' + env.className + '-conflict" value="overwrite" class="' + env.className + '-conflict" ' + (!fav.coptions.fastsave.conflict || fav.coptions.fastsave.conflict == 'overwrite' ? 'checked' : '') + '> \
@@ -14463,15 +14469,11 @@ function kellyProfileJoyreactor() {
     
     function getPostLinkEl(publication) {
         
-        if (handler.location.host.indexOf('old.') == -1) {
-            
-            var link = publication.querySelector('.ufoot_first .link_wr a'); // avoid links in jras-pcLinks-img container
-            
-        } else {
-            var link = publication.querySelector('.ufoot [title="ссылка на пост"]');
-        }		
+        // tested with links in jras-pcLinks-img container
         
-        return link;
+        var selector = handler.location.host != 'old.reactor.cc' ? '.ufoot_first .link_wr a' : '.ufoot [title="ссылка на пост"]';
+
+        return publication.querySelector(selector);
     }
     
     function getMainImage(publication, content) {

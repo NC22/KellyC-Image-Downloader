@@ -368,15 +368,11 @@ function kellyProfileJoyreactor() {
     
     function getPostLinkEl(publication) {
         
-        if (handler.location.host.indexOf('old.') == -1) {
-            
-            var link = publication.querySelector('.ufoot_first .link_wr a'); // avoid links in jras-pcLinks-img container
-            
-        } else {
-            var link = publication.querySelector('.ufoot [title="ссылка на пост"]');
-        }		
+        // tested with links in jras-pcLinks-img container
         
-        return link;
+        var selector = handler.location.host != 'old.reactor.cc' ? '.ufoot_first .link_wr a' : '.ufoot [title="ссылка на пост"]';
+
+        return publication.querySelector(selector);
     }
     
     function getMainImage(publication, content) {
