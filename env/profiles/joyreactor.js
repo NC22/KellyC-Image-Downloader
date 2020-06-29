@@ -66,8 +66,7 @@ function kellyProfileJoyreactor() {
     
     this.isNSFW = function() {
         
-        var sfw = KellyTools.getElementByClass(document, 'sswither');
-        
+        var sfw = KellyTools.getElementByClass(document, 'sswither');        
         if (sfw && sfw.className.indexOf('active') != -1) return false;
         else return true;
     }
@@ -149,13 +148,13 @@ function kellyProfileJoyreactor() {
             
             updateFastSaveButtonsState();
             
-            handler.fav.addEventPListener(window, "resize", function (e) {
+            KellyTools.addEventPListener(window, "resize", function (e) {
                 
                 updateSidebarPosition();
                 
             }, '_fav_dialog');
             
-            handler.fav.addEventPListener(window, "scroll", function (e) {
+            KellyTools.addEventPListener(window, "scroll", function (e) {
                 
                 updateSidebarPosition();                
                 updateFastSaveButtonsState();
@@ -798,13 +797,10 @@ function kellyProfileJoyreactor() {
                 
             } else {
                                 
-                addToFavButton.onclick =  function() {		
-                    var comment = KellyTools.getParentByClass(this, 'comment', true);
+                addToFavButton.onclick =  function() {
                     
-                    // console.log(comment);
-                    if (!comment) return false;
-                   
-                    handler.fav.showAddToFavDialog(block, comment);
+                    var comment = KellyTools.getParentByClass(this, 'comment');
+                    if (comment) handler.fav.showAddToFavDialog(block, comment);
                     return false;					
                 }
                 
@@ -822,8 +818,7 @@ function kellyProfileJoyreactor() {
     this.formatPostContainer = function(postBlock) {
         
         var coptions = handler.fav.getGlobal('fav').coptions;
-        var blackList = coptions.posts_blacklist;
-        
+        var blackList = coptions.posts_blacklist;        
         if (blackList) {  
             var userName = getPostUserName(postBlock);
             if (blackList.indexOf(userName) != -1) { 
@@ -832,8 +827,7 @@ function kellyProfileJoyreactor() {
             }
         }
         
-        var shareButtonsBlock = KellyTools.getElementByClass(postBlock, 'share_buttons');
-        
+        var shareButtonsBlock = KellyTools.getElementByClass(postBlock, 'share_buttons');        
         if (!shareButtonsBlock) {
             KellyTools.log('formatPostContainer : cant find placeholder for append "Add to fav button"'); 
             return false;
@@ -845,8 +839,7 @@ function kellyProfileJoyreactor() {
         }
         
         var fastSave = handler.fav.getFastSave();
-        if (!isPostCensored(postBlock)) {
-                           
+        if (!isPostCensored(postBlock)) {                           
             fastSave.showFastSaveButton(postBlock, shareButtonsBlock, coptions.fastsave.enabled, false, handler.className);   
             fastSave.showFastSaveButton(postBlock, shareButtonsBlock, coptions.fastsave.configurableEnabled, true, handler.className);            
         }
@@ -856,8 +849,8 @@ function kellyProfileJoyreactor() {
         if (toogleCommentsButton.length) {
             toogleCommentsButton = toogleCommentsButton[0];
             
-            handler.fav.removeEventPListener(toogleCommentsButton, 'click', 'toogle_comments_' + postBlock.id);                                
-            handler.fav.addEventPListener(toogleCommentsButton, "click", function (e) {
+            KellyTools.removeEventPListener(toogleCommentsButton, 'click', 'toogle_comments_' + postBlock.id);                                
+            KellyTools.addEventPListener(toogleCommentsButton, "click", function (e) {
                 
                 if (commentsBlockTimer[postBlock.id]) return false;
                 

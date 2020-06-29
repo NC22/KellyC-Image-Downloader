@@ -65,12 +65,13 @@
 
 KellyTools = new Object();
 
+KellyTools.PROGNAME = '';
 KellyTools.DEBUG = false;
+
 KellyTools.E_NOTICE = 1;
 KellyTools.E_ERROR = 2;
 
-KellyTools.PROGNAME = '';
-
+KellyTools.events = [];
 
 // Get screen width \ height
 
@@ -89,6 +90,54 @@ KellyTools.getViewport = function() {
     };
 }
 
+KellyTools.addEventPListener = function(object, event, callback, prefix) {
+
+    this.removeEventPListener(object, event, prefix);
+    
+    if (typeof object !== 'object') {
+        object = document.getElementById(object);
+    }
+
+    if (!object)
+        return false;
+    if (!prefix)
+        prefix = '';
+
+    this.events[prefix + event] = callback;
+
+    if (!object.addEventListener) {
+        object.attachEvent('on' + event, this.events[prefix + event]);
+    } else {
+        object.addEventListener(event, this.events[prefix + event]);
+    }
+
+    return true;
+}
+
+KellyTools.removeEventPListener = function(object, event, prefix) {
+    if (typeof object !== 'object') {
+        object = document.getElementById(object);
+    }
+
+    // console.log('remove :  : ' + Object.keys(events).length);
+    if (!object)
+        return false;
+    if (!prefix)
+        prefix = '';
+
+    if (!this.events[prefix + event])
+        return false;
+
+    if (!object.removeEventListener) {
+        object.detachEvent('on' + event, this.events[prefix + event]);
+    } else {
+        object.removeEventListener(event, this.events[prefix + event]);
+    }
+
+    this.events[prefix + event] = null;
+    return true;
+}
+    
 KellyTools.getScrollTop = function() {
 
     var scrollTop = (window.pageYOffset || document.documentElement.scrollTop) - (document.documentElement.clientTop || 0);
@@ -482,7 +531,6 @@ KellyTools.getVarList = function(str, type, glue) {
     if (!str) return [];
     
     str = str.trim();
-    
     if (!str) return [];
       
     if (!glue) glue = ',';
@@ -718,9 +766,7 @@ KellyTools.log = function(info, module, errorLevel) {
         errorLevel = KellyTools.E_NOTICE;
     }    
      
-    if (!this.DEBUG && errorLevel < KellyTools.E_ERROR) {
-        return;
-    }
+    if (!this.DEBUG && errorLevel < KellyTools.E_ERROR) return;
     
     if (typeof info == 'object' || typeof info == 'function') {
         console.log('[' + KellyTools.getTime() + '] ' + module + ' :  var output :');
@@ -729,8 +775,7 @@ KellyTools.log = function(info, module, errorLevel) {
         console.log('[' + KellyTools.getTime() + '] ' + module + ' : '+ info);
     }
     
-    if (errorLevel >= KellyTools.E_ERROR && console.trace) {
-        
+    if (errorLevel >= KellyTools.E_ERROR && console.trace) {        
         console.trace();
     }
 }
@@ -768,12 +813,12 @@ KellyTools.getGMTDate = function() {
     return new Date().toJSON().slice(0, 19).replace('T', ' ');
 }
 
-KellyTools.getParentByClass = function(el, className, strict) {
-    var parent = el;
- 
-    while (parent && ((strict && !parent.classList.contains(className)) || (!strict && parent.className.indexOf(className) != -1))) {
+KellyTools.getParentByClass = function(el, className) {
+    
+    var parent = el; 
+    while (parent && !parent.classList.contains(className)) {
         parent = parent.parentElement;
-    }  
+    }
     
     return parent;
 }
@@ -860,9 +905,7 @@ KellyTools.getElementByClass = function(parent, className) {
         
     if (parent === false) parent = document.body;
     
-    if (typeof parent !== 'object') {
-     
-        
+    if (typeof parent !== 'object') {     
         console.log('unexpected type - ' + typeof parent);
         console.log(parent);
         console.log(className);
@@ -871,8 +914,7 @@ KellyTools.getElementByClass = function(parent, className) {
     
     if (!parent) return false;
     
-    var childNodes = parent.getElementsByClassName(className);
-    
+    var childNodes = parent.getElementsByClassName(className);    
     if (!childNodes || !childNodes.length) return false;
     
     return childNodes[0];

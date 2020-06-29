@@ -6584,7 +6584,7 @@ function KellyGrabber(cfg) {
                     
                     var handler = this;
                     
-                    fav.removeEventPListener(window, "message", this.eventPrefix);
+                    KellyTools.removeEventPListener(window, "message", this.eventPrefix);
                 
                     this.iframe.src = 'about:blank';
                     this.iframe.onload = function() {};
@@ -6621,8 +6621,8 @@ function KellyGrabber(cfg) {
                         handler.abort();
                     }
 
-                    fav.removeEventPListener(window, "message", this.eventPrefix);	
-                    fav.addEventPListener(window, "message", this.onLoadIframe, this.eventPrefix);
+                    KellyTools.removeEventPListener(window, "message", this.eventPrefix);	
+                    KellyTools.addEventPListener(window, "message", this.onLoadIframe, this.eventPrefix);
                     
                     this.iframe.src = urlOrig;
                 };
@@ -7253,27 +7253,19 @@ KellyGrabber.validateDriver = function(driver) {
 
 function KellyFastSave(cfg) {
     
-    var handler = this;   
+    var handler = this;     
     
-    this.downloadTooltip = false;
-    
+    this.downloadTooltip = false;    
     this.favEnv = false;
     
     /*
-        Check is download methods supported by browser and config option for fast download is activated
-        
+        Check is download methods supported by browser
         return boolean
     */
     
     this.isAvailable = function() {
-                
-        if (
-            !handler.favEnv.isDownloadSupported
-            // || !handler.favEnv.getGlobal('fav').coptions.fastsave.enabled
-            // || !handler.favEnv.getGlobal('fav').coptions.fastsave.configurableEnabled
-        ) {
-            return false;
-        } else return true;
+        
+        return !handler.favEnv.isDownloadSupported ? false : true;
     }
     
     /*
@@ -7614,12 +7606,13 @@ function KellyFastSave(cfg) {
 
 KellyTools = new Object();
 
+KellyTools.PROGNAME = '';
 KellyTools.DEBUG = false;
+
 KellyTools.E_NOTICE = 1;
 KellyTools.E_ERROR = 2;
 
-KellyTools.PROGNAME = '';
-
+KellyTools.events = [];
 
 // Get screen width \ height
 
@@ -7638,6 +7631,54 @@ KellyTools.getViewport = function() {
     };
 }
 
+KellyTools.addEventPListener = function(object, event, callback, prefix) {
+
+    this.removeEventPListener(object, event, prefix);
+    
+    if (typeof object !== 'object') {
+        object = document.getElementById(object);
+    }
+
+    if (!object)
+        return false;
+    if (!prefix)
+        prefix = '';
+
+    this.events[prefix + event] = callback;
+
+    if (!object.addEventListener) {
+        object.attachEvent('on' + event, this.events[prefix + event]);
+    } else {
+        object.addEventListener(event, this.events[prefix + event]);
+    }
+
+    return true;
+}
+
+KellyTools.removeEventPListener = function(object, event, prefix) {
+    if (typeof object !== 'object') {
+        object = document.getElementById(object);
+    }
+
+    // console.log('remove :  : ' + Object.keys(events).length);
+    if (!object)
+        return false;
+    if (!prefix)
+        prefix = '';
+
+    if (!this.events[prefix + event])
+        return false;
+
+    if (!object.removeEventListener) {
+        object.detachEvent('on' + event, this.events[prefix + event]);
+    } else {
+        object.removeEventListener(event, this.events[prefix + event]);
+    }
+
+    this.events[prefix + event] = null;
+    return true;
+}
+    
 KellyTools.getScrollTop = function() {
 
     var scrollTop = (window.pageYOffset || document.documentElement.scrollTop) - (document.documentElement.clientTop || 0);
@@ -8031,7 +8072,6 @@ KellyTools.getVarList = function(str, type, glue) {
     if (!str) return [];
     
     str = str.trim();
-    
     if (!str) return [];
       
     if (!glue) glue = ',';
@@ -8267,9 +8307,7 @@ KellyTools.log = function(info, module, errorLevel) {
         errorLevel = KellyTools.E_NOTICE;
     }    
      
-    if (!this.DEBUG && errorLevel < KellyTools.E_ERROR) {
-        return;
-    }
+    if (!this.DEBUG && errorLevel < KellyTools.E_ERROR) return;
     
     if (typeof info == 'object' || typeof info == 'function') {
         console.log('[' + KellyTools.getTime() + '] ' + module + ' :  var output :');
@@ -8278,8 +8316,7 @@ KellyTools.log = function(info, module, errorLevel) {
         console.log('[' + KellyTools.getTime() + '] ' + module + ' : '+ info);
     }
     
-    if (errorLevel >= KellyTools.E_ERROR && console.trace) {
-        
+    if (errorLevel >= KellyTools.E_ERROR && console.trace) {        
         console.trace();
     }
 }
@@ -8317,12 +8354,12 @@ KellyTools.getGMTDate = function() {
     return new Date().toJSON().slice(0, 19).replace('T', ' ');
 }
 
-KellyTools.getParentByClass = function(el, className, strict) {
-    var parent = el;
- 
-    while (parent && ((strict && !parent.classList.contains(className)) || (!strict && parent.className.indexOf(className) != -1))) {
+KellyTools.getParentByClass = function(el, className) {
+    
+    var parent = el; 
+    while (parent && !parent.classList.contains(className)) {
         parent = parent.parentElement;
-    }  
+    }
     
     return parent;
 }
@@ -8409,9 +8446,7 @@ KellyTools.getElementByClass = function(parent, className) {
         
     if (parent === false) parent = document.body;
     
-    if (typeof parent !== 'object') {
-     
-        
+    if (typeof parent !== 'object') {     
         console.log('unexpected type - ' + typeof parent);
         console.log(parent);
         console.log(className);
@@ -8420,8 +8455,7 @@ KellyTools.getElementByClass = function(parent, className) {
     
     if (!parent) return false;
     
-    var childNodes = parent.getElementsByClassName(className);
-    
+    var childNodes = parent.getElementsByClassName(className);    
     if (!childNodes || !childNodes.length) return false;
     
     return childNodes[0];
@@ -9291,16 +9325,12 @@ function KellyOptions(cfg) {
 
 function KellyFavItems(cfg) 
 {
-    var handler = this;    
-        
+    var handler = this;       
     var env = false;
-    var events = [];
     
     // выбранная для добавления в закладки публикация, из этих данных формируется элемент в getFavItemFromSelected
     
-    var selectedPost = false;
-    var selectedImages = false;
-    var selectedComment = false;
+    var selectedPost = false, selectedImages = false, selectedComment = false;
     
     // какие-либо мета данные сохраняемые для определенной публикации в обработчике itemAdd (добавлять методом setSelectionInfo) 
     
@@ -9322,14 +9352,9 @@ function KellyFavItems(cfg)
     
     var sideBarWrap = false;
     
-    var modalBox = false;
-    var modalBoxContent = false;
-    var modalBoxMessage = false;
-    
+    var modalBox = false, modalBoxContent = false, modalBoxMessage = false;
     var downloaderBox = false;    
-    var favCounter = false;
-    
-    //    
+    var favCounter = false;     
     
     var siteContent = false; // main page container - setted by env
     var favContent = false; // main extension container
@@ -9401,8 +9426,7 @@ function KellyFavItems(cfg)
              
             if (imageGridProportions.length) {
                 
-                log('save new proportions for items');  
-                
+                log('save new proportions for items');                  
                 imageGridProportions = [];
                 handler.save('items');
             }
@@ -9521,15 +9545,11 @@ function KellyFavItems(cfg)
             
             if (action == 'main') {
          
-                handler.load(false, function() {
-                    
+                handler.load(false, function() {                    
                     if (env.getPosts()) {
                         handler.initFormatPage();
                     } else {
-                        handler.addEventPListener(window, "load", function (e) {
-                            handler.initFormatPage();
-                            return false;
-                        }, 'init_');
+                        KellyTools.addEventPListener(window, "load", handler.initFormatPage, 'init_');
                     }
                 }); 
                 
@@ -9538,9 +9558,7 @@ function KellyFavItems(cfg)
             log(KellyTools.getProgName() + ' init | loaded in ' + action + ' mode | profile ' + env.profile + ' | DEBUG ' + (KellyTools.DEBUG ? 'enabled' : 'disabled'));           
         }
         
-        handler.addEventPListener(window, "message", function (e) {
-            getDocumentMessage(e);
-        }, 'input_message_');             
+        KellyTools.addEventPListener(window, "message", getDocumentMessage, 'input_message_');             
     }
     
     function setPreventClose(active) {
@@ -10527,7 +10545,7 @@ function KellyFavItems(cfg)
         siteContent.style.display = 'block';
         favContent.style.display = 'none';
         
-        handler.removeEventPListener(window, 'scroll', 'fav_scroll');
+        KellyTools.removeEventPListener(window, 'scroll', 'fav_scroll');
 
         imageGrid.close();
         
@@ -13941,8 +13959,7 @@ function KellyFavItems(cfg)
                 return false; 
             }
             
-            handler.addCss(KellyTools.replaceAll(response.data.css, '__BASECLASS__', env.className));
-             
+            handler.addCss(KellyTools.replaceAll(response.data.css, '__BASECLASS__', env.className));             
             handler.isDownloadSupported = response.isDownloadSupported;
                  
             if (!handler.isDownloadSupported) {
@@ -13986,24 +14003,19 @@ function KellyFavItems(cfg)
         
         // parallel with load resources in initCss
         
-        handler.addEventPListener(document.body, "keyup", function (e) {
+        KellyTools.addEventPListener(document.body, "keyup", function (e) {
             
-            if (!e.target) return;
+            if (!e.target || e.target.tagName == 'INPUT' || e.target.tagName == 'TEXTAREA') return;
             
-            if (e.target.tagName == 'INPUT' || e.target.tagName == 'TEXTAREA') {
-                return;
-            }
-            
-            var c = e.keyCode - 36;
-           
+            var c = e.keyCode - 36;           
             var right = c == 3 || c == 32 || c == 68 || c == 102;
             var left = c == 1 || c == 29 || c == 65 || c == 100;
          
             if (mode  == 'fav') {
+                
                 // disable if already view any image
                 
-                if (handler.getTooltip().isShown() == 'categoryEdit') return;
-                
+                if (handler.getTooltip().isShown() == 'categoryEdit') return;                
                 if (imgViewer && imgViewer.getCurrentState().shown) return;
                 
                 if (right) {
@@ -14019,55 +14031,8 @@ function KellyFavItems(cfg)
         
         // currently we can modify post containers without waiting css, looks fine
         handler.formatPostContainers();
-        handler.initExtensionResources();       
-    }
-    
-    this.addEventPListener = function(object, event, callback, prefix) {
-    
-        handler.removeEventPListener(object, event, prefix);
-        
-        if (typeof object !== 'object') {
-            object = document.getElementById(object);
-        }
-
-        if (!object)
-            return false;
-        if (!prefix)
-            prefix = '';
-
-        events[prefix + event] = callback;
-
-        if (!object.addEventListener) {
-            object.attachEvent('on' + event, events[prefix + event]);
-        } else {
-            object.addEventListener(event, events[prefix + event]);
-        }
-
-        return true;
-    }
-
-    this.removeEventPListener = function(object, event, prefix) {
-        if (typeof object !== 'object') {
-            object = document.getElementById(object);
-        }
-
-        // console.log('remove :  : ' + Object.keys(events).length);
-        if (!object)
-            return false;
-        if (!prefix)
-            prefix = '';
-
-        if (!events[prefix + event])
-            return false;
-
-        if (!object.removeEventListener) {
-            object.detachEvent('on' + event, events[prefix + event]);
-        } else {
-            object.removeEventListener(event, events[prefix + event]);
-        }
-
-        events[prefix + event] = null;
-        return true;
+        handler.initExtensionResources();
+        return false;
     }
     
     constructor(cfg);
@@ -14147,8 +14112,7 @@ function kellyProfileJoyreactor() {
     
     this.isNSFW = function() {
         
-        var sfw = KellyTools.getElementByClass(document, 'sswither');
-        
+        var sfw = KellyTools.getElementByClass(document, 'sswither');        
         if (sfw && sfw.className.indexOf('active') != -1) return false;
         else return true;
     }
@@ -14230,13 +14194,13 @@ function kellyProfileJoyreactor() {
             
             updateFastSaveButtonsState();
             
-            handler.fav.addEventPListener(window, "resize", function (e) {
+            KellyTools.addEventPListener(window, "resize", function (e) {
                 
                 updateSidebarPosition();
                 
             }, '_fav_dialog');
             
-            handler.fav.addEventPListener(window, "scroll", function (e) {
+            KellyTools.addEventPListener(window, "scroll", function (e) {
                 
                 updateSidebarPosition();                
                 updateFastSaveButtonsState();
@@ -14879,13 +14843,10 @@ function kellyProfileJoyreactor() {
                 
             } else {
                                 
-                addToFavButton.onclick =  function() {		
-                    var comment = KellyTools.getParentByClass(this, 'comment', true);
+                addToFavButton.onclick =  function() {
                     
-                    // console.log(comment);
-                    if (!comment) return false;
-                   
-                    handler.fav.showAddToFavDialog(block, comment);
+                    var comment = KellyTools.getParentByClass(this, 'comment');
+                    if (comment) handler.fav.showAddToFavDialog(block, comment);
                     return false;					
                 }
                 
@@ -14903,8 +14864,7 @@ function kellyProfileJoyreactor() {
     this.formatPostContainer = function(postBlock) {
         
         var coptions = handler.fav.getGlobal('fav').coptions;
-        var blackList = coptions.posts_blacklist;
-        
+        var blackList = coptions.posts_blacklist;        
         if (blackList) {  
             var userName = getPostUserName(postBlock);
             if (blackList.indexOf(userName) != -1) { 
@@ -14913,8 +14873,7 @@ function kellyProfileJoyreactor() {
             }
         }
         
-        var shareButtonsBlock = KellyTools.getElementByClass(postBlock, 'share_buttons');
-        
+        var shareButtonsBlock = KellyTools.getElementByClass(postBlock, 'share_buttons');        
         if (!shareButtonsBlock) {
             KellyTools.log('formatPostContainer : cant find placeholder for append "Add to fav button"'); 
             return false;
@@ -14926,8 +14885,7 @@ function kellyProfileJoyreactor() {
         }
         
         var fastSave = handler.fav.getFastSave();
-        if (!isPostCensored(postBlock)) {
-                           
+        if (!isPostCensored(postBlock)) {                           
             fastSave.showFastSaveButton(postBlock, shareButtonsBlock, coptions.fastsave.enabled, false, handler.className);   
             fastSave.showFastSaveButton(postBlock, shareButtonsBlock, coptions.fastsave.configurableEnabled, true, handler.className);            
         }
@@ -14937,8 +14895,8 @@ function kellyProfileJoyreactor() {
         if (toogleCommentsButton.length) {
             toogleCommentsButton = toogleCommentsButton[0];
             
-            handler.fav.removeEventPListener(toogleCommentsButton, 'click', 'toogle_comments_' + postBlock.id);                                
-            handler.fav.addEventPListener(toogleCommentsButton, "click", function (e) {
+            KellyTools.removeEventPListener(toogleCommentsButton, 'click', 'toogle_comments_' + postBlock.id);                                
+            KellyTools.addEventPListener(toogleCommentsButton, "click", function (e) {
                 
                 if (commentsBlockTimer[postBlock.id]) return false;
                 
