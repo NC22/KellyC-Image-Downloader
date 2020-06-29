@@ -4734,8 +4734,7 @@ function KellyGrabber(cfg) {
     // .downloadId values constants
   
     var downloadsOffset = 0; // skip N elements from begin of downloads[], inverted numeration of items not affect on offset. Download always starts from zero to last element
-    var ids = 0; // counter for downloads
-    
+    var ids = 0; // counter for downloads    
     var acceptItems = false;
     
     var events = { 
@@ -4986,6 +4985,17 @@ function KellyGrabber(cfg) {
                 transportMethod = cfg.driver.transportMethod;
                 
                 KellyTools.log('init driver ' + requestMethod + ' | ' + transportMethod, 'KellyGrabber');
+            }
+        }
+    }
+            
+    function updateAcceptItems() {        
+        acceptItems = false;
+        if (options.itemsList) {
+            
+            acceptItems = KellyTools.getPrintValues(options.itemsList, false, 1, downloads.length);           
+            if (!acceptItems.length) {
+                acceptItems = false;
             }
         }
     }
@@ -5251,14 +5261,13 @@ function KellyGrabber(cfg) {
                 if (!this.value && inputValue && !count) {                    
                     showNotice('grabber_selected_items_not_found', 1);
                 }
-                
-                options.itemsList = this.value; 
-                                
+
+                options.itemsList = this.value;
                 updateContinue(true);
                 
                 failItems = [];
                 count ? updateProgressBar(0, 0, count) : updateProgressBar(0, 0);
-                  
+
                 return;
             }
 
@@ -5438,13 +5447,13 @@ function KellyGrabber(cfg) {
         
         handler.addControllEl('save_as_json', lng.s('Скачать как профиль', 'grabber_save_as_json'), function() {
         
-            fav.downloadFilteredData();            
+            handler.downloadFilteredData();            
             return false;
         }); 
         
         handler.addControllEl('save_as_txt', lng.s('Скачать как список ссылок', 'grabber_save_as_txt'), function() {
     
-            fav.downloadFilteredData('txt');            
+            handler.downloadFilteredData('txt');            
             return false;
         });
 
@@ -6947,6 +6956,49 @@ function KellyGrabber(cfg) {
         return count;
     }
     
+    this.downloadFilteredData = function(format, options) {
+             
+        if (mode != 'wait' || !downloads || !downloads.length) return false;        
+        if (format != 'txt') format = false; // default save as json profile
+        
+        updateAcceptItems();
+        
+        var storage = fav.getStorageManager().getDefaultData(), storageTxt = '', sm = fav.getStorageManager();              
+            storage.ids = fav.ids;
+            storage.categories = [];
+        var fname = fav.getGlobal('options').baseFolder + '/' + sm.dir.exportFiltered;
+            fname += fav.getGlobal('options').storage + '_filtered_' + KellyTools.getTimeStamp() + '.' + (format ? format : sm.format);
+            fname = KellyTools.validateFolderPath(fname); 
+            
+        for (var i = 0; i <= downloads.length - 1; i++) {
+            
+            if ((downloads[i].subItem !== false && downloads[i].subItem > 0) || handler.getDownloadItemState(downloads[i]) == 'skip') continue;
+            
+            var item = downloads[i].item, itemCats = item.categoryId;
+            if (format == 'txt') {
+                if (typeof item.pImage !== 'string') {
+                    
+                    for (var b = 0; b <= item.pImage.length-1; b++) storageTxt += fav.getGlobal('env').getImageDownloadLink(item.pImage[b], options && options.quality == 'hd') + "\r\n";
+                    
+                } else storageTxt += fav.getGlobal('env').getImageDownloadLink(item.pImage, options && options.quality == 'hd') + "\r\n";
+                
+            } else { 
+                if (itemCats) {
+                    for (var c = 0; c < itemCats.length; c++) {
+                        if (sm.getCategoryById(storage, itemCats[c]).id == -1) {
+                            storage.categories[storage.categories.length] = sm.getCategoryById(fav.getGlobal('fav'), itemCats[c]);
+                        }
+                    }
+                }
+
+                storage.items[storage.items.length] = item;   
+            }
+        }
+        
+        acceptItems = false;
+        fav.getDownloadManager().createAndDownloadFile(format == 'txt' ? storageTxt : JSON.stringify(storage), fname);        
+    }
+    
     this.addDownloadWork = function() {
         
         if (mode != 'download') return false;
@@ -7120,18 +7172,8 @@ function KellyGrabber(cfg) {
             return false;
         }
                 
-        acceptItems = false;               
-        if (options.itemsList) {
-            
-            acceptItems = KellyTools.getPrintValues(options.itemsList, false, 1, downloads.length);
-           
-            if (!acceptItems.length) {
-                acceptItems = false;
-            }
-           
-           // KellyTools.log(acceptItems);
-        }
-              
+        updateAcceptItems();
+        
         if (downloadsOffset <= 0) {
             downloadsOffset = 0;   
         } else if (downloadsOffset > downloads.length-1) {
@@ -10944,68 +10986,6 @@ function KellyFavItems(cfg)
         // init gallery only for current page
         // create gallery, by array
         imgViewer.addToGallery(galleryImages, 'fav-images', galleryImagesData);  
-    }
-    
-    this.downloadFilteredData = function(format, options, indexes) {
-        
-        if (!indexes) indexes = displayedItems;
-        
-        if (!indexes || !indexes.length) return false;
-        
-        if (format != 'txt') format = false; // default save as json profile
-       
-        var sm = handler.getStorageManager();
-        var fname = fav.coptions.baseFolder + '/' + sm.dir.exportFiltered;
-            fname += fav.coptions.storage + '_filtered_' + KellyTools.getTimeStamp() + '.' + (format ? format : sm.format);
-            fname = KellyTools.validateFolderPath(fname);        
-        
-        if (format == 'txt') {
-            
-            var storage = '';
-            for (var i = indexes.length-1; i >= 0; i--) {     
-            
-                var item = fav.items[indexes[i]];
-                
-                if (typeof item.pImage !== 'string') {
-                
-                    for (var b = 0; b <= item.pImage.length-1; b++) {
-                         storage +=  env.getImageDownloadLink(item.pImage[b], options && options.quality == 'hd') + "\r\n";
-                    }
-                    
-                } else {                
-                     storage += env.getImageDownloadLink(item.pImage, options && options.quality == 'hd') + "\r\n";
-                }         
-               
-            }
-            
-        } else {
-                
-            var storage = sm.getDefaultData();       
-                storage.ids = fav.ids;
-                storage.categories = [];
-            
-            // revers order (first added to array will count as "older")
-            for (var i = indexes.length-1; i >= 0; i--) {
-                
-                var item = fav.items[indexes[i]];;
-                var itemCats = item.categoryId;
-                
-                if (itemCats) {
-                    for (var c = 0; c < itemCats.length; c++) {
-                        if (sm.getCategoryById(storage, itemCats[c]).id == -1) {
-                            storage.categories[storage.categories.length] = sm.getCategoryById(fav, itemCats[c]);
-                        }                    
-                    }    
-                }
-
-                storage.items[storage.items.length] = item;            
-            }
-            
-            storage = JSON.stringify(storage);
-        }
-        
-        handler.getDownloadManager().createAndDownloadFile(storage, fname);
-        return true;
     }
     
     this.setShowCollectionEvent = function(buttons) {
