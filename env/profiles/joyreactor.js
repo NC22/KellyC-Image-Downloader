@@ -11,10 +11,6 @@ function KellyProfileJoyreactor() {
         favorite : '/user/__CONTENTNAME__/favorite/__PAGENUMBER__',
     }
     
-    var publicationClass = 'postContainer';
-
-    this.className = 'kelly-jr-ui'; // base class for every extension container \ element
-  
     this.hostList = [
         "joyreactor.cc", 
         "reactor.cc", 
@@ -29,17 +25,14 @@ function KellyProfileJoyreactor() {
     ];
 	
     this.profile = 'joyreactor';
-         
-    var mainContainers = false;
-    
-    var commentsBlockTimer = [];
+    this.className = 'kelly-jr-ui'; // base class for every extension container \ element
     
     var sideBarPaddingTop = 24;
-    var publications = false;
-      
     var sideBarDisabled = -1; // 1 - sidebar not found or hidden (jras - sidebar can be hidden)
     
     this.fav = false;
+    
+    var mainContainers = false, publications = false, commentsBlockTimer = [];
     
     /* imp */
     
@@ -52,12 +45,13 @@ function KellyProfileJoyreactor() {
             domain : null, // subdomain without fandom level
         };
         
-        var hostParts = location.host.split('.');
-        
+        var hostParts = location.host.split('.');        
         if (hostParts.length >= 2) {
+            
             handler.location.domain  = hostParts[hostParts.length-2];
             handler.location.domain += '.' + hostParts[hostParts.length-1];           
         } else {
+            
             handler.location.domain = handler.location.host;
         }
         
@@ -69,6 +63,12 @@ function KellyProfileJoyreactor() {
         var sfw = KellyTools.getElementByClass(document, 'sswither');        
         if (sfw && sfw.className.indexOf('active') != -1) return false;
         else return true;
+    }
+    
+    this.getPosts = function(container) {
+        
+        if (!container) container = document;        
+        return container.getElementsByClassName('postContainer');
     }
     
     this.getMainContainers = function() {
@@ -115,15 +115,7 @@ function KellyProfileJoyreactor() {
         }
         
         return mainContainers;
-    }
-    
-    // will be replaced by formatPosts
-    
-    this.getPosts = function(container) {
-        if (!container) container = document;
-        
-        return container.getElementsByClassName(publicationClass);
-    }
+    }   
     
     this.events = {
         
