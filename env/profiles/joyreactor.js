@@ -1,7 +1,7 @@
 // part of KellyFavItems extension
 // JoyReactor environment driver
 
-function kellyProfileJoyreactor() {
+function KellyProfileJoyreactor() {
         
     var handler = this;
     
@@ -783,8 +783,7 @@ function kellyProfileJoyreactor() {
             var link = KellyTools.getRelativeUrl(handler.getCommentLink(comments[i]));
             if (!link) continue;
             
-            var inFav = handler.fav.getStorageManager().searchItem(handler.fav.getGlobal('fav'), {link : false, commentLink : link});
-    
+            var inFav = handler.fav.getStorageManager().searchItem(handler.fav.getGlobal('fav'), {link : false, commentLink : link});    
             if (inFav !== false) {
                 
                 addToFavButton.setAttribute('itemIndex', inFav);
@@ -805,10 +804,6 @@ function kellyProfileJoyreactor() {
                 }
                 
                 addToFavButton.innerText = KellyLoc.s('в избранное', 'add_to_fav_comment');
-            }
-            
-            if (typeof kellyProfileJoyreactorEditTweak != 'undefined') {
-                kellyProfileJoyreactorEditTweak.getInstance().onFormatComment(comments[i]);
             }
         }
         
@@ -1235,10 +1230,10 @@ function kellyProfileJoyreactor() {
     }   
 }
 
-kellyProfileJoyreactor.getInstance = function() {
-    if (typeof kellyProfileJoyreactor.self == 'undefined') {
-        kellyProfileJoyreactor.self = new kellyProfileJoyreactor();
+KellyProfileJoyreactor.getInstance = function() {
+    if (typeof KellyProfileJoyreactor.self == 'undefined') {
+        KellyProfileJoyreactor.self = new KellyProfileJoyreactor();
     }
     
-    return kellyProfileJoyreactor.self;
+    return KellyProfileJoyreactor.self;
 }

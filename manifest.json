@@ -1,6 +1,6 @@
 {
    "content_scripts": [ {
-      "js": [ "kmerged.user.js" ],
+      "js": [ "kmerged.user.js", "init/init.js" ],
       "all_frames": true,
       "matches": [ 
         "http://*/*",
@@ -25,7 +25,7 @@
         "<all_urls>"
     ],
    "background": {
-    "scripts": ["kmerged.bg.js"],
+    "scripts": ["kmerged.bg.js", "init/init.bg.js"],
     "persistent": false
    },  
    "options_ui": {
