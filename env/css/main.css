@@ -1683,3 +1683,13 @@
     box-sizing: border-box; 
     cursor: pointer;
 }
+
+.__BASECLASS__-sidebar-wrap .__BASECLASS__Remove {
+    padding: 4px;
+    background: #ff6464;
+    color: #fff;
+    border-radius: 3px;
+    text-decoration: none;
+    display: block;
+    margin-top: 16px;
+}

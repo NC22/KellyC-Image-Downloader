@@ -612,8 +612,7 @@ function KellyProfileJoyreactor() {
     
     function updateAddToFavButton(postBlock, shareButtonsBlock, side) {
          
-        var link = getPostLinkEl(postBlock);
-        
+        var link = getPostLinkEl(postBlock);        
         if (!link) {            
             KellyTools.log('empty post link element', 'profile updatePostFavButton');
             return false;        
@@ -664,9 +663,10 @@ function KellyProfileJoyreactor() {
                 
             addToFav.onclick = function() { 
             
-                handler.fav.showRemoveFromFavDialog(inFav, function() {
+                handler.fav.showAddToFavDialog(parseInt(inFav), false, false, function() {
                     if (handler.fav.getGlobal('fav').coptions.syncByAdd) syncFav(postBlock, false);
                     
+                    handler.formatPostContainer(postBlock);              
                     handler.fav.closeSidebar(); 
                 }); 
                 
@@ -682,11 +682,10 @@ function KellyProfileJoyreactor() {
             
             addToFav.onclick = function() { 
                 
-                handler.fav.showAddToFavDialog(postBlock, false, function(selectedPost, selectedComment, selectedImages) {                    
+                handler.fav.showAddToFavDialog(postBlock, false, function() {      
+                    if (handler.fav.getGlobal('fav').coptions.syncByAdd) syncFav(postBlock, true);
                     
-                    if (!selectedComment && handler.fav.getGlobal('fav').coptions.syncByAdd) {
-                        syncFav(selectedPost, true);
-                    }                     
+                    handler.formatPostContainer(postBlock);
                 });
                 
                 return false; 
@@ -701,12 +700,10 @@ function KellyProfileJoyreactor() {
     
     this.getCommentText = function(comment) {
         
-        var contentContainer = comment.querySelector('.txt > div');  
-
+        var contentContainer = comment.querySelector('.txt > div');
         if (contentContainer && !contentContainer.className) return KellyTools.getElementText(contentContainer);
         
-        var contentContainer = comment.querySelector('.txt > span');  
-
+        var contentContainer = comment.querySelector('.txt > span');
         if (contentContainer && !contentContainer.className) return KellyTools.getElementText(contentContainer);
         
         for (var i = 0; i < comment.childNodes.length; i++) {
@@ -736,9 +733,11 @@ function KellyProfileJoyreactor() {
                     continue;
                 }
             }
-        
-            var addToFavButton = comments[i].getElementsByClassName(handler.className + '-addToFavComment');
+                    
+            var link = KellyTools.getRelativeUrl(handler.getCommentLink(comments[i]));
+            if (!link) continue;
             
+            var addToFavButton = comments[i].getElementsByClassName(handler.className + '-addToFavComment');            
             if (!addToFavButton.length) {
         
                 var bottomLink = comments[i].getElementsByClassName('reply-link');
@@ -768,34 +767,23 @@ function KellyProfileJoyreactor() {
                 
             } else {
                 addToFavButton = addToFavButton[0];
+            }            
+            
+            addToFavButton.innerText = KellyLoc.s('в избранное', 'add_to_fav_comment');
+            addToFavButton.removeAttribute('data-item-index');
+            
+            var inFav = handler.fav.getStorageManager().searchItem(handler.fav.getGlobal('fav'), {link : false, commentLink : link}); // search comment by link            
+            if (inFav !== false) {
+                addToFavButton.setAttribute('data-item-index', inFav);
+                addToFavButton.innerText = KellyLoc.s('удалить из избранного', 'remove_from_fav_comment');
             }
             
-            
-            // searh comment by link
-            var link = KellyTools.getRelativeUrl(handler.getCommentLink(comments[i]));
-            if (!link) continue;
-            
-            var inFav = handler.fav.getStorageManager().searchItem(handler.fav.getGlobal('fav'), {link : false, commentLink : link});    
-            if (inFav !== false) {
-                
-                addToFavButton.setAttribute('itemIndex', inFav);
-                addToFavButton.onclick = function() { 
-                    handler.fav.showRemoveFromFavDialog(this.getAttribute('itemIndex')); 
-                    return false;
-                };
-                
-                addToFavButton.innerText = KellyLoc.s('удалить из избранного', 'remove_from_fav_comment');
-                
-            } else {
-                                
-                addToFavButton.onclick =  function() {
-                    
-                    var comment = KellyTools.getParentByClass(this, 'comment');
-                    if (comment) handler.fav.showAddToFavDialog(block, comment);
-                    return false;					
-                }
-                
-                addToFavButton.innerText = KellyLoc.s('в избранное', 'add_to_fav_comment');
+            addToFavButton.onclick =  function() {
+                var itemIndex = this.getAttribute('data-item-index');
+                var onUpdateItem = function() { handler.formatComments(block); }
+                var comment = KellyTools.getParentByClass(this, 'comment');
+                if (comment) handler.fav.showAddToFavDialog(itemIndex ? parseInt(itemIndex) : block, comment, onUpdateItem, onUpdateItem);
+                return false;					
             }
         }
         
