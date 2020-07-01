@@ -701,9 +701,7 @@
 
 .__BASECLASS__-PreviewImage-container {
      overflow : hidden;
-    /*width: 200px;
-    */
-     max-height : 400px;
+     max-height : 320px;
      text-align : center;
 }
 
@@ -775,7 +773,6 @@
 .__BASECLASS__-PreviewImage {
      width : 200px;
      display : inline-block;
-     border-radius : 3px;
 }
 
 .__BASECLASS__-PreviewText-container {
@@ -1687,7 +1684,7 @@
 .__BASECLASS__-sidebar-wrap .__BASECLASS__Remove {
     padding: 4px;
     background: #ff6464;
-    color: #fff;
+    color: #fff!important;
     border-radius: 3px;
     text-decoration: none;
     display: block;
