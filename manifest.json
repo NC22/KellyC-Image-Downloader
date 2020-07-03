@@ -21,7 +21,8 @@
         "downloads",
         "storage",
         "tabs",
-        "unlimitedStorage",        
+        "unlimitedStorage",
+        "contextMenus",
         "<all_urls>"
     ],
    "background": {
