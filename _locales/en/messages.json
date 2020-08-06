@@ -261,10 +261,7 @@
         "message":"Available variables<br><br>"
     },    
     "fast_save_help_1":{  
-        "message":"<b>#CURRENT_LOCATION#</b> - current site (ex. reactor, at, wakfu etc.)<br>"
-    },    
-    "fast_save_help_2":{  
-        "message":"<b>#PUBLICATION_HOME#</b> - depends of site of publication. If home site not found then use current site sub domain<br>"
+        "message":"<b>#CURRENT_LOCATION#</b> - current site (ex. wh, at, wakfu etc.)<br>"
     },
     "fast_save_enabled":{  
         "message":"Display fast save button"

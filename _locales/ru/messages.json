@@ -261,10 +261,7 @@
         "message":"Доступны переменные<br><br>"
     },    
     "fast_save_help_1":{  
-        "message":"<b>#CURRENT_LOCATION#</b> - текущий сайт (например reactor, at, wakfu и т.д.)<br>"
-    },    
-    "fast_save_help_2":{  
-        "message":"<b>#PUBLICATION_HOME#</b> - зависит от фэндома поста. Если фэндом не найден то равен текущему сайту<br>"
+        "message":"<b>#CURRENT_LOCATION#</b> - текущий поддомен (например wh, at, wakfu и т.д.)<br>"
     },
     "fast_save_enabled":{  
         "message":"Показывать кнопку быстрого сохранения для публикаций"

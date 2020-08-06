@@ -700,6 +700,10 @@
     min-height: 230px;
 }
 
+.__BASECLASS__-ModalBox .__BASECLASS__-ModalBox-content input[type=checkbox] {
+    margin-right : 6px;
+}
+
 .__BASECLASS__-PreviewImage-container {
      overflow : hidden;
      max-height : 320px;

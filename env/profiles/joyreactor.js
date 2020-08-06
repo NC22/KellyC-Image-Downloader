@@ -95,11 +95,9 @@ function KellyProfileJoyreactor() {
             
             mainContainers.sideBar = mainContainers.body;
             
-            if (mainContainers.siteContent) {
-                
+            if (mainContainers.siteContent) {                
                 mainContainers.favContent = document.createElement('div');
-                mainContainers.favContent.className = handler.className + '-FavContainer ' + handler.hostClass;            
-                
+                mainContainers.favContent.className = handler.className + '-FavContainer ' + handler.hostClass;                
                 mainContainers.siteContent.parentNode.insertBefore(mainContainers.favContent, mainContainers.siteContent);                
             }
             
@@ -126,8 +124,7 @@ function KellyProfileJoyreactor() {
         
         onPageReady : function() {
             
-            publications = handler.getPosts();
-            
+            publications = handler.getPosts();            
             return false;
         },
         
@@ -442,17 +439,12 @@ function KellyProfileJoyreactor() {
     
     function updateFastSaveButtonsState() {
         
-        var options = handler.fav.getGlobal('fav');
-        
-        
-        if (!handler.fav.isDownloadSupported || !options.coptions.fastsave.enabled || !options.coptions.fastsave.check) {
+        var options = handler.fav.getGlobal('fav');        
+        if (!handler.fav.isDownloadSupported || !options.coptions.fastsave.enabled || !options.coptions.fastsave.check || !publications || !publications.length) {
             return false;
         }
         
-        if (!publications || !publications.length) return false;
-
-        var scrollBottom = KellyTools.getViewport().screenHeight + KellyTools.getScrollTop();
-        
+        var scrollBottom = KellyTools.getViewport().screenHeight + KellyTools.getScrollTop();        
         var updatePublicationFastButton = function(publication) {
             
             var button = KellyTools.getElementByClass(publication, handler.className + '-fast-save-unchecked');           
@@ -468,12 +460,7 @@ function KellyProfileJoyreactor() {
             } 
         }
         
-        for (var i = 0; i < publications.length; i++) {
-            
-            if (!publications[i]) continue;
-            
-            updatePublicationFastButton(publications[i]);                    
-        }
+        for (var i = 0; i < publications.length; i++) updatePublicationFastButton(publications[i]);
     }
 
     function isPostCensored(postBlock) {
@@ -483,8 +470,7 @@ function KellyProfileJoyreactor() {
 
     function updateSidebarProportions(sideBarWrap) {
         
-        var filters = KellyTools.getElementByClass(sideBarWrap, handler.className + '-FiltersMenu');     
-            
+        var filters = KellyTools.getElementByClass(sideBarWrap, handler.className + '-FiltersMenu'); 
         if (filters && filters.offsetHeight > 440 && filters.className.indexOf('calculated') == -1) {
             
             var filtersBlock = KellyTools.getElementByClass(sideBarWrap, handler.className + '-FiltersMenu-container');
@@ -529,13 +515,11 @@ function KellyProfileJoyreactor() {
                  
                 KellyTools.log('Bad sidebar position', 'updateSidebarPosition'); 
                 sideBarDisabled = 1;
-               
             }
             
             if (!sideBlock) {
                 KellyTools.log('Sidebar not found', 'updateSidebarPosition'); 
                 sideBarDisabled = 1;
-                
             }
             
             if (sideBarDisabled == 1) {
@@ -552,11 +536,8 @@ function KellyProfileJoyreactor() {
             sideBlock = false;
         }
         
-        var scrollTop = KellyTools.getScrollTop();
-        var scrollLeft = KellyTools.getScrollLeft();
-        
-        var top = 0;
-        var topMax = 0;
+        var scrollTop = KellyTools.getScrollTop(), scrollLeft = KellyTools.getScrollLeft();        
+        var top = 0, topMax = 0;
        
         if (sideBlock) {
             
@@ -606,8 +587,6 @@ function KellyProfileJoyreactor() {
                 }
             }
         }
-        
-        // tagList
     }
     
     function updateAddToFavButton(postBlock, shareButtonsBlock, side) {
@@ -857,7 +836,7 @@ function KellyProfileJoyreactor() {
        
     /* not imp */
     
-    this.getPostTags = function(publication, limitTags, full, homeTagsOnly) {
+    this.getPostTags = function(publication, limitTags) {
         
         if (!limitTags) limitTags = false;
         
@@ -866,18 +845,13 @@ function KellyProfileJoyreactor() {
         if (!nativeTags) return tags;
         
         var nativeTags = nativeTags.getElementsByTagName('A');
-        if (!nativeTags || !nativeTags.length) return tags;
-        
+        if (!nativeTags || !nativeTags.length) return tags;        
         
         for (var i = 0; i < nativeTags.length; i++) {
            var tagName = nativeTags[i].innerHTML.trim(); 
            if (!tagName) continue;
            
-           if (homeTagsOnly && (nativeTags[i].href.indexOf('.reactor.cc') == -1 || nativeTags[i].href.indexOf('/tag/') != -1)) {
-               continue;
-           }
-           
-           tags[tags.length] = full ? {tagName : tagName, url : nativeTags[i].href} : tagName;
+           tags[tags.length] = tagName;
            if (limitTags && tags.length >= limitTags) return tags;
         }
         
@@ -922,30 +896,15 @@ function KellyProfileJoyreactor() {
     
     this.getAllMedia = function(publication) {
         
-        var data = [];
-        
+        var data = [], content = false;
         if (!publication) return data;
         
-        var content = false;
-        
-        if (publication.className.indexOf('comment') != -1) {
+        // highlited comments - <div class="comment hightlighted filled">[...]</div> | common comments    - <div class="comment"><div class="txt">[...]</div></div>
             
-            // highlited comments - <div class="comment hightlighted filled">[...]</div>
-            // common comments    - <div class="comment"><div class="txt">[...]</div></div>
-            
-            content = publication;
-            
-        } else {
-            content = KellyTools.getElementByClass(publication, 'post_content');
-        }
+        content = publication.className.indexOf('comment') != -1 ? publication : KellyTools.getElementByClass(publication, 'post_content');
+        if (!content || isPostCensored(publication)) return data;
         
-        if (!content) return data;
-        
-        var mainImage = getMainImage(publication, content);
-        
-        // censored posts not contain post container and
-        // /images/censorship/ru.png
-        
+        var mainImage = getMainImage(publication, content);      
         var imagesEl = content.getElementsByClassName('image');
         
         for (var i = 0; i < imagesEl.length; i++) {
@@ -1000,7 +959,7 @@ function KellyProfileJoyreactor() {
     /* imp */
     // route format
     // [image-server-subdomain].[domain]/pics/[comment|post]/[full|animation format]/[title]-[image-id].[extension]
-    // format - optional, unvalidated
+    // format - animation file format in request - optional, unvalidated, used for video formats in downloader
     
     this.getImageDownloadLink = function(url, full, format) {
         
@@ -1020,19 +979,10 @@ function KellyProfileJoyreactor() {
             imgServer = imgServer[0];
             var type = url.indexOf('comment') == -1 ? 'post' : 'comment';
       
-            // prevent watermark show for jr-proxy (not all images, untested domain, dont have access)
-            // if (this.location.domain == 'jr-proxy.com') imgServer = 'img1';
-            
-            if (format) {
-                
+            if (format && ['mp4', 'webm'].indexOf(format) != -1) {                
                 filename = filename.split('.')[0] + '.' + format;
-                
-                if (['mp4', 'webm'].indexOf(format) == -1) {
-                    format = '';
-                } else {
-                    full = false; // full accepted for all formats except videos
-                }
-            }
+                full = false;
+            } else format = false;
             
             // prevent 301 redirect in fandoms for media requests
            
