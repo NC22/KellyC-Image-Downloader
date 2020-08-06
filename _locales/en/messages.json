@@ -65,8 +65,8 @@
     "cat_new_cat_name":{  
         "message":"New category name"
     },
-    "cat_no_cat":{  
-        "message":"Without category"
+    "cat_select":{  
+        "message":"Select category"
     },
     "cats":{  
         "message":"Categories"

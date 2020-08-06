@@ -65,8 +65,8 @@
     "cat_new_cat_name":{  
         "message":"Новая категория"
     },
-    "cat_no_cat":{  
-        "message":"Без категории"
+    "cat_select":{  
+        "message":"Выбрать категорию"
     },
     "cats":{  
         "message":"Категории"
