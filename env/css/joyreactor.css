@@ -198,12 +198,13 @@
     margin-top : 6px;
 }
 
-.__BASECLASS__-old-reactor-cc .__BASECLASS__Add {
-    font-weight : bold;
-    display : block;
-    height : 26px;
-    line-height : 26px;
-    margin: 6px 0;
+.__BASECLASS__-old-reactor-cc .__BASECLASS__Add, .__BASECLASS__-old-reactor-cc .__BASECLASS__Remove {
+    width: 100%;
+    float: none;
+    display: block;
+    box-sizing: border-box;
+    margin-bottom: 6px;
+    padding: 6px;
 }
 
 #__BASECLASS__-ModalBox.__BASECLASS__-old-reactor-cc a {
