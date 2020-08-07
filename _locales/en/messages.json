@@ -238,6 +238,9 @@
     },
     "download_empty":{  
         "message":"List of found publications is empty (see log for more info)"
+    },   
+    "edit":{
+        "message":"Edit"
     },
     "edit_mode":{  
         "message":"Edit mode"
