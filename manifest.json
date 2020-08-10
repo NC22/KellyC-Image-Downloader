@@ -22,7 +22,6 @@
         "storage",
         "tabs",
         "unlimitedStorage",
-        "contextMenus",
         "<all_urls>"
     ],
    "background": {
