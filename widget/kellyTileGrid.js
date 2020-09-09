@@ -5,7 +5,7 @@
    @description    image view widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.1.2 28.08.19
+   @version        v 1.1.3 09.09.20
    
    ToDo : 
    
@@ -57,7 +57,7 @@ function KellyTileGrid(cfg) {
         onBadBounds : false, // (handler, data[errorCode, error, tile, boundEl]) element is loaded, but bounds is unsetted or loaded with error 
         onResize : false, // (handler) window resize
         onLoadBounds : false, // (handler, boundEl, errorTriger) some of bounds element is ready, if user function return true tilegrid will not refresh, todo - return tile
-        onResizeImage : false, // (handler, tileResizedInfo[origHeight, origWidth, width, height])
+        onResizeImage : false, // (handler, tileResizedInfo[origHeight, origWidth, width, height, tile, image, boundEl, portrait])
     };
     
     var lazyEvent = false;
@@ -206,8 +206,7 @@ function KellyTileGrid(cfg) {
             if (data.tile) data.tile.style.display = 'none';
         }
         
-        return false;
-            
+        return false;            
     };
     
     function onLoadBounds(boundEl, state) {
@@ -227,9 +226,9 @@ function KellyTileGrid(cfg) {
             boundEl.setAttribute('error', '1');
         } else {            
         
-            // original naturalWidth \ height may be lost after resize operations
+            // original naturalWidth \ naturalHeight may be lost after resize operations
             
-            if (boundEl.tagName = 'IMG' && !boundEl.getAttribute('data-width')) {
+            if (boundEl.tagName == 'IMG' && !boundEl.getAttribute('data-width')) {
                 boundEl.setAttribute('data-width', boundEl.naturalWidth);
                 boundEl.setAttribute('data-height', boundEl.naturalHeight); 
                 
@@ -341,16 +340,14 @@ function KellyTileGrid(cfg) {
             for (var i=0; i <= tiles.length-1; i++){ 
                 
                 var rElement = handler.getResizableElement(tiles[i]);
-                removeClass(rElement, 'grid-first');
-                removeClass(rElement, 'grid-last');
+                removeClass(rElement, 'grid-first'); removeClass(rElement, 'grid-last');
                 
                 var boundEl = handler.getBoundElement(tiles[i]);
                 if (boundEl.tagName == 'IMG' && tiles[i].getAttribute('data-load-eventInit')) {
                     
                     boundEl.removeEventListener('error', imgEvents.onLoadBoundsError);
                     boundEl.removeEventListener('load',  imgEvents.onLoadBoundsSuccess);
-                    
-                    tiles[i].setAttribute('data-load-eventInit', '0');
+                    tiles[i].removeAttribute('data-load-eventInit');
                 }
             }
         }
@@ -368,9 +365,7 @@ function KellyTileGrid(cfg) {
             var isElInView = function(el) {
                     
                 var bounds = el.getBoundingClientRect();
-           
-                if (screenBounds.height + scrollTop > scrollTop + bounds.top && scrollTop < scrollTop + bounds.bottom ) {
-                    
+                if (screenBounds.height + scrollTop > scrollTop + bounds.top && scrollTop < scrollTop + bounds.bottom ) {                    
                     return true;
                 }
                 
@@ -389,17 +384,15 @@ function KellyTileGrid(cfg) {
                 if (tilesBoundsEls[i].getAttribute('data-src')) {
                     
                     if (!tilesLoadState[i]) {
-                        if (rules.loadLimit && loading >= rules.loadLimit) {
-                            
+                        if (rules.loadLimit && loading >= rules.loadLimit) {                            
                             break; 
                         }
                     }
                     
-                    if (!tilesLoadState[i] || isElInView(tilesBoundsEls[i])) {
+                    if (!tilesLoadState[i] || isElInView(handler.getResizableElement(tiles[i]))) { // more preferable load if tile block is in view, may be add callback in future
                         tilesBoundsEls[i].src = tilesBoundsEls[i].getAttribute('data-src');
-                        tilesBoundsEls[i].setAttribute('data-src', '');
-                    } else {
-                            
+                        tilesBoundsEls[i].removeAttribute('data-src');
+                    } else {                            
                         skipped++;
                         continue;
                     }
@@ -443,21 +436,14 @@ function KellyTileGrid(cfg) {
         
         if (!tilesBlock) return false;
         
-        
-        tiles = handler.getTiles();
-        tilesLoaded = 0;
-        tilesBoundsEls = [];
-        tilesLoadState = [];
+        tiles = handler.getTiles(), tilesLoaded = 0, tilesBoundsEls = [], tilesLoadState = [];
         
         for (var i = 0; i < tiles.length; i++) {
             
             tilesBoundsEls[i] = handler.getBoundElement(tiles[i]);
             tilesLoadState[i] = isBoundsLoaded(tiles[i], tilesBoundsEls[i]);
             
-            if (tilesLoadState[i]) {
-                tilesLoaded++;                
-            }
-            
+            if (tilesLoadState[i]) tilesLoaded++;
         }
         
         return true;
@@ -477,8 +463,7 @@ function KellyTileGrid(cfg) {
     
     function getBoundElementData(boundEl, type) {
         
-        type = type != 'width' ? 'height' : 'width';
-        
+        type = type != 'width' ? 'height' : 'width';        
         var dataValue = boundEl.getAttribute('data-' + type);
         
         if (typeof dataValue == 'undefined') {
@@ -495,18 +480,12 @@ function KellyTileGrid(cfg) {
         if (!updateTileGridState()) return false;
         
         var isAllBoundsLoaded = tilesLoaded == tiles.length;
-        
-        if (!isAllBoundsLoaded) {
-            addClass(tilesBlock, 'loading');
-        } else {
-            removeClass(tilesBlock, 'loading');
-        }
+        if (!isAllBoundsLoaded) addClass(tilesBlock, 'loading');
+        else removeClass(tilesBlock, 'loading');
         
         if (isAllBoundsLoaded || rules.tmpBounds) {
         
-            landscape = 0;
-            portrait = 0;
-            currentTileRow = [];        
+            landscape = 0, portrait = 0, currentTileRow = [];        
             
             var screenSize = tilesBlock.getBoundingClientRect().width; 
             
@@ -521,12 +500,13 @@ function KellyTileGrid(cfg) {
                
             for (var i=0; i <= tiles.length-1; i++){ 
                             
-                var tileMainEl = handler.getBoundElement(tiles[i]);
+                var tileMainEl = tilesBoundsEls[i];
                 var alternativeBounds = false;					
                 
                 var imageInfo = {
                     portrait : false,
-                    image : handler.getResizableElement(tiles[i]),
+                    image : handler.getResizableElement(tiles[i]), // resizable element - could be same as tile pointer el
+                    boundEl : tileMainEl, // dimensions element - could be same as tile pointer el
                     width : 0,
                     height : 0,
                     tile : tiles[i],
@@ -567,7 +547,7 @@ function KellyTileGrid(cfg) {
                     
                     if (!imageInfo.width || imageInfo.width < 0) {
                     
-                        alternativeBounds = onBadBounds({errorCode : 3, error : 'no width \ height', tile : tiles[i],	boundEl : tileMainEl});						
+                        alternativeBounds = onBadBounds({errorCode : 3, error : 'no width \ height', tile : tiles[i], boundEl : tileMainEl});						
                         if (!alternativeBounds) {
                         
                             continue;
@@ -590,17 +570,14 @@ function KellyTileGrid(cfg) {
                 
                 if (!imageInfo.height) imageInfo.height = imageInfo.width;
                 
-                var aspectRatio = imageInfo.width / imageInfo.height;
-                var oversized = false;                
-                
+                var aspectRatio = imageInfo.width / imageInfo.height, oversized = false;
                 if (aspectRatio <= rules.minAspectRatio) oversized = true; 
                 
                 if (oversized) {
                     
-                    imageInfo.width = 0;
-                    imageInfo.height = 0;
+                    imageInfo.width = 0; imageInfo.height = 0;
                     
-                    alternativeBounds = onBadBounds({errorCode : 4, error : 'oversized', tile : tiles[i],	boundEl : tileMainEl});						
+                    alternativeBounds = onBadBounds({errorCode : 4, error : 'oversized', tile : tiles[i], boundEl : tileMainEl});						
                     if (!alternativeBounds) {
                     
                         continue;
@@ -626,11 +603,8 @@ function KellyTileGrid(cfg) {
                     
                     if (rules.collectLast && i + rules.collectLast >= tiles.length) continue; // collect last elements
                     
-                    var currentRowResultHeight = getExpectHeight();
-                    
-                    // если текущий ряд не масштабируеся под требуемую высоту с определенным допуском, продолжаем сбор изображений
-                    
-                    if (currentRowResultHeight > rowHeight + ( (rowHeight / 100) * rules.heightDiff )) continue;
+                    var currentRowResultHeight = getExpectHeight(); // если текущий ряд не масштабируеся под требуемую высоту с определенным допуском, продолжаем сбор изображений
+                    if (currentRowResultHeight > rowHeight + ((rowHeight / 100) * rules.heightDiff )) continue;
                     
                 } else {
                 
@@ -712,7 +686,7 @@ function KellyTileGrid(cfg) {
         // count total width of row, and resize by required row height
         for (var i=0; i <= currentTileRow.length-1; ++i){ 
             currentTileRow[i].origWidth = currentTileRow[i].width;
-            currentTileRow[i].origHeight = currentTileRow[i].hight;
+            currentTileRow[i].origHeight = currentTileRow[i].height;
             currentTileRow[i] = getResizedInfo(rowHeight, currentTileRow[i], 'height');
             width += parseInt(currentTileRow[i].width); 
             
