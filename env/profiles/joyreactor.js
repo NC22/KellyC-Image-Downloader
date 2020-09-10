@@ -625,52 +625,27 @@ function KellyProfileJoyreactor() {
                                
                 link.parentElement.parentElement.insertBefore(addToFav, link.parentElement); 
                 addToFav = KellyTools.getElementByClass(addToFav, className);
-                
             }           
         }         
         
-        var inFav = handler.fav.getStorageManager().searchItem(handler.fav.getGlobal('fav'), {link : linkUrl, commentLink : false});
-                
-        // update title
-        
-        if (inFav !== false) {
+        var postIndex = handler.fav.getStorageManager().searchItem(handler.fav.getGlobal('fav'), {link : linkUrl, commentLink : false});
+        var action = postIndex !== false ? 'remove_from' : 'add_to';  
+        var onAction = function(remove) {
+            if (handler.fav.getGlobal('fav').coptions.syncByAdd) syncFav(postBlock, false);
+            if (remove) handler.fav.closeSidebar(); 
             
-            KellyTools.classList('add', addToFav, handler.className + '-' + sideName + '-addtofav-added');  
-            
-            if (side) addToFav.title = KellyLoc.s('Удалить из избранного', 'remove_from_fav_tip');
-            else addToFav.innerText = KellyLoc.s('Удалить из избранного', 'remove_from_fav');
-                
-            addToFav.onclick = function() { 
-            
-                handler.fav.showAddToFavDialog(parseInt(inFav), false, false, function() {
-                    if (handler.fav.getGlobal('fav').coptions.syncByAdd) syncFav(postBlock, false);
-                    
-                    handler.formatPostContainer(postBlock);              
-                    handler.fav.closeSidebar(); 
-                }); 
-                
-                return false; 
-            };
-            
-        } else {
-                        
-            KellyTools.classList('remove', addToFav, handler.className + '-' + sideName + '-addtofav-added');  
-            
-            if (side) addToFav.title = KellyLoc.s('Добавить в избранное', 'add_to_fav_tip');
-            else addToFav.innerText = KellyLoc.s('Добавить в избранное', 'add_to_fav');
-            
-            addToFav.onclick = function() { 
-                
-                handler.fav.showAddToFavDialog(postBlock, false, function() {      
-                    if (handler.fav.getGlobal('fav').coptions.syncByAdd) syncFav(postBlock, true);
-                    
-                    handler.formatPostContainer(postBlock);
-                });
-                
-                return false; 
-            };
-            
+            handler.formatPostContainer(postBlock); 
         }
+        
+        addToFav.onclick = function() { 
+            handler.fav.showAddToFavDialog(action == 'remove_from' ? postIndex : postBlock, false, onAction, function() {onAction(true)});
+            return false; 
+        };
+                      
+        KellyTools.classList(action == 'remove_from' ? 'add' : 'remove', addToFav, handler.className + '-' + sideName + '-addtofav-added');
+        
+        if (side) addToFav.title = KellyLoc.s('', action + '_fav_tip');
+        else addToFav.innerText = KellyLoc.s('', action + '_fav'); 
         
         return addToFav;
     }
