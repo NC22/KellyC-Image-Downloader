@@ -1354,6 +1354,14 @@
     margin-bottom : 16px;
 }
 
+.__BASECLASS__-exporter-create-by-tag-container,
+.__BASECLASS__-exporter-tag-filter-container {
+    padding: 14px;
+    margin-bottom: 12px;
+    margin-top: 12px;
+    background : rgba(239, 239, 239, 0.35);
+}
+
 .__BASECLASS__-options-table-bookmarks {
     vertical-align: middle;
 }
