@@ -58,11 +58,12 @@ function KellyTileGrid(cfg) {
         onResize : false, // (handler) window resize
         onLoadBounds : false, // (handler, boundEl, errorTriger) some of bounds element is ready, if user function return true tilegrid will not refresh, todo - return tile
         onResizeImage : false, // (handler, tileResizedInfo[origHeight, origWidth, width, height, tile, image, boundEl, portrait])
+        onRequestDataSrc : false, // (handler, tiles[i], tilesBoundsEls[i]) on start request lazyload 
     };
     
     var lazyEvent = false;
     var loading = 0;
-    var updateAnimationFrame = true;
+    var updateAnimationFrame = true, updateLazyFrame = true;
     
     this.eventsChecked = false; 
     this.gifBase64 = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP/' + '/' + '/yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; // empty 1x1 gif placeholder
@@ -110,8 +111,14 @@ function KellyTileGrid(cfg) {
         
         if (rules.lazy && !lazyEvent) {
     
-            lazyEvent = function() {
-                updateTileGridEvents();
+            lazyEvent = function() {       
+                if (!updateAnimationFrame || !updateLazyFrame) return false;        
+                updateLazyFrame = false;
+                
+                window.requestAnimationFrame(function(){            
+                    updateLazyFrame = true;
+                    updateTileGridEvents();
+                });
             };
     
             window.addEventListener('scroll', lazyEvent);
@@ -367,9 +374,7 @@ function KellyTileGrid(cfg) {
                 var bounds = el.getBoundingClientRect();
                 if (screenBounds.height + scrollTop > scrollTop + bounds.top && scrollTop < scrollTop + bounds.bottom ) {                    
                     return true;
-                }
-                
-                return false;
+                } else return false;
             }
         }
         
@@ -380,37 +385,29 @@ function KellyTileGrid(cfg) {
                
             // lazyLoad disabled for elements without bounds data
             
-            if (rules.lazy) {
-                if (tilesBoundsEls[i].getAttribute('data-src')) {
-                    
-                    if (!tilesLoadState[i]) {
-                        if (rules.loadLimit && loading >= rules.loadLimit) {                            
-                            break; 
-                        }
-                    }
-                    
-                    if (!tilesLoadState[i] || isElInView(handler.getResizableElement(tiles[i]))) { // more preferable load if tile block is in view, may be add callback in future
+            if (rules.lazy && tilesBoundsEls[i].getAttribute('data-src')) {
+                
+                if (!tilesLoadState[i] && rules.loadLimit && loading >= rules.loadLimit) break; // limit total requests for unknown bound images
+                if (!tilesLoadState[i] || isElInView(handler.getResizableElement(tiles[i]))) { // image bounds is unknown (newer was loaded) or image in view
+                                        
+                    if (events.onRequestDataSrc) events.onRequestDataSrc(handler, tiles[i], tilesBoundsEls[i]);
+                    else {
                         tilesBoundsEls[i].src = tilesBoundsEls[i].getAttribute('data-src');
                         tilesBoundsEls[i].removeAttribute('data-src');
-                    } else {                            
-                        skipped++;
-                        continue;
                     }
-                    
+                } else {                            
+                    skipped++; continue;
                 }
             }
             
             if (!tilesLoadState[i] || rules.recheckAlways) {
                                 
                 if (tilesBoundsEls[i].tagName == 'IMG' && !tiles[i].getAttribute('data-load-eventInit')) {
-                    
-                    // test error states
-                    /*
-                        var testError = Math.floor(Math.random() * Math.floor(50));
-                        if (testError > 25) {
+                                        
+                    /*  var testError = Math.floor(Math.random() * Math.floor(50)); // test error states
+                        if (testError > 25) { 
                             tilesBoundsEls[i].src = tilesBoundsEls[i].src.replace('.', 'test.d');
-                        }
-                    */
+                        } */
                     
                     // todo need tile el in onLoadBounds method before
                     // addClass(tiles[i], 'tile-loading');
@@ -425,10 +422,7 @@ function KellyTileGrid(cfg) {
             }
         }
         
-        if (tilesLoaded == tiles.length && !skipped) {
-            handler.eventsChecked = true;
-        }
-        
+        if (tilesLoaded == tiles.length && !skipped) handler.eventsChecked = true;        
         return true;     
     };
         
