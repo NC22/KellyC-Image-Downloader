@@ -21,6 +21,7 @@ for %%x in (
     "lib\kellyOptions.js"
     "lib\kellyFavItems.js"
     "env\profiles\joyreactor.js" 
+    "env\profiles\topjoyreactor.js" 
 ) do (
     
     @echo.>> %frontend%

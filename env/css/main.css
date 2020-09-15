@@ -241,7 +241,7 @@
 
 .__BASECLASS__-sidebar-wrap .__BASECLASS__-sidebar-collapse {
     display : none;  
-    background: rgba(97, 83, 56, 0.77);
+    background: rgb(255 168 0);
     width: 100px;
     text-align: center;
     border-radius: 3px;
@@ -562,7 +562,9 @@
 }
 
 .__BASECLASS__-FiltersMenu {
-     margin-bottom : 12px;
+    margin: 0;
+    padding: 0;
+    margin-bottom : 12px;
     /* todo move tooltips max-height: 450px;
      overflow-y: auto;
      overflow-x: hidden;
@@ -628,7 +630,7 @@
 .__BASECLASS__-sidebar-wrap {
      position: absolute;
      z-index: 990;
-     
+     width: 326px;
      transition : opacity 0.3s;
 }
 
@@ -877,11 +879,8 @@
      text-align : center;
 }
 
-.__BASECLASS__-ImgView-img img {
-    /* 
-	 opacity : 0;
-     transition : opacity 1s;
-	*/
+.__BASECLASS__-ImgView-img-self {
+    background: rgb(255, 255, 255, 0.79);
 }
 
 .__BASECLASS__-ImgView-loader {

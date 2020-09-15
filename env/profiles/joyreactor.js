@@ -31,8 +31,7 @@ function KellyProfileJoyreactor() {
     var sideBarDisabled = -1; // 1 - sidebar not found or hidden (jras - sidebar can be hidden)
     
     this.fav = false;
-    
-    var mainContainers = false, publications = false, commentsBlockTimer = [];
+    var publications = false, commentsBlockTimer = [];
     
     /* imp */
     
@@ -75,8 +74,8 @@ function KellyProfileJoyreactor() {
         
         // todo move create buttons methods from faitems core
         
-        if (!mainContainers) {
-            mainContainers = {
+        if (!handler.mContainers) {
+            handler.mContainers = {
                 
                 // public
                 
@@ -84,7 +83,6 @@ function KellyProfileJoyreactor() {
                 siteContent : document.getElementById('contentinner'), // site main container
                 favContent : false, // main extension container - image grid \ options block
                 sideBar : false,  // place where to put extension sidebar block (add post \ filters menu)
-                               
                 menu : document.getElementById('submenu'), // currently used in kellyFavItems to create menu buttons
                 
                 // private
@@ -93,26 +91,22 @@ function KellyProfileJoyreactor() {
                 tagList : document.getElementById('tagList'),   // helps to detect lowest position of sideBar by Y (top), only for updateSidebarPosition()
             };
             
-            mainContainers.sideBar = mainContainers.body;
+            handler.mContainers.sideBar = handler.mContainers.body;
             
-            if (mainContainers.siteContent) {                
-                mainContainers.favContent = document.createElement('div');
-                mainContainers.favContent.className = handler.className + '-FavContainer ' + handler.hostClass;                
-                mainContainers.siteContent.parentNode.insertBefore(mainContainers.favContent, mainContainers.siteContent);                
+            if (handler.mContainers.siteContent) {                
+                handler.mContainers.favContent = document.createElement('div');
+                handler.mContainers.favContent.className = handler.className + '-FavContainer ' + handler.hostClass;                
+                handler.mContainers.siteContent.parentNode.insertBefore(handler.mContainers.favContent, handler.mContainers.siteContent);                
             }
             
-            if (!mainContainers.body) {
-                KellyTools.log('getMainContainers : body container not found', KellyTools.E_ERROR); 
-                return false;  
-            }
-            
-            if (!mainContainers.favContent) {
-                KellyTools.log('getMainContainers : cant create favContent container, check siteContent selector', KellyTools.E_ERROR);
+            if (!handler.mContainers.favContent || !handler.mContainers.body) {
+                KellyTools.log('getMainContainers : cant create containers, check selectors', KellyTools.E_ERROR);
+                KellyTools.log(handler.mContainers, KellyTools.E_ERROR);
                 return false;               
             }
         }
         
-        return mainContainers;
+        return handler.mContainers;
     }   
     
     this.events = {
@@ -159,13 +153,7 @@ function KellyProfileJoyreactor() {
             
             if (handler.location.domain == 'joyreactor.cc' || (handler.location.domain == 'reactor.cc' && handler.location.host != 'old.reactor.cc')) {
 
-                var bar = document.getElementById('searchBar');
-                
-                var style = {
-                    bg : false,
-                    btn : false,
-                };
-                
+                var bar = document.getElementById('searchBar'), style = { bg : false, btn : false };
                 var applyStyle = function() {
                     
                     css = "\n\r\n\r\n\r" + '/* ' +  handler.profile + '-dynamic */' + "\n\r\n\r\n\r";
@@ -193,7 +181,6 @@ function KellyProfileJoyreactor() {
                     }
                                    
                     handler.fav.addCss(css);
-                    
                 }
                 
                 if (bar) {
@@ -235,7 +222,6 @@ function KellyProfileJoyreactor() {
                 }               
             }
             
-            
             handler.fav.showNativeFavoritePageInfo();
         },
         
@@ -268,19 +254,14 @@ function KellyProfileJoyreactor() {
             if (refreshPosts) {
                 
                 var old = document.querySelectorAll('.' + handler.className + '-post-button-base');
-               
-                if (old) {
-                    for (var i = 0; i < old.length; i++) {
-                        if (old[i].parentNode) old[i].parentNode.removeChild(old[i]);                
-                    }
+                for (var i = 0; i < old.length; i++) {
+                    if (old[i].parentNode) old[i].parentNode.removeChild(old[i]);                
                 }
                 
                 handler.fav.formatPostContainers(); 
                 return true;
             }
-            
         },
-        
         
         onShowFavouriteImages : function(imagesAsDownloadItems) {
             
@@ -502,14 +483,10 @@ function KellyProfileJoyreactor() {
         
         if (!handler.fav) return false;
         
-        var sideBarWrap = handler.fav.getView('sidebar');        
+        var sideBarWrap = handler.fav.getView('sidebar'), sideBlock = handler.getMainContainers().sideBlock;        
         if (!sideBarWrap || sideBarWrap.className.indexOf('hidden') !== -1) return false;
-        
-        var sideBlock = handler.getMainContainers().sideBlock;     
-        
-        // first time update position, validate sidebar block
-        
-        if (sideBarDisabled == -1) {
+            
+        if (sideBarDisabled == -1) { // first time update position, validate sidebar block
             
             if (sideBlock && window.getComputedStyle(sideBlock).position == 'absolute') {
                  
@@ -529,26 +506,16 @@ function KellyProfileJoyreactor() {
                     KellyTools.classList('add', collapseButton, handler.className + '-active');
                 }
             }
-            
         } 
         
-        if (sideBarDisabled == 1) {
-            sideBlock = false;
-        }
+        if (sideBarDisabled == 1) sideBlock = false;
         
-        var scrollTop = KellyTools.getScrollTop(), scrollLeft = KellyTools.getScrollLeft();        
-        var top = 0, topMax = 0;
-       
-        if (sideBlock) {
-            
-            var sideBlockBounds = sideBlock.getBoundingClientRect();
-            
-            topMax = sideBlockBounds.top + scrollTop;
-            top = topMax;
-        }
+        var sideBlockBounds = sideBlock ? sideBlock.getBoundingClientRect() : {top : 0};
+        if (!sideBlock && handler.getMainContainers().favContent.style.display == 'block') sideBlockBounds = handler.getMainContainers().favContent.getBoundingClientRect();
                     
-        // screen.height / 2  - (sideBarWrap.getBoundingClientRect().height / 2) - 24
-        
+        var scrollTop = KellyTools.getScrollTop(), scrollLeft = KellyTools.getScrollLeft();   
+        var topMax = sideBlockBounds.top + scrollTop, top = topMax;
+                           
         if (!handler.fav.sideBarLock && sideBarPaddingTop + scrollTop > top) top = sideBarPaddingTop + scrollTop;
                 
         sideBarWrap.style.top = top + 'px';
@@ -556,19 +523,15 @@ function KellyProfileJoyreactor() {
         if (sideBlock) {
             
             var widthBase = 0;            
-            if (handler.hostClass.indexOf('old') == -1) {
-                widthBase = 24;
-            }
+            if (handler.hostClass.indexOf('old') == -1) widthBase = 24;
             
             sideBarWrap.style.right = 'auto';
             sideBarWrap.style.left = Math.round(sideBlockBounds.left + scrollLeft) + 'px';
             sideBarWrap.style.width = Math.round(sideBlockBounds.width + widthBase) + 'px';
             
-        } else {
-            
+        } else {            
             sideBarWrap.style.right = '20px';
             sideBarWrap.style.left = 'auto';
-            sideBarWrap.style.width = '326px';
         }		
         
         var tagList = handler.getMainContainers().tagList;
@@ -578,13 +541,8 @@ function KellyProfileJoyreactor() {
             var bottomLimit = tagList.getBoundingClientRect().top + scrollTop;
             
             if (sideBarWrapBounds.height + sideBarWrapBounds.top + scrollTop >= bottomLimit) {
-                
                 var newTop = bottomLimit - sideBarWrapBounds.height;
-                
-                if (topMax < newTop) {
-                    // console.log(sideBarWrapBounds.height + scrollTop)
-                    sideBarWrap.style.top = newTop + 'px';
-                }
+                if (topMax < newTop)  sideBarWrap.style.top = newTop + 'px';
             }
         }
     }
@@ -959,9 +917,9 @@ function KellyProfileJoyreactor() {
                 full = false;
             } else format = false;
             
-            // prevent 301 redirect in fandoms for media requests
-           
-            var host = handler.location.domain == 'reactor.cc' ? 'reactor.cc' : handler.location.host;
+            var host = handler.location.host;
+                 if (handler.location.domain == 'reactor.cc') host = 'reactor.cc'; // prevent 301 redirect in fandoms for media requests
+            else if (host == 'top.joyreactor.cc') host = 'joyreactor.cc';
             
             url  = handler.location.protocol + '//' + imgServer + '.' + host + '/pics/' + type + '/';
             url += (format ? format + '/' : '') + (full ? 'full/' : '') + filename;
