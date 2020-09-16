@@ -27,8 +27,11 @@ function KellyProfileJoyreactor() {
     this.profile = 'joyreactor';
     this.className = 'kelly-jr-ui'; // base class for every extension container \ element
     
-    var sideBarPaddingTop = 24;
-    var sideBarDisabled = -1; // 1 - sidebar not found or hidden (jras - sidebar can be hidden)
+    this.sidebarConfig = {
+        topMax : 0,
+        paddingTop : 24,
+        nDisabled : -1, // 1 - sidebar not found or hidden (jras - sidebar can be hidden)
+    };
     
     this.fav = false;
     var publications = false, commentsBlockTimer = [];
@@ -151,93 +154,44 @@ function KellyProfileJoyreactor() {
         */     
         
         onInitWorktop : function() {
-            
-            updateFastSaveButtonsState();
-            
-            KellyTools.addEventPListener(window, "resize", updateSidebarPosition, '_fav_dialog');
-            KellyTools.addEventPListener(window, "scroll", function (e) {
-                
-                updateSidebarPosition();                
-                updateFastSaveButtonsState();
-                
-            }, '_fav_dialog');
-            
             return false;
         },
         
         onExtensionReady : function() {
+                
+            handler.sidebarConfig.topMax = handler.getMainContainers().siteContent.getBoundingClientRect().top + KellyTools.getScrollTop();            
+            updateFastSaveButtonsState();
+
+            KellyTools.addEventPListener(window, "resize", updateSidebarPosition, '_fav_dialog');
+            KellyTools.addEventPListener(window, "scroll", function (e) {                
+                updateSidebarPosition();                
+                updateFastSaveButtonsState();                
+            }, '_fav_dialog');
             
             // get fandom css for buttons
             
-            if (handler.location.domain == 'joyreactor.cc' || (handler.location.domain == 'reactor.cc' && handler.location.host != 'old.reactor.cc')) {
+            if ( document.getElementById('searchBar') && (
+                (handler.location.domain == 'joyreactor.cc' && handler.location.host != 'top.joyreactor.cc') ||
+                (handler.location.domain == 'reactor.cc' && handler.location.host != 'old.reactor.cc'))
+               ) {
 
-                var bar = document.getElementById('searchBar'), style = { bg : false, btn : false };
-                var applyStyle = function() {
+                var bar = document.getElementById('searchBar'), style = { bg : window.getComputedStyle(bar).backgroundColor };                                    
+                var css = "\n\r\n\r\n\r" + '/* ' +  handler.profile + '-dynamic */' + "\n\r\n\r\n\r";
                     
-                    css = "\n\r\n\r\n\r" + '/* ' +  handler.profile + '-dynamic */' + "\n\r\n\r\n\r";
+                if (style.bg && style.bg.indexOf('0, 0, 0, 0') == -1) {
                     
-                    if (style.bg && style.bg.indexOf('0, 0, 0, 0') == -1) {
-                        css += '.' + handler.className + '-bgcolor-dynamic {';
-                        css += 'background-color : ' + style.btn + '!important;';
-                        css += '}';
-                    }
-                    
-                    if (style.bg && style.bg.indexOf('0, 0, 0, 0') == -1) {
-                    
-                        css += '.active .' + handler.className + '-buttoncolor-dynamic, \
-                                .active.' + handler.className + '-buttoncolor-dynamic, \
-                                .' + handler.className + '-ahover-dynamic:hover .' + handler.className + '-buttoncolor-dynamic, \
-                                .' + handler.className + '-ahover-dynamic .' + handler.className + '-buttoncolor-dynamic:hover \
-                                {';
-                                
-                        css += 'background-color : ' + style.btn + '!important;';
-                        css += '}';
-                                            
-                        css += '.' + handler.className + '-buttoncolor-any-dynamic {';
-                        css += 'background-color : ' + style.btn + '!important;';
-                        css += '}';
-                    }
-                                   
-                    handler.fav.addCss(css);
+                    css += '.' + handler.className + '-bgcolor-dynamic {background-color : ' + style.bg + '!important;}';
+                    css += '.active .' + handler.className + '-buttoncolor-dynamic,\
+                            .active.' + handler.className + '-buttoncolor-dynamic,\
+                            .' + handler.className + '-ahover-dynamic:hover .' + handler.className + '-buttoncolor-dynamic,\
+                            .' + handler.className + '-ahover-dynamic .' + handler.className + '-buttoncolor-dynamic:hover \
+                            { background-color : ' + style.bg + '!important; }';
+                                  
+                    css += '.' + handler.className + '-buttoncolor-any-dynamic { background-color : ' + style.bg + '!important; }';
                 }
-                
-                if (bar) {
-                    style.bg = window.getComputedStyle(bar).backgroundColor;
-                    
-                    var btn = bar.querySelector('.submenuitem.active a');
-                    if (btn) {
+                               
+                handler.fav.addCss(css);
                         
-                        style.btn = window.getComputedStyle(btn).backgroundColor;
-                        applyStyle();
-                        
-                    } else {
-                        
-                        // create subitem to detect background color for items
-                        bar = bar.querySelector('#submenu > div');
-                        
-                        if (bar) {
-                            
-                            var subMenuItem = document.createElement('div');
-                                subMenuItem.style.opacity = 0;
-                                subMenuItem.className = 'submenuitem active';
-                            
-                            KellyTools.setHTMLData(subMenuItem, '<a href="#">test</a>');
-                            
-                            bar.appendChild(subMenuItem);
-                            btn = subMenuItem.childNodes[0];
-                            
-                            setTimeout(function() {
-                                
-                                style.btn = window.getComputedStyle(btn).backgroundColor;
-                                
-                                subMenuItem.parentElement.removeChild(subMenuItem);
-                                
-                                applyStyle();
-                                
-                            }, 100);                        
-                        }
-                    }
-                }               
             }
             
             handler.fav.showNativeFavoritePageInfo();
@@ -311,29 +265,22 @@ function KellyProfileJoyreactor() {
                 var tiles = handler.fav.getImageGrid().getTiles();   
                 if (tiles && tiles.length) {
                     
-                    var scrollTop = KellyTools.getScrollTop();
-                    var screenBottom = scrollTop + KellyTools.getViewport().screenHeight;
-                    var currentRow = 0;
-                    var topItemBounds = false;
+                    var scrollTop = KellyTools.getScrollTop(), screenBottom = scrollTop + KellyTools.getViewport().screenHeight;
+                    var currentRow = 0, topItemBounds = false;
                     
                     for (var i = 0; i < tiles.length; i++) {
                         
                         if (tiles[i].className.indexOf('grid-last') == -1) continue;
                         
                         var itemBounds = tiles[i].getBoundingClientRect();
-                        if (!topItemBounds) {
-                            topItemBounds = itemBounds;
-                        }
-
-                        var itemScroll = itemBounds.top + scrollTop;                        
-                        if (itemScroll < screenBottom) {
+                        if (!topItemBounds) topItemBounds = itemBounds;                        
+                        
+                        if (itemBounds.top + scrollTop < screenBottom) {
                             currentRow++;
                         }
                     }
                     
-                    if (topItemBounds && currentRow >= autoScrollRow) {
-                        window.scrollTo(0, topItemBounds.top + scrollTop - 90);
-                    }
+                    if (topItemBounds && currentRow >= autoScrollRow) window.scrollTo(0, topItemBounds.top + scrollTop - 90);
                 }
             }
 
@@ -343,8 +290,7 @@ function KellyProfileJoyreactor() {
     
     function syncFav(publication, inFav) {        
         var item = publication.querySelector('.favorite_link');
-        if (!item) return;
-        
+        if (!item) return;        
         
         if (inFav && item.className.indexOf(' favorite') == -1) {                
             KellyTools.dispatchEvent(item);
@@ -368,7 +314,6 @@ function KellyProfileJoyreactor() {
                 else output += input.charAt(i);
             }
             
-            // console.log(output);
             return output;
         }
         
@@ -392,10 +337,7 @@ function KellyProfileJoyreactor() {
             }
         }
 
-        if (mainImage) {					
-            mainImage.schemaOrg = true;
-        }
-        
+        if (mainImage) mainImage.schemaOrg = true;        
         return mainImage;
     }
     
@@ -473,8 +415,8 @@ function KellyProfileJoyreactor() {
             var modalBoxHeight = modalBox.getBoundingClientRect().height;       
             
             var viewport = KellyTools.getViewport();
-            if (viewport.screenHeight < modalBoxHeight + filters.offsetHeight + sideBarPaddingTop) {
-                filtersBlock.style.maxHeight = (viewport.screenHeight - modalBoxHeight - sideBarPaddingTop - 44 - sideBarPaddingTop) + 'px';
+            if (viewport.screenHeight < modalBoxHeight + filters.offsetHeight + handler.sidebarConfig.paddingTop) {
+                filtersBlock.style.maxHeight = (viewport.screenHeight - modalBoxHeight - handler.sidebarConfig.paddingTop - 44 - handler.sidebarConfig.paddingTop) + 'px';
                 filtersBlock.style.overflowY = 'scroll';
 
             } else {
@@ -494,20 +436,20 @@ function KellyProfileJoyreactor() {
         var sideBarWrap = handler.fav.getView('sidebar'), sideBlock = handler.getMainContainers().sideBlock;        
         if (!sideBarWrap || sideBarWrap.className.indexOf('hidden') !== -1) return false;
             
-        if (sideBarDisabled == -1) { // first time update position, validate sidebar block
+        if (handler.sidebarConfig.nDisabled == -1) { // first time update position, validate sidebar block
             
             if (sideBlock && window.getComputedStyle(sideBlock).position == 'absolute') {
                  
                 KellyTools.log('Bad sidebar position', 'updateSidebarPosition'); 
-                sideBarDisabled = 1;
+                handler.sidebarConfig.nDisabled = 1;
             }
             
             if (!sideBlock) {
                 KellyTools.log('Sidebar not found', 'updateSidebarPosition'); 
-                sideBarDisabled = 1;
+                handler.sidebarConfig.nDisabled = 1;
             }
             
-            if (sideBarDisabled == 1) {
+            if (handler.sidebarConfig.nDisabled == 1) {
                 
                 var collapseButton = KellyTools.getElementByClass(sideBarWrap, handler.className + '-sidebar-collapse');
                 if (collapseButton) {
@@ -516,21 +458,18 @@ function KellyProfileJoyreactor() {
             }
         } 
         
-        if (sideBarDisabled == 1) sideBlock = false;
+        if (handler.sidebarConfig.nDisabled == 1) sideBlock = false;
         
-        var sideBlockBounds = sideBlock ? sideBlock.getBoundingClientRect() : {top : 0};
-        if (!sideBlock && handler.getMainContainers().favContent.style.display == 'block') sideBlockBounds = handler.getMainContainers().favContent.getBoundingClientRect();
-                    
         var scrollTop = KellyTools.getScrollTop(), scrollLeft = KellyTools.getScrollLeft();   
-        var topMax = sideBlockBounds.top + scrollTop, top = topMax;
+        var topMax = handler.sidebarConfig.topMax, top = topMax;
                            
-        if (!handler.fav.sideBarLock && sideBarPaddingTop + scrollTop > top) top = sideBarPaddingTop + scrollTop;
+        if (!handler.fav.sideBarLock && handler.sidebarConfig.paddingTop + scrollTop > top) top = handler.sidebarConfig.paddingTop + scrollTop;
                 
         sideBarWrap.style.top = top + 'px';
        
         if (sideBlock) {
             
-            var widthBase = 0;            
+            var widthBase = 0, sideBlockBounds = sideBlock.getBoundingClientRect();            
             if (handler.hostClass.indexOf('old') == -1) widthBase = 24;
             
             sideBarWrap.style.right = 'auto';

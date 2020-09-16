@@ -7,8 +7,9 @@ var KellyProfileTopJoyreactor = new Object();
         KellyProfileTopJoyreactor.self = new KellyProfileJoyreactor();   
         var handler = KellyProfileTopJoyreactor.self;
         
+        handler.events.onExtensionReadyOrig = handler.events.onExtensionReady;
         handler.events.onExtensionReady = function() {
-            
+            handler.events.onExtensionReadyOrig();
             var updateMenuPos = function() {
                 var containers = handler.getMainContainers();
                 var sPos = containers.siteContent.getBoundingClientRect();
@@ -20,9 +21,9 @@ var KellyProfileTopJoyreactor = new Object();
             updateMenuPos();
         }       
         
-        var nativeOnPageReady = handler.events.onPageReady;
+        handler.events.onPageReadyOrig = handler.events.onPageReady;
         handler.events.onPageReady = function() {
-            nativeOnPageReady();
+            handler.events.onPageReadyOrig();
             handler.initUpdateWatcher();
             handler.fav.getFastSave().tooltipOptions = {
                 positionY : 'bottom',
