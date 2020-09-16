@@ -176,6 +176,10 @@
     white-space : nowrap;
 }
 
+.__BASECLASS__-old-reactor-cc .__BASECLASS__-ModalBox .__BASECLASS__-ModalBox-content {
+    font-size : 12px;
+}
+
 .__BASECLASS__-old-reactor-cc .__BASECLASS__-exporter-container input[type=text] {
     margin-top : 6px;
     margin-bottom : 6px;
@@ -226,8 +230,8 @@
 
 
 .__BASECLASS__-old-reactor-cc .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll td {
-    padding-bottom : 4px;
-    padding-top : 4px;
+    padding-bottom : 0px;
+    padding-top : 0px;
 }
 
 .__BASECLASS__-old-reactor-cc.__BASECLASS__-fast-save, .__BASECLASS__-old-reactor-cc.__BASECLASS__-sidebar-addtofav {
