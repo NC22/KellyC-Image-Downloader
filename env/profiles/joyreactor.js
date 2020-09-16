@@ -168,30 +168,39 @@ function KellyProfileJoyreactor() {
                 updateFastSaveButtonsState();                
             }, '_fav_dialog');
             
-            // get fandom css for buttons
-            
-            if ( document.getElementById('searchBar') && (
+            if ( document.getElementById('searchBar') && document.getElementById('submenu') && (
                 (handler.location.domain == 'joyreactor.cc' && handler.location.host != 'top.joyreactor.cc') ||
                 (handler.location.domain == 'reactor.cc' && handler.location.host != 'old.reactor.cc'))
                ) {
 
-                var bar = document.getElementById('searchBar'), style = { bg : window.getComputedStyle(bar).backgroundColor };                                    
-                var css = "\n\r\n\r\n\r" + '/* ' +  handler.profile + '-dynamic */' + "\n\r\n\r\n\r";
-                    
+                var bar = document.getElementById('searchBar'), style = { bg : window.getComputedStyle(bar).backgroundColor };  
+                
                 if (style.bg && style.bg.indexOf('0, 0, 0, 0') == -1) {
                     
-                    css += '.' + handler.className + '-bgcolor-dynamic {background-color : ' + style.bg + '!important;}';
-                    css += '.active .' + handler.className + '-buttoncolor-dynamic,\
-                            .active.' + handler.className + '-buttoncolor-dynamic,\
-                            .' + handler.className + '-ahover-dynamic:hover .' + handler.className + '-buttoncolor-dynamic,\
-                            .' + handler.className + '-ahover-dynamic .' + handler.className + '-buttoncolor-dynamic:hover \
-                            { background-color : ' + style.bg + '!important; }';
-                                  
-                    css += '.' + handler.className + '-buttoncolor-any-dynamic { background-color : ' + style.bg + '!important; }';
-                }
-                               
-                handler.fav.addCss(css);
+                    var subMenuItem = document.createElement('div');
+                        subMenuItem.style.opacity = 0;
+                        subMenuItem.className = 'submenuitem active';
+                    
+                    KellyTools.setHTMLData(subMenuItem, '<a href="#">null</a>');
+                    document.getElementById('submenu').appendChild(subMenuItem);
+                    
+                    setTimeout(function() {
+                        style.btn = window.getComputedStyle(subMenuItem.childNodes[0]).backgroundColor;
+                        subMenuItem.parentElement.removeChild(subMenuItem);
                         
+                        var css = "\n\r\n\r\n\r" + '/* ' +  handler.profile + '-dynamic */' + "\n\r\n\r\n\r";             
+                        css += '.' + handler.className + '-bgcolor-dynamic {background-color : ' + style.btn + '!important;}';
+                        css += '.active .' + handler.className + '-buttoncolor-dynamic,\
+                                .active.' + handler.className + '-buttoncolor-dynamic,\
+                                .' + handler.className + '-ahover-dynamic:hover .' + handler.className + '-buttoncolor-dynamic,\
+                                .' + handler.className + '-ahover-dynamic .' + handler.className + '-buttoncolor-dynamic:hover \
+                                { background-color : ' + style.btn + '!important; }';
+                                      
+                        css += '.' + handler.className + '-buttoncolor-any-dynamic { background-color : ' + style.btn + '!important; }';
+                        
+                        handler.fav.addCss(css);
+                     }, 100);                
+                 }                        
             }
             
             handler.fav.showNativeFavoritePageInfo();
