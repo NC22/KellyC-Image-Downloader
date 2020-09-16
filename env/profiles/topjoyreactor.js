@@ -68,6 +68,9 @@ var KellyProfileTopJoyreactor = new Object();
         
         handler.formatPostContainer = function(postBlock) {
             
+            var tags = postBlock.getElementsByClassName('badge');
+            if (tags.length && tags[0].parentElement) tags[0].parentElement.classList.add('taglist');
+            
             var coptions = handler.fav.getGlobal('fav').coptions;
             var postLink = handler.getPostLinkEl(postBlock);
             var buttonsBlock = KellyTools.getElementByClass(postBlock, handler.className + '-extension-additions');

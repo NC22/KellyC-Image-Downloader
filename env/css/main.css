@@ -8,6 +8,10 @@
      display : none;
 }
 
+.__BASECLASS__-FavContainer.active {
+    display : block;
+}
+
 .__BASECLASS__-FavContainer {
      margin-bottom : 120px;
      line-height: 0px;
