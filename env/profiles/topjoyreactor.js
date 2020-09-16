@@ -6,7 +6,20 @@ var KellyProfileTopJoyreactor = new Object();
         
         KellyProfileTopJoyreactor.self = new KellyProfileJoyreactor();   
         var handler = KellyProfileTopJoyreactor.self;
-         
+        
+        handler.events.onExtensionReady = function() {
+            
+            var updateMenuPos = function() {
+                var containers = handler.getMainContainers();
+                var sPos = containers.siteContent.getBoundingClientRect();
+                var sResult = sPos.left + sPos.width - handler.mContainers.menu.getBoundingClientRect().width;
+                handler.mContainers.menu.style.left = sResult + 'px';
+            }
+            
+            KellyTools.addEventPListener(window, "resize", updateMenuPos, '_fav_dialog');            
+            updateMenuPos();
+        }       
+        
         var nativeOnPageReady = handler.events.onPageReady;
         handler.events.onPageReady = function() {
             nativeOnPageReady();
@@ -48,11 +61,15 @@ var KellyProfileTopJoyreactor = new Object();
             return data;
         }
         
+        handler.getPostLinkEl = function(publication) { 
+            return publication.querySelector('.card-footer a[rel="noopener noreferrer"]');
+        }
+        
         handler.formatPostContainer = function(postBlock) {
             
             var coptions = handler.fav.getGlobal('fav').coptions;
-            var postLink = postBlock.querySelector('.card-footer a[rel="noopener noreferrer"]');
-            var buttonsBlock = postBlock.querySelector(handler.className + '-extension-additions');
+            var postLink = handler.getPostLinkEl(postBlock);
+            var buttonsBlock = KellyTools.getElementByClass(postBlock, handler.className + '-extension-additions');
             
             if (!buttonsBlock) {            
                 buttonsBlock = document.createElement('div');
@@ -60,7 +77,7 @@ var KellyProfileTopJoyreactor = new Object();
                 postLink.parentNode.insertBefore(buttonsBlock, postLink);
             }
        
-            var link = handler.getPostLink(postBlock, postLink);
+            var link = handler.getPostLink(postBlock);
             var className =  handler.className + '-post-addtofav';
                        
             var fastSave = handler.fav.getFastSave();                         
@@ -98,6 +115,7 @@ var KellyProfileTopJoyreactor = new Object();
                 for (var i = 0; i < mutations.length; i++) {
                     if (mutations[i].target.className.indexOf('post-card-row') != -1) {
                         handler.getMainContainers();
+                        handler.fav.hideFavoritesBlock();
                         handler.fav.formatPostContainers();
                         KellyTools.log('New page loaded, format publications', KellyTools.E_ERROR);
                         return;
@@ -123,7 +141,7 @@ var KellyProfileTopJoyreactor = new Object();
                 handler.mContainers.sideBar = handler.mContainers.body;
                 handler.mContainers.body.parentNode.insertBefore(handler.mContainers.menu, handler.mContainers.body);
                 
-                if (handler.mContainers.siteContent) {                
+                if (handler.mContainers.siteContent) {                      
                     handler.mContainers.favContent = document.createElement('div');
                     handler.mContainers.favContent.className = handler.className + '-FavContainer ' + handler.hostClass;
                 }

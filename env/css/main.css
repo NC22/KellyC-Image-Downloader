@@ -11,6 +11,7 @@
 .__BASECLASS__-FavContainer {
      margin-bottom : 120px;
      line-height: 0px;
+     min-height: 312px;
 }
 
 .__BASECLASS__-FavContainer-page {
@@ -203,6 +204,7 @@
 
 .__BASECLASS__-tooltipster-close svg {
     width: 16px;
+    vertical-align: baseline;
 }
 
 .__BASECLASS__-tooltipster-content {
@@ -355,6 +357,11 @@
     height : 250px;
     border-radius : 4px;
     cursor: pointer;
+}
+
+.__BASECLASS__-FavItem-grid-empty {
+    line-height : 20px;
+    padding : 4px;
 }
 
 .__BASECLASS__-FavItem-grid-resized .__BASECLASS__-preview {
@@ -722,6 +729,7 @@
 .__BASECLASS__-ModalBox .__BASECLASS__-ModalBox-content {
     padding : 12px;
     min-height: 130px;
+    font-size : 14px;
 }
 
 .__BASECLASS__-ModalBox .__BASECLASS__-ModalBox-content input[type=checkbox] {
@@ -789,25 +797,36 @@
 
 .__BASECLASS__Add, .__BASECLASS__Remove  {
     font-weight : bold;
-    background: #ff9900;
     padding: 2px 6px;
     color: #fff!important;
-    text-decoration: none;
     border-radius: 3px;  
     width: 48%;
     text-align: center;
     float : right;
 }
 
-.__BASECLASS__Remove  {
-    background: #ff6464;
+.__BASECLASS__Remove {
     width: 100%;
-    margin: 0px 0px 6px 0px!important;
+    padding: 4px;
+    border-radius: 3px;
+    text-decoration: none;
+    display: block;
+    margin: 0px 0px 6px 0px;
 }
 
-.__BASECLASS__SavePostWrap .__BASECLASS__AddSection input, 
-.__BASECLASS__SavePostWrap .__BASECLASS__AddSection a {
-   margin-top : 6px;
+.__BASECLASS__Add, .__BASECLASS__Add:hover {
+    background: #ff9900;
+    text-decoration: none;
+}
+
+.__BASECLASS__Remove, .__BASECLASS__Remove:hover {
+    background: #ff6464;
+    text-decoration: none;
+}
+
+.__BASECLASS__SavePostWrap input, 
+.__BASECLASS__SavePostWrap .__BASECLASS__Add {
+   margin: 5px 0;
 }
 
 .__BASECLASS__SavePostWrap input, .__BASECLASS__SavePostWrap select {
@@ -971,6 +990,7 @@
 
 .__BASECLASS__-ImgView-btn svg  {
 	width : 16px;
+    vertical-align: baseline;
 }
 
 .__BASECLASS__-ImgView-btn svg g {
@@ -1020,6 +1040,8 @@
 .__BASECLASS__-tab {
     padding-top : 24px;
 	padding-left : 16px;
+    line-height: 2;
+    padding-bottom : 16px;
 }
 
 .__BASECLASS__GridType-option.hidden {
@@ -1076,6 +1098,7 @@
 
 .__BASECLASS__-options-table input[type=text] {
     min-width: 280px;
+    margin : 6px;
     margin-left: 16px;
     padding-left: 6px;
     height : 30px;
@@ -1099,12 +1122,6 @@
 .__BASECLASS__-options-table .__BASECLASS__-cfg-buttons {
     padding-top : 24px;
     padding-bottom : 12px;
-}
-
-.__BASECLASS__-tab {
-	
-    line-height: 2;
-
 }
 
 .__BASECLASS__-tab h3{
@@ -1472,7 +1489,6 @@
     width : 100%;
 }
 
-
 .__BASECLASS__-downloader-controll div {
     line-height: normal;
 }
@@ -1490,7 +1506,6 @@
     background : #ffe52b;  
 }
 
-
 .__BASECLASS__-downloader-item-state-loading { 
     width : 16px; 
     height : 16px;
@@ -1498,9 +1513,21 @@
     border : 1px solid 1px solid rgba(0,0,0,0.3);
 }
 
-
 .__BASECLASS__-ModalBox-downloader {
     margin-top: 16px;
+}
+
+.__BASECLASS__-ModalBox-downloader input {
+    margin : 1px 0;    
+}
+
+.__BASECLASS__-ModalBox-downloader label {
+    display : inline-block;
+    margin : 4px 0;
+}
+
+.__BASECLASS__-ModalBox-downloader a {
+    color: #282828;
 }
 
 .__BASECLASS__-ModalBox-downloader .__BASECLASS__-ModalBox-content {
@@ -1512,8 +1539,7 @@
 }
 
 .__BASECLASS__-downloader-controll .__BASECLASS__-downloader-extended-show-row td {
-    padding-top : 6px;
-    padding-bottom : 6px;
+    padding : 0;
     text-align : center;
 }
 
@@ -1729,14 +1755,4 @@
     height: 100%;
     box-sizing: border-box; 
     cursor: pointer;
-}
-
-.__BASECLASS__-sidebar-wrap .__BASECLASS__Remove {
-    padding: 4px;
-    background: #ff6464;
-    color: #fff!important;
-    border-radius: 3px;
-    text-decoration: none;
-    display: block;
-    margin-top: 8px;
 }

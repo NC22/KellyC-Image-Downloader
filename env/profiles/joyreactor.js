@@ -64,6 +64,29 @@ function KellyProfileJoyreactor() {
         else return true;
     }
     
+    /* imp */
+    
+    this.getPostLinkEl = function(publication) {
+        
+        var selector = handler.location.host != 'old.reactor.cc' ? '.ufoot_first .link_wr a' : '.ufoot [title="ссылка на пост"]';
+
+        return publication.querySelector(selector);
+    }
+    
+    // get canonical url link in format "//url"
+    
+    this.getPostLink = function(publication, el) {
+        
+        if (!el) el = handler.getPostLinkEl(publication);
+    
+        if (el) {
+            var link = el.href.match(/[A-Za-z.0-9]+\/post\/[0-9]+/g);
+            return link ? '//' + link[0] : false;
+        }
+        
+        return '';    
+    }   
+    
     this.getPosts = function(container) {
         
         if (!container) container = document;        
@@ -131,12 +154,7 @@ function KellyProfileJoyreactor() {
             
             updateFastSaveButtonsState();
             
-            KellyTools.addEventPListener(window, "resize", function (e) {
-                
-                updateSidebarPosition();
-                
-            }, '_fav_dialog');
-            
+            KellyTools.addEventPListener(window, "resize", updateSidebarPosition, '_fav_dialog');
             KellyTools.addEventPListener(window, "scroll", function (e) {
                 
                 updateSidebarPosition();                
@@ -334,16 +352,7 @@ function KellyProfileJoyreactor() {
             KellyTools.dispatchEvent(item);
         }
     }
-    
-    function getPostLinkEl(publication) {
         
-        // tested with links in jras-pcLinks-img container
-        
-        var selector = handler.location.host != 'old.reactor.cc' ? '.ufoot_first .link_wr a' : '.ufoot [title="ссылка на пост"]';
-
-        return publication.querySelector(selector);
-    }
-    
     function getMainImage(publication, content) {
         
         if (!publication) return false;
@@ -448,7 +457,6 @@ function KellyProfileJoyreactor() {
         return (postBlock.innerHTML.indexOf('/images/censorship') != -1 || postBlock.innerHTML.indexOf('/images/unsafe_ru') != -1) ? true : false;
     }
 
-
     function updateSidebarProportions(sideBarWrap) {
         
         var filters = KellyTools.getElementByClass(sideBarWrap, handler.className + '-FiltersMenu'); 
@@ -549,7 +557,7 @@ function KellyProfileJoyreactor() {
     
     function updateAddToFavButton(postBlock, shareButtonsBlock, side) {
          
-        var link = getPostLinkEl(postBlock);        
+        var link = handler.getPostLinkEl(postBlock);        
         if (!link) {            
             KellyTools.log('empty post link element', 'profile updatePostFavButton');
             return false;        
@@ -790,22 +798,7 @@ function KellyProfileJoyreactor() {
         
         return tags;
     }
-    
-    /* imp */
-    // get canonical url link in format "//url"
-    
-    this.getPostLink = function(publication, el) {
         
-        if (!el) el = getPostLinkEl(publication);
-    
-        if (el) {
-            var link = el.href.match(/[A-Za-z.0-9]+\/post\/[0-9]+/g);
-            return link ? '//' + link[0] : false;
-        }
-        
-        return '';    
-    }    
-    
     /* imp */
     // get canonical comment url link in format "//url"
     
