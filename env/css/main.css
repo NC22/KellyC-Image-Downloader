@@ -454,6 +454,8 @@
 	 margin : 0px;
 	 padding : 6px;
 	 line-height : 0px;
+     width: 200px;
+     height: 200px;
 }
 
 .__BASECLASS__-FavItem .__BASECLASS__-FavItem-additions {

@@ -944,7 +944,7 @@ function KellyProfileJoyreactor() {
         info.contentName = KellyTools.getUrlFileName(info.contentName);
         
         var posts = handler.getPosts();
-        if (posts) info.items = posts.length;
+        if (posts.length > 0) info.items = posts.length;
         
         if (handler.location.host.indexOf('old.') != -1) {
             var pagination = document.getElementById('Pagination');

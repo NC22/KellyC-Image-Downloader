@@ -43,18 +43,17 @@ input[type=submit] {
 }
 
 .content {
-	width : 960px;
+	width : 75%;
 	min-height : 100px;
 }
 
-.page-content > div.clear {
-	
+.page-content > div.clear {	
 	clear : both; 
 	float: none;
 }
 
 #sidebar {
-	width : 300px;
+	width : 25%;
 	min-height : 100px;
 }
 
@@ -97,6 +96,25 @@ input[type=submit] {
 	border-bottom: 1px solid #ffa429;
 }
 
+.__BASECLASS__-ModalBox.__BASECLASS__-ModalBox-main {
+    margin-top: 6px;
+    margin-left: 16px;
+}
+
 .__BASECLASS__-copyright-info {
     font-size: 18px;
+    float: right;
+    padding-top: 4px;
+}
+
+@media (max-width: 1240px) {
+     .content {
+        width: 65%;
+        min-height: 100px;
+    }
+    
+    #sidebar {
+        width: 35%;
+        min-height: 100px;
+    }
 }
