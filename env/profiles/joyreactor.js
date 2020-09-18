@@ -72,7 +72,6 @@ function KellyProfileJoyreactor() {
     this.getPostLinkEl = function(publication) {
         
         var selector = handler.location.host != 'old.reactor.cc' ? '.ufoot_first .link_wr a' : '.ufoot [title="ссылка на пост"]';
-
         return publication.querySelector(selector);
     }
     
@@ -196,7 +195,7 @@ function KellyProfileJoyreactor() {
                                 .' + handler.className + '-ahover-dynamic .' + handler.className + '-buttoncolor-dynamic:hover \
                                 { background-color : ' + style.btn + '!important; }';
                                       
-                        css += '.' + handler.className + '-buttoncolor-any-dynamic { background-color : ' + style.btn + '!important; }';
+                        css += '.' + handler.className + '-buttoncolor-any-dynamic { background-color : ' + style.bg + '!important; }';
                         
                         handler.fav.addCss(css);
                      }, 100);                
@@ -1013,20 +1012,19 @@ function KellyProfileJoyreactor() {
     
     this.getRecomendedDownloadSettings = function() {
         
-        var browser = KellyTools.getBrowserName();
-        
+        var browser = KellyTools.getBrowserName();        
         if (browser == 'opera' || browser == 'chrome') {
             
             return { 
                 transportMethod : KellyGrabber.TRANSPORT_BLOB, 
-                requestMethod : KellyGrabber.REQUEST_XML 
+                requestMethod : KellyGrabber.REQUEST_FETCH 
             }
             
         } else {
             
             return { 
                 transportMethod : KellyGrabber.TRANSPORT_BLOBBASE64, 
-                requestMethod : KellyGrabber.REQUEST_IFRAME 
+                requestMethod : KellyGrabber.REQUEST_FETCH 
             }
             
         }

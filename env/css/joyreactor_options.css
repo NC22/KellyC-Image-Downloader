@@ -96,9 +96,9 @@ input[type=submit] {
 	border-bottom: 1px solid #ffa429;
 }
 
-.__BASECLASS__-ModalBox.__BASECLASS__-ModalBox-main {
-    margin-top: 6px;
-    margin-left: 16px;
+.__BASECLASS__-ModalBox {
+    margin-top: 6px!important;
+    margin-left: 16px!important;
 }
 
 .__BASECLASS__-copyright-info {

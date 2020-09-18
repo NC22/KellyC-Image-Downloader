@@ -8,7 +8,7 @@
      display : none;
 }
 
-.__BASECLASS__-FavContainer.active {
+.__BASECLASS__-FavContainer.__BASECLASS__-active {
     display : block;
 }
 

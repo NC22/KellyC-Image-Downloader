@@ -624,10 +624,10 @@
         "message":"Публикация"
     },
     "remove_from_fav":{  
-        "message":"удалить из избранного"
+        "message":"удалить"
     },
     "remove_from_fav_comment":{  
-        "message":"удалить из избранного"
+        "message":"удалить"
     },       
     "remove_from_fav_tip":{  
         "message":"Удалить из избранного"
