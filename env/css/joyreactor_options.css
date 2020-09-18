@@ -101,6 +101,12 @@ input[type=submit] {
     margin-left: 16px!important;
 }
 
+.options_page .__BASECLASS__-pagination-item {
+    line-height: 24px;
+    width: 24px;
+    height: 24px;
+}
+
 .__BASECLASS__-copyright-info {
     font-size: 18px;
     float: right;

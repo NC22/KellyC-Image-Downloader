@@ -26,7 +26,7 @@ function KellyProfileJoyreactor() {
 	
     this.profile = 'joyreactor';
     this.className = 'kelly-jr-ui'; // base class for every extension container \ element
-    
+
     this.sidebarConfig = {
         topMax : 0,
         paddingTop : 24,
@@ -55,6 +55,14 @@ function KellyProfileJoyreactor() {
         } else {
             
             handler.location.domain = handler.location.host;
+        }
+        
+        handler.webRequestsRules = {
+            state : 'download', 
+            referrer : handler.location.protocol  + '//' + handler.location.domain + '/',
+            cors : true,
+            hostList : handler.hostList,
+            types : ['xmlhttprequest'],
         }
         
         handler.hostClass = handler.className + '-' + hostParts.join("-");

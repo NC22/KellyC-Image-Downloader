@@ -15,7 +15,6 @@
     <li>Batch download of images from filtered publications in local profile (select range, number of threads, etc) *</li>
 </ul>
 </p>
-<p>* function currently not supported by Edge (unvailable in Browser API)</p> 
 <br>
 <br>
 <h2>License</h2>
