@@ -391,7 +391,13 @@
     },
     "grabber_range_to":{  
         "message":"To"
-    },  
+    }, 
+    "grabber_title_update":{  
+        "message":"Update window title"
+    },   
+    "grabber_keep_alive_timer":{  
+        "message":"Keep alive downloader if tab unfocused"
+    },      
     "grabber_name_template_help":{  
         "message":"Please select file name template, with include relative patch from base folder in browser <b>Downloads</b> folder<br><br>Allowed variables :<br>"
     },

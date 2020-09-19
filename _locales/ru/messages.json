@@ -334,7 +334,13 @@
     },
     "grabber_range_to":{  
         "message":"По"
-    },       
+    },  
+    "grabber_title_update":{  
+        "message":"Выводить процесс в заголовок окна"
+    },   
+    "grabber_keep_alive_timer":{  
+        "message":"Не замедлять процесс загрузки в фоне"
+    },  
     "grabber_hide_extended":{  
         "message":"Скрыть расширенные настройки"
     },	

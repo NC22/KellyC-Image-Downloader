@@ -20,6 +20,11 @@ ul {
 	padding: 0px;
 }
 
+*, *:before, *:after {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
 
 input[type=submit] {
 	background: #fb0;
@@ -99,12 +104,6 @@ input[type=submit] {
 .__BASECLASS__-ModalBox {
     margin-top: 6px!important;
     margin-left: 16px!important;
-}
-
-.options_page .__BASECLASS__-pagination-item {
-    line-height: 24px;
-    width: 24px;
-    height: 24px;
 }
 
 .__BASECLASS__-copyright-info {
