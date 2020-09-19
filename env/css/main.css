@@ -664,10 +664,11 @@
 
 .__BASECLASS__-ModalBox.hidden {
     opacity : 0;
-    overflow: hidden;
-    max-height: 0;
-    min-height: unset;
-    border: transparent;
+    overflow : hidden;
+    max-height : 0;
+    min-height : unset;
+    border : transparent;
+    margin-bottom : 0;
 }
 
 .__BASECLASS__-ModalBox {
@@ -681,7 +682,8 @@
     opacity : 1;
     transition : opacity 0.3s;
 
-    pointer-events: auto;
+    pointer-events: auto;    
+    margin-bottom: 16px;
 }
 
 .__BASECLASS__-ModalBox-controll-buttons a {
@@ -1517,10 +1519,6 @@
     height : 16px;
     background : #ff972b; 
     border : 1px solid 1px solid rgba(0,0,0,0.3);
-}
-
-.__BASECLASS__-ModalBox-downloader {
-    margin-top: 16px;
 }
 
 .__BASECLASS__-ModalBox-downloader input {

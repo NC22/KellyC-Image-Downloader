@@ -12,9 +12,9 @@ var KellyProfileTopJoyreactor = new Object();
             handler.events.onExtensionReadyOrig();
             var updateMenuPos = function() {
                 var containers = handler.getMainContainers();
-                var sPos = containers.siteContent.getBoundingClientRect();
-                var sResult = sPos.left + sPos.width - handler.mContainers.menu.getBoundingClientRect().width;
-                handler.mContainers.menu.style.left = sResult + 'px';
+                var sPos = containers[(handler.fav.getGlobal('mode') != 'main' ? 'fav' : 'site') + 'Content'].getBoundingClientRect();
+                var sResult = sPos.left + sPos.width - containers.menu.getBoundingClientRect().width;
+                containers.menu.style.left = sResult + 'px';
             }
             
             KellyTools.addEventPListener(window, "resize", updateMenuPos, '_fav_dialog');            
