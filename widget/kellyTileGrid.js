@@ -455,20 +455,22 @@ function KellyTileGrid(cfg) {
         }
     };
     
+    function hasClass(el, name) {
+        if (el) {
+            return el.classList.contains(tileClass + '-' + name);
+        } else return false;
+    };
+    
     function getBoundElementData(boundEl, type) {
         
         type = type != 'width' ? 'height' : 'width';        
         var dataValue = boundEl.getAttribute('data-' + type);
         
-        if (typeof dataValue == 'undefined') {
-            dataValue = boundEl.getAttribute(type); 
-        }
+        if (typeof dataValue == 'undefined') dataValue = boundEl.getAttribute(type); 
         
         return parseInt(dataValue);
     };
     
-	// todo - add optional delay, because may be some issues if tilesBlock have % width. In this case add elements, then after delay update grid 
-	
     this.updateTileGrid = function() {		
         
         if (!updateTileGridState()) return false;
@@ -559,8 +561,7 @@ function KellyTileGrid(cfg) {
                     addClass(tiles[i], 'tmp-bounds');
                     imageInfo.width = rules.tmpBounds.width;
                     imageInfo.height = rules.tmpBounds.height;
-                }
-                
+                }                
                 
                 if (!imageInfo.height) imageInfo.height = imageInfo.width;
                 
@@ -635,8 +636,7 @@ function KellyTileGrid(cfg) {
                 }
             }
 
-            var clear = tilesBlock.getElementsByClassName(tileClass + '-clear-both');
-            
+            var clear = tilesBlock.getElementsByClassName(tileClass + '-clear-both');            
             if (clear.length) clear[0].parentNode.appendChild(clear[0]);
             else {
                 clear = document.createElement('div');
@@ -647,6 +647,15 @@ function KellyTileGrid(cfg) {
         } 
     
         updateTileGridEvents();
+        
+        // todo - add size watcher to prevent problems?
+	
+        if (!hasClass(tilesBlock, 'resized')) {
+            addClass(tilesBlock, 'resized');            
+            delayUpdateTileGrid(); // prevent problems with % width elements
+        }
+        
+        tilesBlock.setAttribute('data-resized-width', screenSize);
         
         if (events.onGridUpdated) events.onGridUpdated(handler, isAllBoundsLoaded);
     };
@@ -679,11 +688,12 @@ function KellyTileGrid(cfg) {
                
         // count total width of row, and resize by required row height
         for (var i=0; i <= currentTileRow.length-1; ++i){ 
+        
             currentTileRow[i].origWidth = currentTileRow[i].width;
             currentTileRow[i].origHeight = currentTileRow[i].height;
             currentTileRow[i] = getResizedInfo(rowHeight, currentTileRow[i], 'height');
-            width += parseInt(currentTileRow[i].width); 
             
+            width += parseInt(currentTileRow[i].width);            
         }
         
         // get required row width by resizing common bounds width \ height
@@ -731,7 +741,6 @@ function KellyTileGrid(cfg) {
                 currentTileRow[i].image.style.float = 'left';
             }
         }
-        
         
         portrait = 0;
         landscape = 0;

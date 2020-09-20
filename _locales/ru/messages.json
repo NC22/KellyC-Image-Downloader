@@ -339,7 +339,7 @@
         "message":"Выводить процесс в заголовок окна"
     },   
     "grabber_keep_alive_timer":{  
-        "message":"Не замедлять процесс загрузки в фоне"
+        "message":"Не засыпать в фоне"
     },  
     "grabber_hide_extended":{  
         "message":"Скрыть расширенные настройки"
