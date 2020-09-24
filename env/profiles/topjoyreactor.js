@@ -119,11 +119,20 @@ var KellyProfileTopJoyreactor = new Object();
                 for (var i = 0; i < mutations.length; i++) {
                     if (mutations[i].target.className.indexOf('post-card-row') != -1) {
                         handler.getMainContainers();
-                        handler.fav.hideFavoritesBlock();
+                        handler.fav.closeSidebar();
                         handler.fav.formatPostContainers();
-                        KellyTools.log('New page loaded, format publications', KellyTools.E_ERROR);
+                        KellyTools.log('New page loaded, format publications');
                         return;
-                    }
+                    } else if (mutations[i].target.id == 'root' && 
+                               mutations[i].removedNodes.length > 0 && 
+                               mutations[i].removedNodes[0].nodeType == Node.ELEMENT_NODE && 
+                               mutations[i].removedNodes[0].classList.contains('container') &&
+                               handler.fav.getGlobal('mode') == 'main') {
+                                   
+                        handler.fav.closeSidebar();
+                        KellyTools.log('Page publications removed');
+                        return;
+                   }
                 }
             });
             
