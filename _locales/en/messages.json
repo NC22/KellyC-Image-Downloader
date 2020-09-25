@@ -129,7 +129,7 @@
         "message":"Open preview image"
     },      
     "cgrid_lazy":{  
-        "message":"Load images only when they in visible area of screen (beta)"
+        "message":"Load images only when they in visible area of screen"
     }, 
     "change":{  
         "message":"Change"
@@ -291,7 +291,7 @@
         "message":"Save to"
     },
     "fast_save_check":{  
-        "message":"Check file already downloaded (beta)"
+        "message":"Check file already downloaded"
     }, 
     "fast_save_check_notice":{  
         "message":"If file already downloaded, then green marker will be added to download button"
