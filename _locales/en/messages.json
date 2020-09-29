@@ -718,7 +718,19 @@
     },   
     "storage_type_notice":{  
         "message":"<b>Change storage type only if needed</b>. After change, your current profile list will be hidden, until switch back to previous storage type"
+    },  
+    "storage_type_notice_fox_warning":{  
+        "message":"<b style=\"color: #ff4a4a\">Warning - Firefox will clear data stored by extensions using the localStorage API in various scenarios where users clear their browsing history and data</b>. Switch to <b>Browser API</b> for safety"
+    },    
+    "storage_type_notice_fox_warning_2":{  
+        "message":"<div><b style=\"color: #ff4a4a\">Warning - Firefox will clear data stored by extensions using the localStorage API in various scenarios where users clear their browsing history and data</b>.</div>"
     }, 
+    "storage_type_notice_fox_warning_3":{  
+        "message":"<div>Switch to <b>Browser API</b> for safety</div>"
+    },
+    "storage_type_notice_fox_warning_4":{  
+        "message":"<div><a href=\"#\" data-action=\"ok\">Dont remind again</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"#\" data-action=\"options\">Go to options page</a> </div>"
+    },
     "storage_manage":{  
         "message":"Profile manager"
     }, 
