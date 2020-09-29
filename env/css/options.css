@@ -15,7 +15,8 @@ body, html {
 }
 
 a {
-	color: #212121;
+	color: #212121;  
+    font-size: 14px;
 }
 
 ul {

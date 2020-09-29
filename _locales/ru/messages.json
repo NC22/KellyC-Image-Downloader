@@ -157,7 +157,10 @@
     },
     "download":{  
         "message":"Скачать"
-    },    
+    },  
+    "download_empty_p":{  
+        "message":"пустой шаблон"
+    },      
     "download_hd":{  
         "message":"Скачать оригинал (HD)"
     },   

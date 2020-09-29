@@ -158,6 +158,9 @@
     "download":{  
         "message":"Download"
     },  
+    "download_empty_p":{  
+        "message":"empty profile"
+    }, 
     "download_hd":{  
         "message":"Download hd"
     },   

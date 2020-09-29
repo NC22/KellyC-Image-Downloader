@@ -1174,9 +1174,14 @@
     right: 12px;
 }
 
-.__BASECLASS__-DBItem a , .__BASECLASS__-DBItem span{
-	margin-right : 16px;
-	
+.__BASECLASS__-DBItem a, .__BASECLASS__-DBItem span{
+	margin-right : 16px;	
+}
+
+.__BASECLASS__-DBItem a.__BASECLASS__-right {
+    float: right;
+    margin-right: 64px;
+    font-size: 12px;
 }
 
 .__BASECLASS__-icon {

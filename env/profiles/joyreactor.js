@@ -90,7 +90,7 @@ function KellyProfileJoyreactor() {
         if (!el) el = handler.getPostLinkEl(publication);
     
         if (el) {
-            var link = el.href.match(/[A-Za-z.0-9]+\/post\/[0-9]+/g);
+            var link = el.href.match(/[A-Za-z.0-9-]+\/post\/[0-9]+/g);
             return link ? '//' + link[0] : false;
         }
         
@@ -304,15 +304,12 @@ function KellyProfileJoyreactor() {
     
     }
     
-    function syncFav(publication, inFav) {        
+    function syncFav(publication, addTofav) {        
         var item = publication.querySelector('.favorite_link');
         if (!item) return;        
         
-        if (inFav && item.className.indexOf(' favorite') == -1) {                
-            KellyTools.dispatchEvent(item);
-        } else if (!inFav && item.className.indexOf(' favorite') != -1) {                
-            KellyTools.dispatchEvent(item);
-        }
+        if (   (addTofav && !item.classList.contains('favorite'))
+            || (!addTofav && item.classList.contains('favorite'))) KellyTools.dispatchEvent(item);
     }
         
     function getMainImage(publication, content) {
@@ -552,7 +549,7 @@ function KellyProfileJoyreactor() {
         var postIndex = handler.fav.getStorageManager().searchItem(handler.fav.getGlobal('fav'), {link : linkUrl, commentLink : false});
         var action = postIndex !== false ? 'remove_from' : 'add_to';  
         var onAction = function(remove) {
-            if (handler.fav.getGlobal('fav').coptions.syncByAdd) syncFav(postBlock, false);
+            if (handler.fav.getGlobal('fav').coptions.syncByAdd) syncFav(postBlock, !remove);
             if (remove) handler.fav.closeSidebar(); 
             
             handler.formatPostContainer(postBlock); 
