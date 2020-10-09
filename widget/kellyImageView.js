@@ -5,7 +5,7 @@
    @description    image view widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.1.9 08.02.20
+   @version        v 1.2.0 09.10.20
    
    ToDo : 
    
@@ -13,7 +13,7 @@
    include pixel ratio detection - https://stackoverflow.com/questions/1713771/how-to-detect-page-zoom-level-in-all-modern-browsers
    add user event onButtonsShow
    alternative load by xmlHTTPrequest - make posible progressbar on "onprogress" event https://stackoverflow.com/questions/76976/how-to-get-progress-from-xmlhttprequest
-   зум скроллом - только при наведении на изображение
+
 */
 
 function KellyImgView(cfg) {
@@ -46,7 +46,7 @@ function KellyImgView(cfg) {
     var scale = 1;
     
     var move = {x : -1, y : -1, left : false, top : false}; // начальная точка клика dragStart, базовая позиция перемещаемого элемента
-    var lastPos = false;
+    var lastPos = false, prevPos = false;
     
     var buttons = {};
     
@@ -253,47 +253,37 @@ function KellyImgView(cfg) {
     function showBodyScroll(show) {
         var body = document.body;
         
-        body.className = body.className.replace(commClassName + '-margin', '').trim();
-        body.className = body.className.replace(commClassName + '-lock', '').trim();
+        removeClass(body, 'margin'); removeClass(body, 'lock');
         
-        if (show) {
-
-            return;
-            
-        } else {
+        if (show) return; 
         
-            if (!body || !body.clientWidth) return false;
-        
-            var diff = screen.width - body.clientWidth;
-            if (!diff || diff <= 0) return false;
-            
-            if (bodyLockCss !== false) {
-                bodyLockCss.innerHTML = '';
-            }
-    
-            var head = document.head || document.getElementsByTagName('head')[0];
-            
+        var diff = body.clientWidth ? screen.width - body.clientWidth : 0;
+        if (!diff || diff <= 0) diff = 0;
+                    
+        if (bodyLockCss !== false) {
+            bodyLockCss.innerHTML = '';
+        } else {                
             bodyLockCss = document.createElement('style');
             bodyLockCss.type = 'text/css';
-            
-            head.appendChild(bodyLockCss);
-            
-            css = '.' + commClassName + '-margin {';
-            css += 'margin-right : ' + diff + 'px;';
-            css += '}';
-            
-            if (bodyLockCss.styleSheet){
-              bodyLockCss.styleSheet.cssText = css;
-            } else {
-              bodyLockCss.appendChild(document.createTextNode(css));
-            }
-            
-            body.className += ' ' + commClassName + '-lock ' + commClassName + '-margin';
         }
 
+        var head = document.head || document.getElementsByTagName('head')[0];            
+            head.appendChild(bodyLockCss);
+        
+        css = '.' + commClassName + '-margin {';
+        css += 'margin-right : ' + diff + 'px;';
+        css += '}';
+        
+        if (bodyLockCss.styleSheet){
+          bodyLockCss.styleSheet.cssText = css;
+        } else {
+          bodyLockCss.appendChild(document.createTextNode(css));
+        }
+        
+        addClass(body, 'lock'); addClass(body, 'margin');
         return true;
     }
-    
+        
     this.getButton = function(index) {
     
         if (!index) return buttons;
@@ -845,36 +835,14 @@ function KellyImgView(cfg) {
     // get local coordinats event pos
     
     function getEventDot(e) {
-        e = e || window.event;
-        var x, y;
-        
-        var scrollX = 0; // document.body.scrollLeft + document.documentElement.scrollLeft;
-        var scrollY = 0; // document.body.scrollTop + document.documentElement.scrollTop;
-        
-        var touches = [];
+        var e = e || window.event, touches = [], x = e.clientX, y = e.clientY;
+       
         if (e.touches && e.touches.length > 0) {
             
-            for (var i = 0; i < e.touches.length; i++) {
-                
-                touches[i] = {
-                    x : e.touches[i].clientX + scrollX,
-                    y : e.touches[i].clientY + scrollY,
-                };
-                
-                if (i == 0) {
-                    x = touches[0].x;
-                    y = touches[0].y;
-                }
-            }
-            
-        } else {
-            // e.pageX e.pageY e.x e.y bad for cross-browser
-            x = e.clientX + scrollX;
-            y = e.clientY + scrollY;		
-        }
+            x = e.touches[0].clientX; y = e.touches[0].clientY;
+            for (var i = 0; i < e.touches.length; i++) touches[i] = { x : e.touches[i].clientX, y : e.touches[i].clientY};     
+        } 
         
-        //var rect = canvas.getBoundingClientRect();
-
         return {x: x, y: y, touches : touches};
     }
     
@@ -892,28 +860,27 @@ function KellyImgView(cfg) {
     }
 
     this.drag = function(e) {
-        
-        var prevTouches = lastPos ? lastPos.touches : false;
-        
+               
         lastPos = getEventDot(e);
-        if (lastPos.touches && lastPos.touches.length > 2){
-            return;
+        if (lastPos.touches && lastPos.touches.length > 2) return;
+        
+        var zoom = false;
+        
+        if (lastPos.touches && lastPos.touches.length == 2){
+            var distanceDiff = !prevPos ? 0 : Math.abs(calcDistance(prevPos[0], prevPos[1]) - calcDistance(lastPos.touches[0], lastPos.touches[1]));        
+            if (prevPos && distanceDiff > 20)  { 
+            
+                zoom = calcDistance(prevPos[0], prevPos[1]) < calcDistance(lastPos.touches[0], lastPos.touches[1]) ? 'in' : 'out';
+                prevPos = lastPos.touches; 
+                
+            } else if (!prevPos) prevPos = lastPos ? lastPos.touches : false;  
+            if (!zoom) return;
         }
         
-        /*
-        if (!animationFrame) return false;
+               
+        if (zoom) {
         
-        window.requestAnimationFrame(function() {
-            animationFrame = true;
-        })
-        
-        animationFrame = false;
-        */
-        
-        if (prevTouches && prevTouches.length > 1 && lastPos.touches.length > 1) {
-        
-            var zoomIn = calcDistance(prevTouches[0], prevTouches[1]) < calcDistance(lastPos.touches[0], lastPos.touches[1]) ? true : false;
-            handler.scale(zoomIn);
+            handler.scale(zoom == 'in' ? true : false);
             
         } else if (moveable || scale != 1) {
         
@@ -962,17 +929,7 @@ function KellyImgView(cfg) {
                 
                 handler.nextImage(next);
                 
-            } else {
-            
-                if (image) {
-                
-                    var newPos = {left : move.left, top : move.top};
-                
-                    image.style.left = newPos.left + 'px';                
-                    handler.updateButtonsPos(newPos);
-                }
-            }
-            
+            } else handler.updateSize(false);            
         }     
 
         lastPos = false;

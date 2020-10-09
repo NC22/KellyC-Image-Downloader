@@ -6,21 +6,7 @@ var KellyProfileTopJoyreactor = new Object();
         
         KellyProfileTopJoyreactor.self = new KellyProfileJoyreactor();   
         var handler = KellyProfileTopJoyreactor.self;
-        
-        handler.events.onExtensionReadyOrig = handler.events.onExtensionReady;
-        handler.events.onExtensionReady = function() {
-            handler.events.onExtensionReadyOrig();
-            var updateMenuPos = function() {
-                var containers = handler.getMainContainers();
-                var sPos = containers[(handler.fav.getGlobal('mode') != 'main' ? 'fav' : 'site') + 'Content'].getBoundingClientRect();
-                var sResult = sPos.left + sPos.width - containers.menu.getBoundingClientRect().width;
-                containers.menu.style.left = sResult + 'px';
-            }
-            
-            KellyTools.addEventPListener(window, "resize", updateMenuPos, '_fav_dialog');            
-            updateMenuPos();
-        }       
-        
+                
         handler.events.onPageReadyOrig = handler.events.onPageReady;
         handler.events.onPageReady = function() {
             handler.events.onPageReadyOrig();
@@ -145,6 +131,7 @@ var KellyProfileTopJoyreactor = new Object();
                 
                 handler.mContainers = {
                     body : document.getElementById('root'),
+                    menuHolder : document.querySelector('.nsfw_switcher'),
                     siteContent : document.querySelector('.postContainer'),                
                     menu : document.createElement('div'),
                 };
@@ -152,7 +139,7 @@ var KellyProfileTopJoyreactor = new Object();
                 handler.mContainers.menu.id = 'submenu';
                 handler.mContainers.menu.className = handler.hostClass;
                 handler.mContainers.sideBar = handler.mContainers.body;
-                handler.mContainers.body.parentNode.insertBefore(handler.mContainers.menu, handler.mContainers.body);
+                handler.mContainers.menuHolder.appendChild(handler.mContainers.menu);
                 
                 if (handler.mContainers.siteContent) {                      
                     handler.mContainers.favContent = document.createElement('div');
@@ -169,6 +156,8 @@ var KellyProfileTopJoyreactor = new Object();
                 handler.mContainers.body = document.getElementById('root');
                 handler.mContainers.sideBar = handler.mContainers.body;
                 handler.mContainers.siteContent = document.querySelector('.postContainer');
+                handler.mContainers.menuHolder = document.querySelector('.nsfw_switcher');
+                handler.mContainers.menuHolder.appendChild(handler.mContainers.menu);
                 handler.mContainers.body.appendChild(handler.mContainers.favContent);   
             }
             

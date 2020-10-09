@@ -5,15 +5,20 @@
 }
 
 #submenu.__BASECLASS__-top-joyreactor-cc {
-
-    position: absolute;
-    top: 0;
     height: 32px;
-    margin-top: 8px;
+    padding-top: 8px;
     white-space: nowrap;
-    /* right: 0; */
+    display : inline-block;
+    float : right;
     color: #8b857b;
 }
+
+#submenu.__BASECLASS__-top-joyreactor-cc a{
+    color : #8b857b;
+    line-height: 25px;
+}
+
+
 
 #submenu.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-MainMenuItem {
     display: inline-block;
