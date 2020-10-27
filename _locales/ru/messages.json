@@ -143,6 +143,9 @@
     "debug":{  
         "message":"Режим отладки"
     },  
+    "dark_theme":{  
+        "message":"Темная тема"
+    }, 
     "delete":{  
         "message":"Удалить"
     },
@@ -270,10 +273,10 @@
         "message":"<b>#CURRENT_LOCATION#</b> - текущий поддомен (например wh, at, wakfu и т.д.)<br>"
     },
     "fast_save_enabled":{  
-        "message":"Показывать кнопку быстрого сохранения для публикаций"
+        "message":" [ICON] Показывать кнопку быстрого сохранения для публикаций"
     },  
     "fast_save_configurable_enabled":{  
-        "message":"Показывать кнопку настраевомого быстрого сохранения для публикаций"
+        "message":" [ICON2] Показывать кнопку настраевомого быстрого сохранения для публикаций"
     },    
     "fix_proportions":{  
         "message":"Обновить пропорции"
@@ -292,7 +295,10 @@
     }, 
     "fast_save_to":{  
         "message":"Сохранять в папку"
-    }, 
+    },   
+    "fast_save_to_placeholder":{  
+        "message":"folder/Fast"
+    },
     "fast_save_check":{  
         "message":"Проверять, был ли уже скачан файл"
     }, 
@@ -503,6 +509,15 @@
     "hide_soc":{  
         "message":"Скрывать кнопки соц. сетей из публикаций"
     },
+    "hide_add_to_fav":{  
+        "message":"Скрывать кнопку \"в избранное\""
+    },   
+    "hide_top_menu":{  
+        "message":"Скрывать все верхнее меню расширения (доступ только со страницы настроек)"
+    }, 
+    "mobile_optimization":{  
+        "message":"Мобильный режим"
+    },
     "ignore_comments":{  
         "message":"Игнорировать комментарии"
     },
@@ -655,6 +670,12 @@
     },
     "save":{  
         "message":"Сохранить"
+    },   
+    "sidebar_section_filters": {
+        "message":"Фильтры"
+    },  
+    "sidebar_section_downloads": {
+        "message":"Загрузки"
     },
     "saving":{  
         "message":"Сохранение..."
@@ -796,6 +817,9 @@
     },     
     "tip":{  
         "message":"подсказка"
+    },
+    "web_request_api":{  
+        "message":"Webrequest API"
     },  
     "kb":{  
         "message":"кб"

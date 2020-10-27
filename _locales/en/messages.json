@@ -140,6 +140,9 @@
     "comment":{  
         "message":"Comment"
     },
+    "dark_theme":{  
+        "message":"Dark theme"
+    }, 
     "debug":{  
         "message":"Debug mode"
     },    
@@ -270,10 +273,10 @@
         "message":"<b>#CURRENT_LOCATION#</b> - current site (ex. wh, at, wakfu etc.)<br>"
     },
     "fast_save_enabled":{  
-        "message":"Display fast save button"
+        "message":" [ICON] Display fast save button"
     },  
     "fast_save_configurable_enabled":{  
-        "message":"Display configurable fast save button"
+        "message":" [ICON2] Display configurable fast save button"
     }, 
     "fix_proportions":{  
         "message":"Update proportions"
@@ -292,6 +295,9 @@
     }, 
     "fast_save_to":{  
         "message":"Save to"
+    },    
+    "fast_save_to_placeholder":{  
+        "message":"folder/Fast"
     },
     "fast_save_check":{  
         "message":"Check file already downloaded"
@@ -493,6 +499,15 @@
     },
     "hide_soc":{  
         "message":"Hide social networks markers from publication block"
+    }, 
+    "hide_add_to_fav":{  
+        "message":"Hide \"Add to fav\""
+    },   
+    "hide_top_menu":{  
+        "message":"Hide extension upper menu"
+    }, 
+    "mobile_optimization":{  
+        "message":"Mobile mode"
     },
     "ignore_comments":{  
         "message":"Ignore comments"
@@ -647,6 +662,12 @@
     "save":{  
         "message":"Save"
     },
+    "sidebar_section_filters": {
+        "message":"Filters"
+    },  
+    "sidebar_section_downloads": {
+        "message":"Downloads"
+    },
     "saving":{  
         "message":"Saving..."
     }, 
@@ -787,7 +808,10 @@
     },       
     "tip":{  
         "message":"notice"
-    },    
+    },  
+    "web_request_api":{  
+        "message":"Webrequest API"
+    },   
     "kb":{  
         "message":"kb"
     }

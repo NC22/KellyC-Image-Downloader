@@ -2,6 +2,10 @@ html {
     overflow-y : scroll;
 }
 
+body {
+    background-color : #fff;
+}
+
 body, html {
 	margin: 0px;
 	padding: 0px; 
@@ -82,11 +86,11 @@ input[type=submit] {
 	font-size: 14px;
 }
 
-.joyreactor-env #submenu .submenuitem.__BASECLASS__-MainMenuItem-fav a {
+#submenu .submenuitem.__BASECLASS__-MainMenuItem-fav a {
 	background : transparent;
 }
 
-.joyreactor-env #submenu .submenuitem.active a {
+#submenu .submenuitem.active a {
 	background : #fdb201;
 }
 
@@ -103,15 +107,33 @@ input[type=submit] {
 	border-bottom: 1px solid #ffa429;
 }
 
-.__BASECLASS__-ModalBox {
-    margin-top: 6px!important;
-    margin-left: 16px!important;
+.__BASECLASS__-copyright-info a {
+    font-size : 18px;
+}
+
+.options_page .__BASECLASS__-ModalBox {
+    margin-top: 6px;
+    margin-left: 16px;
 }
 
 .__BASECLASS__-copyright-info {
     font-size: 18px;
     float: right;
     padding-top: 4px;
+}
+
+*,:after,:before {
+    box-sizing: border-box
+}
+
+/* mobile version */
+
+.__BASECLASS__-mobile .content {
+    width : 100%;
+}
+
+.__BASECLASS__-mobile #sidebar {
+    display : none;
 }
 
 @media (max-width: 1240px) {

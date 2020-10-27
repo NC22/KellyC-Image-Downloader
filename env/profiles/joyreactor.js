@@ -242,9 +242,7 @@ function KellyProfileJoyreactor() {
             if (refreshPosts) {
                 
                 var old = document.querySelectorAll('.' + handler.className + '-post-button-base');
-                for (var i = 0; i < old.length; i++) {
-                    if (old[i].parentNode) old[i].parentNode.removeChild(old[i]);                
-                }
+                for (var i = 0; i < old.length; i++) if (old[i].parentNode) old[i].parentNode.removeChild(old[i]);
                 
                 handler.fav.formatPostContainers(); 
                 return true;
@@ -308,8 +306,7 @@ function KellyProfileJoyreactor() {
         var item = publication.querySelector('.favorite_link');
         if (!item) return;        
         
-        if (   (addTofav && !item.classList.contains('favorite'))
-            || (!addTofav && item.classList.contains('favorite'))) KellyTools.dispatchEvent(item);
+        if ((addTofav && !item.classList.contains('favorite')) || (!addTofav && item.classList.contains('favorite'))) KellyTools.dispatchEvent(item);
     }
         
     function getMainImage(publication, content) {
@@ -354,32 +351,8 @@ function KellyProfileJoyreactor() {
         return mainImage;
     }
     
-    function getCommentsList(postBlock) {    
-        
-        var comments = postBlock.getElementsByClassName('comment');
-        if (comments.length) return comments;
-
-        return false;               
-    }
-    
-    function getPostUserName(publication) {
-        var nameContainer = KellyTools.getElementByClass(publication, 'uhead_nick');
-        if (nameContainer) {
-            var img = KellyTools.getElementByClass(publication, 'avatar');
-            if (img) return img.getAttribute('alt');
-        }
-        
-        return false;
-    }
-    
-    function getCommentUserName(comment) {
-        var nameContainer = KellyTools.getElementByClass(comment, 'reply-link');
-        if (nameContainer) {   
-            var a = KellyTools.getElementByTag(nameContainer, 'A');
-            if (a) return a.textContent || a.innerText || '';
-        }
-        
-        return false;
+    function getCommentsList(postBlock) {   
+        return postBlock.getElementsByClassName('comment');
     }
     
     function updateFastSaveButtonsState() {
@@ -414,6 +387,7 @@ function KellyProfileJoyreactor() {
 
     function updateSidebarProportions(sideBarWrap) {
         
+        if (sideBarWrap.className.indexOf('inline') !== -1) return;
         var filters = KellyTools.getElementByClass(sideBarWrap, handler.className + '-FiltersMenu'); 
         if (filters && filters.offsetHeight > 440 && filters.className.indexOf('calculated') == -1) {
             
@@ -447,7 +421,7 @@ function KellyProfileJoyreactor() {
         if (!handler.fav) return false;
         
         var sideBarWrap = handler.fav.getView('sidebar'), sideBlock = handler.getMainContainers().sideBlock;        
-        if (!sideBarWrap || sideBarWrap.className.indexOf('hidden') !== -1) return false;
+        if (!sideBarWrap || sideBarWrap.className.indexOf('hidden') !== -1 || sideBarWrap.className.indexOf('inline') !== -1) return false;
             
         if (handler.sidebarConfig.nDisabled == -1) { // first time update position, validate sidebar block
             
@@ -591,21 +565,9 @@ function KellyProfileJoyreactor() {
         
     this.formatComments = function(block) {
     
-        var comments = getCommentsList(block);
-        if (!comments) return false;
-        
-        var blackList = handler.fav.getGlobal('fav').coptions.comments_blacklist;
-        
+        var comments = getCommentsList(block);        
         for(var i = 0; i < comments.length; i++) {
-                                    
-            if (blackList) {  
-                var userName = getCommentUserName(comments[i]);
-                if (blackList.indexOf(userName) != -1) { 
-                    comments[i].style.display = 'none';            
-                    continue;
-                }
-            }
-                    
+             
             var link = KellyTools.getRelativeUrl(handler.getCommentLink(comments[i]));
             if (!link) continue;
             
@@ -665,14 +627,6 @@ function KellyProfileJoyreactor() {
     this.formatPostContainer = function(postBlock) {
         
         var coptions = handler.fav.getGlobal('fav').coptions;
-        var blackList = coptions.posts_blacklist;        
-        if (blackList) {  
-            var userName = getPostUserName(postBlock);
-            if (blackList.indexOf(userName) != -1) { 
-                postBlock.style.display = 'none';            
-                return false;
-            }
-        }
         
         var shareButtonsBlock = KellyTools.getElementByClass(postBlock, 'share_buttons');        
         if (!shareButtonsBlock) {

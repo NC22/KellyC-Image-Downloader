@@ -68,11 +68,6 @@
     padding-bottom : 6px;
 }
 
-.__BASECLASS__-tooltipster-wrap.__BASECLASS__-ItemTip-tooltipster  {
-	padding-left : 10px;
-    padding-right : 10px;
-}
-
 .__BASECLASS__-tooltipster-wrap.__BASECLASS__-Default-tooltipster, 
 .__BASECLASS__-tooltipster-wrap.__BASECLASS__-ItemTip-tooltipster,
 .__BASECLASS__-tooltipster-wrap.__BASECLASS__-tooltipster-error,
@@ -647,6 +642,11 @@
      transition : opacity 0.3s;
 }
 
+.__BASECLASS__-sidebar-wrap.__BASECLASS__-inline {
+    position : static!important;
+    width : 100%!important;
+}
+
 .__BASECLASS__-sidebar-wrap-hidden {
      pointer-events: none;
      opacity : 0;
@@ -662,7 +662,7 @@
      opacity : 1;
 }
 
-.__BASECLASS__-ModalBox.hidden {
+.__BASECLASS__-ModalBox-wrap.hidden {
     opacity : 0;
     overflow : hidden;
     max-height : 0;
@@ -984,6 +984,8 @@
 
 .__BASECLASS__-ImgView-btn-info {
     font-size: 16px;
+    padding : 0;
+    line-height : 32px;
 }
 
 .__BASECLASS__-ImgView-active, .material-image-view-btns {
@@ -1027,10 +1029,11 @@
     text-align: center;
     text-decoration: none;
     font-size: 16px;
-    border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
+    border-top-left-radius : 3px;
+    border-top-right-radius : 3px;
 	overflow : hidden;
-	line-height:1.1;
+	line-height :1.1;
+    margin-right : 4px;
 }
 
 .__BASECLASS__-tab-list ul li.active {
@@ -1052,7 +1055,14 @@
     padding-bottom : 16px;
 }
 
-.__BASECLASS__GridType-option.hidden {
+.__BASECLASS__-BaseOptions .__BASECLASS__-fast-save{
+    display:  inline-block; 
+    margin: 0;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
+.__BASECLASS__-grid-group.hidden {
     display : none;
 }
 
@@ -1074,7 +1084,7 @@
     margin-right: 0px;
 }
 
-.__BASECLASS__-options-table .radioselect label {
+.__BASECLASS__-options-table .__BASECLASS__-radioselect label {
     margin-right : 16px;
 }
 
@@ -1766,4 +1776,27 @@
     height: 100%;
     box-sizing: border-box; 
     cursor: pointer;
+}
+
+/* mobile version */
+
+.__BASECLASS__-mobile .__BASECLASS__-sidebar-wrap .__BASECLASS__-ModalBox {
+    margin : 0px;
+}
+
+.__BASECLASS__-mobile .kelly-jr-ui-FavItem-grid-first,
+.__BASECLASS__-mobile .kelly-jr-ui-FavItem-grid-first .__BASECLASS__-FavItem-download-state-holder {
+    padding-left: 0;
+}
+
+.__BASECLASS__-mobile .kelly-jr-ui-FavItem-grid-last,
+.__BASECLASS__-mobile .kelly-jr-ui-FavItem-grid-last .__BASECLASS__-FavItem-download-state-holder {
+    padding-right: 0;
+}
+
+.__BASECLASS__-mobile .__BASECLASS__-section-header-inline {
+    height: 32px;
+    line-height: 32px;
+    padding: 0 24px;
+    background: #5c5c5c;
 }
