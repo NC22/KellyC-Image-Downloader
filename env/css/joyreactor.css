@@ -4,6 +4,27 @@
     z-index : 995;
 }
 
+.ufoot .__BASECLASS__-post-addtofav {
+    font-size: 0.85rem;
+}
+
+.ufoot .__BASECLASS__-old-reactor-cc .__BASECLASS__-post-addtofav {
+    font-size: 11px;
+}
+
+#submenu div div.__BASECLASS__-FavItemsCount {
+    line-height: 1.2;
+}
+
+#submenu div.__BASECLASS__-MainMenuItem.active.__BASECLASS__-MainMenuItem-fav a {
+    background : transparent;
+}
+
+
+#submenu div.__BASECLASS__-MainMenuItem.active a:hover {
+    text-decoration : none;
+}
+
 #submenu.__BASECLASS__-top-joyreactor-cc {
     height: 32px;
     padding-top: 8px;
@@ -16,6 +37,10 @@
 #submenu.__BASECLASS__-top-joyreactor-cc a{
     color : #8b857b;
     line-height: 25px;
+}
+
+#submenu.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-MainMenuItem.active a {
+	background : transparent;
 }
 
 #submenu.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-MainMenuItem {
@@ -390,15 +415,9 @@
     background-size: 16px;
 }
 
+#submenu .__BASECLASS__-old-reactor-cc.__BASECLASS__-MainMenuItem-fav.active a,
+#submenu .__BASECLASS__-old-reactor-cc.__BASECLASS__-MainMenuItem-fav a:hover,
 #submenu .__BASECLASS__-old-reactor-cc.__BASECLASS__-MainMenuItem-fav a {
-    padding-right : 0px;
-}
-
-#submenu .__BASECLASS__-old-reactor-cc.__BASECLASS__-MainMenuItem-fav.active a {
-    padding-right : 0px;
-}
-
-#submenu .__BASECLASS__-old-reactor-cc.__BASECLASS__-MainMenuItem-fav a:hover {
     padding-right : 0px;
 }
 
@@ -412,71 +431,14 @@
 }
 
 #submenu .__BASECLASS__-old-reactor-cc.__BASECLASS__-MainMenuItem-fav {
-
-    margin-right: 0px;
-    margin-left: 0px;
-    
-}
-
-#submenu .__BASECLASS__-MainMenuItem-fav a {
-    text-decoration : none;
-    margin : 0px;
-    padding : 0px;
-    display : block;
-    width: 100%;
-    height: 100%;
-}
-
-#submenu div.submenuitem.active.__BASECLASS__-MainMenuItem-fav a {
-    background : transparent;
-}
-
-#submenu div div.__BASECLASS__-FavItemsCount {
-    position: absolute;
-    top: -8px;
-    font-size: 12px;
-    line-height: 1.2;
-    background: rgba(237, 85, 0, 0.58039);
-    border-radius: 6px;
-    line-height: 14px;
-    height: 14px;
-    padding-left: 3px;
-    padding-right: 3px;
-    right: -18px;
-    z-index: 3;
-    
-    opacity : 0;
-    transition : opacity 0.3s;
+    margin-right : 0px!important;
+    margin-left: 0px!important;
 }
 
 #submenu div.__BASECLASS__-old-reactor-cc div.__BASECLASS__-FavItemsCount {
     background: rgba(237, 85, 0, 1);
 }
 
-#submenu div div.__BASECLASS__-FavItemsCount.__BASECLASS__-FavItemsCount-1 {
-    right: -6px;
-    min-width: 14px;
-    border-radius: 7px;
-}
-
-#submenu div div.__BASECLASS__-FavItemsCount.__BASECLASS__-FavItemsCount-10 {
-    right: -12px;
-}
-
-
-#submenu div div.__BASECLASS__-FavItemsCount.__BASECLASS__-FavItemsCount-100 {
-    right: -20px;
-}
-
-#submenu div div.__BASECLASS__-FavItemsCount.__BASECLASS__-FavItemsCount-1000 {
-    right: -24px;
-}
-
-
 #submenu .__BASECLASS__-old-reactor-cc div div.__BASECLASS__-FavItemsCount {
     right : -8px;
-}
-
-#submenu div.submenuitem.__BASECLASS__-MainMenuItem-fav:hover .__BASECLASS__-FavItemsCount {
-    opacity : 1;
 }

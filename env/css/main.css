@@ -625,6 +625,7 @@
  
 .__BASECLASS__-FavFilter.active, .__BASECLASS__-FavEditButton.active {
      background : rgba(255, 92, 16, 0.75);
+     text-decoration : none;
 }
 
 .__BASECLASS__-FiltersMenu > li > a.active{
@@ -1070,11 +1071,11 @@
     padding-left : 16px;
 }
 
-.__BASECLASS__-options-table-bookmarks {
+.__BASECLASS__-options-table-datasource {
     vertical-align: middle;
 }
 
-.__BASECLASS__-options-table-bookmarks img {
+.__BASECLASS__-options-table-datasource img {
     width: 62px;
     height: 62px;
     border-radius: 32px;
@@ -1337,6 +1338,13 @@
     max-width : 200px;
 }
 
+.__BASECLASS__-MainMenuItem {
+    display: inline-block;
+}
+
+.__BASECLASS__-MainMenuItem-options.active a {
+	background : #fdb201;
+}
 
 .__BASECLASS__-MainMenuItem-fav.active .__BASECLASS__-icon {
 	background-color : #fdb201;
@@ -1401,10 +1409,6 @@
     margin-bottom: 12px;
     margin-top: 12px;
     background : rgba(239, 239, 239, 0.35);
-}
-
-.__BASECLASS__-options-table-bookmarks {
-    vertical-align: middle;
 }
 
 .__BASECLASS__-common-button,
@@ -1585,7 +1589,6 @@
     display : block;
 }
 
-
 .__BASECLASS__-downloader-controll .__BASECLASS__-downloader-range-tr input[type=text]  {
     
     width : 45%;
@@ -1604,6 +1607,7 @@
     height: 32px;
     line-height: 32px;
     text-align: center;
+    text-decoration: none;
 }
 
 .__BASECLASS__-ModalBox-downloader .kelly-jr-ui-downloader-controll-buttons a.disabled {
@@ -1659,7 +1663,6 @@
     color: #eb5656;
     font-weight: bold;
 }
-
 
 .__BASECLASS__-downloader-error-list p {
     margin: 0;
@@ -1747,7 +1750,6 @@
     font-size: 12px;
 }
 
-
 /* Fav items importer, todo replace class, cause collisions */
 
 .__BASECLASS__-FavItem-download-number {
@@ -1776,6 +1778,59 @@
     height: 100%;
     box-sizing: border-box; 
     cursor: pointer;
+}
+
+.__BASECLASS__-MainMenuItem.active a:hover {
+    text-decoration : none;
+}
+
+.__BASECLASS__-MainMenuItem-fav a {
+    text-decoration : none;
+    margin : 0px;
+    padding : 0px;
+    display : block;
+    width: 100%;
+    height: 100%;
+}
+
+div.__BASECLASS__-FavItemsCount {
+    position: absolute;
+    top: -8px;
+    font-size: 12px;
+    line-height: 1.2;
+    background: rgba(237, 85, 0, 0.58039);
+    border-radius: 6px;
+    line-height: 14px;
+    height: 14px;
+    padding-left: 3px;
+    padding-right: 3px;
+    right: -18px;
+    z-index: 3;
+    
+    opacity : 0;
+    transition : opacity 0.3s;
+}
+
+div.__BASECLASS__-FavItemsCount.__BASECLASS__-FavItemsCount-1 {
+    right: -6px;
+    min-width: 14px;
+    border-radius: 7px;
+}
+
+div.__BASECLASS__-FavItemsCount.__BASECLASS__-FavItemsCount-10 {
+    right: -12px;
+}
+
+div.__BASECLASS__-FavItemsCount.__BASECLASS__-FavItemsCount-100 {
+    right: -20px;
+}
+
+div.__BASECLASS__-FavItemsCount.__BASECLASS__-FavItemsCount-1000 {
+    right: -24px;
+}
+
+div.__BASECLASS__-MainMenuItem.__BASECLASS__-MainMenuItem-fav:hover .__BASECLASS__-FavItemsCount {
+    opacity : 1;
 }
 
 /* mobile version */

@@ -96,7 +96,7 @@
         "message":"Элементов на страницу"
     },
     "cgrid_tiles_header":{  
-        "message":"Настройки сетки элементов избранного"
+        "message":"Настройки сетки элементов"
     },   
     "cgrid_type":{  
         "message":"Режим отображения публикаций"
@@ -140,6 +140,9 @@
     "collapse":{  
         "message":"Свернуть"
     },
+    "cache_wh":{  
+        "message":"Кэш пропорций"
+    },
     "debug":{  
         "message":"Режим отладки"
     },  
@@ -160,7 +163,25 @@
     },
     "download":{  
         "message":"Скачать"
+    }, 
+    "download_current_tab":{  
+        "message":"Картинки со вкладки"
+    },   
+    "download_record":{  
+        "message":"Вкл. запись"
+    },
+    "download_recorded":{  
+        "message":"Скачать запись"
+    },
+    "download_record_stop":{  
+        "message":"Остановить"
+    }, 
+    "download_recorded_images":{  
+        "message":"Записаные картинки"
     },  
+    "download_recorded_empty":{  
+        "message":"Нет записей"
+    },         
     "download_empty_p":{  
         "message":"пустой шаблон"
     },      
@@ -253,12 +274,15 @@
     },
     "ext_description":{  
         "message":"Каталогизатор, грабер картинок из публикаций и комментов для JoyReactor"
-    },     
-    "ext_ver":{  
-        "message":"Версия"
     },        
     "ext_name":{  
         "message":"KellyC Favorites"
+    },  
+    "ext_name_recorder":{  
+        "message":"KellyC Image Downloader"
+    }, 
+    "ext_description_recorder":{  
+        "message":"Расширения для скачивания картинок с сайтов"
     },
     "expand":{  
         "message":"Развернуть"
@@ -554,9 +578,6 @@
     "item_number":{  
         "message":"Запись №__ITEMN__"
     },
-    "item_sign":{  
-        "message":"Подпись : "
-    },
     "item_upd":{  
         "message":"Избранная публикация обновлена"
     },
@@ -641,12 +662,12 @@
     "prev":{  
         "message":"Предыдущее"
     },
-    "preview":{  
-        "message":"превью"
-    },
     "publication":{  
         "message":"Публикация"
     },
+    "related_doc":{  
+        "message":"Документ"
+    }, 
     "remove_from_fav":{  
         "message":"удалить"
     },
@@ -686,9 +707,6 @@
     "select":{  
         "message":"Выбрать"
     },
-    "source":{  
-        "message":"оригинал"
-    },
     "storage":{  
         "message":"Профили"
     },
@@ -715,9 +733,15 @@
     },    
     "storage_load_from_user_info":{  
         "message":"Данные [__USER_NAME__] (постов : __BOOKMARKS_NUM__)"
+    },  
+    "storage_load_from_dump":{  
+        "message":"Загрузить текущие данные"
+    },   
+    "storage_load_from_dump_info":{  
+        "message":"Текущие собранные данные (записей : __BOOKMARKS_NUM__)"
     },      
     "storage_create_e3":{  
-        "message":"Данные из профиля пользователя не доступны"
+        "message":"Данные из выбранного источника не доступны"
     },    
     "storage_parser_save_to_profile":{  
         "message":"Добавить картинки в профиль"

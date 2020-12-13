@@ -1,0 +1,96 @@
+
+.universal-downloader .__BASECLASS__-TypeFiltersContainer {
+    display : none;
+}
+
+.__BASECLASS__-ModalBox {
+    min-height : 0;
+}
+
+.__BASECLASS__-FavItem-grid-resized .__BASECLASS__-preview.__BASECLASS__-preview-small {
+
+    position: static; 
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+    max-height : 100%;
+    max-width : 100%;
+}
+
+.__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-ModalBox-content {
+    padding-top: 4px;
+}
+
+.__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-buttons button {
+    border: 0;
+    height: 32px;
+    display: inline-block;
+    margin-right: 2%;
+    background: #ff8509;
+    width: 49%;
+    float: left;
+    cursor : pointer;
+}
+
+.__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-buttons button:last-child {
+    margin-right : 0;
+}
+
+.__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-url label {
+    margin-top: 6px;
+    display: block;
+}
+
+.__BASECLASS__-ModalBox-wrap-addition input[type=text] {
+    width: 100%;
+    height: 32px;
+}
+
+.__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-downloader-progressbar {
+    width: 100%;
+}
+
+.__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-statistic {
+    background: #ff8509;
+    height: 32px;
+    line-height: 32px;
+    padding: 0 12px;
+    font-size: 14px;
+    cursor : pointer;
+}
+
+.__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-statistic span:last-child {
+    font-size : 12px;
+    float : right;
+}
+
+.__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-downloader-statistic.hidden, 
+.__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-downloader-progressbar.hidden {
+    display : none;
+}
+
+.__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-downloader-statistic, 
+.__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-downloader-progressbar, 
+.__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-bounds,
+.__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-buttons, 
+.__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-exclude-url, 
+.__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-url label, 
+.__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-statistic {
+    margin-bottom: 6px;
+}
+
+.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll tr.__BASECLASS__-downloader-quality-tr,
+.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll tr.__BASECLASS__-downloader-controll-extended-grabber_anim_format {
+    display : none;
+}
+
+.__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-bounds input {
+    width: 64px;
+    height: 32px;
+}
+
+.__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-buttons:after {
+    content: ' ';
+    clear: both;
+    display: block;
+}

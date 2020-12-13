@@ -70,11 +70,11 @@ input[type=submit] {
 	min-height : 100px;
 }
 
-#submenu .submenuitem {
+.__BASECLASS__-MainMenuItem {
 	display : inline-block;
 }
 
-#submenu .submenuitem a {
+.__BASECLASS__-MainMenuItem a {
 	background: #ffefc9;
 	height: 30px;
 	display: inline-block;
@@ -86,15 +86,11 @@ input[type=submit] {
 	font-size: 14px;
 }
 
-#submenu .submenuitem.__BASECLASS__-MainMenuItem-fav a {
+.__BASECLASS__-MainMenuItem.__BASECLASS__-MainMenuItem-fav a {
 	background : transparent;
 }
 
-#submenu .submenuitem.active a {
-	background : #fdb201;
-}
-
-#submenu div div.__BASECLASS__-FavItemsCount.__BASECLASS__-FavItemsCount-1 {
+.__BASECLASS__-FavItemsCount.__BASECLASS__-FavItemsCount-1 {
 	
 	border-radius : 6px;
 }

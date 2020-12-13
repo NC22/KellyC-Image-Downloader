@@ -1,8 +1,16 @@
 @echo off
 pushd "%~1"
+
 SET frontend=kmerged.user.js
 SET background=kmerged.bg.js
-SET options=kmerged.options.js
+SET manifest=manifest.json
+
+SET recorder=0
+SET joyreactor=1
+
+:: manifest configurations - all | recorder | joyreactor (see lib\manifest)
+
+SET manifestMode=joyreactor
 
 break>%frontend%
 :: or echo.>%frontend% to clear file before write
@@ -20,25 +28,16 @@ for %%x in (
     "lib\kellyTools.js"
     "lib\kellyOptions.js"
     "lib\kellyFavItems.js"
-    "env\profiles\joyreactor.js" 
-    "env\profiles\topjoyreactor.js" 
 ) do (
     
-    @echo.>> %frontend%
     @echo.>> %frontend%
     @echo.>> %frontend%
     @echo // EXTRACTED FROM FILE %%~x>> %frontend%
     @echo.>> %frontend%
     @echo.>> %frontend%
-    @echo.>> %frontend%
     
     copy %frontend% + "%~dp0\%%~x" %frontend%
 )
-
-@echo.>> %frontend%
-@echo.>> %frontend%
-@echo.>> %frontend%
-@echo // end of file >> %frontend%
 
 break>%background%
 copy %background% + "%~dp0\SIGN" %background%
@@ -49,11 +48,7 @@ for %%x in (
 ) do (
     
     @echo.>> %background%
-    @echo.>> %background%
-    @echo.>> %background%
     @echo // EXTRACTED FROM FILE %%~x>> %background%
-    @echo.>> %background%
-    @echo.>> %background%
     @echo.>> %background%
     
     copy %background% + "%~dp0\%%~x" %background%
@@ -61,22 +56,54 @@ for %%x in (
 
 @echo.>> %background%
 @echo.>> %background%
-@echo.>> %background%
-@echo // end of file >> %background%
 
-break>%options%
-copy %options% + "%~dp0\SIGN" %options%
+if "%joyreactor%" geq "1" (
 
-for %%x in (
-    "lib\kellyOptionsPage.js"  
-) do (
-
-    @echo // EXTRACTED FROM FILE %%~x>> %options%    
-    copy %options% + "%~dp0\%%~x" %options%
+    for %%x in (
+        "lib\profiles\joyreactor.js" 
+        "lib\profiles\topjoyreactor.js" 
+    ) do (
+    
+        @echo.>> %frontend%
+        @echo // EXTRACTED FROM FILE %%~x>> %frontend%
+        @echo.>> %frontend%
+        
+        copy %frontend% + "%~dp0\%%~x" %frontend%
+    )
 )
 
-@echo.>> %options%
-@echo // end of file >> %options%
+@echo.>> %frontend%
+@echo.>> %frontend%
+
+:: lib\recorder\profiles\*.js
+
+if "%recorder%" geq "1" (
+
+    for %%x in (
+        "lib\recorder\kellyPageWatchdog.js"	  
+        "lib\recorder\kellyLoadDocControll.js"      
+        "lib\recorder\kellyDPage.js"
+        "lib\profiles\default.js" 
+        "lib\profiles\recorder.js" 
+    ) do (
+    
+        @echo.>> %frontend%
+        @echo // EXTRACTED FROM FILE %%~x>> %frontend%
+        @echo.>> %frontend%
+        
+        copy %frontend% + "%~dp0\%%~x" %frontend%
+    )
+    
+    @echo.>> %background%    
+    copy %background% + "%~dp0\lib\recorder\kellyEDRecorder.js" %background%
+    @echo.>> %background%  
+)
+
+@echo.>> %frontend%
+@echo.>> %frontend%
+
+break>%manifest%
+copy "%~dp0\lib\manifest\manifest_%manifestMode%.json" %manifest%
 
 popd
 

@@ -1,0 +1,47 @@
+#__UNIQID__:after {
+    content: " ";
+    width: 24px;
+    height: 24px;
+    position: absolute;
+    left: 4px;
+    background: #ff0b0b;
+    overflow: hidden;
+    border-radius: 16px;
+    /* bottom: 4px; */
+    animation: __UNIQID__blink 0.8s cubic-bezier(.5, 0, 1, 1) infinite alternate;  
+    box-shadow: 0px 0px 17px 0px rgb(217 59 59 / 75%);
+}
+
+#__UNIQID__ {
+    position: fixed;
+    right: 12px;
+    z-index: 1000011;
+    bottom: 12px;
+    color: #ff0b0b;
+    font-weight: bold;
+    line-height: 24px;
+    background: rgb(255, 255, 255, 0.85);
+    padding-left: 34px;
+    padding-top: 5px;
+    padding-bottom: 36px;
+    padding-right: 6px;
+    border-radius: 4px;
+    border: 1px solid rgb(0, 0, 0, 0.44);
+}
+
+#__UNIQID__ > div {
+    position: absolute;
+    bottom: 0;
+    border-radius: 3px;
+    padding: 6px;
+    min-width: 44px;
+    right: 0;
+    text-align: center;
+    padding: 0;
+    width: 100%;
+}
+
+@keyframes __UNIQID__blink {  
+  from { opacity: 1; }
+  to { opacity: 0; }
+}

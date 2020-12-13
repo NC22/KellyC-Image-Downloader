@@ -140,6 +140,9 @@
     "comment":{  
         "message":"Comment"
     },
+    "cache_wh":{  
+        "message":"Catched proportions"
+    },
     "dark_theme":{  
         "message":"Dark theme"
     }, 
@@ -160,6 +163,24 @@
     },
     "download":{  
         "message":"Download"
+    },  
+    "download_current_tab":{  
+        "message":"Images from Tab"
+    },   
+    "download_record":{  
+        "message":"Record"
+    },
+    "download_recorded":{  
+        "message":"Download record"
+    },
+    "download_record_stop":{  
+        "message":"Stop record"
+    }, 
+    "download_recorded_images":{  
+        "message":"Recorded images"
+    },  
+    "download_recorded_empty":{  
+        "message":"No records"
     },  
     "download_empty_p":{  
         "message":"empty profile"
@@ -256,12 +277,15 @@
     },
     "ext_name":{  
         "message":"KellyC Favorites"
+    },    
+    "ext_name_recorder":{  
+        "message":"KellyC Image Downloader"
+    },
+    "ext_description_recorder":{  
+        "message":"Extension for batch download images from sites"
     },
     "expand":{  
         "message":"Expand"
-    },
-    "ext_ver":{  
-        "message":"Version"
     },
     "folder":{  
         "message":"Folder"
@@ -545,9 +569,6 @@
     "item_number":{  
         "message":"Item №__ITEMN__"
     },
-    "item_sign":{  
-        "message":"Sign : "
-    },
     "item_upd":{  
         "message":"Publication updated"
     },
@@ -632,9 +653,6 @@
     "prev":{  
         "message":"Previouse"
     },
-    "preview":{  
-        "message":"preview"
-    },
     "publication":{  
         "message":"Publication"
     },    
@@ -643,6 +661,9 @@
     },  
     "reload":{  
         "message":"Reload"
+    }, 
+    "related_doc":{  
+        "message":"Related doc"
     }, 
     "restore":{  
         "message":"Restore"
@@ -677,9 +698,6 @@
     "select":{  
         "message":"Select"
     },
-    "source":{  
-        "message":"source"
-    },
     "storage":{  
         "message":"Profile"
     },    
@@ -706,9 +724,15 @@
     },    
     "storage_load_from_user_info":{  
         "message":"Content __USER_NAME__ (items : __BOOKMARKS_NUM__)"
-    },      
+    }, 
+    "storage_load_from_dump":{  
+        "message":"Load from recorded"
+    },  
+    "storage_load_from_dump":{  
+        "message":"Current recorded data (items : __BOOKMARKS_NUM__)"
+    },       
     "storage_create_e3":{  
-        "message":"Data from user profile is unavailable"
+        "message":"Data from selected source is unavailable"
     },    
     "storage_parser_save_to_profile":{  
         "message":"Save images to profile"

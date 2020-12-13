@@ -12,7 +12,7 @@ body.__BASECLASS__-dark  {
     background: #3f3931;
 }
 
-.__BASECLASS__-dark #submenu .submenuitem.active a {
+.__BASECLASS__-dark .__BASECLASS__-MainMenuItem.active a {
     background: #565656;
 }
 

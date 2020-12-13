@@ -1,8 +1,5 @@
-// use chrome.tabs.executeScript(tabId, {file: filename}, function() {  handler.exec(); }); to inject custom environments instead of preseted
 
 if (typeof K_FAV == 'undefined') {
-    
-    var K_FAV = false;
     
     if (window.location.host.indexOf('top.joyreactor.cc') != -1 ) {
         
@@ -13,8 +10,8 @@ if (typeof K_FAV == 'undefined') {
         
     } else {
         
-            K_FAV = new KellyFavItems({env : KellyProfileJoyreactor.getInstance(), location : window.location});
-            K_FAV.exec();
+        K_FAV = new KellyFavItems({env : KellyProfileJoyreactor.getInstance(), location : window.location});
+        K_FAV.exec();
     }
 }
 

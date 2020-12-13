@@ -5,7 +5,7 @@
    @description    image view widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.2.0 09.10.20
+   @version        v 1.2.1 04.11.20
    
    ToDo : 
    
@@ -1002,8 +1002,7 @@ function KellyImgView(cfg) {
         };
         
         setTimeout(function() { 
-        
-            image.style.opacity = '1'; 
+            if (image) image.style.opacity = '1'; 
             handler.hideButtons(false);             
             handler.updateButtonsPos(false);
             
