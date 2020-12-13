@@ -12,7 +12,7 @@
     <li>Allow user to bookmark publications and comments</li>
     <li>Store \ manage \ export \ import publications and comments ("Save" icon and "Options" button placed in header menu of site)</li>
     <li>Export bookmarks of selected user or tag to local profile</li>
-    <li>Batch download of images from filtered publications in local profile (select range, number of threads, etc) *</li>
+    <li>Batch download of images from filtered publications in local profile (select range, number of threads, etc)</li>
 </ul>
 </p>
 <br>
