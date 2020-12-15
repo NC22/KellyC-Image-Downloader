@@ -728,7 +728,7 @@
     "storage_load_from_dump":{  
         "message":"Load from recorded"
     },  
-    "storage_load_from_dump":{  
+    "storage_load_from_dump_info":{  
         "message":"Current recorded data (items : __BOOKMARKS_NUM__)"
     },       
     "storage_create_e3":{  
