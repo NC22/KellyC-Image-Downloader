@@ -5,12 +5,12 @@ SET frontend=kmerged.user.js
 SET background=kmerged.bg.js
 SET manifest=manifest.json
 
-SET recorder=0
+SET recorder=1
 SET joyreactor=1
 
 :: manifest configurations - all | recorder | joyreactor (see lib\manifest)
 
-SET manifestMode=joyreactor
+SET manifestMode=all
 
 break>%frontend%
 :: or echo.>%frontend% to clear file before write

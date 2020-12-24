@@ -123,6 +123,7 @@
     background : rgba(96, 102, 126, 0.9490);
 	border : 0px dashed #c5c5c5;
 	color : #fff;
+    
     /*
     background: rgb(253, 218, 151);
     border: 2px solid #634949;
@@ -133,8 +134,8 @@
 }
 
 .__BASECLASS__-tooltipster-container a {
-    /* color : #060303;  */
     color : #fff;
+    text-decoration-color: inherit;
 }
 
 .__BASECLASS__-download-tooltipster .__BASECLASS__-tooltipster-container {
