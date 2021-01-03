@@ -742,6 +742,9 @@
     },  
     "storage_create_add_if_exist":{  
         "message":"Add new items if profile already exits (<b>beta</b>)"
+    },   
+    "storage_create_overwrite_if_exist":{  
+        "message":"Overwrite if exist"
     },
     "storage_create_cancel_if_exist":{  
         "message":"Cancel if already exist with same id"
@@ -799,7 +802,10 @@
     },         
     "storage_create_ok_madd":{  
         "message":"Profile updated"
-    },   
+    },
+    "storage_create_ok_moverwrite":{  
+        "message":"Profile overwritten"
+    },    
     "storage_create_e1":{  
         "message":"Error while save profile to localStorage (turn on debug mode an watch console)"
     },   

@@ -1,17 +1,17 @@
 
-if (typeof K_FAV == 'undefined') {
+if (typeof K_FAV == 'undefined' || K_FAV === null) {
     
     if (window.location.host.indexOf('top.joyreactor.cc') != -1 ) {
         
         KellyProfileTopJoyreactor.getInstance().initOnLoad(function() {
             K_FAV = new KellyFavItems({env : KellyProfileTopJoyreactor.getInstance(), location : window.location});
-            K_FAV.exec();
+            if (!K_FAV.exec()) K_FAV = null;
         });
         
     } else {
         
         K_FAV = new KellyFavItems({env : KellyProfileJoyreactor.getInstance(), location : window.location});
-        K_FAV.exec();
+        if (!K_FAV.exec()) K_FAV = null;
     }
 }
 

@@ -1,5 +1,4 @@
-
-.universal-downloader .__BASECLASS__-TypeFiltersContainer {
+.__BASECLASS__-TypeFiltersContainer {
     display : none;
 }
 
@@ -17,6 +16,14 @@
     max-width : 100%;
 }
 
+.__BASECLASS__-ModalBox-wrap-addition.collapsed .__BASECLASS__-statistic {
+    margin-bottom : 0px;
+}
+
+.__BASECLASS__-ModalBox-wrap-addition.collapsed  .__BASECLASS__-ModalBox-content {
+    display : none;
+}
+
 .__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-ModalBox-content {
     padding-top: 4px;
 }
@@ -30,6 +37,10 @@
     width: 49%;
     float: left;
     cursor : pointer;
+}
+
+.__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-buttons.__BASECLASS__-buttons-single button {
+    width : 100%;
 }
 
 .__BASECLASS__-ModalBox-wrap-addition .__BASECLASS__-buttons button:last-child {
