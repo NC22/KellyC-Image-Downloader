@@ -594,7 +594,7 @@
         "message":"Показать превью"
     },
     "fav_list_empty":{  
-        "message":"Список публикаций пуст"
+        "message":"Список картинок пуст"
     },
     "loading":{  
         "message":"Загрузка"
@@ -692,6 +692,9 @@
     "save":{  
         "message":"Сохранить"
     },   
+    "saved":{  
+        "message":"Сохранненое"
+    },     
     "sidebar_section_filters": {
         "message":"Фильтры"
     },  
@@ -853,5 +856,38 @@
     },  
     "kb":{  
         "message":"кб"
+    },
+    "recorder_extra_filters":{  
+        "message":"Доп. фильтры"
+    },
+    "recorder_filter":{  
+        "message":"Выбрать"
+    },
+    "recorder_load_prop":{  
+        "message":"Загрузить пропорции"
+    },
+    "recorder_load_related_doc":{  
+        "message":"Загрузить доп. документы"
+    },
+    "recorder_regular_expr":{  
+        "message":"Регулярное выражение"
+    },
+    "recorder_exclude_urls":{  
+        "message":"Исключать ссылки"
+    },
+    "recorder_min_dimensions":{  
+        "message":"Мин. пропорции"
+    },
+    "recorder_filter_help":{  
+        "message":"Дополнительные фильтры используются если нет возможности отсеять необходимые изображения через список групп"
+    },
+    "recorder_filter_help_1":{  
+        "message":"<b>Загрузить пропорции</b> - отсортировать изображений по разрешения и отсеять картинки с ошибками \\ технические картинки (< 3x3)"
+    },
+    "recorder_filter_help_2":{  
+        "message":"<b>Загрузить доп. документы</b> - попробовать найти оригиналы изображений выбранный картинок (рекомендуется использовать только на определенных сайтах, где кнопка имеет значек __CHECKMARK__)"
+    },
+    "recorder_displayed_info":{  
+        "message":"Картинки : __ITEMS__ | Доп. документы : __RELATED_DOCS__"
     }
 }

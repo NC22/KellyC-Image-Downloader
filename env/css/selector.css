@@ -1,0 +1,93 @@
+/* options page to route for specified profile to work with */
+
+html, body {
+    background: #e5f2ff;
+    /* background-color: #2b2b2b; */
+    /* color: #fff; */
+    padding: 0;
+    margin: 0;
+}
+
+#profile-selector {
+    padding : 16px;
+}
+
+#profile-selector h1 {
+    padding: 0;
+    margin: 0;
+    margin-bottom: 12px;
+}
+
+.profile-selector-copyright {
+    position: absolute;
+    bottom: 0;
+    /* left: 50%; */
+    font-size: 15px;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.46);
+    color: #fff;
+}
+
+.profile-selector-copyright a {
+    text-decoration: none;
+    color: #ff7721;
+    font-weight: bold;
+}
+
+.profile-clever-chick {
+    
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+.profile-clever-chick img {
+    
+    width: 300px;
+    float: right;
+}
+
+
+.profile-selector {
+    display : inline-block;
+    background : #ff8318;
+    font-size : 12px;
+    padding : 6px;
+    margin-bottom : 12px;
+    margin-right : 12px;
+    max-width : 500px;
+}
+
+.profile-selector a { 
+    
+    color : #000;
+    text-decoration : none;
+}
+
+.profile-selector .profile-selector-name {
+    font-weight : bold;
+    font-size : 14px;
+    display : block;
+}
+
+.profile-selector .profile-selector-hostlist {
+    padding : 6px;
+    font-size : 12px;
+    background : rgba(255, 255, 255, 0.43);
+    margin-top : 6px;
+}
+
+.profile-selector label input[type=checkbox] {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    padding: 0;
+    margin: 0;
+    margin-right: 2px;
+}
+
+.profile-selector  label {
+    display: block;
+    height: 18px;
+    margin-bottom: 4px;
+}

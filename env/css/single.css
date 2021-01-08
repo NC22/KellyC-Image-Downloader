@@ -1,3 +1,5 @@
+/* css for display extension as separate page */
+
 html { 
     overflow-y : scroll;
 }
@@ -10,6 +12,8 @@ body, html {
 	margin: 0px;
 	padding: 0px; 
 	
+    font-size : 12px;
+    
 	/*
 		width : 1280px;
 		height : 640px;
@@ -34,16 +38,15 @@ ul {
     box-sizing: border-box;
 }
 
+*,:after,:before {
+    box-sizing: border-box;
+}
+
 input[type=submit] {
 	background: #fb0;
 	border: 0px;
 	padding: 6px;
 	cursor: pointer;
-}
-
-.__BASECLASS__-imagesBlock-container {
-	width : 100%;
-	overflow : hidden;
 }
 
 .page-content {
@@ -68,6 +71,19 @@ input[type=submit] {
 #sidebar {
 	width : 25%;
 	min-height : 100px;
+}
+
+#submenu {
+	padding: 50px;
+	padding-bottom: 20px;
+	padding-top: 20px;
+	background: #ffd6a4;
+	border-bottom: 1px solid #ffa429;
+}
+
+.__BASECLASS__-imagesBlock-container {
+	width : 100%;
+	overflow : hidden;
 }
 
 .__BASECLASS__-MainMenuItem {
@@ -95,14 +111,6 @@ input[type=submit] {
 	border-radius : 6px;
 }
 
-#submenu {
-	padding: 50px;
-	padding-bottom: 20px;
-	padding-top: 20px;
-	background: #ffd6a4;
-	border-bottom: 1px solid #ffa429;
-}
-
 .__BASECLASS__-copyright-info a {
     font-size : 18px;
 }
@@ -118,22 +126,9 @@ input[type=submit] {
     padding-top: 4px;
 }
 
-*,:after,:before {
-    box-sizing: border-box
-}
-
-/* mobile version */
-
-.__BASECLASS__-mobile .content {
-    width : 100%;
-}
-
-.__BASECLASS__-mobile #sidebar {
-    display : none;
-}
-
 @media (max-width: 1240px) {
-     .content {
+    
+    .content {
         width: 65%;
         min-height: 100px;
     }

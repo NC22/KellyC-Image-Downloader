@@ -1,19 +1,17 @@
-KellyOptionsPage = new Object();
-KellyOptionsPage.env = false;
-KellyOptionsPage.init = function() {
+KellyJoyreactorDPage = new Object();
+KellyJoyreactorDPage.env = false;
+KellyJoyreactorDPage.init = function() {
     
     window.K_FAV = false;
     document.title = KellyTools.getProgName();
+    K_FAV = new KellyFavItems({env : KellyProfileJoyreactor.getInstance(), location : { href : 'http:' + '//' + 'joyreactor.cc' + '/', protocol : 'http:', host : 'joyreactor.cc'}, allowMobile : true});
     
-    KellyTools.DEBUG = true;    
-    K_FAV = new KellyFavItems({env : KellyProfileJoyreactor.getInstance(), location : { href : 'http:' + '//' + 'joyreactor.cc' + '/', protocol : 'http:', host : 'joyreactor.cc'}});
-    
-    KellyOptionsPage.env = K_FAV.getGlobal('env');
-    KellyOptionsPage.env.hostClass = 'options_page';    
-    KellyOptionsPage.env.webRequestsRules.types = false;    
+    KellyJoyreactorDPage.env = K_FAV.getGlobal('env');
+    KellyJoyreactorDPage.env.hostClass = 'options_page';    
+    KellyJoyreactorDPage.env.webRequestsRules.types = false;    
 
-    var nativeOnExtensionReady = KellyOptionsPage.env.events.onExtensionReady;            
-    KellyOptionsPage.env.events.onExtensionReady = function() {
+    var nativeOnExtensionReady = KellyJoyreactorDPage.env.events.onExtensionReady;            
+    KellyJoyreactorDPage.env.events.onExtensionReady = function() {
         
         if (nativeOnExtensionReady) nativeOnExtensionReady();
         
@@ -24,18 +22,18 @@ KellyOptionsPage.init = function() {
     }
     
     K_FAV.load('cfg', function(fav) {
-        var resources = ['options', 'main'];
-        
-        if (fav.coptions.mobileOptimization) document.body.classList.add(KellyOptionsPage.env.className + '-mobile');       
+        var resources = ['core', 'single'];
+              
         if (fav.coptions.darkTheme) {
-            document.body.classList.add(KellyOptionsPage.env.className + '-dark');
+            document.body.classList.add(KellyJoyreactorDPage.env.className + '-dark');
             resources.push('dark');
         }
         
-        K_FAV.load('items', function() { K_FAV.initFormatPage(resources); });        
+        K_FAV.load('items', function() { K_FAV.initFormatPage(resources); });   
     });   
     
-    KellyTools.setHTMLData(document.getElementById('submenu'), '<div class="' + KellyOptionsPage.env.className + '-copyright-info">' + KellyTools.getProgName(KellyOptionsPage.env.location) + '</div>');    
+    KellyTools.setHTMLData(document.getElementById('submenu'), '<div class="' + KellyJoyreactorDPage.env.className + '-copyright-info">' + KellyTools.getProgName() + '<span id="copyright-software"></span></div>');     
+    KellyTools.setCopyright('copyright-software');
 }
 
-KellyOptionsPage.init();
+KellyJoyreactorDPage.init();

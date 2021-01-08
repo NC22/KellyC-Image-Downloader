@@ -5,7 +5,7 @@
    @description    image view widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.1.3 09.09.20
+   @version        v 1.1.4 06.01.21
    
    ToDo : 
    
@@ -718,7 +718,6 @@ function KellyTileGrid(cfg) {
             }
             
             addClass(currentTileRow[i].image, 'grid-resized');
-            removeClass(currentTileRow[i].image, 'grid-hidden');
             
             if (i == 0) {
                 addClass(currentTileRow[i].image, 'grid-first');
@@ -740,6 +739,8 @@ function KellyTileGrid(cfg) {
                 currentTileRow[i].image.style.height = currentTileRow[i].height + 'px'; 
                 currentTileRow[i].image.style.float = 'left';
             }
+            
+            removeClass(currentTileRow[i].image, 'grid-hidden'); // expects that all resize job done and image can be shown properly
         }
         
         portrait = 0;

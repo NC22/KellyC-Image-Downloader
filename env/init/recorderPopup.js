@@ -1,9 +1,7 @@
-var K_FAV = false;
-
 KellyPopupPage = new Object();
 KellyPopupPage.className = 'popup-page';
 KellyPopupPage.wrap = false;
-KellyPopupPage.recordingState = 'loading';
+KellyPopupPage.recordingState = 'loading'; // loading (init), stopping (stopRecord), starting (startRecord), disabled (record is not runing), enabled (record is runing)
 KellyPopupPage.recordingNum = false;
 KellyPopupPage.recordingNumEl = false;
 
@@ -12,13 +10,17 @@ KellyPopupPage.buttons = {
         
         KellyTools.getBrowser().tabs.query({ active: true, currentWindow: true }, function(tab){
             
-             KellyPopupPage.parseImages(tab[0].id, function(response) { 
+             KellyPopupPage.sendTabMessage(tab[0].id, {method : 'parseImages'}, function(response) {
+                    
+                 KellyTools.log('parseImages [Get images from active tab without record - ' + (response ? 'OK' : 'FAIL') + ']', 'KellyPopupPage');
                  if (response && response.images) {
-                     KellyTools.getBrowser().runtime.sendMessage({method: "addRecord", clean : true, images : response.images, cats : response.cats, url : response.url, host : response.host}, function(request) {
-                           KellyTools.getBrowser().tabs.create({url: '/env/html/recorderDownloader.html'}, function(tab){});
+                     
+                     KellyTools.getBrowser().runtime.sendMessage({method: "addRecord", clean : true, images : response.images, cats : response.cats, url : response.url, host : response.host}, function(request) {                         
+                           KellyTools.getBrowser().tabs.create({url: '/env/html/recorderDownloader.html'}, function(tab){});                           
                      });
-                 }
-             });
+                     
+                 } else KellyPopupPage.updateNotice('Вкладка недоступна');              
+            });
              
          });
         
@@ -28,63 +30,99 @@ KellyPopupPage.buttons = {
     }},  
     'download_record' : {loc_disabled : 'download_record', loc_enabled : 'download_record_stop', loc_stopping : 'download_record_stopping', event : function() {
           
-          if (['loading', 'stopping'].indexOf(KellyPopupPage.recordingState) != -1) return false;
+          if (['loading', 'stopping', 'starting'].indexOf(KellyPopupPage.recordingState) != -1) return false;
           
           if (KellyPopupPage.recordingState == 'enabled') {   
           
              KellyPopupPage.recordingState = 'stopping';             
-             KellyTools.getBrowser().runtime.sendMessage({method: "stopRecord"}, function(request) {
-                 
-                    KellyPopupPage.recordingState = 'disabled';
-                    KellyPopupPage.recordingNum = request.imagesNum;
+             KellyTools.getBrowser().runtime.sendMessage({method: "stopRecord"}, function(recorderResponse) {
                     
+                    KellyTools.log('stopRecord [Notify background - ' + (recorderResponse ? 'OK' : 'FAIL') + ']', 'KellyPopupPage');
+                    if (!recorderResponse) return;
+                    
+                    var tabsAffected = 0, tabsAnswered = 0;
                     KellyTools.getBrowser().tabs.query({ }, function(tabs){
-                        for (var i = 0; i < tabs.length; i++) KellyPopupPage.sendTabMessage(tabs[i].id, {method: "stopRecord"});                 
+                        
+                        for (var i = 0; i < tabs.length; i++) {
+                            
+                            KellyPopupPage.sendTabMessage(tabs[i].id, {method: "stopRecord"}, function(tabResponse) {
+                                
+                                tabsAnswered++;
+                                KellyTools.log('stopRecord [' + tabsAnswered + '/' + tabs.length + '][Disabled tab recording - ' + (tabResponse && tabResponse.isStopped ? 'STOPPED' : 'IGNORED') + ']', 'KellyPopupPage');
+                                if (tabResponse && tabResponse.isStopped) tabsAffected++;
+                                
+                                if (tabsAnswered >= tabs.length) {
+                                   
+                                    KellyPopupPage.recordingState = 'disabled';
+                                    KellyPopupPage.recordingNum = recorderResponse.imagesNum;
+                                    KellyPopupPage.updateRecordButton(); 
+                                }
+                            });   
+                        }                            
                     });
-                    
-                    KellyPopupPage.updateRecordButton(); 
              });
             
           } else {
               
-              
+              KellyPopupPage.recordingState = 'starting';
               KellyTools.getBrowser().runtime.sendMessage({method: "startRecord"}, function(response) {
-                  
+                    
+                    KellyTools.log('startRecord [Notify background - ' + (response ? 'OK' : 'FAIL') + ']', 'KellyPopupPage');
                     if (!response || !response.isRecorded) {
-                        KellyPopupPage.recordingNumEl.innerText = 'reset BG error';
+                        KellyPopupPage.recordingState = 'disabled';
                         return;
                     }
-                    
-                    KellyPopupPage.recordingState = 'enabled'; 
-                    KellyPopupPage.updateRecordButton(); 
                     
                     KellyTools.getBrowser().tabs.query({ active: true, currentWindow: true }, function(tab){
                         
                         KellyPopupPage.sendTabMessage(tab[0].id, {method: "startRecord"}, function(response) {
                             
-                            if (!response || !response.isRecorded) {
-                                KellyPopupPage.recordingNumEl.innerText = 'Вкладка недоступна';
+                            KellyTools.log('startRecord [Enable active tab recording module - ' + (response ? 'OK' : 'FAIL') + ']', 'KellyPopupPage');
+                            if (!response || !response.isRecorded) {                                
+                                
+                                KellyTools.getBrowser().runtime.sendMessage({method: "stopRecord", clean : true}, function(response) {
+                                    KellyTools.log('startRecord - [Reset background by stopRecord - ' + (response ? 'OK' : 'FAIL') + ']', 'KellyPopupPage');
+                                    KellyPopupPage.recordingState = 'disabled';
+                                    KellyPopupPage.updateNotice('Вкладка недоступна');
+                                });
+                                
                                 return;
                             }
                             
+                            KellyPopupPage.recordingState = 'enabled'; 
+                            KellyPopupPage.updateRecordButton();
                         });    
                     });
              });
              
           }  
     }},
-    'options' : {loc : 'options', event : function() {
+    'options' : {loc : 'saved', event : function() {
          
-         KellyTools.getBrowser().tabs.create({url: '/env/html/recorderDownloader.html?tab=options'}, function(tab){});
+         KellyTools.getBrowser().tabs.create({url: '/env/html/recorderDownloader.html?tab=profiles'}, function(tab){});
         
     }}, 
 };
 
+KellyPopupPage.updateNotice = function(str) {
+    if (!str) {
+        KellyPopupPage.recordingNumEl.style.display = 'none';
+        return;
+    }
+    
+    KellyPopupPage.recordingNumEl.style.display = '';
+    KellyPopupPage.recordingNumEl.innerText = str;    
+}
+
 KellyPopupPage.updateRecordButton = function() {
     
-      KellyPopupPage.recordingNumEl.innerText = KellyPopupPage.recordingNum ? KellyLoc.s('Recorded images', 'download_recorded_images') + ': ' + KellyPopupPage.recordingNum :  KellyLoc.s('No recording', 'download_recorded_empty');
+      var notice = ''; // KellyLoc.s('No recording', 'download_recorded_empty')
+      if (KellyPopupPage.recordingNum) notice = KellyLoc.s('Recorded images', 'download_recorded_images') + ': ' + KellyPopupPage.recordingNum;
+      
       KellyTools.setHTMLData(KellyPopupPage.buttons['download_record'].btn, '<span>' + KellyLoc.s('', KellyPopupPage.buttons['download_record']['loc_' + KellyPopupPage.recordingState]) + '</span>');
+      
       KellyPopupPage.buttons['download_recorded'].btn.style.display = KellyPopupPage.recordingNum && KellyPopupPage.recordingState == 'disabled' ? '' : 'none'; 
+      KellyPopupPage.updateNotice(notice);
 }
 
 // todo add frames support - browser.webNavigation.getAllFrames({tabId})
@@ -94,18 +132,10 @@ KellyPopupPage.sendTabMessage = function(tabId, data, onResponse) {
     KellyTools.getBrowser().tabs.sendMessage(tabId, data, {frameId : 0}, function(response) {
         
         if ( KellyTools.getBrowser().runtime.lastError) {    
-             console.log(  KellyTools.getBrowser().runtime.lastError ); // can be error for system tabs
+             KellyTools.log('sendTabMessage | Tab not available : ' + KellyTools.getBrowser().runtime.lastError.message + ']', 'KellyPopupPage');
         }
         
         if (onResponse) onResponse(response ? response : false);               
-    });
-}
-    
-KellyPopupPage.parseImages = function(tabId, onParse) {
-
-    KellyPopupPage.sendTabMessage(tabId, {method : 'parseImages'}, function(response) {       
-                    
-            if (onParse) onParse(response);                
     });
 }
 
@@ -127,7 +157,7 @@ KellyPopupPage.showRecorder = function() {
     document.title = KellyTools.getProgName();
     KellyPopupPage.wrap = document.getElementById('popup');
     
-    KellyTools.setHTMLData(KellyPopupPage.wrap, '<div class="' + KellyPopupPage.className + '-recorded-num"></div>');
+    KellyTools.setHTMLData(KellyPopupPage.wrap, '<div class="' + KellyPopupPage.className + '-recorded-num"></div>'); KellyTools.setCopyright('copyright-software'); 
     KellyPopupPage.recordingNumEl = KellyTools.getElementByClass(KellyPopupPage.wrap, KellyPopupPage.className + '-recorded-num');
         
     for (var buttonKey in KellyPopupPage.buttons) { 

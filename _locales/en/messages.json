@@ -585,7 +585,7 @@
         "message":"Cant detect comment url"
     },  
     "fav_list_empty":{  
-        "message":"List of favorite items is empty"
+        "message":"List of images is empty"
     },
     "loading":{  
         "message":"Loading"
@@ -682,6 +682,9 @@
     },
     "save":{  
         "message":"Save"
+    },   
+    "saved":{  
+        "message":"Saved"
     },
     "sidebar_section_filters": {
         "message":"Filters"
@@ -844,5 +847,44 @@
     },   
     "kb":{  
         "message":"kb"
+    },
+    "recorder_extra_filters":{  
+        "message":"Extra filters"
+    },
+    "recorder_filter":{  
+        "message":"Filter"
+    },
+    "recorder_load_prop":{  
+        "message":"Load proportions"
+    },
+    "recorder_load_related_doc":{  
+        "message":"Load related links"
+    },
+    "recorder_regular_expr":{  
+        "message":"Reqular expression"
+    },
+    "recorder_exclude_urls":{  
+        "message":"Exclude urls"
+    },
+    "recorder_min_dimensions":{  
+        "message":"Min. dimensions"
+    },
+    "recorder_filter_notice":{  
+        "message":"Load proportions before use filters for best result"
+    },
+    "recorder_filter_help":{  
+        "message":"Дополнительные фильтры используются если нет возможности отсеять необходимые изображения через список групп"
+    },
+    "recorder_filter_help_1":{  
+        "message":"Для фильтрации по мин. ширине и высоте изображения предварительно <b>Загрузите пропорции</b>"
+    },
+    "recorder_filter_help_2":{  
+        "message":"Загрузить пропорции - определить разрешение изображений текущего списка и отсеять картинки с ошибками \\ технические картинки (< 3x3)"
+    },
+    "recorder_filter_help_3":{  
+        "message":"Загрузить доп. документы - попробовать найти оригиналы изображений выбранный картинок (работает только на определенных сайтах)"
+    },
+    "recorder_displayed_info":{  
+        "message":"Items : __ITEMS__ | Documents : __RELATED_DOCS__"
     }
 }

@@ -3,6 +3,7 @@ body {
     margin: 6px;
     padding: 0;
     width: 180px;
+    background : #fff;
 }
 
 * {
@@ -40,4 +41,8 @@ button {
     margin-right: 6px;
     overflow: hidden;
     vertical-align: middle;
+}
+
+#copyright-software a {
+    color: #ff6009;
 }

@@ -75,14 +75,13 @@ if "%joyreactor%" geq "1" (
 @echo.>> %frontend%
 @echo.>> %frontend%
 
-:: lib\recorder\profiles\*.js
-
 if "%recorder%" geq "1" (
 
     for %%x in (
         "lib\recorder\kellyPageWatchdog.js"	  
         "lib\recorder\kellyLoadDocControll.js"      
         "lib\recorder\kellyDPage.js"
+        "lib\recorder\filters\*.js"
         "lib\profiles\default.js" 
         "lib\profiles\recorder.js" 
     ) do (

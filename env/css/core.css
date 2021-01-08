@@ -1,21 +1,14 @@
 /* css main file */
 
-.__BASECLASS__ {
-     margin-right : 6px;
-}
-
 .__BASECLASS__-FavContainer {
+     margin-bottom : 120px;
+     line-height: 0px;
+     min-height: 312px;
      display : none;
 }
 
 .__BASECLASS__-FavContainer.__BASECLASS__-active {
     display : block;
-}
-
-.__BASECLASS__-FavContainer {
-     margin-bottom : 120px;
-     line-height: 0px;
-     min-height: 312px;
 }
 
 .__BASECLASS__-FavContainer-page {
@@ -99,8 +92,7 @@
     padding: 0px;
     margin-right: 4px;
     margin-bottom: 4px;
-    float: left;
-	
+    float: left;	
 }
 
 .__BASECLASS__-ItemTip-images  li  img {
@@ -362,6 +354,7 @@
 .__BASECLASS__-FavItem-grid-empty {
     line-height : 20px;
     padding : 4px;
+    font-size : 14px;
 }
 
 .__BASECLASS__-FavItem-grid-resized .__BASECLASS__-preview {
@@ -402,21 +395,6 @@
     width : auto;
 	height : 100%;
 }
-
- /* 
-.-FavItem-error:after {
-    
-    content: " /\\_/\\ [X] \A  ='_'= 404? \A  |    \\ / \A  |..__ \/"; 
-    left: 40%;
-    bottom: 10px;
-    position: absolute;
-    font-family: monospace;
-    white-space: pre;
-    line-height: 1.2;
-    color : #1d1515;
-    font-weight : bold;
-}
-*/
 
 .__BASECLASS__-FavItem-error img {
     opacity : 0;
@@ -574,10 +552,6 @@
     margin: 0;
     padding: 0;
     margin-bottom : 12px;
-    /* todo move tooltips max-height: 450px;
-     overflow-y: auto;
-     overflow-x: hidden;
-    */
 }
  
 .__BASECLASS__-FiltersMenu > li.includable:before {
@@ -750,9 +724,6 @@
      overflow : hidden;
      max-height : 320px;
      text-align : center;
-}
-
-.__BASECLASS__CatAddForm {
 }
 
 .__BASECLASS__-tooltipster-wrap .__BASECLASS__CatAddForm {
@@ -1023,7 +994,13 @@
 
 /* form base classes */
 
+.__BASECLASS__-tab-list ul {
+
+    padding: 4px;
+}
+
 .__BASECLASS__-tab-list ul li {
+    padding : 0;
     display: inline-block;
     width: 200px;
     height: 32px;
@@ -1048,6 +1025,13 @@
     width: 100%;
     height: 100%;
     display: block;
+}
+
+.__BASECLASS__-OptionsMessage {
+    line-height: normal;
+    padding: 12px;
+    background: #ffbd79;
+    font-weight: bold;
 }
 
 .__BASECLASS__-tab {
@@ -1233,13 +1217,11 @@
 }
 
 .__BASECLASS__-icon-download {
-    /*background-image : url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAgCAYAAAAFQMh/AAAAvUlEQVRIie2X0RGDIBBE9xyrSRE2YRFJSVJEaiQfziaj5oDLCNxMfL8oyxPmOAUAYozQeN4E8wT9ge9IcjAAQ26GeTJGFjKqI4/koisEVw48BjcKJEOP0E9wB67gZvBUWytTjtx88n+fuvses4Kcvdd73pWquzGpZX6oyW6MyVnm6u3jzpj8ap69Z90ak1Lz4o7CvTHRzM29kwPjpfDgro2hmN7ZE2SdIPULowRvMS5AhMH36rfSNjhcHUhDXif2HMDvUkxoAAAAAElFTkSuQmCC');*/
    background-image : url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAgCAMAAAAynjhNAAAAclBMVEUAAAD/TQD/ZwD/ZwD/ZgD/YwD/YAD/YAD/ZwD/ZgD/ZgD/ZQD/ZQD/ZAD/XQDAwI//ZwD/ZgD/ZgD/ZgD/ZgD/ZgD/ZQD+YgH/aAD/ZwD/ZwD/ZgD/ZwD9ZwH/ZgD/ZwD/ZgD/ZgD/ZwH+ZgC5ubn/ZwBA+b+qAAAAJXRSTlMABPf88RkRDuvVfVpFIAkF+uTfyaSZZzEn9cG4tKyTiG1SOTkSeOETlQAAAJdJREFUKM/t0LcSgzAURNF9AknkjME58v+/aDMMSUjq3HHa2+wsJt0CRns2ZNYZMQD3zFR9/Mja0dc8SgCQqLTdCxNCT1w01T0IDIiftqsCThjFpVKzG8eMWn9VnSoWWGqKZT23WKN3PueykVBF3nTHC1v0dIdaRBI6oTvcAb3kwfo7JEwCdgxgxutrDJtPCptUzZ3Ff/MXf4VCYSLxDG4AAAAASUVORK5CYII=');
 }
 
 .__BASECLASS__-icon-download-configurable {
-    /*background-image : url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAgAQMAAAA/jlo8AAAABlBMVEUAAAAewf9MPD43AAAAAXRSTlMAQObYZgAAADRJREFUCNdjYKj/wUAaUf///w90Qv7//wcQgv3//wYIwfj/HwOIQDFA/gGMYG+AEHCA1WQAN5c/SQvheqcAAAAASUVORK5CYII=')*/
-    background-image : url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAgCAMAAAAynjhNAAAAbFBMVEUAAAAewP8dwf8dwf8dwf8dwf8dwf8dwf8bwP8awv8awf8Zwf8Uu/8ewf8dwf8ewf8dwP8cwP8dwP8cwP8cwf8cwP8cv/8cuf4Rv/8dwP8dv/8cwP8cwP8cwf8dwP8cwf8ewv8bwv8Afv8ewf81AZJCAAAAI3RSTlMA/vvp1KL34VIlHxoI9PHcvrCLbEc6NBIOzca5l4V7dF1cAlWGDUoAAACTSURBVCjP7dBJFoMgEEXRjy0g9kZN37D/PYaTA1EIZJTMfNM7qV94J1fBtHGAaxmsVkzjkJJU8dyXAT1OisXURV7dswegKlKfJzt9nOAN+dB84DCNiasxxZIYckdvBdbdrXlVD7v5Wi1aXjjcusxodrZFz9MenRh8tdFLU/gbD2o+aRlCJZI0CEdz9cpfJr/0X34Cuts/FbjQJxwAAAAASUVORK5CYII=');
+      background-image : url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAgCAMAAAAynjhNAAAAbFBMVEUAAAAewP8dwf8dwf8dwf8dwf8dwf8dwf8bwP8awv8awf8Zwf8Uu/8ewf8dwf8ewf8dwP8cwP8dwP8cwP8cwf8cwP8cv/8cuf4Rv/8dwP8dv/8cwP8cwP8cwf8dwP8cwf8ewv8bwv8Afv8ewf81AZJCAAAAI3RSTlMA/vvp1KL34VIlHxoI9PHcvrCLbEc6NBIOzca5l4V7dF1cAlWGDUoAAACTSURBVCjP7dBJFoMgEEXRjy0g9kZN37D/PYaTA1EIZJTMfNM7qV94J1fBtHGAaxmsVkzjkJJU8dyXAT1OisXURV7dswegKlKfJzt9nOAN+dB84DCNiasxxZIYckdvBdbdrXlVD7v5Wi1aXjjcusxodrZFz9MenRh8tdFLU/gbD2o+aRlCJZI0CEdz9cpfJr/0X34Cuts/FbjQJxwAAAAASUVORK5CYII=');
 }
 
 .__BASECLASS__-fast-save, .__BASECLASS__-sidebar-addtofav {
@@ -1517,6 +1499,7 @@
 
 .__BASECLASS__-downloader-controll input[type=text] {
     width : 100%;
+    height : 30px;
 }
 
 .__BASECLASS__-downloader-controll div {
@@ -1554,6 +1537,12 @@
 
 .__BASECLASS__-ModalBox-downloader a {
     color: #282828;
+}
+
+.__BASECLASS__-downloader-controll-range a {
+    
+    display: inline-block;
+    padding: 6px;
 }
 
 .__BASECLASS__-ModalBox-downloader .__BASECLASS__-ModalBox-content {
@@ -1609,6 +1598,7 @@
     line-height: 32px;
     text-align: center;
     text-decoration: none;
+    padding : 0;
 }
 
 .__BASECLASS__-ModalBox-downloader .kelly-jr-ui-downloader-controll-buttons a.disabled {
@@ -1834,25 +1824,20 @@ div.__BASECLASS__-MainMenuItem.__BASECLASS__-MainMenuItem-fav:hover .__BASECLASS
     opacity : 1;
 }
 
-/* mobile version */
-
-.__BASECLASS__-mobile .__BASECLASS__-sidebar-wrap .__BASECLASS__-ModalBox {
-    margin : 0px;
+.__BASECLASS__-ModalBox.collapsed {
+    display : none;
 }
 
-.__BASECLASS__-mobile .kelly-jr-ui-FavItem-grid-first,
-.__BASECLASS__-mobile .kelly-jr-ui-FavItem-grid-first .__BASECLASS__-FavItem-download-state-holder {
-    padding-left: 0;
+.__BASECLASS__-section-header-inline {
+    cursor : pointer;
+    margin-top: 6px;
+    margin-left: 16px;
+    font-size: 14px;
 }
 
-.__BASECLASS__-mobile .kelly-jr-ui-FavItem-grid-last,
-.__BASECLASS__-mobile .kelly-jr-ui-FavItem-grid-last .__BASECLASS__-FavItem-download-state-holder {
-    padding-right: 0;
-}
-
-.__BASECLASS__-mobile .__BASECLASS__-section-header-inline {
+.__BASECLASS__-section-header-inline {
     height: 32px;
     line-height: 32px;
-    padding: 0 24px;
-    background: #5c5c5c;
+    padding: 0 12px;
+    background: #ff8509;
 }

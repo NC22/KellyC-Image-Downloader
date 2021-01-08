@@ -13,12 +13,19 @@ body.__BASECLASS__-dark  {
 }
 
 .__BASECLASS__-dark .__BASECLASS__-MainMenuItem.active a {
-    background: #565656;
+    color: #000;
+}
+
+.__BASECLASS__-dark .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a {
+    color : #000;
 }
 
 .__BASECLASS__-dark a, .__BASECLASS__-dark a:hover {
     color: #fca91a;
-    background-color: transparent;
+}
+
+.__BASECLASS__-dark .__BASECLASS__-MainMenuItem a {
+    color : #000;
 }
 
 .__BASECLASS__-dark .__BASECLASS__-tab-list a {
