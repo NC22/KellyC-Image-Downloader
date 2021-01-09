@@ -856,7 +856,28 @@
     },  
     "kb":{  
         "message":"кб"
+    },     
+    "thread_sec_notice":{  
+        "message":"Настройки скорости запросов при загрузке доп. документов. <b>Не менять без необходимости.</b><br>* Одно или несколько значений через запятую, при итерации выбираются случайным образом"
     },
+    "thread_pauseEvery":{  
+        "message":"Пауза после указанного кол-ва запросов *"
+    }, 
+    "thread_pauseTimer":{  
+        "message":"Длина паузы (сек.) *"
+    }, 
+    "thread_timeout":{  
+        "message":"Таймаут при длительном ожидании ответа (сек.)"
+    }, 
+    "thread_timeoutOnEnd":{  
+        "message":"Интервал запросов в потоке (сек.) *"
+    }, 
+    "thread_maxThreads":{  
+        "message":"Кол-во потоков"
+    }, 
+    "recorder_request_settings":{  
+        "message":"Параметры запросов"
+    },    
     "recorder_extra_filters":{  
         "message":"Доп. фильтры"
     },
@@ -873,7 +894,16 @@
         "message":"Регулярное выражение"
     },
     "recorder_exclude_urls":{  
-        "message":"Исключать ссылки"
+        "message":"Исключать url"
+    },
+    "recorder_match_url":{  
+        "message":"Совпадение url"
+    },
+    "recorder_width":{  
+        "message":"Ширина"
+    },
+    "recorder_height":{  
+        "message":"Высота"
     },
     "recorder_min_dimensions":{  
         "message":"Мин. пропорции"
@@ -886,6 +916,27 @@
     },
     "recorder_filter_help_2":{  
         "message":"<b>Загрузить доп. документы</b> - попробовать найти оригиналы изображений выбранный картинок (рекомендуется использовать только на определенных сайтах, где кнопка имеет значек __CHECKMARK__)"
+    },
+    "recorder_cant_find_images":{  
+        "message":"Не найдено изображений в доп. документах"
+    },
+    "recorder_canceled":{  
+        "message":"Задача отменена"
+    },
+    "recorder_added_images_num":{  
+        "message":"Добавлено __IMAGESNUM__ изображений"
+    },
+    "recorder_load_beasy":{  
+        "message":"Выполняется процесс загрузки данных. Отмените действие перед дальнейшей работой"
+    },
+    "recorder_load_beasy_wr":{  
+        "message":"Выполняется процесс обновления навигации. Подождите..."
+    },
+    "recorder_max":{  
+        "message":"Мин."
+    },
+    "recorder_min":{  
+        "message":"Макс."
     },
     "recorder_displayed_info":{  
         "message":"Картинки : __ITEMS__ | Доп. документы : __RELATED_DOCS__"

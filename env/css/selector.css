@@ -19,7 +19,7 @@ html, body {
 }
 
 .profile-selector-copyright {
-    position: absolute;
+    position: fixed;
     bottom: 0;
     /* left: 50%; */
     font-size: 15px;
@@ -35,8 +35,7 @@ html, body {
 }
 
 .profile-clever-chick {
-    
-    position: absolute;
+    position: fixed;
     bottom: 0;
     right: 0;
 }
@@ -50,7 +49,8 @@ html, body {
 
 .profile-selector {
     display : inline-block;
-    background : #ff8318;
+    /* background : #ff8318; */
+    border : 1px solid #000;
     font-size : 12px;
     padding : 6px;
     margin-bottom : 12px;
@@ -90,4 +90,27 @@ html, body {
     display: block;
     height: 18px;
     margin-bottom: 4px;
+}
+
+.profile-selector-recorder-filters h2 {
+    padding: 0;
+    margin: 0;
+    margin-bottom: 12px;
+}
+
+.profile-selector-recorder-filters table {
+    border: 1px solid;
+}
+
+.profile-selector-recorder-filters table td {
+    padding: 4px;
+    border : 1px solid #000;
+}
+
+.profile-selector-recorder-filters td.profile-selector-original-ok, .profile-selector-recorder-filters td.profile-selector-preview-ok {
+    background: #a3ffa6;
+}
+
+.profile-selector-recorder-filters td.profile-selector-original-fail, .profile-selector-recorder-filters td.profile-selector-preview-fail {
+    background: #ffc8a7;
 }

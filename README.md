@@ -17,6 +17,8 @@
 </p>
 <br>
 <br>
+<p>RU | Расширение для сохранения и пакетного скачивания картинок сайтов</p>
+<br>
 <h2>License</h2>
 <br>
 <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public License v3</a>

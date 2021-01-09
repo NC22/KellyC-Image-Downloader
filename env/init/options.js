@@ -34,7 +34,8 @@ KellyOptionsPage.init = function() {
         html += '<div class="' + bc + '">' + itemHtml + '</a></div>';
     }
     
-    html += "<table><tr><td>Сайт</td><td>Скачать оригинал</td><td>Скачать превью</td></tr>";
+    /*
+    html += '<div class="' + bc + '-recorder-filters"><div class="' + bc + '-title"><h2>Фильтры для записывающего модуля</h2></div><table><tr><td>Сайт</td><td>Скачать оригинал</td><td>Скачать превью</td></tr>';
     KellyPageWatchdog.validators.forEach(function(filter) {
         if (!filter.host) return;
         var detectionLvl = [];
@@ -46,16 +47,15 @@ KellyOptionsPage.init = function() {
     });
     KellyPageWatchdog.filters.forEach(function(filter) {
         var original = 'НЕТ', preview = 'НЕТ';
-        console.log(filter);
         if ( filter.manifest.detectionLvl.indexOf('imageByDocument') != -1 ) original = 'Через доп. запрос';
         if ( filter.manifest.detectionLvl.indexOf('imageOriginal') != -1 ) original = 'ОК';
-        if ( filter.manifest.detectionLvl.indexOf('imagePreview') != -1 ) preview = 'ОК';
-        if ( filter.manifest.detectionLvl.indexOf('imageAny') != -1 ) preview = 'ОК';
+        if ( filter.manifest.detectionLvl.indexOf('imagePreview') != -1 || filter.manifest.detectionLvl.indexOf('imageAny') != -1 ) preview = 'ОК';
         
-        html += '<tr><td>' + filter.manifest.host + '</td><td class="' + bc + '-original ' + bc + '-original-' + (original ? 'ok' : 'fail') +'">' + original + '</td>';
-        html += '<td class="' + bc + '-preview ' + bc + '-preview-' + (preview ? 'ok' : 'fail') +'">' + preview + '</td></tr>';
+        html += '<tr><td>' + filter.manifest.host + '</td><td class="' + bc + '-original ' + bc + '-original-' + (original != 'НЕТ' ? 'ok' : 'fail') +'">' + original + '</td>';
+        html += '<td class="' + bc + '-preview ' + bc + '-preview-' + (preview != 'НЕТ' ? 'ok' : 'fail') +'">' + preview + '</td></tr>';
     });
-    html += '</table>';
+    html += '</table></div>';
+    */
     
     KellyTools.setCopyright('copyright-software', 'options'); KellyTools.setHTMLData(document.getElementById('profile-selector'), html); 
     for (var i = 0; i < this.profiles.length; i++) KellyOptionsPage.addToggleProfileEvent(this.profiles[i].getInstance());

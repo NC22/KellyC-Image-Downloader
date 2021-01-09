@@ -1832,12 +1832,25 @@ div.__BASECLASS__-MainMenuItem.__BASECLASS__-MainMenuItem-fav:hover .__BASECLASS
     cursor : pointer;
     margin-top: 6px;
     margin-left: 16px;
-    font-size: 14px;
-}
-
-.__BASECLASS__-section-header-inline {
+    font-size: 14px; 
     height: 32px;
     line-height: 32px;
     padding: 0 12px;
     background: #ff8509;
+}
+
+.__BASECLASS__-sidebar-wrap.__BASECLASS__-inline {
+    line-height : normal;
+}
+
+.__BASECLASS__-sidebar-wrap.__BASECLASS__-inline .__BASECLASS__SavePostWrap .__BASECLASS__Cat,
+.__BASECLASS__-sidebar-wrap.__BASECLASS__-inline .__BASECLASS__SavePostWrap input, 
+.__BASECLASS__-sidebar-wrap.__BASECLASS__-inline .__BASECLASS__SavePostWrap select {
+    height : 32px;
+}
+
+.__BASECLASS__-sidebar-wrap.__BASECLASS__-inline .__BASECLASS__Add, .__BASECLASS__-sidebar-wrap.__BASECLASS__-inline .__BASECLASS__Remove {
+    height: 32px;
+    line-height: 32px;
+    padding: 0;
 }

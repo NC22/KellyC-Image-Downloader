@@ -847,7 +847,28 @@
     },   
     "kb":{  
         "message":"kb"
+    },   
+    "thread_sec_notice":{  
+        "message":"Настройки скорости запросов при загрузке доп. документов. <b>Менять только если что-то не работает.</b><br>* Одно или несколько значений через запятую, при итерации выбираются случайным образом"
     },
+    "thread_pauseEvery":{  
+        "message":"Пауза после указанного кол-ва запросов *"
+    }, 
+    "thread_pauseTimer":{  
+        "message":"Длина паузы (сек.) *"
+    }, 
+    "thread_timeout":{  
+        "message":"Таймаут при длительном ожидании ответа (сек.)"
+    }, 
+    "thread_timeoutOnEnd":{  
+        "message":"Интервал запросов в потоке (сек.) *"
+    }, 
+    "thread_maxThreads":{  
+        "message":"Кол-во потоков"
+    }, 
+    "recorder_request_settings":{  
+        "message":"Параметры запросов"
+    },    
     "recorder_extra_filters":{  
         "message":"Extra filters"
     },
@@ -866,23 +887,47 @@
     "recorder_exclude_urls":{  
         "message":"Exclude urls"
     },
+    "recorder_match_url":{  
+        "message":"Совпадение по строке"
+    },
+    "recorder_width":{  
+        "message":"Ширины"
+    },
+    "recorder_height":{  
+        "message":"Высота"
+    },
     "recorder_min_dimensions":{  
         "message":"Min. dimensions"
-    },
-    "recorder_filter_notice":{  
-        "message":"Load proportions before use filters for best result"
     },
     "recorder_filter_help":{  
         "message":"Дополнительные фильтры используются если нет возможности отсеять необходимые изображения через список групп"
     },
     "recorder_filter_help_1":{  
-        "message":"Для фильтрации по мин. ширине и высоте изображения предварительно <b>Загрузите пропорции</b>"
+        "message":"<b>Загрузить пропорции</b> - отсортировать изображений по разрешения и отсеять картинки с ошибками \\ технические картинки (< 3x3)"
     },
     "recorder_filter_help_2":{  
-        "message":"Загрузить пропорции - определить разрешение изображений текущего списка и отсеять картинки с ошибками \\ технические картинки (< 3x3)"
+        "message":"<b>Загрузить доп. документы</b> - попробовать найти оригиналы изображений выбранный картинок (рекомендуется использовать только на определенных сайтах, где кнопка имеет значек __CHECKMARK__)"
     },
-    "recorder_filter_help_3":{  
-        "message":"Загрузить доп. документы - попробовать найти оригиналы изображений выбранный картинок (работает только на определенных сайтах)"
+    "recorder_cant_find_images":{  
+        "message":"Не найдено изображений в доп. документах"
+    },
+    "recorder_canceled":{  
+        "message":"Задача отменена"
+    },
+    "recorder_added_images_num":{  
+        "message":"Добавлено __IMAGESNUM__ изображений"
+    },
+    "recorder_load_beasy":{  
+        "message":"Выполняется процесс загрузки данных. Отмените действие перед дальнейшей работой"
+    },
+    "recorder_load_beasy_wr":{  
+        "message":"Updating web request settings. Please wait..."
+    },
+    "recorder_max":{  
+        "message":"Мин."
+    },
+    "recorder_min":{  
+        "message":"Макс."
     },
     "recorder_displayed_info":{  
         "message":"Items : __ITEMS__ | Documents : __RELATED_DOCS__"

@@ -10,7 +10,7 @@
 KellyRecorderFilterExample = new Object(); 
 
 /*
-    описание - используется для статистики \ отображения рекомендаций в соответствии с возможностями фильтра
+    manifest - описание, используется для статистики и проверки совместимости фильтра с использованием функции "Загрузить доп. документы"
     
     host - массив строк или строка - список хостов, актуальных для фильтра
     detectionLvl - возможности фильтрации 'imageAny' - общаяя группа для превью и оригиналов, 'imagePreview' - превью, 'imageOriginal' - оригинал, 'imageByDocument' - оригинал взятый из документа превью
@@ -48,6 +48,28 @@ KellyRecorderFilterExample.addItemByDriver = function(handler, el, item) {
 KellyRecorderFilterExample.parseImagesDocByDriver = function(handler, thread) {
     
 }
+
+/* 
+
+    Метод onInitLocation в процессе доработки / могут быть изменения, не рекомендуется к использованию
+    Выполняется после инициализации парсера страницы - data.url - адресная строка вкладки / data.host - аналог window.location.origin
+    Позволяет конфигурировать парсер перед запуском
+    
+    Пока использовать нет необходимости т.к. параметров для изменения нет.
+*/
+
+KellyRecorderFilterExample.onInitLocation = function(handler, data) {}
+
+/* 
+
+    Метод onInitOptions в процессе доработки / могут быть изменения, не рекомендуется к использованию
+    Инициализация настроек для вкладки "Настройки"
+    
+    Пока не используется сущ. фильтрами. описание будет позже
+*/
+
+KellyRecorderFilterExample.onInitOptions = function(options, coptions) {}
+
 
 KellyPageWatchdog.validators.push({url : 'deviantart', patterns : [['images-wixmp', 'imageAny']]}); // опционально фильтр по соответствию строки (аналогичны файлу _validators.js)
 KellyPageWatchdog.filters.push(KellyRecorderFilterExample);

@@ -131,7 +131,7 @@ body.__BASECLASS__-dark  {
 }
 
 .__BASECLASS__-dark .__BASECLASS__-filters-AdditionButtons a {
-    background-color : transparent!important;
+    background-color : transparent;
 }
 
 .__BASECLASS__-dark a.__BASECLASS__-pagination-item {
@@ -163,4 +163,10 @@ body.__BASECLASS__-dark  {
     color : #000;
     padding-left: 3px;
     padding-right: 3px;
+}
+
+.__BASECLASS__-section-header-inline a, .__BASECLASS__-section-header-inline a:hover {
+    
+    color : #fff;
+    
 }
