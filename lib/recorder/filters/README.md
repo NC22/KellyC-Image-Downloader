@@ -51,6 +51,27 @@ KellyRecorderFilterExample.parseImagesDocByDriver = function(handler, thread) {
 
 /* 
 
+    Метод onInitDocLoader в процессе доработки / могут быть изменения, не рекомендуется к использованию
+    Выполняется перед запуском загрузчика дополнительных документов
+    Позволяет конфигурировать загрузчик перед запуском. Если вернуть false - остановит запуск
+    
+    Можно менять конфигурацию загрузчика через 
+    
+    docLoader.parser.updateCfg(threadDefaults = {   
+        pauseEvery : '50',
+        pauseTimer : '1.2,1.8,2,2.4,2.8',
+        timeout : '5',
+        timeoutOnEnd : '0.8',
+        maxThreads : '1',
+    })
+*/
+
+KellyRecorderFilterExample.onInitDocLoader = function(docLoader, hostList) {}
+
+KellyRecorderFilterExample.onInitLocation = function(handler, data) {}
+
+/* 
+
     Метод onInitLocation в процессе доработки / могут быть изменения, не рекомендуется к использованию
     Выполняется после инициализации парсера страницы - data.url - адресная строка вкладки / data.host - аналог window.location.origin
     Позволяет конфигурировать парсер перед запуском

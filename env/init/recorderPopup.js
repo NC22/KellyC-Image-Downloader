@@ -8,6 +8,11 @@ KellyPopupPage.recordingNumEl = false;
 KellyPopupPage.buttons = {
    'download_current_tab' : {loc : 'download_current_tab', event : function() {
         
+        if (KellyPopupPage.recordingState == 'enabled') {
+            KellyPopupPage.buttons['download_record'].event();
+            return;
+        } else if (KellyPopupPage.recordingState != 'disabled') return;
+        
         KellyTools.getBrowser().tabs.query({ active: true, currentWindow: true }, function(tab){
             
              KellyPopupPage.sendTabMessage(tab[0].id, {method : 'parseImages'}, function(response) {

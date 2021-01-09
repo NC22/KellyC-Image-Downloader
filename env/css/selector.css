@@ -6,6 +6,17 @@ html, body {
     /* color: #fff; */
     padding: 0;
     margin: 0;
+    width : 100%;
+    height: 100%;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    background: #e5f2ff url(../img/d_think.png);
+    background-repeat: no-repeat;
+    background-position: bottom right;
+
 }
 
 #profile-selector {
@@ -19,18 +30,19 @@ html, body {
 }
 
 .profile-selector-copyright {
-    position: fixed;
+position: fixed;
     bottom: 0;
     /* left: 50%; */
     font-size: 15px;
     padding: 16px;
-    background: rgba(0, 0, 0, 0.46);
-    color: #fff;
+    background: rgb(240 248 255);
+    color: #000000;
+    font-weight: bold;
 }
 
 .profile-selector-copyright a {
     text-decoration: none;
-    color: #ff7721;
+    color: #000000;
     font-weight: bold;
 }
 
@@ -113,4 +125,22 @@ html, body {
 
 .profile-selector-recorder-filters td.profile-selector-original-fail, .profile-selector-recorder-filters td.profile-selector-preview-fail {
     background: #ffc8a7;
+}
+
+@media (max-width: 800px) {
+    
+    body {
+        background-image : none;
+    }
+    
+    .profile-selector-copyright:before {  
+        display: block;
+        content : '';
+        background-image: url('../img/my.png');
+        width: 100px;
+        height: 100px;
+        background-size: 100px;
+        border-radius: 52px;
+        border: 2px solid #fff;
+    }
 }

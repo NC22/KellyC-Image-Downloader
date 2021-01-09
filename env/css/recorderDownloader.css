@@ -43,10 +43,6 @@
     border: 3px solid rgba(255, 121, 26, 0.45); 
 }
 
-.__BASECLASS__-ModalBox-addition .__BASECLASS__-ModalBox-content {
-    padding-top: 4px;
-}
-
 .__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons button {
     border: 0;
     height: 32px;
@@ -64,11 +60,6 @@
 
 .__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons button:last-child {
     margin-right : 0;
-}
-
-.__BASECLASS__-ModalBox-addition .__BASECLASS__-url label {
-    margin-top: 6px;
-    display: block;
 }
 
 .__BASECLASS__-ModalBox-addition input[type=text] {
@@ -100,13 +91,26 @@
     display : none;
 }
 
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-url-exclude label,
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-url label {
+    display: block;
+}
+
 .__BASECLASS__-ModalBox-addition .__BASECLASS__-downloader-statistic, 
 .__BASECLASS__-ModalBox-addition .__BASECLASS__-downloader-progressbar,
 .__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons, 
-.__BASECLASS__-ModalBox-addition .__BASECLASS__-exclude-url, 
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-url-exclude label, 
 .__BASECLASS__-ModalBox-addition .__BASECLASS__-url label, 
 .__BASECLASS__-ModalBox-addition .__BASECLASS__-statistic {
     margin-bottom: 6px;
+}
+
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-downloader-statistic {
+    margin-top : 6px;
+}
+
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons-last {
+    margin-bottom : 0;
 }
 
 .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll tr.__BASECLASS__-downloader-quality-tr,
@@ -115,7 +119,7 @@
 }
 
 .__BASECLASS__-ModalBox-addition .__BASECLASS__-bounds input {
-    width: 64px;
+    width: 59px;
     height: 32px;
 }
 
@@ -137,6 +141,11 @@
     margin-left: 12px;
     padding-left: 12px;
     padding-right: 12px;
+}
+
+.__BASECLASS__-buttons button.__BASECLASS__-proportions,
+.__BASECLASS__-buttons button.__BASECLASS__-related-links {
+    background: #ffd6a4;
 }
 
 .__BASECLASS__-checkmark {
