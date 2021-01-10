@@ -25,6 +25,23 @@
     text-decoration : none;
 }
 
+.__BASECLASS__-top-joyreactor-cc.__BASECLASS__-FavContainer,
+.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-tab h3,
+.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-ModalBox a,
+.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-ModalBox {
+    color : #fff;
+}
+
+.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a.__BASECLASS__-downloader-button-save_as_json,
+.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a.__BASECLASS__-downloader-button-save_as_txt {
+    background: #ffab00;
+}
+
+table.__BASECLASS__-options-table input[type="submit"] {
+    padding: 6px;
+    background-color: #ff972b;
+}
+
 #submenu.__BASECLASS__-top-joyreactor-cc {
     height: 32px;
     padding-top: 8px;

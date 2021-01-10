@@ -344,6 +344,13 @@
     margin-bottom : 12px;
 }
 
+.__BASECLASS__-preview-wrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+   
+}
+
 .__BASECLASS__-preview {
     overflow : hidden;
     height : 250px;

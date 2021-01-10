@@ -885,64 +885,64 @@
         "message":"Reqular expression"
     },
     "recorder_exclude_urls":{  
-        "message":"Exclude urls"
+        "message":"Exclude url"
     },
     "recorder_match_url":{  
-        "message":"Совпадение по строке"
+        "message":"Match url"
     },
     "recorder_width":{  
-        "message":"Ширины"
+        "message":"Width"
     },
     "recorder_height":{  
-        "message":"Высота"
+        "message":"Height"
     },
     "recorder_min_dimensions":{  
         "message":"Min. dimensions"
     },
     "recorder_filter_help":{  
-        "message":"<b>Выбрать</b> - выполннить фильтрацию по заданным параметрам<br>"
+        "message":"<b>Filter</b> - filter images by setted params<br>"
     },
     "recorder_filter_help_1":{  
-        "message":"Формат рег. выражений : (http|https)://i.example.com/[a-zA-Z0-9]+/img/[a-zA-Z0-9/_]+.jpg<br><br>"
+        "message":"Format of regular expressions : (http|https)://i.example.com/[a-zA-Z0-9]+/img/[a-zA-Z0-9/_]+.jpg<br><br>"
     },
     "recorder_filter_help_2":{  
-        "message":"<b>Загрузить пропорции</b> - отсортировать изображений по разрешения и отсеять картинки с ошибками \\ технические картинки (< 3x3)<br><br>"
+        "message":"<b>Load proportions</b> - sort by megapixels and put images that load with error or have bad proportions (< 3x3) in to group \"Load error\"<br><br>"
     },
     "recorder_filter_help_3":{  
-        "message":"<b>Загрузить доп. документы</b> - попробовать найти оригиналы изображений выбранный картинок (рекомендуется использовать только на определенных сайтах, где кнопка имеет значек __CHECKMARK__)"
+        "message":"<b>Load related links</b> - try to find original images for filtered images (could work only on several sites, may work on random site. If work was tested on specifed site, button will be marked __CHECKMARK__)"
     },
     "recorder_cant_find_images":{  
-        "message":"Не найдено изображений в доп. документах"
+        "message":"Cant find images in related links"
     },
     "recorder_canceled":{  
-        "message":"Задача отменена"
+        "message":"Task canceled"
     }, 
     "recorder_load_doc_loadDoc":{  
-        "message":"Загрузка документов [изображений : __IMAGESNUM__]"
+        "message":"Load documents [images : __IMAGESNUM__]"
     },   
     "recorder_load_doc_loadImg":{  
-        "message":"Поиск HD версий изображений в документах..."
+        "message":"Search HD images in collection..."
     },
     "recorder_added_images_num":{  
-        "message":"Добавлено __IMAGESNUM__ изображений"
+        "message":"Added __IMAGESNUM__ images"
     },
     "recorder_load_beasy":{  
-        "message":"Выполняется процесс загрузки данных. Отмените действие перед дальнейшей работой"
+        "message":"Stop loading process before"
     },
     "recorder_load_beasy_wr":{  
         "message":"Updating web request settings. Please wait..."
     },
     "recorder_max":{  
-        "message":"Мин."
+        "message":"Min."
     },
     "recorder_min":{  
-        "message":"Макс."
+        "message":"Max."
     },
     "recorder_filtered":{  
         "message":"Images filtered"
     },
     "recorder_terminated":{  
-        "message":"Загрузка доп. документов не поддерживается"
+        "message":"Function is not supported"
     },
     "recorder_displayed_info":{  
         "message":"Items : __ITEMS__ | Documents : __RELATED_DOCS__"
