@@ -887,6 +887,9 @@
     "recorder_load_prop":{  
         "message":"Загрузить пропорции"
     },
+    "recorder_load_prop_skip":{  
+        "message":"Пропустить загрузку"
+    },
     "recorder_load_related_doc":{  
         "message":"Загрузить доп. документы"
     },

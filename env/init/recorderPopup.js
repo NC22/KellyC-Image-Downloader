@@ -110,6 +110,7 @@ KellyPopupPage.buttons = {
 };
 
 KellyPopupPage.updateNotice = function(str) {
+    
     if (!str) {
         KellyPopupPage.recordingNumEl.style.display = 'none';
         return;
@@ -121,13 +122,15 @@ KellyPopupPage.updateNotice = function(str) {
 
 KellyPopupPage.updateRecordButton = function() {
     
-      var notice = ''; // KellyLoc.s('No recording', 'download_recorded_empty')
-      if (KellyPopupPage.recordingNum) notice = KellyLoc.s('Recorded images', 'download_recorded_images') + ': ' + KellyPopupPage.recordingNum;
-      
-      KellyTools.setHTMLData(KellyPopupPage.buttons['download_record'].btn, '<span>' + KellyLoc.s('', KellyPopupPage.buttons['download_record']['loc_' + KellyPopupPage.recordingState]) + '</span>');
-      
-      KellyPopupPage.buttons['download_recorded'].btn.style.display = KellyPopupPage.recordingNum && KellyPopupPage.recordingState == 'disabled' ? '' : 'none'; 
-      KellyPopupPage.updateNotice(notice);
+    var notice = ''; // KellyLoc.s('No recording', 'download_recorded_empty')
+    if (KellyPopupPage.recordingNum) notice = KellyLoc.s('Recorded images', 'download_recorded_images') + ': ' + KellyPopupPage.recordingNum;
+
+    KellyTools.setHTMLData(KellyPopupPage.buttons['download_record'].btn, '<span>' + KellyLoc.s('', KellyPopupPage.buttons['download_record']['loc_' + KellyPopupPage.recordingState]) + '</span>');
+
+    if (KellyPopupPage.recordingState == 'disabled') {
+        KellyPopupPage.buttons['download_recorded'].btn.style.display = KellyPopupPage.recordingNum && KellyPopupPage.recordingState == 'disabled' ? '' : 'none'; 
+        KellyPopupPage.updateNotice(notice);
+    } else KellyPopupPage.updateNotice(false);
 }
 
 // todo add frames support - browser.webNavigation.getAllFrames({tabId})

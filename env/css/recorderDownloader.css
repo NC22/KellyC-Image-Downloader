@@ -145,7 +145,8 @@
     display:inline-block;
     width: 22px;
     height:22px;
-    transform: rotate(45deg);
+    transform: rotate(45deg);  
+    vertical-align: middle;
 }
 
 .__BASECLASS__-checkmark:before {

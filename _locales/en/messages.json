@@ -849,25 +849,25 @@
         "message":"kb"
     },   
     "thread_sec_notice":{  
-        "message":"Настройки скорости запросов при загрузке доп. документов. <b>Менять только если что-то не работает.</b><br>* Одно или несколько значений через запятую, при итерации выбираются случайным образом"
+        "message":"Requests speed settings when use \"Load related docs\" function. <b>Change settings carefully.</b><br>* For randomize requests delays can be setted several values separated by comma"
     },
     "thread_pauseEvery":{  
-        "message":"Пауза после указанного кол-ва запросов *"
+        "message":"Pause after N requests *"
     }, 
     "thread_pauseTimer":{  
-        "message":"Длина паузы (сек.) *"
+        "message":"Pause duration (sec.) *"
     }, 
     "thread_timeout":{  
-        "message":"Таймаут при длительном ожидании ответа (сек.)"
+        "message":"Timeout for long requests (sec.)"
     }, 
     "thread_timeoutOnEnd":{  
-        "message":"Интервал запросов в потоке (сек.) *"
+        "message":"Requests interval in thread (sec.) *"
     }, 
     "thread_maxThreads":{  
-        "message":"Кол-во потоков"
+        "message":"Number of threads"
     }, 
     "recorder_request_settings":{  
-        "message":"Параметры запросов"
+        "message":"Requests settings"
     },    
     "recorder_extra_filters":{  
         "message":"Extra filters"

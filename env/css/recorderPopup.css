@@ -4,6 +4,8 @@ body {
     padding: 0;
     width: 180px;
     background : #fff;
+    font-size : 12px;
+    font-family: 'Open Sans',Sans-serif;
 }
 
 * {
@@ -28,7 +30,8 @@ button {
     font-weight: bold;
     cursor : pointer;
     position : relative;
-    
+    font-size : 13px;  
+    font-family: 'Open Sans',Sans-serif;    
 }
 
 .popup-page-button-download_record span:before {
