@@ -877,6 +877,9 @@
     },
     "recorder_load_prop":{  
         "message":"Load proportions"
+    }, 
+    "recorder_load_prop_skip":{  
+        "message":"Skip loading"
     },
     "recorder_load_related_doc":{  
         "message":"Load related links"
