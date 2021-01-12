@@ -9,9 +9,9 @@
 
 использовать шаблон названия - KellyRecorderFilter[Название_класса]
 
-`
+```
  KellyRecorderFilterExample = new Object(); 
-`
+```
 
 [Название_класса].manifest - массив с параметрами описания, используется для статистики и проверки совместимости фильтра с использованием функции "Загрузить доп. документы"
  
@@ -19,9 +19,9 @@
 * detectionLvl - возможности фильтрации 'imageAny' - общаяя группа для превью и оригиналов, 'imagePreview' - превью, 'imageOriginal' - оригинал, 'imageByDocument' - оригинал > взятый из документа превью
 
 
-`
+```
  KellyRecorderFilterExample.manifest = {host : 'example.com', detectionLvl : ['imageAny', 'imagePreview', 'imageOriginal', 'imageByDocument']}; 
-`
+```
 
 Метод __addItemByDriver__ вызывается перед обработкой DOM элемента el страницы методом поумолчанию (kellyPageWatchDog.parseItem). 
 
@@ -35,7 +35,7 @@
     
 _предполагаемая ссылка на изображение_ определяется исходя из нескольких условий - уровня доверия конкретному тегу (IMG | SOURCE | DIV) в зависимости от его названия \ атрибуту тега \ возможности предположить расширение файлы исходя из строки ссылки. Это позволяет отсеивать строки которые точно не могут являтся ссылками (общий метод валидации см. kellyPageWatchDog.addSingleSrc)
 
-` 
+```
 
 KellyRecorderFilterExample.addItemByDriver = function(handler, el, item) {
       
@@ -51,7 +51,7 @@ KellyRecorderFilterExample.addItemByDriver = function(handler, el, item) {
      }
 }
 
-`
+```
 
 Метод __parseImagesDocByDriver__ вызывается при загрузке дочернего документа (item.relatedDoc). Переменная _thread_ содержит результат выполнения запроса к документу
 
@@ -59,7 +59,9 @@ KellyRecorderFilterExample.addItemByDriver = function(handler, el, item) {
 
 Например :
 
+```
 item.relatedDoc = http://example.com/original-image-page?get=1&get2=234##FETCH_RULES##method=POST&responseType=json&contentType=application/x-www-form-urlencoded&xRequestedWith=XMLHttpRequest&mark_comment=1
+```
 
 Выполнит POST запрос с параметрами GET - {get : 1, get2 : 234}, responseType = json. Заголовки {contentType : application/x-www-form-urlencoded, x-requested-with : XMLHttpRequest}
 
@@ -70,7 +72,7 @@ item.relatedDoc = http://example.com/original-image-page?get=1&get2=234##FETCH_R
 
 * thread.response - тело ответа | документ | медиа данные | json - в зависимости запроса  от thread.request.contentType
 
-`
+```
 
 KellyRecorderFilterExample.parseImagesDocByDriver = function(handler, thread) {
     
@@ -82,30 +84,33 @@ KellyRecorderFilterExample.parseImagesDocByDriver = function(handler, thread) {
         }    
 }
 
-`
+```
 
 Метод __onInitDocLoader__ в процессе доработки / могут быть изменения, не рекомендуется к использованию
 Выполняется перед запуском загрузчика дополнительных документов
 Позволяет конфигурировать загрузчик перед запуском. Если вернуть false - остановит запуск
 
-Можно менять конфигурацию загрузчика через метод docLoader.parser.updateCfg
+```
 
-`docLoader.parser.updateCfg(threadDefaults = {   
+KellyRecorderFilterExample.onInitDocLoader = function(docLoader, hostList) {}
+
+KellyRecorderFilterExample.onInitLocation = function(handler, data) {}
+
+```
+
+Можно менять конфигурацию загрузчика _docLoader_ через метод __docLoader.parser.updateCfg__
+
+```
+
+docLoader.parser.updateCfg(threadDefaults = {   
     pauseEvery : '50',
     pauseTimer : '1.2,1.8,2,2.4,2.8',
     timeout : '5',
     timeoutOnEnd : '0.8',
     maxThreads : '1',
 })
-`
 
-`
-
-KellyRecorderFilterExample.onInitDocLoader = function(docLoader, hostList) {}
-
-KellyRecorderFilterExample.onInitLocation = function(handler, data) {}
-
-`
+```
 
 Метод onInitLocation в процессе доработки / могут быть изменения, не рекомендуется к использованию
 Выполняется после инициализации парсера страницы - data.url - адресная строка вкладки / data.host - аналог window.location.hostname
@@ -113,28 +118,28 @@ KellyRecorderFilterExample.onInitLocation = function(handler, data) {}
 
 Пока использовать нет необходимости т.к. параметров для изменения нет.
 
-`
+```
 
 KellyRecorderFilterExample.onInitLocation = function(handler, data) {}
 
-` 
+```
 
 Метод onInitOptions в процессе доработки / могут быть изменения, не рекомендуется к использованию
 Инициализация настроек для вкладки "Настройки"
 
 Пока не используется сущ. фильтрами. описание будет позже
 
-`
+```
 
 KellyRecorderFilterExample.onInitOptions = function(options, coptions) {}
 
-`
+```
 
 Запуск фильтр и доп. валидаторы через общий список
 
-`
+```
 KellyPageWatchdog.validators.push({url : 'deviantart', patterns : [['images-wixmp', 'imageAny']]}); // опционально фильтр по соответствию строки (аналогичны файлу _validators.js)
 
 KellyPageWatchdog.filters.push(KellyRecorderFilterExample); // активируем фильтр, чтобы все методы выполнялись
 
-`
+```
