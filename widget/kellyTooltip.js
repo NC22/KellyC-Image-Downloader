@@ -282,6 +282,7 @@ function KellyTooltip(cfg) {
         
         if (!handler.self) return;
         
+        if (!mess) mess = '';
         handler.message = mess;
         this.getContent().innerHTML = '';
         

@@ -1317,18 +1317,6 @@
 	width: 28px;
 }
 
-.__BASECLASS__-censored-preview {
-    
-    display : inline-block;
-    width : 150px;
-}
-
-.__BASECLASS__-censored-notice {
-    
-    display : inline-block;
-    max-width : 200px;
-}
-
 .__BASECLASS__-MainMenuItem {
     display: inline-block;
 }
@@ -1354,11 +1342,6 @@
 	position: relative;
 	margin-right: 16px;
 	margin-left: 16px;
-}
-
-
-
-.__BASECLASS__-MainMenuItem-fav span {
 }
 
 .__BASECLASS__-Save {

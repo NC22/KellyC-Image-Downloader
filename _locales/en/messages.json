@@ -655,7 +655,10 @@
     },
     "publication":{  
         "message":"Publication"
-    },    
+    },  
+    "unlock_censored":{  
+        "message":"Unlock blocked data"
+    },  
     "reset":{  
         "message":"Reset"
     },  

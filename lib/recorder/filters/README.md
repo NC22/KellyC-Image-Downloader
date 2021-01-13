@@ -25,7 +25,7 @@
 
 Метод __addItemByDriver__ вызывается перед обработкой DOM элемента el страницы методом поумолчанию (kellyPageWatchDog.parseItem). 
 
-Метод (_kellyPageWatchDog.parseItem_) если фильтр не завершает \ заменяет его выполнение, в общем случае собирает ссылки определенные как _возможные картинки_ из элемента el в объект item (структура объекта описана в kellyPageWatchDog) и пробует найти ассоциируемую с картинкой ссылку на документ (например <a href="документ содержащий оригинал"><img src="превью"></a>) и добавляет итоговый объект в общий список.
+Метод (_kellyPageWatchDog.parseItem_) если фильтр не завершает \ заменяет его выполнение, в общем случае собирает ссылки определенные как _возможные картинки_ из элемента el в объект item (структура объекта описана в kellyPageWatchDog) и пробует найти ассоциируемую с картинкой ссылку на документ. (выполняется поиск структур вида : ` <a href="документ содержащий оригинал">...<img src="превью">...</a> `) и добавляет итоговый объект в общий список.
     
 Метод _addItemByDriver_ может вернуть одно из следующих значений
     
@@ -33,7 +33,7 @@
 * handler.addDriverAction.CONTINUE - продолжить обработку методом (kellyPageWatchDog.parseItem) = отсутствию возвращаемого значения
 * handler.addDriverAction.ADD - добавить item и продолжить проход по списку элементов DOM
     
-_предполагаемая ссылка на изображение_ определяется исходя из нескольких условий - уровня доверия конкретному тегу (IMG | SOURCE | DIV) в зависимости от его названия \ атрибуту тега \ возможности предположить расширение файлы исходя из строки ссылки. Это позволяет отсеивать строки которые точно не могут являтся ссылками (общий метод валидации см. kellyPageWatchDog.addSingleSrc)
+_предполагаемая ссылка на изображение_ (массив item.relatedSrc) определяется исходя из нескольких условий - уровня доверия конкретному тегу (IMG | SOURCE | DIV ... ) в зависимости от его названия \ атрибуту тега \ возможности предположить расширение файлы исходя из строки ссылки. Это позволяет отсеивать строки которые точно не могут являтся ссылками (общий метод валидации см. kellyPageWatchDog.addSingleSrc)
 
 ```
 
@@ -45,9 +45,15 @@ KellyRecorderFilterExample.addItemByDriver = function(handler, el, item) {
         // обрабатываем элемент доступными методами и заполняем item элементами relatedSrc - ссылками на картинки
         // есть несколько реализованых методов для этого
         
-        // handler.addSrcFromAttributes = function(el, item, excludeAttributes = ['name', 'class', 'style', 'id', 'type', 'alt', 'title']) - просканировать все атрибуты элемента и добавить все "предполагаемые ссылки на изображения" в item.relatedSrc * 
+        // handler.addSrcFromAttributes = function(el, item, excludeAttributes = ['name', 'class', 'style', 'id', 'type', 'alt', 'title']) - просканировать все атрибуты элемента и добавить все "предполагаемые ссылки на изображения" в item.relatedSrc
         
-        return item.relatedSrc.length > 0 ? handler.addDriverAction.ADD : handler.addDriverAction.SKIP;    
+        // handler.addSingleSrc = function(item, src, context, el, groups) - проверить является ли строка src ссылкой и добавить её в item.relatedSrc
+        // handler.addSrcFromStyle = function(el, item, bgGroup) - найти ссылку на фоновое изображение в атрибуте style - style="background:url('[предполагаемая ссылка на изображение]')"
+        
+        handler.addSingleSrc(item, el.src, 'addSrcFromAttributes-src', el, 'imagePreview'); // добавит изображение el.src в массив item.relatedSrc с группой imagePreview
+        
+        // если удалось добавить изображение методом addSingleSrc, подтверждаем добавление item в общий массив элементов и останавливаем метод по умолчанию, иначе пропускаем элемент
+        return item.relatedSrc.length > 0 ? handler.addDriverAction.ADD : handler.addDriverAction.SKIP; 
      }
 }
 

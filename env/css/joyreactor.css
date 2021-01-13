@@ -75,6 +75,17 @@ table.__BASECLASS__-options-table input[type="submit"] {
     color: #000000;
 }
 
+.__BASECLASS__-censored {
+    border: 3px solid #ff843c;
+    cursor: pointer;
+    display: block;
+    position: relative;
+}
+
+.__BASECLASS__-censored-notice {
+    padding: 6px;
+}
+
 .__BASECLASS__-top-joyreactor-cc .__BASECLASS__-tab-list ul li {
     border-top-left-radius: 0; 
     border-top-right-radius: 0;

@@ -38,7 +38,7 @@ https://www.youtube.com/watch?v=ImKbC_1Oz8c</p>
 <p>Пример того как скачать все картинки из раздела "Media" в Twitter приведен здесь 
 https://www.youtube.com/watch?v=x1-kqKMnMmA</p>
 <p></p>
-<p>Если вы знаете JS и хотите расширить список поддерживаемых сайтов, можете добавить дополнительный филтр в соответствии с документацией <a href="https://github.com/NC22/KellyCImageDownloader/blob/master/lib/recorder/filters/README.md">здесь</a></p>
+<p>Если вы знаете JS и хотите расширить список поддерживаемых сайтов, можете добавить дополнительный фильтр в соответствии с документацией <a href="https://github.com/NC22/KellyCImageDownloader/blob/master/lib/recorder/filters/README.md">здесь</a></p>
 
 <p></p>
 <h2>License</h2>

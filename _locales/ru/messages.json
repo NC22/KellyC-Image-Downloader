@@ -665,6 +665,9 @@
     "publication":{  
         "message":"Публикация"
     },
+    "unlock_censored":{  
+        "message":"Отображать заблокированные данные"
+    },
     "related_doc":{  
         "message":"Документ"
     }, 
