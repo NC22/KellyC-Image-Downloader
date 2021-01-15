@@ -8,7 +8,7 @@
         ]
    } ],
    "manifest_version" : 2,
-   "version": "1.1.7.8",
+   "version": "1.1.7.9",
    "name": "KellyC Image Downloader",
    "description": "__MSG_ext_description_recorder__",
    "icons": { 
@@ -35,7 +35,10 @@
     "open_in_tab": true
    },
    "browser_action": {
-    "default_popup": "env/html/recorderPopup.html"
+        "default_popup": "env/html/recorderPopup.html",
+        "default_icon": {
+            "32": "env/img/icon32x32.png"
+        }
    },
    "web_accessible_resources": [
         "env/css/*.css",

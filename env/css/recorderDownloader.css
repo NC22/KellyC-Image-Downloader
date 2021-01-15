@@ -122,6 +122,15 @@
     display: block;
 }
 
+.__BASECLASS__-process-docLoader-work .__BASECLASS__-buttons-filter,
+.__BASECLASS__-process-docLoader-work .__BASECLASS__-buttons-proportions,
+.__BASECLASS__-process-docLoader-work .__BASECLASS__-bounds,
+.__BASECLASS__-process-docLoader-work .__BASECLASS__-url-exclude, 
+.__BASECLASS__-process-docLoader-work .__BASECLASS__-url {
+   
+   display : none;
+}
+
 .__BASECLASS__-displayed-info {
 
     font-size: 12px;

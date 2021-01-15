@@ -27,7 +27,7 @@ KellyOptionsPage.init = function() {
             itemHtml += '<div class="' + bc + '-hostlist">Универсальный инструмент для скачивания картинок с любого сайта (вызывается по клику на иконку расширения).</div>';
         } else {        
             itemHtml = '<label><input type="checkbox" class="profile-toggle" data-profile="' + p.profile + '"> Модуль включен</label>';
-            itemHtml += '<a href="' + p.profile + 'Downloader.html?tab=options"><div class="' + bc + '-name">Настройки [Встраиваемый модуль для ' + p.profile.charAt(0).toUpperCase() + p.profile.slice(1) + ']</div>';
+            itemHtml += '<a href="' + p.profile + 'Downloader.html?tab=options"><div class="' + bc + '-name">Настройки [Встраиваемый модуль для ' + KellyTools.getCamelWord(p.profile) + ']</div>';
             if (p.hostList && p.hostList.length > 0)  itemHtml += '<div class="' + bc + '-hostlist">Встроен в сайты : ' + p.hostList.join(', ') + '</div>';  
         }
         

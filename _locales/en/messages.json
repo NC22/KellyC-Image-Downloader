@@ -919,15 +919,24 @@
     },
     "recorder_cant_find_images":{  
         "message":"Cant find images in related links"
+    },  
+    "recorder_cant_find_originals_images":{  
+        "message":"Cant find images that could be originals"
+    },
+    "recorder_no_related_docs":{  
+        "message":"No related docs in selected images"
     },
     "recorder_canceled":{  
         "message":"Task canceled"
     }, 
     "recorder_load_doc_loadDoc":{  
-        "message":"Load documents [images : __IMAGESNUM__]"
+        "message":"Load documents<br>Total images : __IMAGESNUM__<br> Confirmed original : __IMAGESNUM_TRUSTED__"
     },   
     "recorder_load_doc_loadImg":{  
         "message":"Search HD images in collection..."
+    },   
+    "recorder_load_doc_stop":{  
+        "message":"Stop"
     },
     "recorder_added_images_num":{  
         "message":"Added __IMAGESNUM__ images"

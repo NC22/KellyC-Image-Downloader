@@ -928,15 +928,24 @@
     },
     "recorder_cant_find_images":{  
         "message":"Не найдено изображений в доп. документах"
+    },    
+    "recorder_cant_find_originals_images":{  
+        "message":"Нет изображений похожих на оригиналы"
+    },   
+    "recorder_no_related_docs":{  
+        "message":"Нет дополнительных документов"
     },
     "recorder_canceled":{  
         "message":"Задача отменена"
     }, 
     "recorder_load_doc_loadDoc":{  
-        "message":"Загрузка документов [изображений : __IMAGESNUM__]"
+        "message":"Загрузка документов<br>Всего изображений : __IMAGESNUM__ <br> Подтвержденные оригиналы : <b>__IMAGESNUM_TRUSTED__</b>"
     },   
     "recorder_load_doc_loadImg":{  
         "message":"Поиск HD версий изображений в документах..."
+    },
+    "recorder_load_doc_stop":{  
+        "message":"Остановить"
     },
     "recorder_added_images_num":{  
         "message":"Добавлено __IMAGESNUM__ изображений"
