@@ -61,6 +61,7 @@ if "%joyreactor%" geq "1" (
 
     for %%x in (
         "lib\profiles\joyreactor.js" 
+        "lib\profiles\joyreactor.unlock.js"
         "lib\profiles\topjoyreactor.js" 
     ) do (
     
