@@ -277,6 +277,7 @@
 
 .__BASECLASS__-tooltipster-DownloaderItemInfo {
     width : 250px;
+    word-break: break-word;
 }
 
 .__BASECLASS__-tooltipster-ItemInfo > a {

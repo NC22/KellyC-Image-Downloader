@@ -166,6 +166,9 @@ body.__BASECLASS__-dark  {
 
 .__BASECLASS__-section-header-inline a, .__BASECLASS__-section-header-inline a:hover {
     
-    color : #fff;
-    
+    color : #fff;    
+}
+
+.__BASECLASS__-buttons button.__BASECLASS__-related-links-options {
+    background-color: #4e4e4e;
 }

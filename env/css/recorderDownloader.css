@@ -22,6 +22,10 @@
    border-radius : 0; 
 }
 
+.__BASECLASS__-section-header-inline.__BASECLASS__-section-sidebar_section_extra_progress {
+    display : none;
+}
+
 .__BASECLASS__-preview-dimensions {
     position: absolute;
     bottom: 6px;
@@ -41,7 +45,7 @@
     height: 32px;
     display: inline-block;
     margin-right: 2%;
-    background: #ff8509;
+    background-color: #ff8509;
     width: 49%;
     float: left;
     cursor : pointer;
@@ -65,20 +69,15 @@
     width: 100%;
 }
 
-.__BASECLASS__-ModalBox-addition .__BASECLASS__-statistic {
-    background: #ff8509;
-    height: 32px;
-    line-height: 32px;
-    padding: 0 12px;
-    font-size: 14px;
-    cursor : pointer;
+.__BASECLASS__-ModalBox-addition, .__BASECLASS__-ModalBox-addition .__BASECLASS__-ModalBox-content {
+    min-height: unset;
 }
 
-.__BASECLASS__-ModalBox-addition .__BASECLASS__-statistic span:last-child {
-    font-size : 12px;
-    float : right;
+.__BASECLASS__-related-links-options-wrap {
+    margin-top : 12px;
 }
 
+.__BASECLASS__-related-links-options-wrap.hidden,
 .__BASECLASS__-ModalBox-addition .__BASECLASS__-downloader-statistic.hidden, 
 .__BASECLASS__-ModalBox-addition .__BASECLASS__-downloader-progressbar.hidden {
     display : none;
@@ -93,8 +92,7 @@
 .__BASECLASS__-ModalBox-addition .__BASECLASS__-downloader-progressbar,
 .__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons, 
 .__BASECLASS__-ModalBox-addition .__BASECLASS__-url-exclude label, 
-.__BASECLASS__-ModalBox-addition .__BASECLASS__-url label, 
-.__BASECLASS__-ModalBox-addition .__BASECLASS__-statistic {
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-url label {
     margin-bottom: 6px;
 }
 
@@ -123,9 +121,11 @@
 }
 
 .__BASECLASS__-process-docLoader-work .__BASECLASS__-buttons-filter,
-.__BASECLASS__-process-docLoader-work .__BASECLASS__-buttons-proportions,
+.__BASECLASS__-process-docLoader-work .__BASECLASS__-extra-sort,
+.__BASECLASS__-process-docLoader-work .__BASECLASS__-section-sidebar_section_extra_sort,
 .__BASECLASS__-process-docLoader-work .__BASECLASS__-bounds,
-.__BASECLASS__-process-docLoader-work .__BASECLASS__-url-exclude, 
+.__BASECLASS__-process-docLoader-work .__BASECLASS__-url-exclude,
+.__BASECLASS__-process-docLoader-work .__BASECLASS__-related-links-options-wrap, 
 .__BASECLASS__-process-docLoader-work .__BASECLASS__-url {
    
    display : none;
@@ -146,8 +146,21 @@
 }
 
 .__BASECLASS__-buttons button.__BASECLASS__-proportions,
+.__BASECLASS__-buttons button.__BASECLASS__-related-links-options,
 .__BASECLASS__-buttons button.__BASECLASS__-related-links {
-    background: #ffd6a4;
+    background-color: #ffd6a4;
+}
+
+.__BASECLASS__-buttons button.__BASECLASS__-related-links-options {
+    float: right;
+    height: 32px;
+    width: 18%;
+    display: block;
+    background-position: center;
+}
+
+.__BASECLASS__-buttons button.__BASECLASS__-related-links {
+    width : 80%;
 }
 
 .__BASECLASS__-checkmark {

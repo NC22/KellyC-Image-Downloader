@@ -878,8 +878,17 @@
     "recorder_filter":{  
         "message":"Filter"
     },
-    "recorder_load_prop":{  
-        "message":"Load proportions"
+    "recorder_load_prop_desc":{  
+        "message":"Proportions (desc)"
+    },   
+    "recorder_load_prop_asc":{  
+        "message":"Proportions (asc)"
+    },  
+    "recorder_sort_id_desc":{  
+        "message":"Order (desc)"
+    }, 
+    "recorder_sort_id_asc":{  
+        "message":"Order (asc)"
     }, 
     "recorder_load_prop_skip":{  
         "message":"Skip loading"
@@ -958,6 +967,18 @@
     },
     "recorder_terminated":{  
         "message":"Function is not supported"
+    },
+    "recorder_sort":{  
+        "message":"Sort"
+    },
+    "recorder_related_doc_trusted_url":{  
+        "message":"Trusted url"
+    },
+    "recorder_related_doc_deep_search":{  
+        "message":"Deep search"
+    },
+    "recorder_last_recorded":{  
+        "message":"Last recorded data"
     },
     "recorder_displayed_info":{  
         "message":"Items : __ITEMS__ | Documents : __RELATED_DOCS__"
