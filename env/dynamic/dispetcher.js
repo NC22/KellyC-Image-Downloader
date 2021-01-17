@@ -31,9 +31,10 @@
                 if (!handler.enabledEvents['before_unload']) {
                     
                     handler.enabledEvents['before_unload'] = function(e) {
-
                         e.preventDefault();
                         e.returnValue = '';
+                        
+                        return "";
                     };
                     
                     window.addEventListener('beforeunload', handler.enabledEvents['before_unload']);                    

@@ -8,6 +8,8 @@ SET manifest=manifest.json
 SET recorder=1
 SET joyreactor=1
 
+SET manifestVersion=2
+
 :: manifest configurations - all | recorder | joyreactor (see lib\manifest)
 
 SET manifestMode=all
@@ -45,7 +47,6 @@ copy %background% + "%~dp0\SIGN" %background%
 for %%x in ( 
     "lib\kellyTools.js" 
     "lib\kellyDispetcher.js" 
-    "env\init\background.js" 
 ) do (
     
     @echo.>> %background%
@@ -55,7 +56,16 @@ for %%x in (
     copy %background% + "%~dp0\%%~x" %background%
 )
 
+if "%manifestVersion%" equ "3" (
+
+    @echo.>> %background%    
+    copy %background% + "%~dp0\lib\kellyDispetcherNetRequest.js" %background%
+    @echo.>> %background%  
+    
+)
+
 @echo.>> %background%
+copy %background% + "env\init\background.js" %background%
 @echo.>> %background%
 
 if "%joyreactor%" geq "1" (
@@ -104,7 +114,15 @@ if "%recorder%" geq "1" (
 @echo.>> %frontend%
 
 break>%manifest%
-copy "%~dp0\lib\manifest\manifest_%manifestMode%.json" %manifest%
+
+if "%manifestVersion%" equ "3" (
+
+    copy "%~dp0\lib\manifest\manifest_%manifestMode%_v3.json" %manifest%
+    
+) else (
+    copy "%~dp0\lib\manifest\manifest_%manifestMode%.json" %manifest%
+)
+
 
 popd
 
