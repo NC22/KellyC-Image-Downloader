@@ -40,6 +40,19 @@
     border: 3px solid rgba(255, 121, 26, 0.45); 
 }
 
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons p {
+    background: #ffc78e;
+    color : #000;
+    padding: 6px;
+    margin: 0;
+    margin-bottom: 6px;
+}
+
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons button.selected,
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons button:hover {
+    background-color: #ffc78e;
+}
+
 .__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons button {
     border: 0;
     height: 32px;
@@ -94,10 +107,6 @@
 .__BASECLASS__-ModalBox-addition .__BASECLASS__-url-exclude label, 
 .__BASECLASS__-ModalBox-addition .__BASECLASS__-url label {
     margin-bottom: 6px;
-}
-
-.__BASECLASS__-ModalBox-addition .__BASECLASS__-downloader-statistic {
-    margin-top : 6px;
 }
 
 .__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons-last {

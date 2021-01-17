@@ -878,17 +878,23 @@
     "recorder_filter":{  
         "message":"Filter"
     },
-    "recorder_load_prop_desc":{  
-        "message":"Proportions (desc)"
+    "recorder_desc":{  
+        "message":"Desc"
     },   
-    "recorder_load_prop_asc":{  
-        "message":"Proportions (asc)"
-    },  
-    "recorder_sort_id_desc":{  
-        "message":"Order (desc)"
+    "recorder_asc":{  
+        "message":"Asc"
+    },
+    "recorder_order_direct":{  
+        "message":"Direct"
+    },   
+    "recorder_order_reverse":{  
+        "message":"Reversed"
+    },     
+    "recorder_sort_order":{  
+        "message":"Order (ID)"
     }, 
-    "recorder_sort_id_asc":{  
-        "message":"Order (asc)"
+    "recorder_sort_proportions":{  
+        "message":"Proportions"
     }, 
     "recorder_load_prop_skip":{  
         "message":"Skip loading"
@@ -957,10 +963,10 @@
         "message":"Updating web request settings. Please wait..."
     },
     "recorder_max":{  
-        "message":"Min."
+        "message":"Max."
     },
     "recorder_min":{  
-        "message":"Max."
+        "message":"Min."
     },
     "recorder_filtered":{  
         "message":"Images filtered"
@@ -980,6 +986,9 @@
     "recorder_last_recorded":{  
         "message":"Last recorded data"
     },
+    "recorder_load_proportions":{  
+        "message":"Load proportions..."
+    },  
     "recorder_displayed_info":{  
         "message":"Items : __ITEMS__ | Documents : __RELATED_DOCS__"
     }

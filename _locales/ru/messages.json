@@ -887,17 +887,23 @@
     "recorder_filter":{  
         "message":"Выбрать"
     },
-    "recorder_load_prop_desc":{  
-        "message":"Пропорции (по убыванию)"
-    },
-    "recorder_load_prop_asc":{  
-        "message":"Пропорции (по возрастанию)"
+    "recorder_desc":{  
+        "message":"По убыванию"
     },   
-    "recorder_sort_id_desc":{  
-        "message":"Порядковый номер (по убыванию)"
+    "recorder_asc":{  
+        "message":"По возрастанию"
+    },  
+    "recorder_order_direct":{  
+        "message":"Прямой"
     },   
-    "recorder_sort_id_asc":{  
-        "message":"Порядковый номер (по возрастанию)"
+    "recorder_order_reverse":{  
+        "message":"Обратный"
+    },    
+    "recorder_sort_order":{  
+        "message":"Порядок (ID)"
+    }, 
+    "recorder_sort_proportions":{  
+        "message":"Пропорции"
     },
     "recorder_load_prop_skip":{  
         "message":"Пропустить загрузку"
@@ -966,10 +972,10 @@
         "message":"Выполняется процесс обновления навигации. Подождите..."
     },
     "recorder_max":{  
-        "message":"Мин."
+        "message":"Макс."
     },
     "recorder_min":{  
-        "message":"Макс."
+        "message":"Мин."
     },
     "recorder_filtered":{  
         "message":"Данные отфильтрованы"
@@ -989,6 +995,9 @@
     "recorder_last_recorded":{  
         "message":"Последние записанные данные"
     },
+    "recorder_load_proportions":{  
+        "message":"Загружаются пропорции..."
+    },   
     "recorder_displayed_info":{  
         "message":"Картинки : __ITEMS__ | Доп. документы : __RELATED_DOCS__"
     }
