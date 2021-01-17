@@ -27,7 +27,7 @@
         "<all_urls>"
     ],
    "background": {
-    "scripts": ["kmerged.bg.js", "env/init/background.js"],
+    "scripts": ["kmerged.bg.js"],
     "persistent": true
    },  
    "options_ui": {

@@ -45,6 +45,7 @@ copy %background% + "%~dp0\SIGN" %background%
 for %%x in ( 
     "lib\kellyTools.js" 
     "lib\kellyDispetcher.js" 
+    "env\init\background.js" 
 ) do (
     
     @echo.>> %background%
