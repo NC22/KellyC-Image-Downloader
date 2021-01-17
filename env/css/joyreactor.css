@@ -25,21 +25,38 @@
     text-decoration : none;
 }
 
-.__BASECLASS__-top-joyreactor-cc.__BASECLASS__-FavContainer,
-.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-tab h3,
-.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-ModalBox a,
-.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-ModalBox {
-    color : #fff;
-}
-
 .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a.__BASECLASS__-downloader-button-save_as_json,
 .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a.__BASECLASS__-downloader-button-save_as_txt {
     background: #ffab00;
 }
 
+.__BASECLASS__-OptionsSave-wrap input[type="submit"],
 table.__BASECLASS__-options-table input[type="submit"] {
     padding: 6px;
     background-color: #ff972b;
+}
+
+.__BASECLASS__-old-reactor-cc .__BASECLASS__-OptionsSave-wrap input[type="submit"],
+.__BASECLASS__-old-reactor-cc table.__BASECLASS__-options-table input[type="submit"] {
+    background-color: transparent;
+} 
+
+.__BASECLASS__-censored {
+    border: 3px solid #ff843c;
+    cursor: pointer;
+    display: block;
+    position: relative;
+}
+
+.__BASECLASS__-censored-notice {
+    padding: 6px;
+}
+
+.__BASECLASS__-top-joyreactor-cc.__BASECLASS__-FavContainer,
+.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-tab h3,
+.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-ModalBox a,
+.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-ModalBox {
+    color : #fff;
 }
 
 #submenu.__BASECLASS__-top-joyreactor-cc {
@@ -73,17 +90,6 @@ table.__BASECLASS__-options-table input[type="submit"] {
 
 .__BASECLASS__-top-joyreactor-cc .__BASECLASS__-tab-list a {
     color: #000000;
-}
-
-.__BASECLASS__-censored {
-    border: 3px solid #ff843c;
-    cursor: pointer;
-    display: block;
-    position: relative;
-}
-
-.__BASECLASS__-censored-notice {
-    padding: 6px;
 }
 
 .__BASECLASS__-top-joyreactor-cc .__BASECLASS__-tab-list ul li {
