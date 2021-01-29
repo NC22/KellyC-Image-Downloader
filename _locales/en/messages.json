@@ -777,10 +777,10 @@
         "message":"<b>Change storage type only if needed</b>. After change, your current profile list will be hidden, until switch back to previous storage type"
     },  
     "storage_type_notice_fox_warning":{  
-        "message":"<b style=\"color: #ff4a4a\">Warning - Firefox will clear data stored by extensions using the localStorage API in various scenarios where users clear their browsing history and data</b>. Switch to <b>Browser API</b> for safety"
+        "message":"<b style=\"color: #ff4a4a\">Warning - using the localStorage is unsafe for constantly store data</b>. Switch to <b>Browser API</b> for safety"
     },    
     "storage_type_notice_fox_warning_2":{  
-        "message":"<div><b style=\"color: #ff4a4a\">Warning - Firefox will clear data stored by extensions using the localStorage API in various scenarios where users clear their browsing history and data</b>.</div>"
+        "message":"<div><b style=\"color: #ff4a4a\">Warning - using the <b>localStorage</b> is unsafe for constantly store data</b>.</div>"
     }, 
     "storage_type_notice_fox_warning_3":{  
         "message":"<div>Switch to <b>Browser API</b> for safety</div>"
