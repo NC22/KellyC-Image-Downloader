@@ -73,10 +73,10 @@ item.relatedDoc = http://example.com/original-image-page?get=1&get2=234##FETCH_R
 
 параметр mark_comment = 1 и другие с префиксом mark_ в запросе не учавствуют и используются при необходимости только для постобработки (все параметры сохраняются в thread.rules - массив вида ['mark_comments=1', 'responseType=json', ...])
 
-Установка POST данных пока не поддерживается.
+Установка POST данных \ бинарных данных пока не поддерживается.
 Установка доп. заголовков пока не поддерживается.
 
-* thread.response - тело ответа | документ | медиа данные | json - в зависимости запроса  от thread.request.contentType
+* thread.response - тело ответа | документ | медиа данные | json - в зависимости запроса responseType
 
 ```
 
