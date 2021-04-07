@@ -878,8 +878,17 @@
     "thread_maxThreads":{  
         "message":"Кол-во потоков"
     }, 
+    "thread_imgLoadermaxThreads":{  
+        "message":"Кол-во потоков"
+    },
+    "thread_imgLoaderTimeout":{  
+        "message":"Таймаут при длительном ожидании ответа (сек.)"
+    },
     "recorder_request_settings":{  
-        "message":"Параметры запросов"
+        "message":"Параметры запросов доп. документов"
+    },    
+    "recorder_image_request_settings":{  
+        "message":"Параметры скорости загрузки пропорций картинок"
     },    
     "recorder_extra_filters":{  
         "message":"Доп. фильтры"

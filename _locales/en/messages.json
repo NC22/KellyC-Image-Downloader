@@ -869,8 +869,17 @@
     "thread_maxThreads":{  
         "message":"Number of threads"
     }, 
+    "thread_imgLoadermaxThreads":{  
+        "message":"Number of threads"
+    }, 
+    "thread_imgLoaderTimeout":{  
+        "message":"Timeout for long requests (sec.)"
+    }, 
     "recorder_request_settings":{  
-        "message":"Requests settings"
+        "message":"Requests addition doc. settings"
+    }, 
+    "recorder_image_request_settings":{  
+        "message":"Request image bounds settings"
     },    
     "recorder_extra_filters":{  
         "message":"Extra filters"
