@@ -3,7 +3,7 @@ KellyPopupPage.className = 'popup-page';
 KellyPopupPage.wrap = false;
 KellyPopupPage.recordingState = 'loading'; // loading (init), stopping (stopRecord), starting (startRecord), disabled (record is not runing), enabled (record is runing)
 KellyPopupPage.recordingNum = false;
-KellyPopupPage.recordingNumEl = false;
+KellyPopupPage.recordingInfoEls = false;
 
 KellyPopupPage.buttons = {
    'download_current_tab' : {loc : 'download_current_tab', event : function() {
@@ -112,24 +112,28 @@ KellyPopupPage.buttons = {
 KellyPopupPage.updateNotice = function(str) {
     
     if (!str) {
-        KellyPopupPage.recordingNumEl.style.display = 'none';
+        KellyPopupPage.recordingInfoEls.block.style.display = 'none';
         return;
     }
     
-    KellyPopupPage.recordingNumEl.style.display = '';
-    KellyPopupPage.recordingNumEl.innerText = str;    
+    KellyPopupPage.recordingInfoEls.block.style.display = '';
+    KellyPopupPage.recordingInfoEls.clear.style.display = KellyPopupPage.recordingNum ? '' : 'none';
+    KellyPopupPage.recordingInfoEls.notice.innerText = str;     
 }
 
 KellyPopupPage.updateRecordButton = function() {
     
-    var notice = ''; // KellyLoc.s('No recording', 'download_recorded_empty')
-    if (KellyPopupPage.recordingNum) notice = KellyLoc.s('Recorded images', 'download_recorded_images') + ': ' + KellyPopupPage.recordingNum;
-
     KellyTools.setHTMLData(KellyPopupPage.buttons['download_record'].btn, '<span>' + KellyLoc.s('', KellyPopupPage.buttons['download_record']['loc_' + KellyPopupPage.recordingState]) + '</span>');
 
     if (KellyPopupPage.recordingState == 'disabled') {
+        
         KellyPopupPage.buttons['download_recorded'].btn.style.display = KellyPopupPage.recordingNum && KellyPopupPage.recordingState == 'disabled' ? '' : 'none'; 
-        KellyPopupPage.updateNotice(notice);
+        KellyPopupPage.buttons['download_current_tab'].btn.style.display = KellyPopupPage.buttons['download_recorded'].btn.style.display == 'none' ? '' : 'none';
+        KellyPopupPage.buttons['options'].btn.style.display = KellyPopupPage.buttons['download_current_tab'].btn.style.display;
+        KellyPopupPage.buttons['download_record'].btn.style.display = KellyPopupPage.buttons['download_current_tab'].btn.style.display;
+                
+        KellyPopupPage.updateNotice(KellyPopupPage.recordingNum ? KellyLoc.s('Recorded images', 'download_recorded_images') + ': ' + KellyPopupPage.recordingNum : false);
+        
     } else KellyPopupPage.updateNotice(false);
 }
 
@@ -163,10 +167,29 @@ KellyPopupPage.updateRecorded = function() {
 KellyPopupPage.showRecorder = function() {
             
     document.title = KellyTools.getProgName();
-    KellyPopupPage.wrap = document.getElementById('popup');
+    KellyPopupPage.wrap = document.getElementById('popup');    
     
-    KellyTools.setHTMLData(KellyPopupPage.wrap, '<div class="' + KellyPopupPage.className + '-recorded-num"></div>'); KellyTools.setCopyright('copyright-software'); 
-    KellyPopupPage.recordingNumEl = KellyTools.getElementByClass(KellyPopupPage.wrap, KellyPopupPage.className + '-recorded-num');
+    KellyTools.setCopyright('copyright-software');
+    
+    var recorderInfoHtml = '\
+        <div class="' + KellyPopupPage.className + '-recorded-block">\
+            <span class="' + KellyPopupPage.className + '-recorded-notice"></span>\
+            <a href="#" class="' + KellyPopupPage.className + '-recorded-clear">[x]</a>\
+        </div>'; 
+    
+    KellyTools.setHTMLData(KellyPopupPage.wrap, recorderInfoHtml);
+    
+    KellyPopupPage.recordingInfoEls = {
+        notice : KellyTools.getElementByClass(KellyPopupPage.wrap, KellyPopupPage.className + '-recorded-notice'),
+        block : KellyTools.getElementByClass(KellyPopupPage.wrap, KellyPopupPage.className + '-recorded-block'),
+        clear : KellyTools.getElementByClass(KellyPopupPage.wrap, KellyPopupPage.className + '-recorded-clear'),
+    };
+    
+    KellyPopupPage.recordingInfoEls.clear.onclick = function() {
+        KellyPopupPage.recordingNum = false;
+        KellyPopupPage.updateRecordButton();
+        return false;
+    }
         
     for (var buttonKey in KellyPopupPage.buttons) { 
     
