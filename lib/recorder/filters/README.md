@@ -119,7 +119,7 @@ docLoader.parser.updateCfg(threadDefaults = {
 ```
 
 Метод onInitLocation в процессе доработки / могут быть изменения, не рекомендуется к использованию
-Выполняется после инициализации парсера страницы - data.url - адресная строка вкладки / data.host - аналог window.location.hostname
+Выполняется после инициализации парсера страницы (Клик по "Начать запись" / "Картинки со вкладки") - data.url - адресная строка вкладки / data.host - аналог window.location.hostname
 Позволяет конфигурировать парсер перед запуском
 
 Пока использовать нет необходимости т.к. параметров для изменения нет.
@@ -141,7 +141,18 @@ KellyRecorderFilterExample.onInitOptions = function(options, coptions) {}
 
 ```
 
-Запуск фильтр и доп. валидаторы через общий список
+Метод validateByDriver выполняется после всей работы в addItemByDriver когда объект item (структура объекта описана в kellyPageWatchDog) уже полностью сформирован.
+
+```
+KellyRecorderFilterPixiv.validateByDriver = function(handler, item) {
+    
+   // любые модификации объека item можно выполнить здесь
+   // return false; - отменит добавление элемента
+}
+```
+
+Чтобы фильтр с доп. логикой учавствовал в обработке странице, его необходимо добавить в массив KellyPageWatchdog.filters как приведено ниже.
+В массиве KellyPageWatchdog.validators можно прописать автоматичекие ассоциации с группами по совпадениям в строке ссылки на изображение. Иногда этого достаточно и можно обойтись без доп. логики
 
 ```
 KellyPageWatchdog.validators.push({url : 'deviantart', patterns : [['images-wixmp', 'imageAny']]}); // опционально фильтр по соответствию строки (аналогичны файлу _validators.js)
