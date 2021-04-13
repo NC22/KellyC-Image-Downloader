@@ -17,6 +17,7 @@
 <p><a href="https://www.youtube.com/watch?v=ImKbC_1Oz8c">Download images from <b>Pinterest</b></a> (Collect bookmarks from specifed folder)</p>
 
 <p><a href="https://www.youtube.com/watch?v=x1-kqKMnMmA">Download images from <b>Twitter</b></a> (Collect "Media" section)
+<p><a href="https://youtu.be/1Nivs34BDbI">Download images from <b>Pixiv</b></a> (Collect "Bookmarks" example)
 </p>
 <p></p>
 <p>If you know JS and want to extend list of supported sites read documentation about addtion filters <a href="https://github.com/NC22/KellyCImageDownloader/blob/master/lib/recorder/filters/README.md">here</a></p>
