@@ -818,6 +818,9 @@
     "storage_create_e2":{  
         "message":"Bad profile file format (JSON parse fail)"
     }, 
+    "storage_create_e3":{  
+        "message":"Error : Profile (__PROFILE_MODULE__) is not compatible with current view module (__CURRENT_MODULE__)"
+    },
     "storage_import_e1":{  
         "message":"Please select file"
     }, 
