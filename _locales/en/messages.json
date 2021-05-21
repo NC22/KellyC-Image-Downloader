@@ -144,7 +144,7 @@
         "message":"Catched proportions"
     },
     "dark_theme":{  
-        "message":"Dark theme"
+        "message":"Dark theme (options page)"
     }, 
     "debug":{  
         "message":"Debug mode"
@@ -631,9 +631,6 @@
     },
     "options_side":{  
         "message":"Move extension options button to sidebar"
-    },    
-    "options_show_censored":{  
-        "message":"Show preview of blocked publication (full image still will be unavailable)"
     },  
     "options_storage":{  
         "message":"Base directory for store profiles and configs"
@@ -656,9 +653,18 @@
     "publication":{  
         "message":"Publication"
     },  
+    "unlock_common" : {
+        "message" : "Unlock tweaks"
+    }, 
     "unlock_censored":{  
         "message":"Unlock blocked data"
+    }, 
+    "unlock_censored_auto":{  
+        "message":"Autounlock blocked on page load"
     },  
+    "unlock_censored_parser":{  
+        "message":"Unlock blocked posts during load"
+    },      
     "reset":{  
         "message":"Reset"
     },  
@@ -990,7 +996,7 @@
         "message":"Sort"
     },
     "recorder_related_doc_trusted_url":{  
-        "message":"Trusted url"
+        "message":"Mutch url (picture in related doc.)"
     },
     "recorder_related_doc_deep_search":{  
         "message":"Deep search"

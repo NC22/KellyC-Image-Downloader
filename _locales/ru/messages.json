@@ -147,7 +147,7 @@
         "message":"Режим отладки"
     },  
     "dark_theme":{  
-        "message":"Темная тема"
+        "message":"Темная тема (страница настроек)"
     }, 
     "delete":{  
         "message":"Удалить"
@@ -644,9 +644,6 @@
     "options_side":{  
         "message":"Перенести кнопку настроек из шапки сайта в боковое меню фильтров"
     },   
-    "options_show_censored":{  
-        "message":"Показывать превью заблокированных публикаций (полноразмерное изображение все равно будет не доступно)"
-    }, 
     "other":{  
         "message":"Остальное"
     },  
@@ -665,8 +662,17 @@
     "publication":{  
         "message":"Публикация"
     },
+    "unlock_common" : {
+        "message" : "Снятие блокировок"
+    },
     "unlock_censored":{  
         "message":"Отображать заблокированные данные"
+    },    
+    "unlock_censored_auto":{  
+        "message":"Автоматически разблокировать зацензуреные посты"
+    },  
+    "unlock_censored_parser":{  
+        "message":"Восстанавливать заблокированные посты"
     },
     "related_doc":{  
         "message":"Документ"
@@ -1002,7 +1008,7 @@
         "message":"Сортировка"
     },
     "recorder_related_doc_trusted_url":{  
-        "message":"Совпадение url (доп. документ)"
+        "message":"Совпадение url (картинка в доп. документе)"
     },
     "recorder_related_doc_deep_search":{  
         "message":"Глубокий поиск"
