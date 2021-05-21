@@ -666,11 +666,17 @@
         "message" : "Снятие блокировок"
     },
     "unlock_censored":{  
-        "message":"Отображать заблокированные данные"
+        "message":"Отображать заблокированные посты"
     },    
     "unlock_censored_auto":{  
-        "message":"Автоматически разблокировать зацензуреные посты"
-    },  
+        "message":"Автоматически без клика на превью"
+    }, 
+    "unlock_censored_mode":{  
+        "message":"Режим разблокировки постов"
+    },
+    "unlock_censored_manual":{  
+        "message":"По клику на превью"
+    },     
     "unlock_censored_parser":{  
         "message":"Восстанавливать заблокированные посты при выгрузке данных из тегов или закладок"
     },
@@ -833,7 +839,7 @@
     "storage_create_e2":{  
         "message":"Ошибка парсинга структурированных данных файла профиля"
     }, 
-    "storage_create_e3":{  
+    "storage_create_e4":{  
         "message":"Ошибка : Профиль (__PROFILE_MODULE__) не совместим с текущим модулем просмотра (__CURRENT_MODULE__)"
     },
     "storage_save_e1":{  
