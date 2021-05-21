@@ -204,7 +204,7 @@
         "message":"Pages left : __PAGESN__"
     },
     "download_skip_empty":{  
-        "message":"Skip publication without media data (plain text, censored, etc.)"
+        "message":"Skip publication without media data"
     },
     "download_start":{  
         "message":"Run import"
