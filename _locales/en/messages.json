@@ -663,7 +663,7 @@
         "message":"Autounlock blocked on page load"
     },  
     "unlock_censored_parser":{  
-        "message":"Unlock blocked posts during load"
+        "message":"Unlock blocked posts during parsing"
     },      
     "reset":{  
         "message":"Reset"
