@@ -642,10 +642,10 @@
         "message":"Page"
     },
     "pages":{  
-        "message":"Pages"
+        "message":"Pages ranges (1-10, 60-200 etc.)"
     },
     "pages_n":{  
-        "message":"Pages"
+        "message":"Total pages"
     },
     "prev":{  
         "message":"Previouse"

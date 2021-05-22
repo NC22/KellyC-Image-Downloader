@@ -74,6 +74,7 @@ if "%joyreactor%" geq "1" (
         "lib\profiles\joyreactor.js" 
         "lib\profiles\joyreactor.unlock.js"
         "lib\profiles\topjoyreactor.js" 
+        "lib\profiles\mjoyreactor.js" 
     ) do (
     
         @echo.>> %frontend%
