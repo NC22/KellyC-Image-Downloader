@@ -252,7 +252,7 @@
         "message":"Saved profile can be added to extension throw menu (Options -> Profiles -> Add new profile)"
     },   
     "download_limitpages":{  
-        "message":"Selection hit limit (__CURRENTPAGESPERIMPORT__). Please set export pages manually (not more then __MAXPAGESPERIMPORT__ pages per one operation)"
+        "message":"Extension tested with only max. 1200 pages. Please enable <b>Save to separate file</b> feature<br> if you have some problems during parsing data"
     },    
     "download_partly":{  
         "message":"Only part of data was loaded (see log for more info). You still can download loaded data as profile"

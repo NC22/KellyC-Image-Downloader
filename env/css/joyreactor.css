@@ -1,5 +1,31 @@
 /* css compatibility with profile */
 
+/* unlock.js */
+
+.__BASECLASS__-censored {
+    border: 3px solid #ff843c;
+    cursor: pointer;
+    display: block;
+    position: relative;
+}
+
+.__BASECLASS__-censored-notice {
+    padding: 6px;
+}
+
+.__BASECLASS__-censored-auto,.__BASECLASS__-censored-manual {
+    overflow: hidden;
+}
+
+/*
+.__BASECLASS__-censored-auto img {
+    width : 100%;
+    max-width : 811px;
+    filter : blur(20px);
+} */
+
+/* unlock.js */
+
 .topbar_wr {
     z-index : 995;
 }
@@ -40,17 +66,6 @@ table.__BASECLASS__-options-table input[type="submit"] {
 .__BASECLASS__-old-reactor-cc table.__BASECLASS__-options-table input[type="submit"] {
     background-color: transparent;
 } 
-
-.__BASECLASS__-censored {
-    border: 3px solid #ff843c;
-    cursor: pointer;
-    display: block;
-    position: relative;
-}
-
-.__BASECLASS__-censored-notice {
-    padding: 6px;
-}
 
 /* m.reactor */
 
