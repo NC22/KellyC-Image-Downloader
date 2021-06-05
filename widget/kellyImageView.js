@@ -14,6 +14,22 @@
    add user event onButtonsShow
    alternative load by xmlHTTPrequest - make posible progressbar on "onprogress" event https://stackoverflow.com/questions/76976/how-to-get-progress-from-xmlhttprequest
 
+   Example : 
+   
+   // create gallery with name 'gallery-name' with list of items
+   
+   imgViewer.addToGallery(['http://example.ru/image0.jpg', 'http://example.ru/image1.jpg'], 'gallery-name', ['related data for item 0', 'related...']);
+   
+   // opens viewer and show first element of 'gallery-name'
+   
+   imgViewer.loadImage(false, {gallery : 'gallery-name', cursor : 0}); 
+
+   // or same with DOM element 
+   
+   domEl = <a href="#" kellyGallery="gallery-name" kellyGalleryIndex="0">Show</a>
+   
+   imgViewer.loadImage(domEl); 
+   
 */
 
 function KellyImgView(cfg) {

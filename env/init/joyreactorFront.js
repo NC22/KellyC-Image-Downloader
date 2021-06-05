@@ -8,7 +8,7 @@ if (typeof K_FAV == 'undefined' || K_FAV === null) {
             if (!K_FAV.exec()) K_FAV = null;
         });
         
-    } else  if (window.location.host.indexOf('m.reactor.cc') != -1 ) {
+    } else  if (window.location.host.indexOf('m.reactor.cc') != -1 || window.location.host.indexOf('m.joyreactor.cc') != -1 ) {
         
          K_FAV = new KellyFavItems({env : KellyProfileMJoyreactor.getInstance(), location : window.location, allowMobile : true});
          if (!K_FAV.exec()) K_FAV = null;

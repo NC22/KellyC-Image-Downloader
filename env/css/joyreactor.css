@@ -69,23 +69,26 @@ table.__BASECLASS__-options-table input[type="submit"] {
 
 /* m.reactor */
 
-.__BASECLASS__-m-reactor-cc.__BASECLASS__-MainMenuItem-fav {
+.__BASECLASS__-m-reactor-cc.__BASECLASS__-MainMenuItem-fav, .__BASECLASS__-m-joyreactor-cc.__BASECLASS__-MainMenuItem-fav {
     width : 30px;
     height : 30px;
 }
 
-.__BASECLASS__-m-reactor-cc.__BASECLASS__-FavContainer {
+.__BASECLASS__-m-reactor-cc.__BASECLASS__-FavContainer, .__BASECLASS__-m-joyreactor-cc.__BASECLASS__-FavContainer {
     background: #fff;
     margin: 16px;
     max-width : 1024px;
 }
 
-.__BASECLASS__-m-reactor-cc input[type=text]{
+.__BASECLASS__-m-reactor-cc input[type=text], .__BASECLASS__-m-joyreactor-cc input[type=text]{
     border: 1px solid #000;
     height: 30px;
 }
 
-.__BASECLASS__-m-reactor-cc .__BASECLASS__-OptionsSave-wrap input[type="submit"], .__BASECLASS__-m-reactor-cc table.__BASECLASS__-options-table input[type="submit"] {
+.__BASECLASS__-m-reactor-cc .__BASECLASS__-OptionsSave-wrap input[type="submit"], 
+.__BASECLASS__-m-reactor-cc table.__BASECLASS__-options-table input[type="submit"],
+.__BASECLASS__-m-joyreactor-cc .__BASECLASS__-OptionsSave-wrap input[type="submit"], 
+.__BASECLASS__-m-joyreactor-cc table.__BASECLASS__-options-table input[type="submit"] {
     background-color: inherit;
 }
 
