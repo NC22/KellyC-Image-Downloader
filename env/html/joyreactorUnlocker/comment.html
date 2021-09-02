@@ -14,8 +14,9 @@
             <span class="reply-link">
                 <a href="/user/__USER_NAME__" class="comment_username">__USER_NAME__</a>&nbsp;
                 <span class="comment_date"><span class="" data-time=""><span class="date">__DATE__</span> <span class="time">__TIME__</span></span></span>
-                <a href="javascript:" class="response">ответить</a>
+                [__RESPONSE__<a href="javascript:" class="response">ответить</a>]
                 <a href="/post/__POST_ID__#comment__COMMENT_ID__" class="comment_link">ссылка</a>
+                [__DELETE__<a class="delete csrfLink" data-confirm="Действительно удалить комментарий?" href="/post_comment/delete/__COMMENT_ID__">удалить</a></span>]
             </span>
             
             __VOTE__
