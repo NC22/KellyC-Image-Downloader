@@ -8,12 +8,8 @@ KellyJoyreactorDPage.init = function() {
     
     KellyJoyreactorDPage.env = K_FAV.getGlobal('env');
     KellyJoyreactorDPage.env.hostClass = 'options_page';    
-    KellyJoyreactorDPage.env.webRequestsRules.types = false;    
-
-    var nativeOnExtensionReady = KellyJoyreactorDPage.env.events.onExtensionReady;            
+    KellyJoyreactorDPage.env.webRequestsRules.types = false;              
     KellyJoyreactorDPage.env.events.onExtensionReady = function() {
-        
-        if (nativeOnExtensionReady) nativeOnExtensionReady();
         
         // K_FAV.getGlobal('image_events').saveImageProportions = function() { return; }            
         // K_FAV.aspectRatioAccurCheck = false; // копирайт портит проверку соотношения сторон, отключаем
