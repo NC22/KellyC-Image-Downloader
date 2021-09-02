@@ -670,7 +670,13 @@
     }, 
     "unlock_censored_parser":{  
         "message":"Unlock blocked posts during parsing"
-    },      
+    }, 
+    "unlock_censored_auth":{  
+        "message":"Enable posting, vote"
+    },  
+    "unlock_censored_cache":{  
+        "message":"Enable cache"
+    },          
     "reset":{  
         "message":"Reset"
     },  

@@ -679,7 +679,13 @@
     },     
     "unlock_censored_parser":{  
         "message":"Восстанавливать заблокированные посты при выгрузке данных из тегов или закладок"
-    },
+    }, 
+    "unlock_censored_auth":{  
+        "message":"Вкл. отправку комментов, плюсомет (если авторизован)"
+    },  
+    "unlock_censored_cache":{  
+        "message":"Кэш"
+    }, 
     "related_doc":{  
         "message":"Документ"
     }, 

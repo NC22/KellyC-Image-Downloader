@@ -16,7 +16,7 @@
 
    Example : 
    
-   // create gallery with name 'gallery-name' with list of items
+   // reset \ create gallery with name 'gallery-name' with list of items
    
    imgViewer.addToGallery(['http://example.ru/image0.jpg', 'http://example.ru/image1.jpg'], 'gallery-name', ['related data for item 0', 'related...']);
    
@@ -47,7 +47,6 @@ function KellyImgView(cfg) {
     var commClassName = false; // DOM viewer class \ id base name
    
     var block = false;
-    var blockInit = false;
     
     var fadeTime = 500; // not synced with css
     var buttonsMargin = 6;
@@ -108,7 +107,14 @@ function KellyImgView(cfg) {
         
         if (cfg.viewerBlock) {
             block = cfg.viewerBlock;
-            blockInit = false;
+             
+            if (typeof block == 'string') {
+                var el = document.getElementById(block.trim());
+                if (el) block = el;
+            }
+            
+            if (block) initBlockData(block);
+            else console.log('Fail to get container element'); 
         }
         
         if (cfg.userEvents) {
@@ -160,22 +166,7 @@ function KellyImgView(cfg) {
         }               
     };    
     
-    function getBlock() {
-        
-        if (!blockInit) {
-            
-            if (typeof block == 'string') {
-                var el = document.getElementById(block.trim());
-                if (el) block = el;
-            }
-            
-            if (block) {
-                initBlockData(block);
-                blockInit = true;
-            }
-        }
-        
-        
+    function getBlock() {        
         return block ? block : false;
     }
     
@@ -186,29 +177,24 @@ function KellyImgView(cfg) {
         newGallery = newGallery.trim();
         if (!newGallery) return false;
         
-        if (selectedGallery != newGallery) {
+        selectedGallery = newGallery;
+        
+        if (typeof images[selectedGallery] == 'undefined') console.log('[Notice] no images in selected gallery ' + selectedGallery);
+        
+        if (!images[selectedGallery] || images[selectedGallery].length <= 1) {
             
-            selectedGallery = newGallery;
-            
-            if (getBlock()) {
-                
-                if (!images[selectedGallery] || images[selectedGallery].length <= 1) {
-                    
-                    if (buttons['prev']) addClass(buttons['prev'], 'btn-hidden');
-                    if (buttons['next']) addClass(buttons['next'], 'btn-hidden');
+            if (buttons['prev']) addClass(buttons['prev'], 'btn-hidden');
+            if (buttons['next']) addClass(buttons['next'], 'btn-hidden');
 
-                    addClass(getBlock(), 'single-img');
-                    
-                } else {
-                    
-                    if (buttons['prev']) removeClass(buttons['prev'], 'btn-hidden');
-                    if (buttons['next']) removeClass(buttons['next'], 'btn-hidden');
-                    
-                    removeClass(getBlock(), 'single-img');
-                }                
-                
-            }
-        }
+            addClass(getBlock(), 'single-img');
+            
+        } else {
+            
+            if (buttons['prev']) removeClass(buttons['prev'], 'btn-hidden');
+            if (buttons['next']) removeClass(buttons['next'], 'btn-hidden');
+            
+            removeClass(getBlock(), 'single-img');
+        } 
         
         return true;
     }
@@ -216,23 +202,25 @@ function KellyImgView(cfg) {
     function initBlockData(block) {
         
         var tmp;
+    
+        block.innerHTML = '';
+    
+        tmp = document.createElement('DIV');
+        addClass(tmp, 'loader');
         
-            block.innerHTML = '';
+        block.appendChild(tmp);
         
-            tmp = document.createElement('DIV');
-            addClass(tmp, 'loader');
-            
-            block.appendChild(tmp);
-            
-            tmp = document.createElement('DIV');
-            addClass(tmp, 'img');
+        tmp = document.createElement('DIV');
+        addClass(tmp, 'img');
+    
+        block.appendChild(tmp);
         
-            block.appendChild(tmp);
-            
-            tmp = document.createElement('DIV');
-            addClass(tmp, 'btns');
-            
-            block.appendChild(tmp);
+        tmp = document.createElement('DIV');
+        addClass(tmp, 'btns');
+        
+        block.appendChild(tmp);
+        
+        handler.hideLoader(true);
         
         return true;
     }
@@ -360,13 +348,9 @@ function KellyImgView(cfg) {
     
     this.addButton = function(innerHTML, index, eventOnClick, addition) {
         
-        if (!getBlock()) {        
-            console.log('cant create buttons, main block not ready');
-            return false;
-        }
+        if (!getBlock()) return false;
         
         var w, h, additionStyle, className;
-        
         var lazyAccept = false;
         var fixed = false;
         
@@ -535,7 +519,6 @@ function KellyImgView(cfg) {
     }
     
     function getEl(name) {
-        if (!getBlock()) return false;
         var pool = block.getElementsByClassName(commClassName + '-' + name);        
         if (pool && pool.length) return pool[0];
         else return false;
@@ -754,8 +737,8 @@ function KellyImgView(cfg) {
                 } else if (galleryData.cursor == 'prev') {
                     galleryItemPointer = getNextImage(false, true);
                 } else {
-                    cursor = galleryData.cursor;
-                    galleryItemPointer = images[selectedGallery][cursor];
+                    cursor = parseInt(galleryData.cursor);
+                    galleryItemPointer = images[selectedGallery][!cursor ? 0 : cursor];
                 }
             }
         }

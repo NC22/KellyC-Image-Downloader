@@ -18,7 +18,8 @@
                 
                 senderId : 'dynamic_dispetcher',
                 error : '',
-                method : e.data.method,                
+                method : e.data.method,  
+                location : window.location.href,
             };
             
             
@@ -42,19 +43,17 @@
                 
             } else if (e.data.method == handler.messageNameBase + '.getvar') {
                 
-                if (e.data.var_name) {
+                
+                if (e.data.varList) {
                     
                     var getVarAsString = function(value) {
-                                           
-                        if (typeof value != 'string' && typeof String != 'undefined') {
-                            value = String(value);
-                        }
-                        
+                        if (typeof value != 'string' && typeof String != 'undefined') value = String(value);
                         return value;
-                    }                    
+                    }
                     
-                    response[e.data.var_name] = typeof window[e.data.var_name] != 'undefined' ? getVarAsString(window[e.data.var_name]) : false;  
-                    
+                    response.varList = {};
+                    for (var i = 0; i < e.data.varList.length; i++) response.varList[e.data.varList[i]] = typeof window[e.data.varList[i]] != 'undefined' ? getVarAsString(window[e.data.varList[i]]) : false; 
+                        
                 } else {
                     
                     response.error = 'var_name is undefined';
@@ -65,7 +64,7 @@
                 handler.remove();
             } 
             
-            e.source.postMessage(response, "*");
+            e.source.postMessage(response, window.location.orign);
         };
         
         KellyDynamicDispetcher.removeBeforeUnload = function() {

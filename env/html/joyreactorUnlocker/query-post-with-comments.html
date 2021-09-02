@@ -1,0 +1,15 @@
+... on Post {
+    rating,
+    createdAt,
+    comments { 
+        level, parent {id}, createdAt, rating, user {id, username}, id, text, 
+        attributes {
+            ... on AttributeEmbed {id, type, value, image { type }} 
+            ... on AttributePicture {id, type, image { type }}
+        } 
+    }, 
+    attributes {
+        ... on AttributeEmbed {id, type, value, image { type }} 
+        ... on AttributePicture {id, type, image { type, width, height }}
+    }
+}

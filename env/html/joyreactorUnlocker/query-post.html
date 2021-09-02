@@ -1,0 +1,8 @@
+... on Post {
+    rating, 
+    createdAt,
+    attributes {
+        ... on AttributeEmbed {id, type, value, image { type }} 
+        ... on AttributePicture {id, type, image { type, width, height }}
+    }
+}

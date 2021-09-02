@@ -35,7 +35,7 @@
         }
    },
    "web_accessible_resources":  [{
-      "resources": ["env/css/*.css", "env/pages/*.js", "env/profile/*.js", "env/dynamic/*.js"],
+      "resources": ["env/css/*.css", "env/html/*.html", "env/dynamic/*.js"],
       "matches": [],
       "extension_ids": []
     }]

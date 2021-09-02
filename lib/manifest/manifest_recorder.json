@@ -42,8 +42,7 @@
    },
    "web_accessible_resources": [
         "env/css/*.css",
-        "env/pages/*.js",
-        "env/profile/*.js",
+        "env/html/*.html",
         "env/dynamic/*.js"
     ]
 }
