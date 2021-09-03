@@ -620,6 +620,9 @@
     "options":{  
         "message":"Options"
     },
+    "options_extra":{  
+        "message":"Addition options"
+    },
     "options_main":{  
         "message":"Main options"
     },
@@ -667,9 +670,6 @@
     },
     "unlock_censored_manual":{  
         "message":"Load by click on post small preview"
-    }, 
-    "unlock_censored_parser":{  
-        "message":"Unlock blocked posts during parsing"
     }, 
     "unlock_censored_auth":{  
         "message":"Enable posting, vote"
