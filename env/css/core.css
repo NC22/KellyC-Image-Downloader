@@ -1394,10 +1394,13 @@
     margin-right : 16px;
 }
 
+.__BASECLASS__-exporter-container {
+    margin-bottom : 24px;
+}
+
 .__BASECLASS__-exporter-container.__BASECLASS__-active {
     border: 1px solid rgba(0, 0, 0, 0.35);
     padding: 16px;
-    margin-bottom : 24px;
 }
 
 .__BASECLASS__-exporter-create-by-tag-container.__BASECLASS__-active,
