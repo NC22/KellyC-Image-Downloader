@@ -78,8 +78,8 @@ input[type=submit] {
 	padding: 50px;
 	padding-bottom: 20px;
 	padding-top: 20px;
-	background: #ffd6a4;
-    height : 72px;
+	background-color: #ffd6a4;
+    min-height : 72px;
 	border-bottom: 1px solid #ffa429;
 }
 

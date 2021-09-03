@@ -212,7 +212,7 @@
     "download_tip":{  
         "message":"Если нужно захватить все страницы оставьте не заполненным"
     },
-    "download_title":{  
+    "download_form_open":{  
         "message":"Выгрузить в профиль данных"
     },    
     "download_pages_autosave" : {

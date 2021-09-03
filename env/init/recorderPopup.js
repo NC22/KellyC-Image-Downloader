@@ -207,9 +207,9 @@ KellyPopupPage.showRecorder = function() {
 KellyPopupPage.init = function() {
     
     KellyTools.getBrowser().runtime.sendMessage({method: "getResources", items : ['recorderPopup']}, function(request) {
-        if (!request || !request.data.css) return false; 
+        if (!request || !request.data.loadedData) return false; 
         
-        KellyTools.addCss(KellyPopupPage.className, KellyTools.replaceAll(request.data.css, '__BASECLASS__', KellyPopupPage.className));
+        KellyTools.addCss(KellyPopupPage.className, KellyTools.replaceAll(request.data.loadedData, '__BASECLASS__', KellyPopupPage.className));
         KellyPopupPage.showRecorder();
     });            
     

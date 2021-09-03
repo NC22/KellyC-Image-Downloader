@@ -212,7 +212,7 @@
     "download_tip":{  
         "message":"If you want download all pages, just keep field empty"
     },
-    "download_title":{  
+    "download_form_open":{  
         "message":"Create data profile"
     },
     "download_tag_filter_1":{  
