@@ -64,7 +64,7 @@
                 handler.remove();
             } 
             
-            e.source.postMessage(response, window.location.orign);
+            e.source.postMessage(response, window.location.origin);
         };
         
         KellyDynamicDispetcher.removeBeforeUnload = function() {
