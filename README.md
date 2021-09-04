@@ -15,7 +15,6 @@
 <p>Several usage examples:</p>
 <p></p>
 <p><a href="https://www.youtube.com/watch?v=ImKbC_1Oz8c">Download images from <b>Pinterest</b></a> (Collect bookmarks from specifed folder)</p>
-
 <p><a href="https://www.youtube.com/watch?v=x1-kqKMnMmA">Download images from <b>Twitter</b></a> (Collect "Media" section)
 <p><a href="https://youtu.be/1Nivs34BDbI">Download images from <b>Pixiv</b></a> (Collect "Bookmarks" example)
 </p>
@@ -29,12 +28,9 @@
 <p>Некоторые сайты поддерживают дополнительный функционал, позволяющий быстро захватить оригиналы изображений без дополнительной фильтрации в ручную. Примеры использования и список сайтов с которых можно быстро скачать оригиналы изображений - <a href="https://github.com/NC22/KellyCImageDownloader/wiki">открыть</a></p>
 <p>Функция "Загрузка дочерних документов" используется если на основной странице доступно только изображение с низким разрешением и ссылка ведет на страницу с оригиналом. (функционал поумолчанию может не всегда сработать, см. страницу поддержки сайтов)</p>
 <p></p>
-<p><a href="https://www.youtube.com/watch?v=XpXhwndWYyg">Скачать картинки из альбома <b>Вконтакте</b></a> (Пример использования ф-ции)</p>
-<p></p>
 <p>Несколько примеров использования</p>
-<p></p>
+<p><a href="https://www.youtube.com/watch?v=XpXhwndWYyg">Скачать картинки из альбома <b>Вконтакте</b></a> (Пример использования ф-ции)</p>
 <p><a href="https://www.youtube.com/watch?v=ImKbC_1Oz8c">Скачать картинки с <b>Pinterest</b></a> (Сбор данных из закладок пользователя)</p>
-
 <p><a href="https://www.youtube.com/watch?v=x1-kqKMnMmA">Скачать картинки с <b>Twitter</b></a> (Сбор данных из раздела "Media")</p>
 <p></p>
 <p>Если вы знаете JS и хотите расширить список поддерживаемых сайтов, можете добавить дополнительный фильтр в соответствии с документацией <a href="https://github.com/NC22/KellyCImageDownloader/blob/master/lib/recorder/filters/README.md">здесь</a></p>

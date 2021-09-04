@@ -126,7 +126,7 @@
 
 .__BASECLASS__-tooltipster-container {
 	min-width: 210px;
-	min-height: 52px;
+	min-height: 40px;
 	margin : 0;
 	
     background : rgba(96, 102, 126, 0.9490);
@@ -140,6 +140,7 @@
     */
 	border-radius : 4px;
 	padding : 12px;
+    box-sizing: border-box;
 }
 
 .__BASECLASS__-tooltipster-container a {
