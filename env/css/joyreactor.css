@@ -106,7 +106,6 @@ table.__BASECLASS__-options-table input[type="submit"] {
 
 #submenu.__BASECLASS__-top-joyreactor-cc {
     height: 32px;
-    padding-top: 8px;
     white-space: nowrap;
     display : inline-block;
     float : right;
@@ -131,6 +130,10 @@ table.__BASECLASS__-options-table input[type="submit"] {
     top: -2px;
     color: #fff;
     background: rgb(237 153 0);
+}
+
+#submenu.__BASECLASS__-top-joyreactor-cc .kelly-jr-ui-icon {
+    top : 8px;
 }
 
 .__BASECLASS__-top-joyreactor-cc .__BASECLASS__-tab-list a {
