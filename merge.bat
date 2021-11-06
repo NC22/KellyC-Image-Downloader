@@ -64,6 +64,12 @@ if "%manifestVersion%" equ "3" (
     
 )
 
+if "%joyreactor%" geq "1" (    
+    @echo.>> %background%    
+    copy %background% + "%~dp0\lib\profiles\joyreactor.unlock.d.js" %background%
+    @echo.>> %background%  
+)
+
 @echo.>> %background%
 copy %background% + "env\init\background.js" %background%
 @echo.>> %background%
