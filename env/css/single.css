@@ -126,8 +126,14 @@ input[type=submit] {
 
 .__BASECLASS__-copyright-info {
     font-size: 18px;
-    float: right;
-    padding-top: 4px;
+    float: right;  
+    line-height: normal;
+    margin-top: -4px;
+}
+
+#copyright-software a,  #copyright-software {
+    font-size : 12px;
+    text-align: right;
 }
 
 @media (max-width: 1240px) {

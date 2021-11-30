@@ -8,7 +8,7 @@
     }
     
     .__BASECLASS__-tab-list, .__BASECLASS__-tab {        
-        padding: 12px;
+        padding: 0;
         padding-bottom : 0px;
     }
     
@@ -65,7 +65,16 @@
         /* font-weight: bold; */
         float: none;
         margin-left: 14px;
-        margin-bottom: 12px;
+        margin-bottom: 25px;
+        margin-top: 0;
+    }
+    
+    #copyright-name {
+        font-size: 18px;
+    }
+    
+    #copyright-software a, #copyright-software {
+        text-align : left;
     }
 }
 
