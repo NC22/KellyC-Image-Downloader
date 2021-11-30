@@ -169,12 +169,12 @@ KellyPopupPage.showRecorder = function() {
     document.title = KellyTools.getProgName();
     KellyPopupPage.wrap = document.getElementById('popup');    
     
-    KellyTools.setCopyright('copyright-software');
+    KellyTools.setCopyright('copyright-software', 'popup');
     
     var recorderInfoHtml = '\
         <div class="' + KellyPopupPage.className + '-recorded-block">\
             <span class="' + KellyPopupPage.className + '-recorded-notice"></span>\
-            <a href="#" class="' + KellyPopupPage.className + '-recorded-clear">[x]</a>\
+            <a href="#" class="' + KellyPopupPage.className + '-recorded-clear">' + KellyLoc.s('', 'cancel') + '</a>\
         </div>'; 
     
     KellyTools.setHTMLData(KellyPopupPage.wrap, recorderInfoHtml);
@@ -216,4 +216,5 @@ KellyPopupPage.init = function() {
     return true;
 }
 
-KellyPopupPage.init();
+
+KellyTools.loadFrontJs(KellyPopupPage.init);

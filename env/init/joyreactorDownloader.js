@@ -55,4 +55,4 @@ KellyJoyreactorDPage.init = function() {
     KellyTools.setCopyright('copyright-software');
 }
 
-KellyJoyreactorDPage.init();
+KellyTools.loadFrontJs(KellyJoyreactorDPage.init);

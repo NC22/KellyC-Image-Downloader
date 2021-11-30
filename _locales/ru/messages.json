@@ -177,7 +177,7 @@
         "message":"Остановить"
     }, 
     "download_recorded_images":{  
-        "message":"Записаные картинки"
+        "message":"Найдено"
     },  
     "download_recorded_empty":{  
         "message":"Нет записей"
@@ -529,7 +529,10 @@
     },    
     "go":{  
         "message":"Перейти"
-    },
+    },  
+    "help":{  
+        "message":"Помощь"
+    }, 
     "hide_soc":{  
         "message":"Скрывать кнопки соц. сетей из публикаций"
     },
@@ -622,6 +625,9 @@
     },  
     "nsfw_tip":{  
         "message":"Если деактивировано - автоматически исключать категории с маркером NSFW"
+    },  
+    "nradiowave_person":{  
+        "message":"Владимир Рубчук"
     },
     "no_image":{  
         "message":"Без изображения"
@@ -650,6 +656,30 @@
     "other":{  
         "message":"Остальное"
     },  
+    "options_page_title": {
+        "message" : "Выберите страницу настроек модуля"
+    },
+    "options_page_module_enabled": {
+        "message" : "Модуль включен"
+    },
+    "options_page_recorder_cfg": {
+        "message" : "Настройки [Всплывающее окно записи]"
+    },
+    "options_page_recorder_desc": {
+        "message" : "Универсальный инструмент для скачивания картинок с любого сайта (вызывается по клику на иконку расширения)"
+    },
+    "options_page_custom_cfg": {
+        "message" : "Настройки [Встраиваемый модуль для __PROFILENAME__]"
+    },
+    "options_page_custom_sites": {
+        "message" : "Встроен в сайты :"
+    },
+    "options_page_about": {
+        "message" : "О проекте"
+    },
+    "options_page_pp": {
+        "message" : "Политика конфиденциальности"
+    },
     "page":{  
         "message":"Страница"
     }, 
@@ -769,7 +799,10 @@
     },    
     "storage_parser_save_to_profile":{  
         "message":"Добавить картинки в профиль"
-    },
+    },    
+    "storage_conflict_action":{  
+        "message":"Если профиль существует"
+    }, 
     "storage_name":{  
         "message":"Идентификатор профиля<br>(только символы A-Z, 1-9, _)"
     },
@@ -800,18 +833,6 @@
     "storage_type_notice":{  
         "message":"При изменении типа хранения данных данные будут считываться из другого места, соответственно текущий список профилей будет скрыт."
     },   
-    "storage_type_notice_fox_warning":{  
-        "message":"<b style=\"color: #ff4a4a\">Внимание - в новых версиях браузера тип хранения данных \"Localstorage\" может быть небезопасен для долгосрочного хранения</b>. Если не хотите потерять данные используйте <b>Browser API</b>"
-    },   
-    "storage_type_notice_fox_warning_2":{  
-        "message":"<div><b style=\"color: #ff4a4a\">Внимание - в новых версиях браузера тип хранения данных \"Localstorage\" может быть небезопасен для долгосрочного хранения</b></div>"
-    }, 
-    "storage_type_notice_fox_warning_3":{  
-        "message":"<div style=\"margin: 12px 0;\">Рекомендуется переключить тип хранения данных на <b>Browser API</b> в настройках, предварительно скачав текущий профиль со списком картинок</div>"
-    },
-    "storage_type_notice_fox_warning_4":{  
-        "message":"<div><a href=\"#\" data-action=\"ok\">Больше не предупреждать</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"#\" data-action=\"options\">Перейти в настройки</a> </div>"
-    },
     "storage_type":{  
         "message":"Тип хранения данных"
     },  
@@ -864,7 +885,7 @@
         "message":"Данные обновлены"
     },
     "storage_deprecated":{  
-        "message":"Данные избранного были обновлены с другой вкладки. Перезагрузить список избранных элементов для текущей страницы ?"
+        "message":"Данные профиля были обновлены с другой вкладки. Перезагрузить список элементов для текущей страницы ?"
     }, 
     "sync_by_add":{  
         "message":"Дублировать в \"Закладки\" пользователя, если авторизован"

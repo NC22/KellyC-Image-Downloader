@@ -1,5 +1,4 @@
 KellyOptionsPage = new Object();
-KellyOptionsPage.profiles = [KellyProfileRecorder, KellyProfileJoyreactor];
 
 KellyOptionsPage.addToggleProfileEvent = function(p) {    
 
@@ -16,22 +15,30 @@ KellyOptionsPage.addToggleProfileEvent = function(p) {
 
 KellyOptionsPage.init = function() {
     
-    var bc = 'profile-selector', html = '<div class="' + bc + '-title"><h1>Выберите страницу настроек модуля</h1></div>', itemHtml = '';
+    KellyOptionsPage.profiles = [KellyProfileRecorder, KellyProfileJoyreactor];
+    var handler = KellyOptionsPage;
+
+    var bc = 'profile-selector', html = '', itemHtml = '';
     document.title = KellyTools.getProgName();
-    
-    for (var i = 0; i < this.profiles.length; i++) {
+            
+    for (var i = 0; i < handler.profiles.length; i++) {
         
-        var p = this.profiles[i].getInstance(); 
+        var p = handler.profiles[i].getInstance(); 
         if (p.profile == 'recorder') { // filter.constructor.name - конструктор пока везде Object
-            itemHtml = '<label></label><a href="' + p.profile + 'Downloader.html?tab=options"><div class="' + bc + '-name">Настройки [Всплывающее окно записи]</div>';            
-            itemHtml += '<div class="' + bc + '-hostlist">Универсальный инструмент для скачивания картинок с любого сайта (вызывается по клику на иконку расширения).</div>';
+            itemHtml = '<label></label><a href="' + p.profile + 'Downloader.html?tab=options"><div class="' + bc + '-name">' + KellyLoc.s('', 'options_page_recorder_cfg') + '</div>';            
+            itemHtml += '<div class="' + bc + '-hostlist">' + KellyLoc.s('test', 'options_page_recorder_desc') + '</div>';
         } else {        
-            itemHtml = '<label><input type="checkbox" class="profile-toggle" data-profile="' + p.profile + '"> Модуль включен</label>';
-            itemHtml += '<a href="' + p.profile + 'Downloader.html?tab=options"><div class="' + bc + '-name">Настройки [Встраиваемый модуль для ' + KellyTools.getCamelWord(p.profile) + ']</div>';
-            if (p.hostList && p.hostList.length > 0)  itemHtml += '<div class="' + bc + '-hostlist">Встроен в сайты : ' + p.hostList.join(', ') + '</div>';  
+            itemHtml = '<label><input type="checkbox" class="profile-toggle" data-profile="' + p.profile + '">' + KellyLoc.s('', 'options_page_module_enabled') + '</label>';
+            itemHtml += '<a href="' + p.profile + 'Downloader.html?tab=options"><div class="' + bc + '-name">' + KellyLoc.s('', 'options_page_custom_cfg', {PROFILENAME : KellyTools.getCamelWord(p.profile)})+ '</div>';
+            if (p.hostList && p.hostList.length > 0)  itemHtml += '<div class="' + bc + '-hostlist">' + KellyLoc.s('', 'options_page_custom_sites') + p.hostList.join(', ') + '</div>';  
         }
         
         html += '<div class="' + bc + '">' + itemHtml + '</a></div>';
+    }
+    
+    var pageLoc = document.querySelectorAll('[data-loc]');
+    for (var i = 0; i < pageLoc.length; i++) {
+        pageLoc[i].innerText = KellyLoc.s('', pageLoc[i].getAttribute('data-loc'));
     }
     
     /*
@@ -57,8 +64,9 @@ KellyOptionsPage.init = function() {
     html += '</table></div>';
     */
     
-    KellyTools.setCopyright('copyright-software', 'options'); KellyTools.setHTMLData(document.getElementById('profile-selector'), html); 
-    for (var i = 0; i < this.profiles.length; i++) KellyOptionsPage.addToggleProfileEvent(this.profiles[i].getInstance());
+    KellyTools.setCopyright('copyright-software', 'options'); KellyTools.setHTMLData(document.getElementById('profile-selector'), html + '<div style="clear : both;"></div>'); 
+    for (var i = 0; i < handler.profiles.length; i++) KellyOptionsPage.addToggleProfileEvent(handler.profiles[i].getInstance());
 }
 
-KellyOptionsPage.init();
+
+KellyTools.loadFrontJs(KellyOptionsPage.init);

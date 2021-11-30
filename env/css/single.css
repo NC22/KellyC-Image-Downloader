@@ -86,6 +86,7 @@ input[type=submit] {
 .__BASECLASS__-imagesBlock-container {
 	width : 100%;
 	overflow : hidden;
+    margin-bottom : 16px;
 }
 
 .__BASECLASS__-MainMenuItem {
@@ -120,6 +121,7 @@ input[type=submit] {
 .options_page .__BASECLASS__-ModalBox {
     margin-top: 6px;
     margin-left: 16px;
+    margin-bottom : 6px;
 }
 
 .__BASECLASS__-copyright-info {

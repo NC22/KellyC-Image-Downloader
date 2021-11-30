@@ -1,1 +1,3 @@
-KellyDPage.init();
+KellyTools.loadFrontJs(function() {
+    KellyDPage.init();
+});

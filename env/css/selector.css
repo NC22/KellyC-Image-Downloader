@@ -8,41 +8,62 @@ html, body {
     margin: 0;
     width : 100%;
     height: 100%;
+    color: #ff8d00;
 }
 
 body {
     padding: 0;
     margin: 0;
-    background: #e5f2ff url(../img/d_think.png);
+    /* background: #e5f2ff url(../img/d_think.png); */
+    background : #2f2f2f;
     background-repeat: no-repeat;
     background-position: bottom right;
 
 }
 
 #profile-selector {
+    padding: 16px;
+}
+
+.profile-selector-title {
+    
+    background : #6a6a6a;
     padding : 16px;
 }
 
-#profile-selector h1 {
+.profile-selector-title h1 {
     padding: 0;
     margin: 0;
     margin-bottom: 12px;
 }
 
+.profile-help-links {
+    position: fixed;
+    bottom: 0;
+    right : 0;
+    font-size: 15px;
+    padding: 16px;
+    font-size : 16px;
+}
+
+.profile-help-links a {
+    margin-right: 6px;
+    text-decoration: none;
+    color: #ff8d00;
+    font-weight: bold;
+}
+
 .profile-selector-copyright {
-position: fixed;
+    position: fixed;
     bottom: 0;
     /* left: 50%; */
     font-size: 15px;
     padding: 16px;
-    background: rgb(240 248 255);
-    color: #000000;
-    font-weight: bold;
 }
 
 .profile-selector-copyright a {
     text-decoration: none;
-    color: #000000;
+    color: #ff8d00;
     font-weight: bold;
 }
 
@@ -60,20 +81,21 @@ position: fixed;
 
 
 .profile-selector {
-    display : inline-block;
-    /* background : #ff8318; */
-    border : 1px solid #000;
-    font-size : 12px;
-    padding : 6px;
-    margin-bottom : 12px;
-    margin-right : 12px;
-    max-width : 500px;
+    display: inline-block;
+    /* background: #ff8318; */
+    border: 1px solid #000;
+    font-size: 12px;
+    padding: 6px;
+    margin-bottom: 12px;
+    margin-right: 12px;
+    max-width: 500px;
+    float: left;
+    background: #4c4c4c;
 }
 
-.profile-selector a { 
-    
-    color : #000;
-    text-decoration : none;
+.profile-selector a {
+    color: #fff;
+    text-decoration: none;
 }
 
 .profile-selector .profile-selector-name {
@@ -87,6 +109,7 @@ position: fixed;
     font-size : 12px;
     background : rgba(255, 255, 255, 0.43);
     margin-top : 6px;
+    min-height : 50px; 
 }
 
 .profile-selector label input[type=checkbox] {
@@ -142,5 +165,9 @@ position: fixed;
         background-size: 100px;
         border-radius: 52px;
         border: 2px solid #fff;
+    }
+    
+    .profile-help-links {
+        position: static;
     }
 }

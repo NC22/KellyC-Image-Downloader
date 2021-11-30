@@ -177,7 +177,7 @@
         "message":"Stop record"
     }, 
     "download_recorded_images":{  
-        "message":"Recorded images"
+        "message":"Found"
     },  
     "download_recorded_empty":{  
         "message":"No records"
@@ -520,7 +520,10 @@
     },
     "go":{  
         "message":"Go"
-    },
+    },  
+    "help":{  
+        "message":"Help"
+    }, 
     "hide_soc":{  
         "message":"Hide social networks markers from publication block"
     }, 
@@ -613,6 +616,9 @@
     },
     "nsfw_tip":{  
         "message":"Auto deselect categories that marked as NSFW"
+    },    
+    "nradiowave_person":{  
+        "message":"Владимир Рубчук"
     },
     "no_image":{  
         "message":"Without image"
@@ -640,6 +646,30 @@
     },
     "other":{  
         "message":"Other"
+    },   
+    "options_page_title": {
+        "message" : "Select module options page"
+    },    
+    "options_page_module_enabled": {
+        "message" : "Module enabled"
+    },
+    "options_page_recorder_cfg": {
+        "message" : "Options [Recorder module]"
+    },
+    "options_page_recorder_desc": {
+        "message" : "Recored for download images from any site (call popup by click on extension icon по)"
+    },
+    "options_page_custom_cfg": {
+        "message" : "Options [Module for __PROFILENAME__]"
+    },
+    "options_page_custom_sites": {
+        "message" : "Sites :"
+    },
+    "options_page_about": {
+        "message" : "About"
+    },
+    "options_page_pp": {
+        "message" : "Privacy Policy"
     },
     "page":{  
         "message":"Page"
@@ -760,6 +790,9 @@
     },    
     "storage_parser_save_to_profile":{  
         "message":"Save images to profile"
+    },    
+    "storage_conflict_action":{  
+        "message":"If profile exists"
     }, 
     "storage_name":{  
         "message":"Profile id (only ch. A-Z, 1-9, _)"
@@ -794,18 +827,6 @@
     "storage_type_notice":{  
         "message":"<b>Change storage type only if needed</b>. After change, your current profile list will be hidden, until switch back to previous storage type"
     },  
-    "storage_type_notice_fox_warning":{  
-        "message":"<b style=\"color: #ff4a4a\">Warning - using the localStorage is unsafe for constantly store data</b>. Switch to <b>Browser API</b> for safety"
-    },    
-    "storage_type_notice_fox_warning_2":{  
-        "message":"<div><b style=\"color: #ff4a4a\">Warning - using the <b>localStorage</b> is unsafe for constantly store data</b>.</div>"
-    }, 
-    "storage_type_notice_fox_warning_3":{  
-        "message":"<div>Switch to <b>Browser API</b> for safety</div>"
-    },
-    "storage_type_notice_fox_warning_4":{  
-        "message":"<div><a href=\"#\" data-action=\"ok\">Dont remind again</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"#\" data-action=\"options\">Go to options page</a> </div>"
-    },
     "storage_manage":{  
         "message":"Profile manager"
     }, 
@@ -855,7 +876,7 @@
         "message":"Current configuration updated"
     },
     "storage_deprecated":{  
-        "message":"List of fav images was updated from another tab. Reload image list ?"
+        "message":"List of current profile images was updated from another tab. Reload image list ?"
     }, 
     "sync_by_add":{  
         "message":"If user is logged in, duplicates publication to main favorites storage"

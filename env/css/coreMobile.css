@@ -141,3 +141,38 @@
 .__BASECLASS__-mobile .content {
     width : 100%;
 }
+
+
+@media (max-width: 590px) { 
+
+    .__BASECLASS__-dark .page-content {
+        padding : 0 6px;        
+    }
+    
+    .__BASECLASS__-dark .__BASECLASS__-tab-list ul li {
+        margin-top : 2px;
+        margin-bottom : 2px;
+        width: auto; 
+        float: unset; 
+    }
+    
+    .__BASECLASS__-dark  .__BASECLASS__-options-table > tbody > tr > td[colspan="2"],    
+    .__BASECLASS__-dark  .__BASECLASS__-options-table > tbody > tr > td {
+        height : auto;
+    }
+    
+    .__BASECLASS__-dark  .__BASECLASS__-options-table > tbody > tr > td br {
+        display : inline-block;
+        margin-left : 4px;
+    }
+    
+    .__BASECLASS__-dark input[type=submit] {
+        width: 100%;
+        margin-top: 12px;
+    }
+    
+    .__BASECLASS__-dark .__BASECLASS__-sidebar-wrap .__BASECLASS__-ModalBox.__BASECLASS__-Main-download-btn-ModalBox {
+        display : none;
+    }
+}
+
