@@ -1,5 +1,6 @@
 KellyPopupPage = new Object();
 KellyPopupPage.className = 'popup-page';
+KellyPopupPage.css = ['recorderPopup'];
 KellyPopupPage.wrap = false;
 KellyPopupPage.recordingState = 'loading'; // loading (init), stopping (stopRecord), starting (startRecord), disabled (record is not runing), enabled (record is runing)
 KellyPopupPage.recordingNum = false;
@@ -206,12 +207,18 @@ KellyPopupPage.showRecorder = function() {
 
 KellyPopupPage.init = function() {
     
-    KellyTools.getBrowser().runtime.sendMessage({method: "getResources", items : ['recorderPopup']}, function(request) {
-        if (!request || !request.data.loadedData) return false; 
-        
-        KellyTools.addCss(KellyPopupPage.className, KellyTools.replaceAll(request.data.loadedData, '__BASECLASS__', KellyPopupPage.className));
-        KellyPopupPage.showRecorder();
-    });            
+    var favEnv = new KellyFavItems({env : KellyProfileRecorder.getInstance()});
+        favEnv.load('cfg', function(fav) { 
+            
+            if (fav.coptions.darkTheme) KellyPopupPage.css.push('darkRecorderPopup');
+            
+            KellyTools.getBrowser().runtime.sendMessage({method: "getResources", items : KellyPopupPage.css}, function(request) {
+                if (!request || !request.data.loadedData) return false; 
+                
+                KellyTools.addCss(KellyPopupPage.className, KellyTools.replaceAll(request.data.loadedData, '__BASECLASS__', KellyPopupPage.className));
+                KellyPopupPage.showRecorder();
+            });   
+        });
     
     return true;
 }

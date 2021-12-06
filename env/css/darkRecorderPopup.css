@@ -1,0 +1,46 @@
+body {
+    background: #363838;
+    border: 6px solid #fff;
+}
+
+button {
+    background: #444646;
+    color: #fff;
+    border: 0;
+}
+
+button:hover {
+    background: #5d5d5d;
+}
+
+.popup-page-recorded-block {
+    color: #bfbfbf;
+    background: #4b4b4b;
+}
+
+.__BASECLASS__-recorded-block a {
+    float : right;
+    color: #bfbfbf;
+}
+
+.popup-page-button-download_recorded {
+    background: #e63d3d;
+}
+
+.popup-page-button-download_recorded:hover {
+    background: #ff7878;
+}
+
+.popup-page-button-download_record span:before {
+    background: #e63d3d;
+}
+
+#copyright-software {
+    color: #bfbfbf;
+    background: #4b4b4b;
+    padding: 11px 12px;
+}
+
+#copyright-software a {
+    color: #bfbfbf;
+}

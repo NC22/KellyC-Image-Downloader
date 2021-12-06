@@ -26,6 +26,18 @@
     "apply":{  
         "message":"Применить изменения"
     },
+    "additions":{  
+        "message":"Справка"
+    },
+    "additions_modules":{  
+        "message":"Модули сайтов"
+    },
+    "additions_help":{  
+        "message":"Помощь"
+    },
+    "additions_about":{
+        "message":"Ресурсы и документы"
+    },
     "associations_tags":{  
         "message":"Ассоциации с тегами (через запятую)"
     },
@@ -147,7 +159,7 @@
         "message":"Режим отладки"
     },  
     "dark_theme":{  
-        "message":"Темная тема (страница настроек)"
+        "message":"Темная тема"
     }, 
     "delete":{  
         "message":"Удалить"
@@ -627,7 +639,7 @@
         "message":"Если деактивировано - автоматически исключать категории с маркером NSFW"
     },  
     "nradiowave_person":{  
-        "message":"Владимир Рубчук"
+        "message":"nradiowave"
     },
     "no_image":{  
         "message":"Без изображения"
@@ -679,6 +691,9 @@
     },
     "options_page_pp": {
         "message" : "Политика конфиденциальности"
+    }, 
+    "options_page_selected": {
+        "message" : "(Текущая страница)"
     },
     "page":{  
         "message":"Страница"

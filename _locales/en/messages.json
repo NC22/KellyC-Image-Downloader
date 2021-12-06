@@ -28,6 +28,18 @@
     },
     "associations_tags":{  
         "message":"Associations with tags"
+    },  
+    "additions":{  
+        "message":"About"
+    },
+    "additions_modules":{  
+        "message":"Enabled site modules"
+    },
+    "additions_help":{  
+        "message":"Help"
+    },
+    "additions_about":{
+        "message":"Links and related documents"
     },
     "close":{  
         "message":"Close"
@@ -144,7 +156,7 @@
         "message":"Catched proportions"
     },
     "dark_theme":{  
-        "message":"Dark theme (options page)"
+        "message":"Dark theme"
     }, 
     "debug":{  
         "message":"Debug mode"
@@ -618,7 +630,7 @@
         "message":"Auto deselect categories that marked as NSFW"
     },    
     "nradiowave_person":{  
-        "message":"Vladimir Rubchuk"
+        "message":"nradiowave"
     },
     "no_image":{  
         "message":"Without image"
@@ -670,6 +682,9 @@
     },
     "options_page_pp": {
         "message" : "Privacy Policy"
+    },    
+    "options_page_selected": {
+        "message" : "(Current page)"
     },
     "page":{  
         "message":"Page"

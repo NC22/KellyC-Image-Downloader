@@ -3,11 +3,10 @@ body {
     margin: 0;
     padding: 0;
     width: 212px;
-    background: #363838;
     font-size: 12px;
     font-family: 'Open Sans',Sans-serif;
+    background: #ffffff;
     border: 6px solid #fff;
-    border-radius: 33p;
 }
 
 * {
@@ -15,9 +14,9 @@ body {
 }
 
 button {
-    background: #444646;
-    color: #fff;
-    border: 0;
+    background: #e5e5e5;
+    color: #000;
+    border: 1px solid;
     border-radius: 0;
     width: 100%;
     margin-bottom: 2px;
@@ -31,29 +30,28 @@ button {
 }
 
 button:hover {
-    background: #5d5d5d;
+    background: #b7b7b7;
 }
 
 .popup-page-recorded-block {
     width: 100%;
     padding: 6px;
-    color: #bfbfbf;
+    color: #000000;
     margin-bottom: 2px;
-    background: #4b4b4b;
     padding: 12px 7px;
 }
 
 .__BASECLASS__-recorded-block a {
     float : right;
-    color: #bfbfbf;
+    color: #ff610f;
 }
 
 .popup-page-button-download_recorded {
-    background: #e63d3d;
+    background: #ff782a;
 }
 
 .popup-page-button-download_recorded:hover {
-    background: #ff7878;
+    background: #ff8c4a;
 }
 
 .popup-page-button-download_record span:before {
@@ -69,10 +67,10 @@ button:hover {
 }
 
 #copyright-software {
-    color: #bfbfbf;
     text-align: right;
-    background: #4b4b4b;
-    padding: 18px 12px;
+    color: #ff610f;
+    background: #ffffff;
+    padding: 11px 3px;
 }
 
 #copyright-software a:first-child {
@@ -80,5 +78,5 @@ button:hover {
 }
 
 #copyright-software a {
-    color: #bfbfbf;
+    color: #ff610f;
 }

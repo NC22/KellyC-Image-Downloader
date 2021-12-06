@@ -50,22 +50,23 @@ body.__BASECLASS__-dark  {
     border-bottom: 1px solid #5a5a5a;
 }
 
-.__BASECLASS__-dark .__BASECLASS__-MainMenuItem.__BASECLASS__-MainMenuItem-fav a {
+.__BASECLASS__-dark .__BASECLASS__-MainMenuItem.__BASECLASS__-MainMenuItem-fav a,
+.__BASECLASS__-dark .__BASECLASS__-MainMenuItem.__BASECLASS__-MainMenuItem-fav.active a {
     background : transparent;
 }
 
 .__BASECLASS__-dark .__BASECLASS__-MainMenuItem a {
-    background: #ff7878;
+    background: #646464;
     font-size: 14px;
     font-weight: bold;
-    color : #fff;
+    color: #fff;
 }
 
 .__BASECLASS__-dark .__BASECLASS__-MainMenuItem-fav.active .__BASECLASS__-icon {
     background-color: #ff7878;
 }
 
-.__BASECLASS__-dark .__BASECLASS__-MainMenuItem-options.active a {
+.__BASECLASS__-dark .__BASECLASS__-MainMenuItem.active a {
     background: #e63d3d;
     color : #fff;
 }
@@ -74,10 +75,14 @@ body.__BASECLASS__-dark  {
     color : #000;
 }
 
-.__BASECLASS__-dark a, .__BASECLASS__-dark a:hover, 
-.__BASECLASS__-dark .__BASECLASS__-tab-list ul li a:hover {
+.__BASECLASS__-dark a, .__BASECLASS__-dark a:hover {
     color: rgb(255, 255, 255, 0.68);
 }
+
+.__BASECLASS__-dark .__BASECLASS__-tab-list ul li:hover {
+    background : #858585;
+    
+} 
 
 .__BASECLASS__-dark .__BASECLASS__-tab {
     line-height : normal;
@@ -99,7 +104,7 @@ body.__BASECLASS__-dark  {
 .__BASECLASS__-dark .__BASECLASS__-tab-list ul li {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-    background: #ff7878;
+    background: #646464;
     margin: 0;
     width: 25%;
     height: 40px;
@@ -241,12 +246,14 @@ body.__BASECLASS__-dark  {
 .__BASECLASS__-dark a.__BASECLASS__-pagination-item {
     color: #cdcdcd;
     background: #666666;
+    border: 2px solid #3c3c3c;
 }
 
 .__BASECLASS__-dark .__BASECLASS__-FavFilter {
     font-size : 12px;
 }
 
+.__BASECLASS__-dark .__BASECLASS__-FavItem-grid-empty,
 .__BASECLASS__-dark .__BASECLASS__-FavItem-download-number,
 .__BASECLASS__-dark .__BASECLASS__-preview-dimensions,
 .__BASECLASS__-dark .__BASECLASS__-message.__BASECLASS__-success, 
@@ -296,12 +303,12 @@ body.__BASECLASS__-dark  {
 
 .__BASECLASS__-Main-download-btn,
 .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a.__BASECLASS__-downloader-button-init {
-    background-color: #ff7878;
+    background-color: #e63d3d;
 }
 
 .__BASECLASS__-Main-download-btn:hover,
 .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a:hover {
-    background-color : #ffa6a6;
+    background-color : #e95757;
 }
 
 .__BASECLASS__-dark .__BASECLASS__-buttons button {
@@ -337,4 +344,26 @@ body.__BASECLASS__-dark  {
 .__BASECLASS__-downloader-progressbar-line:after {
     
     border-radius : 0;
+}
+
+.__BASECLASS__-dark .profile-selector {
+    background: #7c7c7c;
+}
+
+.__BASECLASS__-dark .profile-selector-selected {
+    color: #ffffff;
+}
+
+.__BASECLASS__-dark li.__BASECLASS__-additions-menu-item-li.kelly-jr-ui-additions-active a {
+    background: #979797;
+}
+
+.__BASECLASS__-dark .__BASECLASS__-active.__BASECLASS__-additions-page-item {
+    min-height: 250px;
+    padding: 6px;
+    background: #5c5c5c;
+}
+
+.__BASECLASS__-dark a.__BASECLASS__-additions-menu-item {
+    background: #5c5c5c;
 }
