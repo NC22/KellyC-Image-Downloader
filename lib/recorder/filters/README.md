@@ -129,7 +129,7 @@ item.relatedDoc = http://example.com/original-image-page?get=1&get2=234##FETCH_R
 
 KellyRecorderFilterExample.parseImagesDocByDriver = function(handler, thread) {
     
-        if (handler.url.indexOf('vk.com') != -1 && typeof thread.response == 'object' && handler.url.indexOf('original-image-page') != -1) {
+        if (handler.url.indexOf('example.ru') != -1 && typeof thread.response == 'object' && handler.url.indexOf('original-image-page') != -1) {
                 if (thread.response.originalImage) {
                     handler.imagesPool.push({relatedSrc : [thread.response.originalImage]}); // заполняем полученными данными, важна только ссылка на оригинал
                     return true; // прерываем обработку поумолчанию
@@ -197,6 +197,19 @@ KellyRecorderFilterPixiv.validateByDriver = function(handler, item) {
    // return false; - отменит добавление элемента
 }
 ```
+
+Инициализация перед началом процесса захвата ссылок. Можно задать список доп. категорий чтобы потои их проставлять в validateByDriver \ parseImagesDocByDriver \ addItemByDriver
+
+```
+KellyRecorderFilterExample.onStartRecord = function(handler, context) {
+     if (handler.url.indexOf('example.ru') == -1) return;
+     handler.additionCats = {
+        example_comment : {loc : 'Comment', color : '#b7dd99'},
+        example_post : {loc : 'Post', color : '#b7dd99'},
+     };
+}
+```
+
 
 Чтобы фильтр с доп. логикой учавствовал в обработке странице, его необходимо добавить в массив KellyPageWatchdog.filters как приведено ниже.
 В массиве KellyPageWatchdog.validators можно прописать автоматичекие ассоциации с группами по совпадениям в строке ссылки на изображение. Иногда этого достаточно и можно обойтись без доп. логики
