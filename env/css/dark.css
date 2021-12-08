@@ -243,9 +243,15 @@ body.__BASECLASS__-dark  {
     background-color : transparent;
 }
 
+
+.__BASECLASS__-dark a.__BASECLASS__-pagination-item:hover,
+.__BASECLASS__-dark a.__BASECLASS__-pagination-item:focus,
+.__BASECLASS__-dark .__BASECLASS__-pagination-item.active {
+    background: #a3a3a3;
+    color: #fff;
+}
+
 .__BASECLASS__-dark a.__BASECLASS__-pagination-item {
-    color: #cdcdcd;
-    background: #666666;
     border: 2px solid #3c3c3c;
 }
 
@@ -259,10 +265,8 @@ body.__BASECLASS__-dark  {
 .__BASECLASS__-dark .__BASECLASS__-message.__BASECLASS__-success, 
 .__BASECLASS__-dark .__BASECLASS__-OptionsMessage,
 .__BASECLASS__-dark .__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons p,
-.__BASECLASS__-dark .__BASECLASS__-section-header-inline, 
-.__BASECLASS__-dark .__BASECLASS__-pagination-item.active,
-.__BASECLASS__-dark a.__BASECLASS__-pagination-item:hover,
-.__BASECLASS__-dark a.__BASECLASS__-pagination-item:focus,
+.__BASECLASS__-dark .__BASECLASS__-section-header-inline,
+.__BASECLASS__-dark a.__BASECLASS__-pagination-item,
 .__BASECLASS__-dark .__BASECLASS__-FavFilter.active,
 .__BASECLASS__-dark .__BASECLASS__-FavEditButton.active {
     background: #666666;

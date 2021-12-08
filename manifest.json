@@ -28,6 +28,7 @@
             "lib/recorder/filters/pixiv.js", 
             "lib/recorder/filters/twitter.js", 
             "lib/recorder/filters/vk.js", 
+            "lib/recorder/filters/pikabu.js", 
             "lib/recorder/filters/_validators.js", 
             "lib/profiles/default.js", 
             "lib/profiles/recorder.js", 
