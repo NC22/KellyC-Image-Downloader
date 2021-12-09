@@ -73,6 +73,9 @@
     },
     "cat_name":{  
         "message":"Category name"
+    },  
+    "cat_tpl_name":{  
+        "message":"Use in name template"
     },
     "cat_new_cat_name":{  
         "message":"New category name"
@@ -512,7 +515,7 @@
     "grabber_transport_help_2":{  
         "message":"<br><br>Change this option if you can't download any thing (log files, profiles)<br>"
     }, 
-     "grabber_errors_counter":{  
+    "grabber_errors_counter":{  
         "message":"Failed : __ERRORSNUM__"
     },  
     "grabber_skip_downloaded":{  
@@ -997,6 +1000,9 @@
     },
     "recorder_filter_help_3":{  
         "message":"<b>Load related links</b> - try to find original images for filtered images (could work only on several sites, may work on random site. If work was tested on specifed site, button will be marked __CHECKMARK__)"
+    },   
+    "recorder_filter_help_4":{  
+        "message":"<b>Deep search</b> - search bigger images in related doc, compared them with base image of related document (used by default if extension do not have any build in filters for selected site)"
     },
     "recorder_cant_find_images":{  
         "message":"Cant find images in related links"

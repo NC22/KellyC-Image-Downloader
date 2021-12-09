@@ -360,7 +360,6 @@
 }
 
 .__BASECLASS__-preview-text div {
-    
     margin-bottom : 12px;
 }
 
@@ -368,7 +367,6 @@
     position: relative;
     width: 100%;
     height: 100%;
-   
 }
 
 .__BASECLASS__-preview {
@@ -384,6 +382,7 @@
     font-size : 14px;
     background: #ffd6a4;
     padding: 6px;
+    margin-top: 6px;
 }
 
 .__BASECLASS__-FavItem-grid-resized .__BASECLASS__-preview {

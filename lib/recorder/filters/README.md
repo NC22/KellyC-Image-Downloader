@@ -147,7 +147,6 @@ KellyRecorderFilterExample.parseImagesDocByDriver = function(handler, thread) {
 
 KellyRecorderFilterExample.onInitDocLoader = function(docLoader, hostList) {}
 
-KellyRecorderFilterExample.onInitLocation = function(handler, data) {}
 
 ```
 
