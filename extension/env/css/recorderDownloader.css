@@ -1,0 +1,220 @@
+.__BASECLASS__-TypeFiltersContainer {
+    display : none;
+}
+
+.__BASECLASS__-td-opt-1 {
+    display : none;
+}
+
+.__BASECLASS__-ModalBox {
+    min-height : 0;
+}
+
+.__BASECLASS__-FavItem {
+    cursor : pointer;
+}
+
+.__BASECLASS__-preview {
+    border-radius : 0;
+}
+
+.__BASECLASS__-FavItem-download-number {
+   border-radius : 0; 
+}
+
+.__BASECLASS__-section-header-inline.__BASECLASS__-section-sidebar_section_extra_progress {
+    display : none;
+}
+
+.__BASECLASS__-preview-dimensions {
+    position: absolute;
+    bottom: 6px;
+    display: block;
+    line-height: 20px;
+    height: 20px;
+    background: #ffa73acc;
+    padding: 0 2px;
+}
+
+.__BASECLASS__-FavItem-small .__BASECLASS__-preview-wrap {
+    border: 3px solid rgba(255, 121, 26, 0.45); 
+}
+
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons p {
+    background: #ffc78e;
+    color : #000;
+    padding: 6px;
+    margin: 0;
+    margin-bottom: 6px;
+}
+
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons button.selected,
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons button:hover {
+    background-color: #ffc78e;
+}
+
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons button {
+    border: 0;
+    height: 32px;
+    display: inline-block;
+    margin-right: 2%;
+    background-color: #ff8509;
+    width: 49%;
+    float: left;
+    cursor : pointer;
+}
+
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons.__BASECLASS__-buttons-single button {
+    width : 100%;
+}
+
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons button:last-child {
+    margin-right : 0;
+}
+
+.__BASECLASS__-ModalBox-addition input[type=text] {
+    width: 100%;
+    height: 32px;
+    margin-bottom: 6px;
+}
+
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-downloader-progressbar {
+    width: 100%;
+}
+
+.__BASECLASS__-ModalBox-addition, .__BASECLASS__-ModalBox-addition .__BASECLASS__-ModalBox-content {
+    min-height: unset;
+}
+
+.__BASECLASS__-related-links-options-wrap {
+    margin-top : 12px;
+}
+
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-downloader-statistic.hidden, 
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-downloader-progressbar.hidden {
+    display : none;
+}
+
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-url-exclude label,
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-url label {
+    display: block;
+}
+
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-downloader-statistic, 
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-downloader-progressbar,
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons, 
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-url-exclude label, 
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-url label {
+    margin-bottom: 6px;
+}
+
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons-last {
+    margin-bottom : 0;
+}
+
+.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll tr.__BASECLASS__-downloader-quality-tr,
+.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll tr.__BASECLASS__-downloader-controll-extended-grabber_anim_format {
+    display : none;
+}
+
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-bounds input {
+    width: 59px;
+    height: 32px;
+}
+
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons:after {
+    content: ' ';
+    clear: both;
+    display: block;
+}
+
+.__BASECLASS__-process-docLoader-work .__BASECLASS__-buttons-filter,
+.__BASECLASS__-process-docLoader-work .__BASECLASS__-extra-sort,
+.__BASECLASS__-process-docLoader-work .__BASECLASS__-section-sidebar_section_extra_sort,
+.__BASECLASS__-process-docLoader-work .__BASECLASS__-bounds,
+.__BASECLASS__-process-docLoader-work .__BASECLASS__-url-exclude,
+.__BASECLASS__-process-docLoader-work .__BASECLASS__-related-links-options-wrap, 
+.__BASECLASS__-process-docLoader-work .__BASECLASS__-url {
+   
+   display : none;
+}
+
+.__BASECLASS__-displayed-info {
+
+    font-size: 12px;
+    
+    background: #ffefc985;
+    display: inline-block;
+    height: 30px;
+    vertical-align: middle;
+    line-height: 30px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.__BASECLASS__-buttons button.__BASECLASS__-proportions,
+.__BASECLASS__-buttons button.__BASECLASS__-related-links-options,
+.__BASECLASS__-buttons button.__BASECLASS__-related-links {
+    background-color: #ffd6a4;
+}
+
+.__BASECLASS__-buttons button.__BASECLASS__-related-links-options {
+    float: right;
+    height: 32px;
+    width: 18%;
+    display: block;
+    background-position: center;
+}
+
+.__BASECLASS__-buttons button.__BASECLASS__-related-links {
+    width : 80%;
+}
+
+.__BASECLASS__-checkmark {
+    display:inline-block;
+    width: 22px;
+    height:22px;
+    transform: rotate(45deg);  
+    vertical-align: middle;
+}
+
+.__BASECLASS__-checkmark:before {
+    position: absolute;
+    width:3px;
+    height:9px;
+    content:"";
+    background-color:#5fff0d;
+    left:11px;
+    top:6px;
+}
+
+.__BASECLASS__-checkmark:after {
+    position: absolute;
+    content:"";
+    width:3px;
+    height:3px;
+    background-color:#5fff0d;
+    left:8px;
+    top:12px;
+}
+
+.__BASECLASS__-Main-download-btn {
+    display: block;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    padding: 7px;
+    font-size: 16px;
+    text-decoration: none;
+    background: #ff6900;
+    font-weight: bold;
+}
+
+.__BASECLASS__-Main-download-btn-ModalBox.__BASECLASS__-hidden {
+    margin-bottom : 0;
+    margin-top : 0;
+}
+
+.__BASECLASS__-Main-download-btn-ModalBox {
+    border : 0;
+}

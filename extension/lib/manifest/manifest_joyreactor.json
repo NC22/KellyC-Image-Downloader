@@ -1,0 +1,42 @@
+{
+   "content_scripts": [ {
+      "js": [ "kmerged.user.js", "env/init/joyreactorFront.js" ],
+      "all_frames": true,
+      "matches": [ 
+        "http://*/*",
+        "https://*/*"
+        ]
+   } ],
+   "manifest_version" : 2,
+   "version": "1.2.0.4",
+   "name": "__MSG_ext_name__",
+   "description": "__MSG_ext_description__",
+   "icons": { 
+        "32": "env/img/icon32x32.png",
+        "44": "env/img/icon44x44.png",
+        "128": "env/img/icon128x128.png" },
+   "author" : "nradiowave",
+   "default_locale" : "en",
+   "permissions": [
+        "downloads",
+        "storage",
+        "tabs",
+        "unlimitedStorage",
+        "webRequest",
+        "webRequestBlocking",
+        "<all_urls>"
+    ],
+   "background": {
+    "scripts": ["kmerged.bg.js"],
+    "persistent": true
+   },  
+   "options_ui": {
+    "page": "env/html/joyreactorDownloader.html",
+    "open_in_tab": true
+   },
+   "web_accessible_resources": [
+        "env/css/*.css",
+        "env/html/*.html",
+        "env/dynamic/*.js"
+    ]
+}

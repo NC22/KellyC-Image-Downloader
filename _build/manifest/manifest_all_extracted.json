@@ -1,0 +1,88 @@
+{
+   "content_scripts": [ {
+      "js": [ 
+            "widget/kellyTooltip.js", 
+            "widget/kellyTileGrid.js", 
+            "widget/kellyImageView.js", 
+            "lib/kellyLoc.js", 
+            "lib/kellyStorageManager.js", 
+            "lib/kellyThreadWork.js", 
+            "lib/kellyGrabber.js", 
+            "lib/kellyFastSave.js", 
+            "lib/kellyTools.js", 
+            "lib/kellyOptions.js", 
+            "lib/kellyAdditionsForm.js", 
+            "lib/kellyFavItems.js", 
+            "lib/profiles/joyreactor.js", 
+            "lib/profiles/joyreactor.unlock.js", 
+            "lib/profiles/topjoyreactor.js", 
+            "lib/recorder/kellyPageWatchdog.js", 
+            "lib/recorder/kellyLoadDocControll.js", 
+            "lib/recorder/kellyDPage.js", 
+            "lib/recorder/filters/artstation.js", 
+            "lib/recorder/filters/deviantart.js", 
+            "lib/recorder/filters/ehentai.js", 
+            "lib/recorder/filters/instagram.js", 
+            "lib/recorder/filters/joyreactor.js", 
+            "lib/recorder/filters/kemonoparty.js", 
+            "lib/recorder/filters/pixiv.js", 
+            "lib/recorder/filters/twitter.js", 
+            "lib/recorder/filters/vk.js", 
+            "lib/recorder/filters/pikabu.js", 
+            "lib/recorder/filters/_validators.js", 
+            "lib/profiles/default.js", 
+            "lib/profiles/recorder.js", 
+            "env/init/recorderFront.js", 
+            "env/init/joyreactorFront.js" 
+      ],
+      "all_frames": true,
+      "matches": [ 
+        "http://*/*",
+        "https://*/*"
+        ]
+   } ],
+   "manifest_version" : 2,
+   "version": "1.2.1.0",
+   "name": "KellyC Image Downloader",
+   "description": "__MSG_ext_description_recorder__",
+   "icons": { 
+        "32": "env/img/icon32x32.png",
+        "44": "env/img/icon44x44.png",
+        "128": "env/img/icon128x128.png" },
+   "author" : "nradiowave",
+   "default_locale" : "en",
+   "permissions": [
+        "downloads",
+        "storage",
+        "tabs",
+        "unlimitedStorage",
+        "webRequest",
+        "webRequestBlocking",
+        "<all_urls>"
+    ],
+   "background": {
+    "scripts": [
+        "lib/kellyTools.js", 
+        "lib/kellyDispetcher.js", 
+        "lib/profiles/joyreactor.unlock.d.js",     
+        "env/init/background.js", 
+        "lib/recorder/kellyEDRecorder.js"
+    ],
+    "persistent": true
+   },  
+   "options_ui": {
+    "page": "env/html/recorderDownloader.html?tab=modules",
+    "open_in_tab": true
+   },
+   "browser_action": {
+        "default_popup": "env/html/recorderPopup.html",
+        "default_icon": {
+            "32": "env/img/icon32x32.png"
+        }
+   },
+   "web_accessible_resources": [
+        "env/css/*.css",
+        "env/html/*.html",
+        "env/dynamic/*.js"
+    ]
+}

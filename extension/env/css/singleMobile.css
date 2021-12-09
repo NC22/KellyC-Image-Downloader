@@ -1,0 +1,26 @@
+/* css for display extension as separate page */
+/* mobile version */
+
+@media (max-width: 1040px) {
+    .page-content {
+        padding: 4px;
+    }
+    
+    #submenu {
+        padding: 30px;
+        padding-bottom: 20px;
+        padding-top: 20px;
+    }
+}   
+
+@media (max-width: 590px) {
+    
+    #submenu {
+        padding-left: 0;
+        padding-right: 0;
+    }  
+}
+
+.__BASECLASS__-mobile #sidebar {
+    display : none;
+}

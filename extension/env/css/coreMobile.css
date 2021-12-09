@@ -1,0 +1,187 @@
+/* mobile version */
+
+@media (max-width: 1040px) {
+    
+    .__BASECLASS__-tab {
+        padding-top : 0;
+        padding-left : 0; 
+    }
+    
+    .__BASECLASS__-tab-list, .__BASECLASS__-tab {        
+        padding: 0;
+        padding-bottom : 0px;
+    }
+    
+    .__BASECLASS__-tab-list ul li {
+        width : auto;
+        border-radius: 0;
+        line-height: 32px;
+        height: 32px;
+        padding : 0 16px;
+    }
+    
+    .__BASECLASS__-tab-list ul li a {
+        padding-top: 0;
+    }
+    
+    .__BASECLASS__-copyright-info {
+        font-size: 15px;
+    }
+    
+    .__BASECLASS__-copyright-info a {
+        font-size: 15px;
+    }
+    
+    .__BASECLASS__-DBItem-name {
+        min-width : unset;
+    }  
+
+    .__BASECLASS__-DBItem-size {
+        min-width : unset;
+    }
+    
+    .__BASECLASS__-DBItem a.__BASECLASS__-right {
+        margin-right : 4px;
+    }
+    
+    .__BASECLASS__-DBItem.active:after {
+        display : none;
+    }
+    
+    .__BASECLASS__-DBItem a, .__BASECLASS__-DBItem span {
+        margin-right : 8px;
+    }
+    
+    .__BASECLASS__-ModalBox .__BASECLASS__-ModalBox-content {
+        min-height : 0px;
+    }
+}
+
+@media (max-width: 800px) { 
+
+    .__BASECLASS__-copyright-info {
+        display: block;
+        font-size: 15px;
+        /* font-weight: bold; */
+        float: none;
+        margin-left: 14px;
+        margin-bottom: 25px;
+        margin-top: 0;
+    }
+    
+    #copyright-name {
+        font-size: 18px;
+    }
+    
+    #copyright-software a, #copyright-software {
+        text-align : left;
+    }
+}
+
+@media (max-width: 590px) {
+    
+    .__BASECLASS__-tab td {
+        display: block;
+        width: 100%!important;
+        margin: 0;
+    }
+    
+    .__BASECLASS__-tab-list, .__BASECLASS__-tab {        
+        padding: 0;
+        padding-bottom : 0;
+    }
+    
+    .__BASECLASS__-DBItem span {
+        display : block;
+    }
+    
+    .__BASECLASS__-DBItem {
+        height : auto;
+    }
+    
+    .__BASECLASS__-tab-list ul li {
+        display: block;
+        margin-bottom: 4px;
+        margin-right : 0px;
+    }
+    
+    .__BASECLASS__-OptionsSave-wrap {
+        margin-top : 16px;
+    }
+    
+    .__BASECLASS__-displayed-info {
+        margin-left: 6px;
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+}
+
+@media (max-width: 390px) {
+    .__BASECLASS__-displayed-info {
+        display: block;
+        margin-top: 12px;
+        margin-right: 6px;
+    }
+}
+
+.__BASECLASS__-mobile .__BASECLASS__-section-header-inline {
+    margin-left: 0;
+}
+
+.__BASECLASS__-mobile .__BASECLASS__-ModalBox {
+    border-radius: 0;
+    border-radius: 0;
+}
+    
+.__BASECLASS__-mobile .__BASECLASS__-sidebar-wrap .__BASECLASS__-ModalBox {
+    margin : 0px;
+}
+
+.__BASECLASS__-mobile .kelly-jr-ui-FavItem-grid-first,
+.__BASECLASS__-mobile .kelly-jr-ui-FavItem-grid-first .__BASECLASS__-FavItem-download-state-holder {
+    padding-left: 0;
+}
+
+.__BASECLASS__-mobile .kelly-jr-ui-FavItem-grid-last,
+.__BASECLASS__-mobile .kelly-jr-ui-FavItem-grid-last .__BASECLASS__-FavItem-download-state-holder {
+    padding-right: 0;
+}
+
+.__BASECLASS__-mobile .content {
+    width : 100%;
+}
+
+
+@media (max-width: 590px) { 
+
+    .__BASECLASS__-dark .page-content {
+        padding : 0 6px;        
+    }
+    
+    .__BASECLASS__-dark .__BASECLASS__-tab-list ul li {
+        margin-top : 2px;
+        margin-bottom : 2px;
+        width: auto; 
+        float: unset; 
+    }
+    
+    .__BASECLASS__-dark  .__BASECLASS__-options-table > tbody > tr > td[colspan="2"],    
+    .__BASECLASS__-dark  .__BASECLASS__-options-table > tbody > tr > td {
+        height : auto;
+    }
+    
+    .__BASECLASS__-dark  .__BASECLASS__-options-table > tbody > tr > td br {
+        display : inline-block;
+        margin-left : 4px;
+    }
+    
+    .__BASECLASS__-dark input[type=submit] {
+        width: 100%;
+        margin-top: 12px;
+    }
+    
+    .__BASECLASS__-dark .__BASECLASS__-sidebar-wrap .__BASECLASS__-ModalBox.__BASECLASS__-Main-download-btn-ModalBox {
+        display : none;
+    }
+}
+
