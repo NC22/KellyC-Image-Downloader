@@ -1,11 +1,9 @@
 <h1><img src="https://catface.ru/userfiles/media/udata_1544561629_uixtxchu.png" width="32"> KellyC Image Downloader</h1>
-<br>
-<br>
-<b><a href="https://catface.ru/way/kellyc_favorites/">Home page</a> | <a href="//github.com/NC22/KellyCFavorites/wiki">Wiki</a></b>
-<br>
-<br>
+<p></p>
 <h2>Install</h2>
 <p><b>Install</b> for <a href="https://chrome.google.com/webstore/detail/kellyc-favorites/mbhkdmjolnhcppnkldbdfaomeabjiofm?hl=en">Chrome</a>, <a href="https://addons.mozilla.org/ru/firefox/addon/kellyc-favorites/">FireFox</a>, <a href="https://chrome.google.com/webstore/detail/kellyc-favorites/mbhkdmjolnhcppnkldbdfaomeabjiofm?hl=en">Edge</a>, <a href="https://chrome.google.com/webstore/detail/kellyc-favorites/mbhkdmjolnhcppnkldbdfaomeabjiofm?hl=en">Opera</a></p>
+<p></p>
+<b><a href="https://catface.ru/way/kellyc_favorites/">Home page</a> | <a href="//github.com/NC22/KellyCFavorites/wiki">Wiki</a></b>
 <p></p>
 <h2>EN | Description</h2>
 <p>An browser extension for batch downloading artworks and images from sites. It allows you to download all images on the page filtering by size or other settings.</p>
