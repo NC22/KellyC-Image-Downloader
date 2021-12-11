@@ -16,7 +16,7 @@
 <p><a href="https://www.youtube.com/watch?v=x1-kqKMnMmA">Download images from <b>Twitter</b></a> (Collect "Media" section)</p>
 <p><a href="https://youtu.be/1Nivs34BDbI">Download images from <b>Pixiv</b></a> (Collect "Bookmarks" example)</p>
 <p></p>
-<p>If you know JS and want to extend list of supported sites read documentation about addition filters <a href="https://github.com/NC22/KellyCImageDownloader/blob/master/lib/recorder/filters/README.md">here</a></p>
+<p>If you know JS and want to extend list of supported sites read documentation about addition filters <a href="https://github.com/NC22/KellyCImageDownloader/blob/master/extension/lib/recorder/filters/README.md">here</a></p>
 
 <p></p>
 <h2>RU | Описание</h2>
@@ -30,7 +30,7 @@
 <p><a href="https://www.youtube.com/watch?v=ImKbC_1Oz8c">Скачать картинки с <b>Pinterest</b></a> (Сбор данных из закладок пользователя)</p>
 <p><a href="https://www.youtube.com/watch?v=x1-kqKMnMmA">Скачать картинки с <b>Twitter</b></a> (Сбор данных из раздела "Media")</p>
 <p></p>
-<p>Если вы знаете JS и хотите расширить список поддерживаемых сайтов, можете добавить дополнительный фильтр в соответствии с документацией <a href="https://github.com/NC22/KellyCImageDownloader/blob/master/lib/recorder/filters/README.md">здесь</a></p>
+<p>Если вы знаете JS и хотите расширить список поддерживаемых сайтов, можете добавить дополнительный фильтр в соответствии с документацией <a href="https://github.com/NC22/KellyCImageDownloader/blob/master/extension/lib/recorder/filters/README.md">здесь</a></p>
 
 <p></p>
 <h2>License</h2>
