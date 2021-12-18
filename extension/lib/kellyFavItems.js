@@ -1049,6 +1049,21 @@ function KellyFavItems(cfg)
         return menuButtonContainer;
     }     
     
+    this.defaultNavigation = function() {
+        
+        if (typeof URLSearchParams == 'undefined') return false;
+        
+        var url = new URL(window.location.href), tab = url.searchParams.get('tab');
+        if (!tab || ['options', 'profiles', 'help', 'modules'].indexOf(tab) == -1) return false;
+        
+             if (tab == 'options') handler.showOptionsDialog();
+        else if (tab == 'profiles') handler.showOptionsDialog(env.className + '-Storage');
+        else if (tab == 'help') handler.showAdditionsDialog('additions_help');
+        else if (tab == 'modules') handler.showAdditionsDialog('additions_modules');
+        
+        return tab;
+    }
+    
     // exit from Favourites plugin block
     
     this.hideFavoritesBlock = function() {

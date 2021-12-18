@@ -320,7 +320,7 @@ function KellyPageWatchdog(cfg)
     var parseItem = function(el) {
         
         var itemType = el.tagName.toLowerCase();
-        if (['script', 'iframe', 'frame', 'include-fragment'].indexOf(itemType) != -1) return false;
+        if (['script', 'iframe', 'frame', 'include-fragment', 'svg'].indexOf(itemType) != -1) return false;
         
         var item = {relatedDoc : false, relatedSrc : [], referrer : handler.host};
        
@@ -351,7 +351,7 @@ function KellyPageWatchdog(cfg)
 
         if (item.relatedSrc.length <= 0) return false;
     
-        // detect related document
+        // detect related document - common case - <a href="RELATED DOC"> ... <> ... <img> ... </> ... </a>
         
         var link = KellyTools.getParentByTag(el, 'A');
         if (link) handler.addSrcFromAttributes(link, item);
@@ -362,6 +362,7 @@ function KellyPageWatchdog(cfg)
             
         } else {
             
+            // search first related link for [Image Item] in parents and in [Image Item] itself [  (max. 15)  pra-pra-parent ... pra-parent ... parent ...  [ [Image Item] ]   ]
             var parent = el, depth = 0, relatedDoc = parent ? parent.getElementsByTagName('A') : false;
             
             while (relatedDoc && relatedDoc.length <= 0 && depth < 15) {

@@ -28,6 +28,7 @@
             "lib/recorder/filters/pixiv.js", 
             "lib/recorder/filters/twitter.js", 
             "lib/recorder/filters/vk.js", 
+            "lib/recorder/filters/flickr.js", 
             "lib/recorder/filters/pikabu.js", 
             "lib/recorder/filters/_validators.js", 
             "lib/profiles/default.js", 
@@ -42,7 +43,7 @@
         ]
    } ],
    "manifest_version" : 2,
-   "version": "1.2.1.0",
+   "version": "1.2.1.1",
    "name": "KellyC Image Downloader",
    "description": "__MSG_ext_description_recorder__",
    "icons": { 

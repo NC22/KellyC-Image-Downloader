@@ -13,7 +13,7 @@ KellyTools.tId = 1000;
 
 // Get screen width \ height
 
-KellyTools.loadFrontJs = function(callback, ) {
+KellyTools.loadFrontJs = function(callback) {
     var js = KellyTools.getBrowser().runtime.getManifest().content_scripts[0].js, loaded = 0, loadPool = [];
 
     for (var i = js.length-1; i >= 0; i--) {
@@ -699,27 +699,21 @@ KellyTools.getUrlExt = function(url) {
     return this.getExt(url);        
 }
 
-KellyTools.addCss = function(id, text, remove) {
-
-    var style = document.getElementById(id);
+KellyTools.addCss = function(id, css) {
+      
+    var style = document.getElementById(id), head = document.head || document.getElementsByTagName('head')[0];
     if (!style) {
-        
-        var head = document.head || document.getElementsByTagName('head')[0];
-        var style = document.createElement('style');
-            style.type = 'text/css';
-            style.id = id;
-        
-            head.appendChild(style);
-    }
-    
-    if (remove) {
-        style.innerHTML = '';
-    }
+        style = document.createElement('style');
+        style.type = 'text/css';
+        style.id = id;       
+        head.appendChild(style);
+    }    
     
     if (style.styleSheet){
-      style.styleSheet.cssText = text;
+        style.styleSheet.cssText = css;
     } else {
-      style.appendChild(document.createTextNode(text));
+        style.innerHTML = '';
+        style.appendChild(document.createTextNode(css));
     }
 }
     

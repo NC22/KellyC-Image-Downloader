@@ -29,28 +29,48 @@ var KellyProfileTopJoyreactor = new Object();
             if (handler.getPosts().length > 0) return onLoad();
             
             handler.observer = new MutationObserver(function(mutations) {
-                if (mutations.length > 0 && handler.getPosts().length > 0) {
+                
+                if (mutations.length > 0 && document.body.querySelector('.post-card')) {
                     handler.observer.disconnect();
-                    onLoad(); 
+                    handler.initPosts(onLoad); 
                 }                
             });
             
             handler.observer.observe(document.getElementById('root'), {childList: true, subtree: true});
         }
         
+        // currently no any direct links on page
+        handler.initPosts = function(onInit) {
+            KellyTools.addCss(handler.className + '-hide-popup', ".ant-dropdown { display : none;}");
+            
+            var post = document.body.querySelectorAll('.post-card'), postValid = [];
+            for (var i = 0; i < post.length; i++) {
+                var linkButton = post[i].querySelector('.post-footer button.ant-dropdown-trigger');
+                if (linkButton) {
+                    postValid.push(post[i]); linkButton.click();
+                    var link = document.createElement('A');
+                        link.className = handler.className + '-post-link';
+                    linkButton.parentNode.insertBefore(link, linkButton);
+                }
+            }
+            
+            setTimeout(function() {
+                
+                var link = document.body.querySelectorAll('.ant-dropdown-placement-topCenter .ant-dropdown-menu-item:last-child a');
+                for (var i = 0; i < link.length; i++) {   
+                    postValid[i].querySelector('.post-footer button.ant-dropdown-trigger').click(); 
+                    postValid[i].getElementsByClassName(handler.className + '-post-link')[0].href = link[i].href;
+                    postValid[i].classList.add(handler.className + '-post');
+                }
+                
+                setTimeout(function() { KellyTools.addCss(handler.className + '-hide-popup', ""); }, 1000);
+                onInit();
+            }, 100);
+        }
+        
         handler.getPosts = function(container) {
             if (!container) container = document;
-            var postItems = [];
-            var postContainers = container.getElementsByClassName('post-card');
-            for (var i = 0; i < postContainers.length; i++) {
-                if (postContainers[i].innerHTML.indexOf('post-content') == -1) continue;
-                var link = handler.getPostLinkEl(postContainers[i]);
-                if (!link) continue;
-                
-                postContainers[i].id = 'post-' + link.href.match(/[0-9]+/g)[0];
-                postItems.push(postContainers[i]);
-            }
-            return postItems;
+            return document.getElementsByClassName(handler.className + '-post');
         }
         
         handler.getAllMedia = function(publication) {
@@ -75,7 +95,7 @@ var KellyProfileTopJoyreactor = new Object();
         }
         
         handler.getPostLinkEl = function(publication) { 
-            return publication.querySelector('.post-footer a.ant-btn.ant-btn-text');
+            return publication.getElementsByClassName(handler.className + '-post-link')[0];
         }
         
         handler.formatPostContainer = function(postBlock) {
@@ -136,13 +156,14 @@ var KellyProfileTopJoyreactor = new Object();
                 for (var i = 0; i < mutations.length; i++) {
                     
                     if (mutations[i].target.className.indexOf(handler.mainContainerClass) != -1) {
-                        
-                        handler.getMainContainers();
-                        if (handler.fav.getGlobal('mode') == 'main') handler.fav.closeSidebar();
-                        else handler.fav.hideFavoritesBlock();
-                        handler.fav.formatPostContainers();
-                        if (handler.unlockManager) handler.unlockManager.formatCensoredPosts();
-                        KellyTools.log('New page loaded, format publications');                        
+                        handler.initPosts(function() {
+                            KellyTools.log('New page loaded, format publications');   
+                            handler.getMainContainers();
+                            if (handler.fav.getGlobal('mode') == 'main') handler.fav.closeSidebar();
+                            else handler.fav.hideFavoritesBlock();
+                            handler.fav.formatPostContainers();
+                            if (handler.unlockManager) handler.unlockManager.formatCensoredPosts();    
+                        });
                         return;
                         
                     } else if (mutations[i].target.id == 'root' && 
@@ -188,7 +209,7 @@ var KellyProfileTopJoyreactor = new Object();
             
             if (!handler.mContainers.siteContent || !handler.mContainers.body) {
                 KellyTools.log('getMainContainers : cant create containers, check selectors', KellyTools.E_ERROR);
-                KellyTools.log(handler.mContainers, KellyTools.E_ERROR);
+                KellyTools.log(handler.mContainers, KellyTools.E_NOTICE);
                 return false;               
             }
             

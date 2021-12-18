@@ -984,12 +984,7 @@ KellyDPage.init = function() {
         if (nativeOnExtensionReady) nativeOnExtensionReady();
         
         KellyDPage.getContainer().removeAttribute('style');
-        
-             if (window.location.href.indexOf('tab=options') != -1) K_FAV.showOptionsDialog();
-        else if (window.location.href.indexOf('tab=profiles') != -1) K_FAV.showOptionsDialog(KellyDPage.env.className + '-Storage');
-        else if (window.location.href.indexOf('tab=help') != -1) K_FAV.showAdditionsDialog('additions_help');
-        else if (window.location.href.indexOf('tab=modules') != -1) K_FAV.showAdditionsDialog('additions_modules');
-        else KellyDPage.showRecordedImages(); 
+        if (!K_FAV.defaultNavigation()) KellyDPage.showRecordedImages(); 
     }
     
     KellyDPage.env.events.onValidateCfg = function(data) {
