@@ -699,7 +699,7 @@ KellyTools.getUrlExt = function(url) {
     return this.getExt(url);        
 }
 
-KellyTools.addCss = function(id, css) {
+KellyTools.addCss = function(id, css, clean) {
       
     var style = document.getElementById(id), head = document.head || document.getElementsByTagName('head')[0];
     if (!style) {
@@ -710,9 +710,10 @@ KellyTools.addCss = function(id, css) {
     }    
     
     if (style.styleSheet){
-        style.styleSheet.cssText = css;
+        if (clean) style.styleSheet.cssText = '';
+        style.styleSheet.cssText += css;
     } else {
-        style.innerHTML = '';
+        if (clean) style.innerHTML = '';
         style.appendChild(document.createTextNode(css));
     }
 }

@@ -41,7 +41,7 @@ var KellyProfileTopJoyreactor = new Object();
         
         // currently no any direct links on page
         handler.initPosts = function(onInit) {
-            KellyTools.addCss(handler.className + '-hide-popup', ".ant-dropdown { display : none;}");
+            KellyTools.addCss(handler.className + '-hide-popup', ".ant-dropdown { display : none;}", true);
             
             var post = document.body.querySelectorAll('.post-card'), postValid = [];
             for (var i = 0; i < post.length; i++) {
@@ -63,7 +63,7 @@ var KellyProfileTopJoyreactor = new Object();
                     postValid[i].classList.add(handler.className + '-post');
                 }
                 
-                setTimeout(function() { KellyTools.addCss(handler.className + '-hide-popup', ""); }, 1000);
+                setTimeout(function() { KellyTools.addCss(handler.className + '-hide-popup', "", true); }, 1000);
                 onInit();
             }, 100);
         }

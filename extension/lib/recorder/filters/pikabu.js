@@ -3,8 +3,13 @@ KellyRecorderFilterPikabu.validateByDriver = function(handler, item) {
     if (handler.url.indexOf('pikabu.ru') == -1 || item.relatedSrc.length <= 0 || !item.relatedDoc || !item.relatedGroups) return;
     
     for (var i = 0; i < item.relatedSrc.length; i++) {
-        // bookmarks page, selected folder
-        if (handler.additionCats['pikabu_save'] && item.relatedGroups[i] && item.relatedGroups[i].indexOf('imageOriginal') != -1) item.relatedGroups[i].push('pikabu_save');
+        if (!item.relatedGroups[i]) continue;
+        
+        // mark gifs as originals
+        if (item.relatedSrc[i].indexOf('.gif') != -1 && item.relatedGroups[i].indexOf('imageAny') != -1) item.relatedGroups[i].push('imageOriginal');
+        
+        // detected bookmarks page, add curent selected folder
+        if (handler.additionCats['pikabu_save'] && item.relatedGroups[i].indexOf('imageOriginal') != -1) item.relatedGroups[i].push('pikabu_save');
     }
 }
 
