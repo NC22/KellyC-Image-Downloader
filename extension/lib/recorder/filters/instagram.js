@@ -1,23 +1,23 @@
 KellyRecorderFilterInstagram = new Object();
 KellyRecorderFilterInstagram.manifest = {host : 'instagram.com', detectionLvl : ['imageAny', 'imageByDocument']};
-KellyRecorderFilterInstagram.addItemByDriver = function(handler, el, item) {
+KellyRecorderFilterInstagram.addItemByDriver = function(handler, data) {
     
-    if (handler.url.indexOf('instagram') != -1 && el.tagName == 'IMG' && el.src.indexOf('instagram.com') != -1 && el.getAttribute('srcset')) { 
+    if (handler.url.indexOf('instagram') != -1 && data.el.tagName == 'IMG' && data.el.src.indexOf('instagram.com') != -1 && data.el.getAttribute('srcset')) { 
             
-        handler.addSingleSrc(item, el.getAttribute('src'), 'addSrcFromAttributes-src', el, 'imagePreview'); 
-        var link = KellyTools.getParentByTag(el, 'A'); // match pattern https://www.instagram.com/p/CJdsKX4DEDK/
-        if (link && link.getAttribute('href').length > 4) item.relatedDoc = link.href;
+        handler.addSingleSrc(data.item, data.el.getAttribute('src'), 'addSrcFromAttributes-src', data.el, 'imagePreview'); 
+        var link = KellyTools.getParentByTag(data.el, 'A'); // match pattern https://www.instagram.com/p/CJdsKX4DEDK/
+        if (link && link.getAttribute('href').length > 4) data.item.relatedDoc = link.href;
         
-        return item.relatedDoc && item.relatedSrc.length > 0 ? handler.addDriverAction.ADD : handler.addDriverAction.SKIP;            
+        return data.item.relatedDoc && data.item.relatedSrc.length > 0 ? handler.addDriverAction.ADD : handler.addDriverAction.SKIP;            
     }
 }
 
-KellyRecorderFilterInstagram.parseImagesDocByDriver = function(handler, thread) {
+KellyRecorderFilterInstagram.parseImagesDocByDriver = function(handler, data) {
     
     if (handler.url.indexOf('instagram') != -1){ 
     
         try {
-            var pageDataRegExp = /__additionalDataLoaded\([\'\"]?[-A/-Za-z0-9_]+[\'\"],\{([\s\S]*)\}\);/g, pageData = pageDataRegExp.exec(thread.response), mediaQuality = false;
+            var pageDataRegExp = /__additionalDataLoaded\([\'\"]?[-A/-Za-z0-9_]+[\'\"],\{([\s\S]*)\}\);/g, pageData = pageDataRegExp.exec(data.thread.response), mediaQuality = false;
             if (pageData === null) return;
             
             handler.lastThreadJson = JSON.parse('{' + pageData[1] + '}');

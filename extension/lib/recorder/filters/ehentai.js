@@ -9,42 +9,42 @@ KellyRecorderFilterEHentai.getPreviewTileBounds = function(el) {
     return { x : Math.abs(parseInt(el.style.backgroundPositionX)), y : parseInt(el.style.backgroundPositionY), width : parseInt(el.style.width), height : parseInt(el.style.height) }
 }
 
-KellyRecorderFilterEHentai.addItemByDriver = function(handler, el, item) {
+KellyRecorderFilterEHentai.addItemByDriver = function(handler, data) {
     
     if (handler.url.indexOf('e-hentai.org') == -1 && handler.url.indexOf('exhentai.org') == -1) return;
     
-    if (el.tagName != 'DIV') return;    
+    if (data.el.tagName != 'DIV') return;    
     
-    var previewUrl = el.style.backgroundImage.match(KellyRecorderFilterEHentai.previewMatch);    
+    var previewUrl = data.el.style.backgroundImage.match(KellyRecorderFilterEHentai.previewMatch);    
     if (previewUrl !== null) {
         
-        var relatedDoc = KellyTools.getElementByTag(el, 'A'), bounds = KellyRecorderFilterEHentai.getPreviewTileBounds(el);        
+        var relatedDoc = KellyTools.getElementByTag(data.el, 'A'), bounds = KellyRecorderFilterEHentai.getPreviewTileBounds(data.el);        
         if (!relatedDoc) return handler.addDriverAction.SKIP; 
         
-        handler.addSingleSrc(item, 'data:image-tilemap;' + previewUrl[0] + ',' + bounds.x + ',' + bounds.y + ',' + bounds.width + ',' + bounds.height, 'addSrcFromStyle', el, 'imagePreview');        
-        item.relatedDoc = relatedDoc.href;
+        handler.addSingleSrc(data.item, 'data:image-tilemap;' + previewUrl[0] + ',' + bounds.x + ',' + bounds.y + ',' + bounds.width + ',' + bounds.height, 'addSrcFromStyle', data.el, 'imagePreview');        
+        data.item.relatedDoc = relatedDoc.href;
         
-        console.log(item);
+        console.log(data.item);
         
         return handler.addDriverAction.ADD;
     } 
     
 }
 
-KellyRecorderFilterEHentai.parseImagesDocByDriver = function(handler, thread) {
+KellyRecorderFilterEHentai.parseImagesDocByDriver = function(handler, data) {
  
-    if (handler.url.indexOf('e-hentai.org') != -1 && typeof thread.response == 'string') {
+    if (handler.url.indexOf('e-hentai.org') != -1 && typeof data.thread.response == 'string') {
         
         var parser = new DOMParser(); 
-        thread.loadDoc = parser.parseFromString(thread.response, 'text/html');
+        data.thread.loadDoc = parser.parseFromString(data.thread.response, 'text/html');
         
-        var image = thread.loadDoc.querySelector('#i3 img');
+        var image = data.thread.loadDoc.querySelector('#i3 img');
         if (image){ 
             handler.imagesPool.push({relatedSrc : [image.getAttribute('src')], relatedGroups : []});
             return true;
         }
         
-        thread.response = '';
+        data.thread.response = '';
         return; 
     }    
  

@@ -343,7 +343,9 @@ KellyDPage.showAdditionFilters = function() {
     KellyDPage.statInfoBlock = document.createElement('DIV');
     KellyDPage.statInfoBlock.className = cl + '-displayed-info';
     
-    var isLoadRelatedSupport = KellyDPage.compatibleFilter && KellyDPage.compatibleFilter.manifest.detectionLvl.indexOf('imageByDocument') != -1;
+    var compatibleFilter = KellyDPage.defaultPageParser.getCompatibleFilter();
+    var isLoadRelatedSupport = compatibleFilter && compatibleFilter.manifest.detectionLvl.indexOf('imageByDocument') != -1;
+    
     KellyDPage.env.getMainContainers().menu.appendChild(KellyDPage.statInfoBlock);
 
     html += '<div class="' + cl + '-extra-sort ' + cl + '-section-header-inline ' + cl + '-section-sidebar_section_extra_sort" data-target="sidebar_section_extra_sort">\
@@ -677,29 +679,27 @@ KellyDPage.showAdditionFilters = function() {
         
         self.innerText = KellyLoc.s('', 'recorder_load_doc_stop');
         KellyDPage.commonFilters.classList.add(cl + '-process-docLoader-work');
-        if (!KellyDPage.urlMapDocs) {
+        var initDocLoader = function() {
             
-            KellyDPage.urlMapDocs = true;
-            
-            KellyDPage.storage.items.forEach(function(item) {
-                
-                if (item.relatedDoc) KellyDPage.addUrlMapItem(KellyTools.getUrlExt(item.relatedDoc), KellyTools.getLocationFromUrl(item.relatedDoc), item.referrer);                 
-            });
-            
-            KellyDPage.updateUrlMap(KellyDPage.aDProgress.docLoader.run, true);
-            
-        } else {
-            
-            for (var i = 0; i < KellyPageWatchdog.filters.length; i++) // todo - untested
-                if (KellyPageWatchdog.filters[i].onInitDocLoader && KellyPageWatchdog.filters[i].onInitDocLoader(KellyDPage.aDProgress.docLoader, KellyDPage.env.hostList) === false) {
-                    
-                    KellyDPage.aDProgress.statistic.innerText = KellyLoc.s('', 'recorder_terminated');
-                    KellyDPage.aDProgress.update(true);
-                    return;
-                }
+            if (KellyDPage.defaultPageParser.filterCallback('onInitDocLoader', {docLoader : KellyDPage.aDProgress.docLoader, hostList : KellyDPage.env.hostList}, true) === false) {
+                KellyDPage.aDProgress.statistic.innerText = KellyLoc.s('', 'recorder_terminated');
+                KellyDPage.aDProgress.update(true);
+                return;
+            }
                 
             KellyDPage.aDProgress.docLoader.run();
         }
+        
+        if (!KellyDPage.urlMapDocs) { // is related docs already added to global urlmap list
+            
+            KellyDPage.urlMapDocs = true;            
+            KellyDPage.storage.items.forEach(function(item) {
+                if (item.relatedDoc) KellyDPage.addUrlMapItem(KellyTools.getUrlExt(item.relatedDoc), KellyTools.getLocationFromUrl(item.relatedDoc), item.referrer);                 
+            });
+            
+            KellyDPage.updateUrlMap(initDocLoader, true);
+            
+        } else initDocLoader();
     }
     
     // Sort by proportions or by ID [Action]
@@ -828,8 +828,9 @@ KellyDPage.showRecordedImages = function(onShow) {
           K_FAV.updateFavCounter();
           
           var responseLocation = KellyTools.getLocationFromUrl(response.host);
-          K_FAV.getGlobal('fav').dbName = KellyTools.generateIdWord(responseLocation.hostname.replace('.', '_') + '_record');
-          KellyDPage.compatibleFilter = KellyPageWatchdog.getCompatibleFilter(responseLocation.hostname);
+          
+          K_FAV.getGlobal('fav').dbName = KellyTools.generateIdWord(responseLocation.hostname.replace('.', '_') + '_record');          
+          KellyDPage.defaultPageParser.setLocation({url : response.host, host : responseLocation.origin});
           
           KellyDPage.updateUrlMap(function(){  
               K_FAV.showFavouriteImages(); 
@@ -855,12 +856,17 @@ KellyDPage.init = function() {
      KellyDPage.env = K_FAV.getGlobal('env');
      KellyDPage.env.hostClass = 'options_page';
      
+     KellyDPage.defaultPageParser = new KellyPageWatchdog();
+     
      KellyDPage.env.events.onDisplayBlock = function(mode, action, oldMode) {
          
          var downloadButton = KellyDPage.commonFilters ? KellyTools.getElementByClass(KellyDPage.commonFilters, KellyDPage.env.className + '-Main-download-btn') : false;
          if (downloadButton) {
              downloadButton.parentElement.classList.remove(KellyDPage.env.className + '-hidden');
-             if (K_FAV.getFilters().imagesAsDownloadItems) downloadButton.parentElement.classList.add(KellyDPage.env.className + '-hidden');
+             if (K_FAV.getFilters().imagesAsDownloadItems) {
+                 downloadButton.parentElement.classList.add(KellyDPage.env.className + '-hidden');
+                 // KellyDPage.defaultPageParser.filterCallback('onInitDownloader', {dm : K_FAV.getDownloadManager()}); -- todo need more accurate place, before draw
+             }
          }
          
          if (mode == 'fav' && action == 'show') {
@@ -999,7 +1005,7 @@ KellyDPage.init = function() {
         delete options.tabData['Other'].parts.unlock_common;
         
         KellyLoadDocControll.initOptions(options);
-        for (var i = 0; i < KellyPageWatchdog.filters.length; i++) if (KellyPageWatchdog.filters[i].onInitOptions) KellyPageWatchdog.filters[i].onInitOptions(options); 
+        KellyDPage.defaultPageParser.filterCallback('onInitOptions', {options : options}); 
     }
         
     /*

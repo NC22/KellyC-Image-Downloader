@@ -1,17 +1,17 @@
 KellyRecorderFilterDA = new Object();
 KellyRecorderFilterDA.manifest = {host : 'deviantart.com', detectionLvl : ['imageAny', 'imageByDocument']};
-KellyRecorderFilterDA.parseImagesDocByDriver = function(handler, thread) {
+KellyRecorderFilterDA.parseImagesDocByDriver = function(handler, data) {
     
     if (handler.url.indexOf('deviantart') != -1) {
         
         try {
                 
             var begin = 'window.__INITIAL_STATE__ = JSON.parse("', end = '")';
-            var da = JSON.parse(JSON.parse('"' + thread.response.substring( thread.response.lastIndexOf(begin) + begin.length, thread.response.lastIndexOf(end)) + '"')); 
+            var da = JSON.parse(JSON.parse('"' + data.thread.response.substring( data.thread.response.lastIndexOf(begin) + begin.length, data.thread.response.lastIndexOf(end)) + '"')); 
             
             for (var daName in da['@@entities']['deviation'])  {
                 var deviation =  da['@@entities']['deviation'][daName], mediaQuality = false;                   
-                if (thread.job.url.indexOf(deviation.url) == -1) continue;
+                if (data.thread.job.url.indexOf(deviation.url) == -1) continue;
                 
                 deviation['media']['types'].forEach(function(type) {
                     if ((!mediaQuality || type.h > mediaQuality.h) && (type.c || type.t == 'gif')) mediaQuality = type;
@@ -29,7 +29,7 @@ KellyRecorderFilterDA.parseImagesDocByDriver = function(handler, thread) {
             console.log(e);
        }
            
-       thread.response = ''; 
+       data.thread.response = ''; 
        return true;
     }
 }

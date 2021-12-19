@@ -2,32 +2,32 @@ KellyRecorderFilterPixiv = new Object();
 KellyRecorderFilterPixiv.manifest = {host : 'pixiv.net', detectionLvl : ['imagePreview', 'imageByDocument']};
 KellyRecorderFilterPixiv.artworkReg = {id : new RegExp('[0-9]+'), url : new RegExp('/artworks/[0-9]+')};
 
-KellyRecorderFilterPixiv.validateByDriver = function(handler, item) {
+KellyRecorderFilterPixiv.validateByDriver = function(handler, data) {
     
-    if (handler.url.indexOf('pixiv.net') == -1 || item.relatedSrc.length != 1 || !item.relatedDoc) return;    
-    if (item.relatedDoc.match(KellyRecorderFilterPixiv.artworkReg.url) === null) return;
+    if (handler.url.indexOf('pixiv.net') == -1 || data.item.relatedSrc.length != 1 || !data.item.relatedDoc) return;    
+    if (data.item.relatedDoc.match(KellyRecorderFilterPixiv.artworkReg.url) === null) return;
     
-    var artworkId = KellyRecorderFilterPixiv.artworkReg.id.exec(item.relatedDoc)[0];
-    item.relatedDoc = 'https://www.pixiv.net/ajax/illust/' + artworkId + '/pages' + '##FETCH_RULES##method=GET&responseType=json';
-    item.relatedGroups = [['imagePreview']];
+    var artworkId = KellyRecorderFilterPixiv.artworkReg.id.exec(data.item.relatedDoc)[0];
+    data.item.relatedDoc = 'https://www.pixiv.net/ajax/illust/' + artworkId + '/pages' + '##FETCH_RULES##method=GET&responseType=json';
+    data.item.relatedGroups = [['imagePreview']];
     
     // animations on pixiv has different design and require zip archivator libraries to work with
 }
 
-KellyRecorderFilterPixiv.parseImagesDocByDriver = function(handler, thread) {
+KellyRecorderFilterPixiv.parseImagesDocByDriver = function(handler, data) {
     
     if (handler.url.indexOf('pixiv.net') != -1) {
-        if (typeof thread.response == 'object' && !thread.response.error && typeof thread.response.body == 'object') {
+        if (typeof data.thread.response == 'object' && !data.thread.response.error && typeof data.thread.response.body == 'object') {
             
-            for (var i = 0; i < thread.response.body.length; i++) {
+            for (var i = 0; i < data.thread.response.body.length; i++) {
                 // todo - take width \ height and put this data to relatedBounds pool - implement kellyLoadDocControll to accept this data
-                var urls = thread.response.body[i].urls;
+                var urls = data.thread.response.body[i].urls;
                 if (urls && (urls.regular || urls.original)) handler.imagesPool.push({relatedSrc : [urls.original ? urls.original : urls.regular]});                      
             }
             
         } else console.log('bad response - cant recognize object - check KellyDPage.aDProgress.docLoader.parser.lastThreadReport');
         
-        thread.response = '';  
+        data.thread.response = '';  
         return true;
             
     }

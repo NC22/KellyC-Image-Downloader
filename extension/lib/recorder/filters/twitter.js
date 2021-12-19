@@ -1,12 +1,12 @@
 KellyRecorderFilterTwitter = new Object();
 KellyRecorderFilterTwitter.manifest = {host : 'twitter.com', detectionLvl : ['imageAny', 'imagePreview', 'imageOriginal']};
-KellyRecorderFilterTwitter.addItemByDriver = function(handler, el, item) {
-    if (handler.url.indexOf('twitter') != -1 && el.tagName == 'IMG' && el.src.indexOf('name=') != -1 && el.src.indexOf('pbs.twimg.com/media') != -1) {
+KellyRecorderFilterTwitter.addItemByDriver = function(handler, data) {
+    if (handler.url.indexOf('twitter') != -1 && data.el.tagName == 'IMG' && data.el.src.indexOf('name=') != -1 && data.el.src.indexOf('pbs.twimg.com/media') != -1) {
         
-       handler.addSingleSrc(item, el.src, 'addSrcFromAttributes-src', el, 'imagePreview');
-       handler.addSingleSrc(item, el.src.split('&name=')[0], 'addSrcFromAttributes-src', el, 'imageOriginal');
+       handler.addSingleSrc(data.item, data.el.src, 'addSrcFromAttributes-src', data.el, 'imagePreview');
+       handler.addSingleSrc(data.item, data.el.src.split('&name=')[0], 'addSrcFromAttributes-src', data.el, 'imageOriginal');
        
-       return item.relatedSrc.length > 0 ? handler.addDriverAction.ADD : handler.addDriverAction.SKIP;            
+       return data.item.relatedSrc.length > 0 ? handler.addDriverAction.ADD : handler.addDriverAction.SKIP;            
     } 
 }
 

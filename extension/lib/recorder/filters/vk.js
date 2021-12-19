@@ -1,22 +1,22 @@
 KellyRecorderFilterVK = new Object();
 KellyRecorderFilterVK.manifest = {host : 'vk.com', detectionLvl : ['imagePreview', 'imageByDocument']};
-KellyRecorderFilterVK.addItemByDriver = function(handler, el, item) {
+KellyRecorderFilterVK.addItemByDriver = function(handler, data) {
     
-        if (handler.url.indexOf('vk.com') != -1 && (el.classList.contains('page_doc_photo_href') || el.classList.contains('page_post_thumb_unsized'))) { 
+        if (handler.url.indexOf('vk.com') != -1 && (data.el.classList.contains('page_doc_photo_href') || data.el.classList.contains('page_post_thumb_unsized'))) { 
                
-            item.relatedDoc = el.href;      
-            if (KellyTools.getParentByClass(el, 'reply_content')) item.relatedDoc += '##FETCH_RULES##mark_comment=1';
-            if (el.getAttribute('data-thumb')) handler.addSingleSrc(item, el.getAttribute('data-thumb'), 'addSrcFromAttributes-src', el, 'imagePreview'); 
-            else handler.addSrcFromStyle(el, item, 'imagePreview');
+            data.item.relatedDoc = data.el.href;      
+            if (KellyTools.getParentByClass(data.el, 'reply_content')) data.item.relatedDoc += '##FETCH_RULES##mark_comment=1';
+            if (data.el.getAttribute('data-thumb')) handler.addSingleSrc(data.item, data.el.getAttribute('data-thumb'), 'addSrcFromAttributes-src', data.el, 'imagePreview'); 
+            else handler.addSrcFromStyle(data.el, data.item, 'imagePreview');
             
-            return item.relatedSrc.length > 0 ? handler.addDriverAction.ADD : handler.addDriverAction.SKIP;
+            return data.item.relatedSrc.length > 0 ? handler.addDriverAction.ADD : handler.addDriverAction.SKIP;
             
-        } else if (handler.url.indexOf('vk.com') != -1 && (el.getAttribute('data-id') || el.getAttribute('data-photo-id'))) {
+        } else if (handler.url.indexOf('vk.com') != -1 && (data.el.getAttribute('data-id') || data.el.getAttribute('data-photo-id'))) {
             
-            handler.addSrcFromStyle(el, item, 'imagePreview');             
-            if (item.relatedSrc.length <= 0) return handler.addDriverAction.SKIP;
+            handler.addSrcFromStyle(data.el, data.item, 'imagePreview');             
+            if (data.item.relatedSrc.length <= 0) return handler.addDriverAction.SKIP;
             
-            var query = '&module=feed', marks = '', relatedDoc = el.tagName == 'A' ? el : KellyTools.getElementByTag(el, 'A');
+            var query = '&module=feed', marks = '', relatedDoc = data.el.tagName == 'A' ? data.el : KellyTools.getElementByTag(data.el, 'A');
 
             if (!relatedDoc || !relatedDoc.getAttribute('onclick') || relatedDoc.getAttribute('onclick').indexOf('showPhoto') == -1) return handler.addDriverAction.SKIP; 
                 
@@ -30,56 +30,55 @@ KellyRecorderFilterVK.addItemByDriver = function(handler, el, item) {
                 else if (params[1]) query = '&module=feed&list=' + params[1];
             } else if (params.length <= 0) return handler.addDriverAction.SKIP;  
     
-            if (KellyTools.getParentByClass(el, 'reply_content')) marks += '&mark_comment=1';
+            if (KellyTools.getParentByClass(data.el, 'reply_content')) marks += '&mark_comment=1';
                     
-            item.relatedDoc = 'https://vk.com/al_photos.php?act=show&al=1&al_ad=0&dmcah=' + query + '&photo=' + params[0];
-            item.relatedDoc += '##FETCH_RULES##method=POST&responseType=json&contentType=application/x-www-form-urlencoded&xRequestedWith=XMLHttpRequest' + marks;
+            data.item.relatedDoc = 'https://vk.com/al_photos.php?act=show&al=1&al_ad=0&dmcah=' + query + '&photo=' + params[0];
+            data.item.relatedDoc += '##FETCH_RULES##method=POST&responseType=json&contentType=application/x-www-form-urlencoded&xRequestedWith=XMLHttpRequest' + marks;
             
             return handler.addDriverAction.ADD;
         } 
 }
 
-KellyRecorderFilterVK.parseImagesDocByDriver = function(handler, thread) {
-    
-        if (handler.url.indexOf('vk.com') != -1 && typeof thread.response == 'object' && handler.url.indexOf('photo=') != -1) {
+KellyRecorderFilterVK.parseImagesDocByDriver = function(handler, data) {
+    if (handler.url.indexOf('vk.com') != -1 && typeof data.thread.response == 'object' && handler.url.indexOf('photo=') != -1) {
+        
+        var photoId = handler.url.split('photo=');                
+            photoId = photoId.length == 2 ? photoId[1] : false;
             
-            var photoId = handler.url.split('photo=');                
-                photoId = photoId.length == 2 ? photoId[1] : false;
-                
-            var findSrc = function(data) { 
-                if (!data) return;
-                
-                if (typeof data['id'] != 'undefined' && data['id'] == photoId) {
-                         if (typeof data['w_src'] != 'undefined') return data['w_src']; 
-                    else if (typeof data['y_src'] != 'undefined') return data['y_src'];
-                    else if (typeof data['z_src'] != 'undefined') return data['z_src'];                         
-                    else if (typeof data['x_src'] != 'undefined') return data['x_src'];
-                    else return;
-                }
-
-                for (var name in data) {
-                    if (typeof data[name] == 'object') {
-                       var result = findSrc(data[name]);
-                       if (result) return result;
-                    }
-                 }
+        var findSrc = function(response) { 
+            if (!response) return;
+            
+            if (typeof response['id'] != 'undefined' && response['id'] == photoId) {
+                     if (typeof response['w_src'] != 'undefined') return response['w_src']; 
+                else if (typeof response['y_src'] != 'undefined') return response['y_src'];
+                else if (typeof response['z_src'] != 'undefined') return response['z_src'];                         
+                else if (typeof response['x_src'] != 'undefined') return response['x_src'];
+                else return;
             }
-            
-            var image = findSrc(thread.response);                
-            if (image) handler.imagesPool.push({relatedSrc : [image], relatedGroups : thread.rules.indexOf('mark_comment=1') != -1 ? [['vkComment']] : []});
-            
-            thread.response = ''; 
-            return true;
-            
-        } else if (handler.url.indexOf('vk.com/doc') != -1 && typeof thread.response == 'string' && handler.url.indexOf('hash=') != -1) {
-            
-            thread.loadDoc = KellyTools.val(KellyTools.validateHtmlDoc(thread.response), 'html');
-            var image = thread.loadDoc.querySelector('center img');
-            if (image) handler.imagesPool.push({relatedSrc : [image.getAttribute('src')], relatedGroups : thread.rules.indexOf('mark_comment=1') != -1 ? [['vkComment']] : []});
-            
-            thread.response = '';  
-            return true;           
-        } 
+
+            for (var name in response) {
+                if (typeof response[name] == 'object') {
+                   var result = findSrc(response[name]);
+                   if (result) return result;
+                }
+             }
+        }
+        
+        var image = findSrc(data.thread.response);                
+        if (image) handler.imagesPool.push({relatedSrc : [image], relatedGroups : data.thread.rules.indexOf('mark_comment=1') != -1 ? [['vkComment']] : []});
+        
+        data.thread.response = ''; 
+        return true;
+        
+    } else if (handler.url.indexOf('vk.com/doc') != -1 && typeof data.thread.response == 'string' && handler.url.indexOf('hash=') != -1) {
+        
+        data.thread.loadDoc = KellyTools.val(KellyTools.validateHtmlDoc(data.thread.response), 'html');
+        var image = data.thread.loadDoc.querySelector('center img');
+        if (image) handler.imagesPool.push({relatedSrc : [image.getAttribute('src')], relatedGroups : data.thread.rules.indexOf('mark_comment=1') != -1 ? [['vkComment']] : []});
+        
+        data.thread.response = '';  
+        return true;           
+    } 
 }
 
 KellyPageWatchdog.filters.push(KellyRecorderFilterVK);

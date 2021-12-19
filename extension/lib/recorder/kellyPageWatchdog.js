@@ -54,10 +54,15 @@ function KellyPageWatchdog(cfg)
         // location used only for
         this.url = data.url;
         this.host = data.host; // host = origin - used as referer - referrer : handler.host
+        this.hostname = false;
+        
+        if (this.host) {
+            this.hostname = KellyTools.getLocationFromUrl(handler.host).hostname;
+            if (handler.hostname.indexOf('www.') === 0) handler.hostname = handler.hostname.replace('www.', '');
+        }
         
         resetConfig();
-        
-        for (var i = 0; i < KellyPageWatchdog.filters.length; i++) if (KellyPageWatchdog.filters[i].onInitLocation) KellyPageWatchdog.filters[i].onInitLocation(handler, data);  
+        handler.filterCallback('onInitLocation', data);
     }
     
     // parse or pre-validate requested related document
@@ -71,11 +76,9 @@ function KellyPageWatchdog(cfg)
     //
     
     this.parseImagesDocByDriver = function(thread) {
-                
-        if (KellyTools.DEBUG) handler.lastThreadReport = thread;
-        for (var i = 0; i < KellyPageWatchdog.filters.length; i++) if (KellyPageWatchdog.filters[i].parseImagesDocByDriver && KellyPageWatchdog.filters[i].parseImagesDocByDriver(handler, thread)) return true; 
-        
-        return false;
+        if (KellyTools.DEBUG) handler.lastThreadReport = thread;  
+
+        return handler.filterCallback('parseImagesDocByDriver', {thread : thread}, true);
     }
     
     // passes throw all elements on document - el current scanned element
@@ -83,15 +86,9 @@ function KellyPageWatchdog(cfg)
     
     this.addItemByDriver = function(el, item) {
         
-        var result = false;
-        for (var i = 0; i < KellyPageWatchdog.filters.length; i++) {
-            if (KellyPageWatchdog.filters[i].addItemByDriver) {
-                result = KellyPageWatchdog.filters[i].addItemByDriver(handler, el, item);
-                if (result) return result;
-            }
-        }
+        var result = handler.filterCallback('addItemByDriver', {el : el, item : item}, true);
         
-        return handler.addDriverAction.CONTINUE;
+        return (typeof result != 'undefined') ? result : handler.addDriverAction.CONTINUE;
     }
     
     this.validateItemByDriver = function(item) {
@@ -139,8 +136,7 @@ function KellyPageWatchdog(cfg)
             }
         }
         
-        for (var i = 0; i < KellyPageWatchdog.filters.length; i++) if (KellyPageWatchdog.filters[i].validateByDriver && KellyPageWatchdog.filters[i].validateByDriver(handler, item) === false) return false; 
-        
+        if (handler.filterCallback('validateByDriver', {item : item}, true) === false) return false;
         return item;
     }
         
@@ -403,12 +399,6 @@ function KellyPageWatchdog(cfg)
         
         return handler.imagesPool.length - itemsNum;
     }     
-    
-    //for non blocking calbacks
-    
-    function filterCallback(name, context) {
-        for (var i = 0; i < KellyPageWatchdog.filters.length; i++) if (KellyPageWatchdog.filters[i][name]) KellyPageWatchdog.filters[i][name](handler, context);
-    }
         
     function getApiMessage(request, sender, callback) {
 
@@ -421,7 +411,7 @@ function KellyPageWatchdog(cfg)
         if (request.method == "parseImages") {       
             
             resetPool();
-            filterCallback('onStartRecord', 'parseImages');
+            handler.filterCallback('onStartRecord', {context : 'parseImages'});
             
             handler.parseImages(); 
             response.url = handler.url;
@@ -429,7 +419,7 @@ function KellyPageWatchdog(cfg)
             response.images = handler.imagesPool;
             response.cats = handler.additionCats;
             
-            filterCallback('onStopRecord', 'parseImages');
+            handler.filterCallback('onStopRecord', {context : 'parseImages'});
             handler.log('[parseImages][Current tab images] Added items : ' + handler.imagesPool.length + ' | custom groups : ' + Object.keys(handler.additionCats).length);
         
             if (callback) callback(response); 
@@ -439,12 +429,14 @@ function KellyPageWatchdog(cfg)
             
         } else if (request.method == "startRecord") {       
             
-            resetPool();
+            resetPool();            
+            handler.additionCats = {};
+            handler.filterCallback('onStartRecord', 'startRecord');
+            
             initObserver();
             delayAddImages();
             
             response.isRecorded = true;
-            filterCallback('onStartRecord', 'startRecord');
             
             if (callback) callback(response); 			
             
@@ -457,7 +449,7 @@ function KellyPageWatchdog(cfg)
             handler.recorder = false;
             
             response.isStopped = true;
-            filterCallback('onStopRecord');
+            handler.filterCallback('onStopRecord');
             
             if (callback) callback(response); 
         }
@@ -503,7 +495,6 @@ function KellyPageWatchdog(cfg)
             });   
             
             handler.imagesPool = [];
-            handler.additionCats = {};
             
         }, handler.recorderTick);      
     }
@@ -560,6 +551,40 @@ function KellyPageWatchdog(cfg)
         }
     }
     
+    this.getCompatibleFilter = function() {
+        
+        if (!handler.hostname) return false;
+        
+        for(var i = 0; i < KellyPageWatchdog.filters.length; i++) {
+            var filter = KellyPageWatchdog.filters[i];
+            if (!filter.manifest || !filter.manifest.host) continue;
+
+            var fHostlist = typeof filter.manifest.host == 'string' ? [filter.manifest.host] : filter.manifest.host;
+            
+            for(var b = 0; b < fHostlist.length; b++) {
+                if (fHostlist[b] == handler.hostname) return filter;
+            }
+        }
+        
+        return false;
+    }
+
+    //by default for non blocking calbacks
+
+    this.filterCallback = function(name, data, blocking) {
+        
+        for (var i = 0; i < KellyPageWatchdog.filters.length; i++) {
+            if (!blocking) {
+                if (KellyPageWatchdog.filters[i][name]) KellyPageWatchdog.filters[i][name](handler, data);
+            } else {
+                if (KellyPageWatchdog.filters[i][name]) {
+                    var result = KellyPageWatchdog.filters[i][name](handler, data);
+                    if (typeof result != 'undefined') return result;
+                }
+            }
+        }
+    }
+    
     this.log = function(text) {
         KellyTools.log(text);
     }
@@ -573,7 +598,7 @@ function KellyPageWatchdog(cfg)
             
             if (response.isRecorded) {
                 
-                filterCallback('onStartRecord', 'isRecorded');
+                handler.filterCallback('onStartRecord', 'isRecorded');
                 imagesNum = response.imagesNum;
                 
                 delayAddImages();  
@@ -597,24 +622,6 @@ function KellyPageWatchdog(cfg)
     todo - onBeforeStartParse - to optionaly preset some behaive in future - reduse img data params trust | support videos
 */
 
-KellyPageWatchdog.filters = []; 
-KellyPageWatchdog.getCompatibleFilter = function(hostname) {
-    
-    if (!hostname) return false;
-    if (hostname.indexOf('www.') === 0) hostname = hostname.replace('www.', '');
-    
-    for(var i = 0; i < KellyPageWatchdog.filters.length; i++) {
-        var filter = KellyPageWatchdog.filters[i];
-        if (!filter.manifest || !filter.manifest.host) continue;
-
-        var fHostlist = typeof filter.manifest.host == 'string' ? [filter.manifest.host] : filter.manifest.host;
-        
-        for(var b = 0; b < fHostlist.length; b++) {
-            if (fHostlist[b] == hostname) return filter;
-        }
-    }
-    
-    return false;
-}
+KellyPageWatchdog.filters = [];
 KellyPageWatchdog.validators = [];
 KellyPageWatchdog.bannedUrls = [];

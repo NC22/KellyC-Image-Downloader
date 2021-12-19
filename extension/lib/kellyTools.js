@@ -1114,6 +1114,7 @@ KellyTools.getGMTDate = function() {
     return new Date().toJSON().slice(0, 19).replace('T', ' ');
 }
 
+// isChild
 KellyTools.getParentByClass = function(el, className) {
     
     var parent = el; 
