@@ -622,6 +622,7 @@ function KellyPageWatchdog(cfg)
     todo - onBeforeStartParse - to optionaly preset some behaive in future - reduse img data params trust | support videos
 */
 
+KellyPageWatchdog.filtersHelp = [];
 KellyPageWatchdog.filters = [];
 KellyPageWatchdog.validators = [];
 KellyPageWatchdog.bannedUrls = [];

@@ -12,5 +12,8 @@ KellyPageWatchdog.validators.push({url : 'sankakucomplex.com', host : 'sankakuco
 
 KellyPageWatchdog.validators.push({url : 'boards.4channel.org', host : ['4chan.org', '4channel.org'], patterns : [[new RegExp('//i.4cdn.org/[a-zA-Z0-9]+/[0-9]+s\\.[a-zA-Z]+'), 'imagePreview'], [new RegExp('//i.4cdn.org/[a-zA-Z0-9]+/[0-9]+\\.[a-zA-Z]+'), 'imageOriginal']]});
 
+KellyPageWatchdog.filtersHelp.push({host : 'vk.com', link : 'https://www.youtube.com/watch?v=ImKbC_1Oz8c', loc : 'help_vk'});
+KellyPageWatchdog.filtersHelp.push({host : 'twitter.com', link : 'https://www.youtube.com/watch?v=x1-kqKMnMmA', loc : 'help_twitter'});
+KellyPageWatchdog.filtersHelp.push({host : 'pixiv.net', link : 'https://www.youtube.com/watch?v=ImKbC_1Oz8c', loc : 'help_pixiv'});
 
 KellyPageWatchdog.bannedUrls.push('counter.yadro.ru', 'bat.bing.com', 'ads.adfox'); 
