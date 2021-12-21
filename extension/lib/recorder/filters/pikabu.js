@@ -1,5 +1,5 @@
 KellyRecorderFilterPikabu = new Object();
-KellyRecorderFilterPikabu.manifest = {host : 'pikabu.ru', detectionLvl : ['imageOriginal', 'imagePreview']}};
+KellyRecorderFilterPikabu.manifest = {host : 'pikabu.ru', detectionLvl : ['imageOriginal', 'imagePreview']};
 
 KellyRecorderFilterPikabu.validateByDriver = function(handler, data) {
     if (handler.url.indexOf('pikabu.ru') == -1 || data.item.relatedSrc.length <= 0 || !data.item.relatedDoc || !data.item.relatedGroups) return;
