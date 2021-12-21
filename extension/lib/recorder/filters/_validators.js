@@ -14,6 +14,7 @@ KellyPageWatchdog.validators.push({url : 'boards.4channel.org', host : ['4chan.o
 
 KellyPageWatchdog.filtersHelp.push({host : 'vk.com', link : 'https://www.youtube.com/watch?v=ImKbC_1Oz8c', loc : 'help_vk'});
 KellyPageWatchdog.filtersHelp.push({host : 'twitter.com', link : 'https://www.youtube.com/watch?v=x1-kqKMnMmA', loc : 'help_twitter'});
-KellyPageWatchdog.filtersHelp.push({host : 'pixiv.net', link : 'https://www.youtube.com/watch?v=ImKbC_1Oz8c', loc : 'help_pixiv'});
+KellyPageWatchdog.filtersHelp.push({host : 'pixiv.net', link : 'https://www.youtube.com/watch?v=1Nivs34BDbI', loc : 'help_pixiv'});
+KellyPageWatchdog.filtersHelp.push({host : 'pinterest.com', link : 'https://www.youtube.com/watch?v=ImKbC_1Oz8c', loc : 'help_pinterest'});
 
 KellyPageWatchdog.bannedUrls.push('counter.yadro.ru', 'bat.bing.com', 'ads.adfox'); 
