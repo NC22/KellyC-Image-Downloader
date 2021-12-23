@@ -551,6 +551,17 @@ function KellyPageWatchdog(cfg)
         }
     }
     
+    function isValidHost(filterHosts, inputHost) {
+        
+        var fHostlist = typeof filterHosts == 'string' ? [filterHosts] : filterHosts;
+        
+        for(var b = 0; b < fHostlist.length; b++) {
+            if (fHostlist[b] == inputHost) return true;
+        }
+        
+        return false;
+    }
+    
     this.getCompatibleFilter = function() {
         
         if (!handler.hostname) return false;
@@ -558,12 +569,28 @@ function KellyPageWatchdog(cfg)
         for(var i = 0; i < KellyPageWatchdog.filters.length; i++) {
             var filter = KellyPageWatchdog.filters[i];
             if (!filter.manifest || !filter.manifest.host) continue;
-
-            var fHostlist = typeof filter.manifest.host == 'string' ? [filter.manifest.host] : filter.manifest.host;
+            if (isValidHost(filter.manifest.host, handler.hostname)) return filter;
+        }
+        
+        for (var i = 0; i < KellyPageWatchdog.validators.length; i++) {
+            var validator = KellyPageWatchdog.validators[i];
+            if (!validator.host || !isValidHost(validator.host, handler.hostname)) continue;
+                        
+            var filter = {manifest : {host : validator.host, validator : true, detectionLvl : []}};
             
-            for(var b = 0; b < fHostlist.length; b++) {
-                if (fHostlist[b] == handler.hostname) return filter;
+            if (validator.patterns) {
+                for (var b = 0; b < validator.patterns.length; b++) {
+                    filter.manifest.detectionLvl.push(validator.patterns[b][1]);
+                }
             }
+            
+            if (validator.patternsDoc) {
+                for (var b = 0; b < validator.patternsDoc.length; b++) {
+                    filter.manifest.detectionLvl.push(validator.patternsDoc[b][1]);
+                } 
+            }     
+            
+            return filter;
         }
         
         return false;

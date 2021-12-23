@@ -6,7 +6,7 @@ KellyPageWatchdog.validators.push({url : 'reddit.com', host : 'reddit.com',  pat
 KellyPageWatchdog.validators.push({url : 'fanbox.cc', host : 'fanbox.cc',  patterns : [['fanbox/public/images', 'imagePreview']]});
 KellyPageWatchdog.validators.push({url : 'hentai-foundry.', host : 'hentai-foundry.com', patterns : [['thumb.php', 'imagePreview'], [new RegExp('pictures.hentai-foundry.com/[0-9a-zA-Z]+\/'), 'imageByDocument']]});
 KellyPageWatchdog.validators.push({url : '2ch.hk', host : '2ch.hk', patterns : [[new RegExp('//2ch.hk/[a-zA-Z0-9]+/src/'), 'imageOriginal'], [new RegExp('//2ch.hk/[a-zA-Z0-9]+/thumb/'), 'imagePreview']]});
-KellyPageWatchdog.validators.push({url : 'furaffinity.net', host : 'furaffinity.net', patterns : [[new RegExp('//t.facdn.net/[0-9]+@[0-9]+\-[0-9]+.[a-zA-Z]+'), 'imagePreview'], ['d.facdn.net/art', 'imageByDocument']]});
+KellyPageWatchdog.validators.push({url : 'furaffinity.net', host : 'furaffinity.net', patterns : [[new RegExp('//t.[a-zA-Z0-9]+.net/[0-9]+@[0-9]+\-[0-9]+.[a-zA-Z]+'), 'imagePreview'], [new RegExp('//d.[a-zA-Z0-9]+.net/art'), 'imageByDocument']]});
 // KellyPageWatchdog.validators.push({url : 'exhentai.org', host : 'exhentai.org', patterns : [[new RegExp('//exhentai.org/t/[0-9]+@[0-9]+\-[0-9]+.[a-zA-Z]+'), 'imagePreview'], ['/h/', 'imageByDocument']]});
 KellyPageWatchdog.validators.push({url : 'sankakucomplex.com', host : 'sankakucomplex.com', patterns : [['data/preview/', 'imagePreview'], ['data/sample/', 'imageByDocument']]});
 
