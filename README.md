@@ -7,7 +7,7 @@
 <p></p>
 <h2>EN | Description</h2>
 <p>An browser extension for batch downloading artworks and images from sites. It allows you to download all images on the page filtering by size or other settings.</p>
-<p>Some of the sites (priority to Pixiv, Pinterest, Twitter, Joyreactor, Reddit) support extended features (list of all sites described <a href="https://github.com/NC22/KellyCImageDownloader/wiki">here</a>) for collect "Original" version of images from preview automaticaly without use filters by size manualy.</p>
+<p>Some of the sites (priority to Pixiv, Pinterest, Twitter, Joyreactor, Reddit) support extended features (list of all sites described <a href="https://kellydownloader.com/crawlers/">here</a>) for collect "Original" version of images from preview automaticaly without use filters by size manualy.</p>
 <p>"Load related document" - feature allows you to download addition images from related documents of preview, if original image is not acutally placed on current page. (may be helpfull in some cases, see if site is supported)</p>
 
 <p>Several usage examples:</p>
@@ -22,7 +22,7 @@
 <h2>RU | Описание</h2>
 <p>Расширение для пакетного скачивания картинок \ творчества с любых сайтов. Поддерживаются фильтры по пропорциям, строке url, загрузка дочерних документов.</p>
 <p></p>
-<p>Некоторые сайты поддерживают дополнительный функционал, позволяющий быстро захватить оригиналы изображений без дополнительной фильтрации в ручную. Примеры использования и список сайтов с которых можно быстро скачать оригиналы изображений - <a href="https://github.com/NC22/KellyCImageDownloader/wiki">открыть</a></p>
+<p>Некоторые сайты поддерживают дополнительный функционал, позволяющий быстро захватить оригиналы изображений без дополнительной фильтрации в ручную. Примеры использования и список сайтов с которых можно быстро скачать оригиналы изображений - <a href="https://kellydownloader.com/crawlers/">открыть</a></p>
 <p>Функция "Загрузка дочерних документов" используется если на основной странице доступно только изображение с низким разрешением и ссылка ведет на страницу с оригиналом. (функционал поумолчанию может не всегда сработать, см. страницу поддержки сайтов)</p>
 <p></p>
 <p>Несколько примеров использования</p>
