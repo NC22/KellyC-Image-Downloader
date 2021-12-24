@@ -113,6 +113,9 @@
         margin-left: 6px;
         padding-left: 4px;
         padding-right: 4px;
+        margin-right: 6px;
+        margin-top: 18px;
+        display : block;
     }
 }
 
@@ -135,6 +138,10 @@
     
 .__BASECLASS__-mobile .__BASECLASS__-sidebar-wrap .__BASECLASS__-ModalBox {
     margin : 0px;
+}
+
+.__BASECLASS__-mobile .__BASECLASS__-sidebar-wrap .__BASECLASS__-ModalBox.__BASECLASS__-Main-download-btn-ModalBox {
+    margin-top : 6px;
 }
 
 .__BASECLASS__-mobile .kelly-jr-ui-FavItem-grid-first,

@@ -368,6 +368,14 @@ body.__BASECLASS__-dark  {
     background: #5c5c5c;
 }
 
+.__BASECLASS__-dark .__BASECLASS__-active.__BASECLASS__-additions-page-item ul li a {
+    background: #797979;
+    padding: 5px;
+    margin-bottom: 6px;
+    display: block;
+    color: rgb(255 255 255);
+}
+
 .__BASECLASS__-dark a.__BASECLASS__-additions-menu-item {
     background: #5c5c5c;
 }
