@@ -139,14 +139,28 @@ function KellyPageWatchdog(cfg)
         if (handler.filterCallback('validateByDriver', {item : item}, true) === false) return false;
         return item;
     }
+    
+    var getBlobConverter = function(w, h) {
         
+        if (!handler.blobConverter) handler.blobConverter = document.createElement('canvas');
+        
+            handler.blobConverter.width = w;				
+            handler.blobConverter.height = h;
+            handler.blobConverter.getContext('2d').clearRect(0, 0, w, h);
+            
+        return handler.blobConverter;
+    }
+    
     var getUrl = function(url) {
         
         url = url.trim();
         if (typeof url != 'string' && url.length < 4) return false;
         
         // data url detect | currently only binary images filtered
-        if (url.indexOf('data:image') === 0) return url;
+        
+             if (url.indexOf('data:image') === 0) return url;
+        else if (url.indexOf('blob:') === 0) return url;
+            
         
         // common url validator - todo add protect from bad chars
         if (url.indexOf('/') == -1) return false;
@@ -156,8 +170,12 @@ function KellyPageWatchdog(cfg)
      
     var addItemSrc = function(item, src, groups) {
         
-        handler.srcs.push(src);   // todo - skip dataUrls in prevent-dublicates array ?
-            
+        if (src.indexOf('data:') === 0) {
+           handler.srcs.push(src.substr(0, 258)); 
+        } else {
+            handler.srcs.push(src); 
+        }
+         
         var key = item.relatedSrc.length;
         item.relatedSrc.push(src);
         
@@ -195,8 +213,24 @@ function KellyPageWatchdog(cfg)
 
         src = getUrl(src);
         if (!src) return false;
+                
+        var ext = KellyTools.getUrlExt(src), sourceType = 'unknown', tagName = el.tagName.toLowerCase();        
         
-        var ext = KellyTools.getUrlExt(src), sourceType = 'unknown', tagName = el.tagName.toLowerCase();
+        if (src.indexOf('blob:') === 0) {
+            
+            if (tagName == 'img') {
+                
+                // if (handler.srcs.indexOf(src) !== -1) return false;                
+                // handler.srcs.push(src);
+                
+                var converter = getBlobConverter(el.naturalWidth, el.naturalHeight);
+                    converter.getContext('2d').drawImage(el, 0, 0, el.naturalWidth, el.naturalHeight, 0, 0, el.naturalWidth, el.naturalHeight);
+                
+                src = converter.toDataURL();
+                ext = 'dataUrl';
+                
+            } else return false;
+        }
         
              if (tagName == 'source') sourceType = 'video';
         else if (tagName == 'img' || context == 'addSrcFromStyle') sourceType = 'image'; // todo - optional reduse trust for img data attributes where context != 'addSrcFromAttributes-src'
@@ -209,8 +243,7 @@ function KellyPageWatchdog(cfg)
       
                  if (type.indexOf('image') != -1) sourceType = 'untrust-image';
             else if (type.indexOf('video') != -1) sourceType = 'untrust-video';
-        } 
-                  
+        }      
       
         if (sourceType == 'video') {            
             if (!handler.videoDetect) return false;            
@@ -255,7 +288,9 @@ function KellyPageWatchdog(cfg)
             src = (handler.url.indexOf('http://') === 0 ? 'http' : 'https') + '://' + src;
         }
         
-        if (ext != 'dataUrl' && handler.srcs.indexOf(src) != -1) return false;
+             if (ext == 'dataUrl' && handler.srcs.indexOf(src.substr(0, 258)) != -1) return false;
+        else if (handler.srcs.indexOf(src) != -1) return false;
+        
         var newIndex = addItemSrc(item, src, groups);     
         
         if (handler.debug) {
@@ -474,6 +509,8 @@ function KellyPageWatchdog(cfg)
                 KellyTools.addCss(KellyTools.generateUniqId('kelly-recorder-css'), KellyTools.replaceAll(request.data.loadedData, '__UNIQID__', handler.recorder.id)); 
 
                 KellyTools.setHTMLData(handler.recorder, 'REC<div>' + imagesNum + '</div>');
+                
+                handler.recorder.onclick = function() { delayAddImages();}
                 document.body.appendChild(handler.recorder);
             });
         }
@@ -483,13 +520,16 @@ function KellyPageWatchdog(cfg)
         
         var newItems = handler.parseImages(dc);
         handler.log('[DelayAddImages] Added items : ' + newItems + ' | custom groups : ' + Object.keys(handler.additionCats).length);
-        
+
         if (!updateAF) return false;        
         updateAF = false;
         handler.recorderTick = handler.recorderTick === false ? 0 : 500;
         
         setTimeout(function(){            
             updateAF = true;
+            
+            console.log(handler.imagesPool);
+            
             KellyTools.getBrowser().runtime.sendMessage({method: "addRecord", images : handler.imagesPool, cats : handler.additionCats, url : handler.url, host : handler.host}, function(response) {
                 showRecorder(response.imagesNum);
             });   

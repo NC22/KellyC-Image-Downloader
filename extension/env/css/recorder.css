@@ -30,6 +30,8 @@
     
     font-family: 'Open Sans',Sans-serif;
     font-size: 15px;
+    
+    cursor : pointer;
 }
 
 #__UNIQID__ > div {
