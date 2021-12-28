@@ -216,7 +216,7 @@ function KellyPageWatchdog(cfg)
                 
         var ext = KellyTools.getUrlExt(src), sourceType = 'unknown', tagName = el.tagName.toLowerCase();        
         
-        if (src.indexOf('blob:') === 0) {
+        if (src.indexOf('blob:') === 0) { // todo - optional disable blob detection
             
             if (tagName == 'img') {
                 
@@ -527,8 +527,6 @@ function KellyPageWatchdog(cfg)
         
         setTimeout(function(){            
             updateAF = true;
-            
-            console.log(handler.imagesPool);
             
             KellyTools.getBrowser().runtime.sendMessage({method: "addRecord", images : handler.imagesPool, cats : handler.additionCats, url : handler.url, host : handler.host}, function(response) {
                 showRecorder(response.imagesNum);
