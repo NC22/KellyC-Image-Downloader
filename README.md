@@ -6,7 +6,7 @@
 <h2>Install</h2>
 <p><b>Install</b> for <a href="https://chrome.google.com/webstore/detail/kellyc-favorites/mbhkdmjolnhcppnkldbdfaomeabjiofm?hl=en">Chrome</a>, <a href="https://addons.mozilla.org/ru/firefox/addon/kellyc-favorites/">FireFox</a>, <a href="https://chrome.google.com/webstore/detail/kellyc-favorites/mbhkdmjolnhcppnkldbdfaomeabjiofm?hl=en">Edge</a>, <a href="https://kellydownloader.com/ru/install-opera/">Opera</a></p>
 <p></p>
-<b><a href="https://kellydownloader.com/">Project homepage</a> | <a href="">Twitter</a></b>
+<b><a href="https://kellydownloader.com/">Project homepage</a> | <a href="https://twitter.com/KellyCLibs">Twitter</a></b>
 <p></p>
 <h2>EN | Description</h2>
 <p>An browser extension for batch downloading artworks and images from sites. It allows you to download all images on the page filtering by size or other settings.</p>
