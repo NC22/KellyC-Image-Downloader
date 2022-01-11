@@ -1,13 +1,20 @@
 <h1><img src="https://catface.ru/userfiles/media/udata_1544561629_uixtxchu.png" width="32"> KellyC Image Downloader</h1>
+![GitHub](https://img.shields.io/github/license/nc22/KellyCImageDownloader)
+
+![Chrome Web Store](https://img.shields.io/chrome-web-store/users/mbhkdmjolnhcppnkldbdfaomeabjiofm?label=chrome%20users%3A)
+![Chrome Web Store](https://img.shields.io/chrome-web-store/rating/mbhkdmjolnhcppnkldbdfaomeabjiofm)
+
+![Mozilla Add-on](https://img.shields.io/amo/users/kellyc-favorites?label=firefox%20users%3A)
+![Mozilla Add-on](https://img.shields.io/amo/rating/kellyc-favorites)
 <p></p>
 <h2>Install</h2>
-<p><b>Install</b> for <a href="https://chrome.google.com/webstore/detail/kellyc-favorites/mbhkdmjolnhcppnkldbdfaomeabjiofm?hl=en">Chrome</a>, <a href="https://addons.mozilla.org/ru/firefox/addon/kellyc-favorites/">FireFox</a>, <a href="https://chrome.google.com/webstore/detail/kellyc-favorites/mbhkdmjolnhcppnkldbdfaomeabjiofm?hl=en">Edge</a>, <a href="https://chrome.google.com/webstore/detail/kellyc-favorites/mbhkdmjolnhcppnkldbdfaomeabjiofm?hl=en">Opera</a></p>
+<p><b>Install</b> for <a href="https://chrome.google.com/webstore/detail/kellyc-favorites/mbhkdmjolnhcppnkldbdfaomeabjiofm?hl=en">Chrome</a>, <a href="https://addons.mozilla.org/ru/firefox/addon/kellyc-favorites/">FireFox</a>, <a href="https://chrome.google.com/webstore/detail/kellyc-favorites/mbhkdmjolnhcppnkldbdfaomeabjiofm?hl=en">Edge</a>, <a href="https://kellydownloader.com/ru/install-opera/">Opera</a></p>
 <p></p>
-<b><a href="https://kellydownloader.com/">Project homepage</a></b>
+<b><a href="https://kellydownloader.com/">Project homepage</a> | <a href="">Twitter</a></b>
 <p></p>
 <h2>EN | Description</h2>
 <p>An browser extension for batch downloading artworks and images from sites. It allows you to download all images on the page filtering by size or other settings.</p>
-<p>Some of the sites (priority to Pixiv, Pinterest, Twitter, Joyreactor, Reddit) support extended features (list of all sites described <a href="https://kellydownloader.com/crawlers/">here</a>) for collect "Original" version of images from preview automaticaly without use filters by size manualy.</p>
+<p>Some of the sites (priority to Pixiv, Pinterest, Twitter, Joyreactor) support extended features (list of all sites described <a href="https://kellydownloader.com/crawlers/">here</a>) for collect "Original" version of images from preview automaticaly without use filters by size manualy.</p>
 <p>"Load related document" - feature allows you to download addition images from related documents of preview, if original image is not acutally placed on current page. (may be helpfull in some cases, see if site is supported)</p>
 
 <p>Several usage examples:</p>
@@ -29,6 +36,7 @@
 <p><a href="https://www.youtube.com/watch?v=XpXhwndWYyg">Скачать картинки из альбома <b>Вконтакте</b></a> (Пример использования ф-ции)</p>
 <p><a href="https://www.youtube.com/watch?v=ImKbC_1Oz8c">Скачать картинки с <b>Pinterest</b></a> (Сбор данных из закладок пользователя)</p>
 <p><a href="https://www.youtube.com/watch?v=x1-kqKMnMmA">Скачать картинки с <b>Twitter</b></a> (Сбор данных из раздела "Media")</p>
+<p><a href="https://youtu.be/1Nivs34BDbI">Скачать картинки с <b>Pixiv</b></a> (Сбор данных из раздела "Закладки")</p>
 <p></p>
 <p>Если вы знаете JS и хотите расширить список поддерживаемых сайтов, можете добавить дополнительный фильтр в соответствии с документацией <a href="https://kellydownloader.com/links/dev/">здесь</a></p>
 
