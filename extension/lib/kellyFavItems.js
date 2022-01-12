@@ -1082,7 +1082,7 @@ function KellyFavItems(cfg)
         if (env.hostClass == 'options_page') return;
         
         if (env.events.onDisplayBlock) env.events.onDisplayBlock(mode, 'hide');
-        if (handler.toolbar) handler.toolbar.events.onDisplayBlock(mode, 'hide'); 
+        if (fav.coptions.bottomToolbar && handler.toolbar) handler.toolbar.events.onDisplayBlock(mode, 'hide'); 
         
         var envContainers = env.getMainContainers();
             envContainers.siteContent.style.display = 'block';
@@ -1121,7 +1121,7 @@ function KellyFavItems(cfg)
         KellyTools.classList('add', envContainers.favContent, env.className + '-active');
         
         if (env.events.onDisplayBlock) env.events.onDisplayBlock(mode, 'show', oldMode);
-        if (handler.toolbar) handler.toolbar.events.onDisplayBlock(mode, 'show', oldMode);   
+        if (fav.coptions.bottomToolbar && handler.toolbar) handler.toolbar.events.onDisplayBlock(mode, 'show', oldMode);   
     }
     
     this.updateImageGrid = function() {
@@ -1441,7 +1441,7 @@ function KellyFavItems(cfg)
         imgViewer.addToGallery(galleryImages, 'fav-images', galleryImagesData);
         
         if (env.events.onUpdateFilteredData && env.events.onUpdateFilteredData(displayedItems)) return; 
-        if (handler.toolbar) handler.toolbar.events.onUpdateFilteredData(displayedItems);
+        if (fav.coptions.bottomToolbar && handler.toolbar) handler.toolbar.events.onUpdateFilteredData(displayedItems);
         
         var tiles = handler.getImageGrid().getTiles();   
         if (!handler.mobileOptimization && tiles && tiles.length) window.scrollTo(0, tiles[0].getBoundingClientRect().top + KellyTools.getScrollTop() - 90);
@@ -2266,6 +2266,7 @@ function KellyFavItems(cfg)
             if (!dm.container) dm.container = downloaderBox.content;
             
             fav.coptions.grabber.itemsList = ''; // is range set save needed ?
+            fav.coptions.grabber.manualExclude = fav.coptions.bottomToolbar;
             
             dm.updateCfg({
                 events : false,
@@ -2370,7 +2371,7 @@ function KellyFavItems(cfg)
         handler.updateImageGrid();  
                     
         if (env.events.onDisplayBlock) env.events.onDisplayBlock('fav', 'show', 'fav');
-        if (handler.toolbar) handler.toolbar.events.onDisplayBlock('fav', 'show', 'fav');
+        if (fav.coptions.bottomToolbar && handler.toolbar) handler.toolbar.events.onDisplayBlock('fav', 'show', 'fav');
         
         return imagesAsDownloadItems;
     }

@@ -41,6 +41,9 @@
     "associations_tags":{  
         "message":"Ассоциации с тегами (через запятую)"
     },
+    "bottom_toolbar":{
+        "message":"Показывать доп. панель инструментов"
+    },
     "close":{  
         "message":"Закрыть"
     },

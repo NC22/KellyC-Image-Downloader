@@ -340,7 +340,10 @@ function KellyOptions(cfg) {
         handler.favEnv.save('cfg');	
 
         if (env.events.onOptionsUpdate && env.events.onOptionsUpdate(refreshPosts)) return;        
-        if (refreshPosts) handler.favEnv.formatPostContainers();  
+        if (refreshPosts) handler.favEnv.formatPostContainers(); 
+        if (handler.cfgInput['bottomToolbar'] && handler.favEnv.getToolbar() && !fav.coptions.bottomToolbar) {
+            handler.favEnv.getToolbar().show(false);
+        } 
     }
     
     constructor(cfg);

@@ -41,6 +41,9 @@
     "additions_about":{
         "message":"Links and related documents"
     },
+    "bottom_toolbar":{
+        "message":"Display bottom toolbar"
+    },
     "close":{  
         "message":"Close"
     },

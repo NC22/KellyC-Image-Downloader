@@ -75,7 +75,12 @@ function KellyToolbar(cfg) {
          KellyTools.setHTMLData(handler.dom.catList, '<span>' + html + (html ? ' ' : '') + getCatListHtml('Исключены картинки', filters.catIgnoreFilters, filters.logic) + '</span>');  
     }
     
-    this.show = function() {
+    this.show = function(hide) {
+       
+       if (hide) {
+           if (handler.container) handler.container.classList.remove(handler.className + '-shown');
+           return;
+       }
        
        if (!handler.container.innerHTML) {
 

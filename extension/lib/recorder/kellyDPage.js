@@ -1000,6 +1000,7 @@ KellyDPage.init = function() {
     
     KellyDPage.env.events.onValidateCfg = function(data) {
         KellyLoadDocControll.validateCfg(data);
+        if (typeof data.coptions.bottomToolbar == 'undefined') data.coptions.bottomToolbar = true;
     } 
     
     KellyDPage.env.events.onCreateOptionsManager = function(options) {
@@ -1008,6 +1009,9 @@ KellyDPage.init = function() {
         delete options.tabData['BaseOptions'].parts.fast_download;
         delete options.tabData['BaseOptions'].parts.options_fav_add;
         delete options.tabData['Other'].parts.unlock_common;
+        
+        options.tabData['BaseOptions'].parts['_common'] = ['bottomToolbar'];        
+        options.cfgInput['bottomToolbar'] = {loc : 'bottom_toolbar', type : 'bool', default : true};  
         
         KellyLoadDocControll.initOptions(options);
         KellyDPage.defaultPageParser.filterCallback('onInitOptions', {options : options}); 
