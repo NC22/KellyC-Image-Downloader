@@ -19,7 +19,8 @@ body.__BASECLASS__-dark  {
     padding-right: 30px;
 }
 
-.__BASECLASS__-FavItem-tmp-bounds .__BASECLASS__-preview-wrap, .__BASECLASS__-FavItem-tmp-bounds .__BASECLASS__-preview   {
+.__BASECLASS__-dark .__BASECLASS__-FavItem-tmp-bounds .__BASECLASS__-preview-wrap, 
+.__BASECLASS__-dark .__BASECLASS__-FavItem-tmp-bounds .__BASECLASS__-preview   {
     background: #2f2f2f;
 }
 
@@ -42,7 +43,7 @@ body.__BASECLASS__-dark  {
 .__BASECLASS__-dark  .page-content {
     padding: 50px;
     padding-top: 20px;
-    padding-bottom: 0;
+    padding-bottom: 50px;
 }
 
 .__BASECLASS__-dark #submenu {
@@ -280,7 +281,7 @@ body.__BASECLASS__-dark  {
     margin: 0px auto;
 }
 
-.__BASECLASS__-dark .__BASECLASS__-FiltersMenu > li > a {
+.__BASECLASS__-dark .__BASECLASS__-FiltersMenu > li > button {
     color : #000;
     padding-left: 3px;
     padding-right: 3px;
@@ -297,21 +298,21 @@ body.__BASECLASS__-dark  {
     background-color: #a9a9a9;
 }
 
-.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a.__BASECLASS__-downloader-button-save_as_json, 
-.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a.__BASECLASS__-downloader-button-save_as_txt, 
-.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a.__BASECLASS__-downloader-button-save_log,
+.__BASECLASS__-dark .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a.__BASECLASS__-downloader-button-save_as_json, 
+.__BASECLASS__-dark .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a.__BASECLASS__-downloader-button-save_as_txt, 
+.__BASECLASS__-dark .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a.__BASECLASS__-downloader-button-save_log,
 .__BASECLASS__-dark .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a {
     background-color: #919191;
     color : #fff;
 }
 
-.__BASECLASS__-Main-download-btn,
-.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a.__BASECLASS__-downloader-button-init {
+.__BASECLASS__-dark .__BASECLASS__-Main-download-btn,
+.__BASECLASS__-dark .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a.__BASECLASS__-downloader-button-init {
     background-color: #e63d3d;
 }
 
-.__BASECLASS__-Main-download-btn:hover,
-.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a:hover {
+.__BASECLASS__-dark .__BASECLASS__-Main-download-btn:hover,
+.__BASECLASS__-dark .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a:hover {
     background-color : #e95757;
 }
 
@@ -343,9 +344,9 @@ body.__BASECLASS__-dark  {
     color : #fff;
 }
 
-.__BASECLASS__-FiltersMenu > li > a,
-.__BASECLASS__-downloader-progressbar,
-.__BASECLASS__-downloader-progressbar-line:after {
+.__BASECLASS__-dark .__BASECLASS__-FiltersMenu > li > button,
+.__BASECLASS__-dark .__BASECLASS__-downloader-progressbar,
+.__BASECLASS__-dark .__BASECLASS__-downloader-progressbar-line:after {
     
     border-radius : 0;
 }
@@ -378,4 +379,35 @@ body.__BASECLASS__-dark  {
 
 .__BASECLASS__-dark a.__BASECLASS__-additions-menu-item {
     background: #5c5c5c;
+}
+
+
+.__BASECLASS__-dark  .__BASECLASS__-toolbar {
+    background: #4d4d4d;
+    color: #cdcdcd;
+}
+
+
+.__BASECLASS__-dark  .__BASECLASS__-toolbar a {
+    color: #ddd;
+}
+
+.__BASECLASS__-dark  .__BASECLASS__-toolbar svg {
+    color: #000;
+}
+
+.__BASECLASS__-dark .__BASECLASS__-toolbar svg path {
+    
+    background: #fff;
+    stroke: #dddddd;
+    fill: #dddddd;
+}
+
+.__BASECLASS__-dark .__BASECLASS__-toolbar-theme {
+    
+    background: #2d2d2d;
+}
+
+.__BASECLASS__-dark .__BASECLASS__-toolbar-theme:before {
+    box-shadow: -2px 2px 1px 1px white;
 }

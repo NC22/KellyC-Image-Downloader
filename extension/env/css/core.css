@@ -89,6 +89,10 @@
      z-index : 1010;
 }
 
+.__BASECLASS__-tooltipster-wrap.__BASECLASS__-tooltipster-close-btn {
+    z-index : 900;
+}
+
 .__BASECLASS__-tooltipster-help {
 
     margin : 0px;
@@ -601,7 +605,8 @@
      margin-top: 6px;
 }
  
-.__BASECLASS__-FiltersMenu > li > a {
+.__BASECLASS__-FiltersMenu > li > button {
+     border : 0px;
      border-radius : 6px;
      text-decoration : none;
      display : inline-block;
@@ -612,17 +617,21 @@
      font-size : 14px;
      background : #ffc78e;
      display : inline-block;
+     padding: 0;
      padding-left : 4px;
      padding-right : 4px;
 	 min-width : 32px;
      transition: background-color 0.3s;
+     cursor : pointer;
+     text-transform: none;
+     font-weight: normal;   
 }
 
-.__BASECLASS__-FiltersMenu > li.flush > a {
+.__BASECLASS__-FiltersMenu > li.flush > button {
     background-color : #fff5eb;
 }
 
-.__BASECLASS__-FiltersMenu > li.__BASECLASS__-filters-CatCreate > a {
+.__BASECLASS__-FiltersMenu > li.__BASECLASS__-filters-CatCreate > button {
 	background : #dbdbdb;
 }
  
@@ -631,11 +640,11 @@
      text-decoration : none;
 }
 
-.__BASECLASS__-FiltersMenu > li > a.active{
+.__BASECLASS__-FiltersMenu > li > button.active{
      background : #ff5c10;
 }
 
-.__BASECLASS__-FiltersMenu > li > a.activeIgnore {
+.__BASECLASS__-FiltersMenu > li > button.activeIgnore {
      background : #ea8080; /* #ff002f; */
 }
 
@@ -1790,7 +1799,137 @@
     color: #ff7600;
 }
 
+.__BASECLASS__-toolbar.__BASECLASS__-toolbar-shown {
+    display : block;
+}
+
+.__BASECLASS__-toolbar {
+    position: fixed;
+    bottom: 0;
+    background: #ffefc9;
+    width: 100%;
+    padding: 4px 12px;
+    padding-top: 0px;
+    z-index: 991;
+    display: none;
+    font-size: 14px;
+    color: #282828;
+    vertical-align: middle;
+}
+
+.__BASECLASS__-toolbar .__BASECLASS__-toolbar-right {
+    float: right;
+}
+
+.__BASECLASS__-toolbar a {
+    margin: 0 6px;
+    text-decoration: none;
+    font-weight: bold;
+    vertical-align: middle;
+    display: inline-block;
+    color: #ddd;
+    cursor : pointer;
+    /* border-bottom: 2px solid; */
+}
+
+.__BASECLASS__-toolbar svg {
+    
+    color: #000;
+    vertical-align: middle;
+    overflow: visible;
+}
+
+.__BASECLASS__-toolbar svg path {
+    
+    background: #fff;
+    stroke: #dddddd;
+    fill: #dddddd;
+}
+
+.__BASECLASS__-toolbar-catlist {
+    display : inline-block;
+    vertical-align: middle;
+}
+
+.__BASECLASS__-toolbar-theme {
+    
+    display: inline-block;
+    float: right;
+    width: 19px;
+    height: 18px;
+    background: #2d2d2d;
+    border-radius: 33px;
+    position: relative;
+    margin-top: 3px;
+    cursor : pointer;
+}
+
+.__BASECLASS__-toolbar-theme:before {
+    position: absolute;
+    top: 7px;
+    left: 11px;
+    transform: translate(-50%, -50%);
+    height: 11px;
+    width: 11px;
+    box-shadow: -2px 2px 1px 1px white;
+    border-radius: 50%;
+    content: "";
+}
+
 /* Fav items importer, todo replace class, cause collisions */
+
+.__BASECLASS__-FavItem-download-enabled {    
+    display : none;
+}
+
+.__BASECLASS__-FavItem-download-enabled+label {
+    display: block;
+}
+
+.__BASECLASS__-toolbar .__BASECLASS__-FavItem-download-enabled+label:before {
+    left: 0;
+    margin: 0;
+    margin-top : 2px;
+}
+
+.__BASECLASS__-toolbar .__BASECLASS__-FavItem-download-enabled+label {
+    display: none;
+    position: relative;
+    padding-left: 33px;
+    margin-left: 12px;
+    margin-right: 28px;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.__BASECLASS__-toolbar.__BASECLASS__-toolbar-downloader .__BASECLASS__-FavItem-download-enabled+label {
+    display : inline-block;
+}
+
+.__BASECLASS__-FavItem-download-enabled+label:before {    
+    display: block;
+    width: 18px;
+    height: 18px;
+    /* background: #000; */
+    position: absolute;
+    margin-top: 4px;
+    margin-left: 4px;
+    border: 2px solid #3d3d3d;
+    content: "";
+}
+
+.__BASECLASS__-FavItem-download-enabled:checked+label:before {
+    background-color: #ff8509;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23fff' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26 2.974 7.25 8 2.193z'/%3e%3c/svg%3e");
+    content: "";
+    display: block;
+    width: 18px;
+    height: 18px;
+}
+
+.__BASECLASS__-FavItem-download-enabled:disabled+label:before {
+    opacity: 0.4;
+}
 
 .__BASECLASS__-FavItem-download-number {
     display: block;
@@ -1802,7 +1941,8 @@
     text-align: center;
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
-    color : #000;
+    color : #000;  
+    cursor: default;
 }
 
 .__BASECLASS__-FavItem-download-number span {

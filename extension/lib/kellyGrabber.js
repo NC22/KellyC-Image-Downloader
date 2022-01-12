@@ -30,6 +30,20 @@ function KellyGrabber(cfg) {
     // 
     // .item               - reference to fav.item[n] object
     // .subItem            - index of fav.item.pImage if object has more then one image
+    //
+    // other tech params : 
+    //
+    // .cancelTimer
+    // .canceling
+    // .dataRequest
+    //
+    // .downloadDelta
+    // .error
+    //
+    // .url 
+    // .filename
+    //
+    // dont need to access vars directly. if you need to check current state use handler.getDownloadItemState(downloads[i]); method
     
     var downloads = []; 
         
@@ -38,6 +52,7 @@ function KellyGrabber(cfg) {
     var downloadsOffset = 0; // skip N elements from begin of downloads[], inverted numeration of items not affect on offset. Download always starts from zero to last element
     var ids = 0; // counter for downloads    
     var acceptItems = false;
+    var manualExcludeItems = [];
     
     var events = { 
     
@@ -794,7 +809,7 @@ function KellyGrabber(cfg) {
             
             if (typeof total == 'undefined' || total === null) {
                 
-                total = downloads.length;
+                total = downloads.length - manualExcludeItems.length;
                 
                 if (acceptItems) {
                     total = acceptItems.length;
@@ -1007,6 +1022,7 @@ function KellyGrabber(cfg) {
                 subItems[downloads[i].item.id].push(i);                
             }
             
+            // check if element is visible on current list page
             var itemContainer = document.getElementById(downloadItemId);
             if (!itemContainer) {
                 continue;
@@ -1014,22 +1030,27 @@ function KellyGrabber(cfg) {
             
             // KellyTools.log(imageClassName + '-' + downloads[i].item.id);
         
-            var holder = KellyTools.getElementByClass(itemContainer, imageClassName + '-download-state-holder');                        
+            var holder = KellyTools.getElementByClass(itemContainer, imageClassName + '-download-state-holder');  
+            var downloadEnabled = KellyTools.getElementByClass(itemContainer, imageClassName + '-download-enabled');
+            var numberTitle = KellyTools.getElementByClass(itemContainer, imageClassName + '-download-number-title');
+            
+            var title = '#' + itemN;
+            if (downloads[i].subItem !== false) {
+                
+                var itemNto = options.invertNumeration ? itemN - downloads[i].item.pImage.length+1 : itemN + downloads[i].item.pImage.length-1;
+                title += '-#' + itemNto;
+            }
+                
             if (!holder) {
                 
                 holder = document.createElement('DIV');
                 holder.className = imageClassName + '-download-state-holder';
                 holder.setAttribute('downloadIndex', i);
-                
-                var title = '#' + itemN;
-                if (downloads[i].subItem !== false) {
-                    
-                    var itemNto = options.invertNumeration ? itemN - downloads[i].item.pImage.length+1 : itemN + downloads[i].item.pImage.length-1;
-                    title += '-#' + itemNto;
-                }
-              
+                        
                 var html = '\
-                    <div class="' + imageClassName + '-download-number" data-start="' + itemN + '"><span>' + title + '</span></div>\
+                    <input type="checkbox" class="' + imageClassName + '-download-enabled" data-no-tip="1" id="' + downloadItemId + '-download-enabled" name="' + downloadItemId + '-download-enabled" value="' + i + '" ' + (manualExcludeItems.indexOf(i) != -1 ? '' : 'checked') + (mode == 'download' ? ' disabled' : '') + '>\
+                    <label title="Включить картинку в список выгрузки" class="' + imageClassName + '-download-enabled-label" data-no-tip="1" for="' + downloadItemId + '-download-enabled"></label>\
+                    <div class="' + imageClassName + '-download-number" data-no-tip="1"><span class="' + imageClassName + '-download-number-title">' + title + '</span></div>\
                     <div class="' + imageClassName + '-download-status"></div>\
                ';
                
@@ -1059,9 +1080,25 @@ function KellyGrabber(cfg) {
                 }, tooltipOptions, 100);       
                 */
                 
+                downloadEnabled = KellyTools.getElementByClass(itemContainer, imageClassName + '-download-enabled'); 
+                downloadEnabled.onchange = function() {  
+                    var itemIndex = parseInt(this.value);
+                    var index = manualExcludeItems.indexOf(itemIndex);
+                    if (index == -1 && !this.checked) manualExcludeItems.push(itemIndex);
+                    if (index != -1 && this.checked) manualExcludeItems.splice(index, 1);
+                    
+                    
+                    updateProgressBar();
+                }
+                    
                 holder.onclick = function(e) {                
                     
                     // if (fav.getTooltip().isShown()) return false;
+                    
+                    
+                    if (e.target.getAttribute('data-no-tip')) {
+                        return;
+                    }
                     
                     var itemIndex = this.getAttribute('downloadIndex');
                     showDownloadItemInfoTooltip(this.getAttribute('downloadIndex'), this);
@@ -1084,7 +1121,11 @@ function KellyGrabber(cfg) {
                     fav.getTooltip().show(false);
                 }  
                 */              
-            } 
+            } else {
+                numberTitle.innerText = title;
+                downloadEnabled.disabled = (mode == 'download' ? true : false);
+                downloadEnabled.checked = manualExcludeItems.indexOf(i) == -1;
+            }
             
             var statusPlaceholder = KellyTools.getElementByClass(holder, imageClassName + '-download-status');
             
@@ -1147,7 +1188,11 @@ function KellyGrabber(cfg) {
         
         // currently count any. Possible states - downloadDelta.state.current == "interrupted" / "complete"
         
-        if (ditem.downloadDelta) { 
+        if (manualExcludeItems.indexOf(itemIndex) != -1) {
+        
+            return 'skip';
+        
+        } else if (ditem.downloadDelta) { 
             
             return 'complete';
             
@@ -1250,7 +1295,7 @@ function KellyGrabber(cfg) {
             var hideContinue = canceled ? false : true;
 
             updateContinue(hideContinue);
-            updateProgressBar();           
+            updateProgressBar();    
         } 
         
         return {inProgress : inProgress, waitingNum : waitingNum};
@@ -1317,7 +1362,8 @@ function KellyGrabber(cfg) {
         
         handler.cancelDownloads(function() {               
             buttons = {};
-            handler.container.innerHTML = ''; 
+            handler.container.innerHTML = '';
+            manualExcludeItems = [];
             downloads = [];
         });
                  
@@ -1441,7 +1487,7 @@ function KellyGrabber(cfg) {
     // переинициализировать список задач, при изменении конфигурации \ обновлении фильтров в основном расширении    
     
     this.setDownloadTasks = function(indexes) {
-        
+
         if (handler.getState() == 'download') {
             return;            
         }
@@ -1491,11 +1537,33 @@ function KellyGrabber(cfg) {
         // todo deselect inaccepted 
         return downloads;
     }
+        
+    this.setManualExcluded = function(input) {
+        
+        if (input == 'select_all') {
+            
+            manualExcludeItems = [];            
+            
+        } else if (input == 'deselect_all') {
+            
+            manualExcludeItems = [];
+            for (var i = 0; i <= downloads.length-1; i++) {
+                manualExcludeItems.push(i);
+            }
+            
+        } else {
+            
+            manualExcludeItems = input;
+        }
+        
+        handler.updateStateForImageGrid();
+    }
     
     // full reset
     
     this.clearDownloads = function() {
         downloads = [];
+        manualExcludeItems = [];
         downloadingIds = [];
         acceptItems = false;
         failItems = [];
@@ -1551,10 +1619,13 @@ function KellyGrabber(cfg) {
                 buttons['init'].innerText = lng.s('Остановить загрузку', 'grabber_stop');
                 buttons['init'].onclick = function() {
                     handler.cancelDownloads();
+                    handler.updateStateForImageGrid();
                     return false;
                 }       
             }
         }
+        
+        handler.updateStateForImageGrid();
       
         if (log && buttons['save_log']) {
              buttons['save_log'].style.display = 'block';
@@ -2440,7 +2511,6 @@ function KellyGrabber(cfg) {
                      
         handler.resetDownloadItems(true);
         handler.updateStartButtonState('stop'); 
-        handler.updateStateForImageGrid();
  
         handler.addDownloadWork(); 
         updateProgressBar();

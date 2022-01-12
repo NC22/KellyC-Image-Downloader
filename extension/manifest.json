@@ -9,6 +9,7 @@
             "lib/kellyThreadWork.js", 
             "lib/kellyGrabber.js", 
             "lib/kellyFastSave.js", 
+            "lib/kellyToolbar.js", 
             "lib/kellyTools.js", 
             "lib/kellyOptions.js", 
             "lib/kellyAdditionsForm.js", 
@@ -44,7 +45,7 @@
         ]
    } ],
    "manifest_version" : 2,
-   "version": "1.2.1.4",
+   "version": "1.2.1.5",
    "name": "KellyC Image Downloader",
    "description": "__MSG_ext_description_recorder__",
    "icons": { 

@@ -199,7 +199,7 @@ table.__BASECLASS__-options-table input[type="submit"] {
     background: #5d5d5d;
 }
 
-.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-FiltersMenu > li > a {
+.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-FiltersMenu > li > button {
     color : #000;
     padding-left: 3px;
     padding-right: 3px;
@@ -352,7 +352,7 @@ table.__BASECLASS__-options-table input[type="submit"] {
 }
 
 
-.__BASECLASS__-old-reactor-cc .__BASECLASS__-FiltersMenu > li.flush > a {
+.__BASECLASS__-old-reactor-cc .__BASECLASS__-FiltersMenu > li.flush > button {
     background-color : #aaff9b;
 }
 
@@ -411,15 +411,14 @@ table.__BASECLASS__-options-table input[type="submit"] {
     margin-top : 12px;
 }
 
-.__BASECLASS__-old-reactor-cc .__BASECLASS__-FiltersMenu > li > a {
+.__BASECLASS__-old-reactor-cc .__BASECLASS__-FiltersMenu > li > button {
     text-decoration: none;
     text-align: center;
     background: #ffc78e;
     display: inline-block;
     border: 1px solid #fab728;
-    background-color: white;
     font-size: 11px;
-    font-weight: bold;
+    font-weight: normal;
     height: 20px;
     line-height: 20px;
     margin: 0;
@@ -437,11 +436,11 @@ table.__BASECLASS__-options-table input[type="submit"] {
     font-size : 13.33px;
 }
 
-.__BASECLASS__-old-reactor-cc .__BASECLASS__-FiltersMenu > li > a.active {
+.__BASECLASS__-old-reactor-cc .__BASECLASS__-FiltersMenu > li > button.active {
     background: #ff5c10;
 }
 
-.__BASECLASS__-old-reactor-cc .__BASECLASS__-FiltersMenu > li > a.activeIgnore {
+.__BASECLASS__-old-reactor-cc .__BASECLASS__-FiltersMenu > li > button.activeIgnore {
      background : #ea8080; 
 }
 
@@ -478,6 +477,10 @@ table.__BASECLASS__-options-table input[type="submit"] {
     box-sizing: border-box;
     margin-bottom: 6px;
     padding: 6px;
+}
+
+.__BASECLASS__-old-reactor-cc .__BASECLASS__-toolbar .__BASECLASS__-toolbar-right {
+    padding-right: 24px;
 }
 
 #__BASECLASS__-ModalBox.__BASECLASS__-old-reactor-cc a {

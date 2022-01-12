@@ -5,7 +5,7 @@
    @description    creates tooltip elements (attaches to an element or screen) widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.0.4 14.05.20
+   @version        v 1.0.5 23.12.21
    
    ToDo : 
    
@@ -39,6 +39,7 @@ function KellyTooltip(cfg) {
     this.ptypeY = 'outside';
     
     this.offset = {left : 0, top : -20};
+    this.avoidOffset = {outBottom : -6, outLeft : 0};
     
     this.removeOnClose = false;
     this.removeSelfDelay = 600;
@@ -81,6 +82,7 @@ function KellyTooltip(cfg) {
         var settings = [
             'avoidOutOfBounds',
             'avoidLostTarget',
+            'avoidOffset', 
             'target', 
             'message',
             'hideWidth',
@@ -103,7 +105,7 @@ function KellyTooltip(cfg) {
             
                 handler[key] = cfg[key];
                 
-                if (key == 'selfClass' || key == 'classGroup'){
+                if (key == 'selfClass' || key == 'classGroup' || key == 'target' || key == 'closeButton'){
                     updateContainerClass = true;
                 }
                 
@@ -158,6 +160,9 @@ function KellyTooltip(cfg) {
             className += ' ' + handler.classGroup + '-y-' + handler.positionY;
             className += ' ' + handler.classGroup + '-x-' + handler.positionX;
         
+        if (handler.target && handler.target == 'screen') className += ' ' + handler.classGroup + '-target-screen';
+        
+        if (handler.closeButton) className += ' ' + handler.classGroup + '-close-btn';
         if (handler.ptypeX) className += ' ' + handler.classGroup + '-' + handler.ptypeX;
         if (handler.ptypeY) className += ' ' + handler.classGroup + '-' + handler.ptypeY;
         if (handler.selfClass) className += ' ' + handler.selfClass;
@@ -325,11 +330,12 @@ function KellyTooltip(cfg) {
             
             handler.contentId = contentId;
             
-            
             closeByBodyPrevent = true;            
             if (handler.closeByBody) {
                 setTimeout(function() { closeByBodyPrevent = false; }, 100);
             }
+            
+            if (handler.userEvents.onShow) handler.userEvents.onShow(handler);
             
         } else {
             if (handler.userEvents.onClose) handler.userEvents.onClose(handler);
@@ -391,14 +397,49 @@ function KellyTooltip(cfg) {
         } else return handler.target;
     }
     
+    function calcPosForTarget(targetPos, toolTipBounds, envBounds, posX, posY, typeX, typeY, offset) {
+           
+        var left = targetPos.left + offset.left + envBounds.scrollLeft;  // left - inside element
+        var top = targetPos.top + offset.top + envBounds.scrollTop; // top - inside element
+              
+        if (posY == 'top' && typeY == 'outside') {
+            top = top - toolTipBounds.height;
+        } else if (posY == 'top' && typeY == 'inside') {		
+                        
+        } else if (posY == 'bottom' && typeY == 'outside') {             
+            top = top + targetPos.height; 
+        } else if (posY == 'bottom' && typeY == 'inside') { 
+            top = top + targetPos.height - toolTipBounds.height; 
+        } else if (posY == 'center') {
+            top += targetPos.height / 2 - toolTipBounds.height / 2;
+        }
+        
+        if (posX == 'left' && typeX == 'outside') {
+            left = left - toolTipBounds.width;			
+        } else if (posX == 'left' && typeX == 'inside') {
+                
+        } else if (posX == 'right' && typeX == 'outside' ) {
+            left = left + targetPos.width;			
+        } else if (posX == 'right' && typeX == 'inside' ) {
+            left = left + targetPos.width - toolTipBounds.width;	
+        } else if (posX == 'center') {
+            left += targetPos.width / 2 - toolTipBounds.width / 2;
+        }
+        
+        return {left : left, top : top};
+    }
+    
     this.updatePosition = function() {
     
         if (!handler.self) return false;
         
-        var scrollTop = (window.pageYOffset || document.documentElement.scrollTop) - (document.documentElement.clientTop || 0);
-        var scrollLeft = (window.pageXOffset || document.documentElement.scrollLeft) - (document.documentElement.clientLeft || 0);
         var screenBoundEl = (document.compatMode === "CSS1Compat") ? document.documentElement : document.body;
-        var screenBounds = { width : screenBoundEl.clientWidth, height : screenBoundEl.clientHeight};
+        var envBounds = {
+            scrollTop : (window.pageYOffset || document.documentElement.scrollTop) - (document.documentElement.clientTop || 0),
+            scrollLeft : (window.pageXOffset || document.documentElement.scrollLeft) - (document.documentElement.clientLeft || 0),
+            screenWidth : screenBoundEl.clientWidth,
+            screenHeight : screenBoundEl.clientHeight,
+        }
         
         if (handler.getTarget()) {	
             
@@ -407,93 +448,55 @@ function KellyTooltip(cfg) {
                 return false;
             }
             
-            var pos = handler.getTarget().getBoundingClientRect();
+            var targetPos = handler.getTarget().getBoundingClientRect();
             
         } else if (handler.target == 'screen') {            
-            var pos = {left : 0, top : 0, width : screenBounds.width, height : screenBounds.height};
         
+            var targetPos = {left : 0, top : 0, width : envBounds.screenWidth, height : envBounds.screenHeight};
+            
+            if (handler.ptypeX == 'outside') handler.ptypeX = 'inside';
+            if (handler.ptypeY == 'outside') handler.ptypeY = 'inside';
+            
+            handler.getContent().style.maxHeight = (targetPos.height-140) + 'px';
+            handler.getContent().style.maxWidth = targetPos.width + 'px';
+            
         } else return false;
         
         var toolTip = handler.self;
         if (handler.minWidth) toolTip.style.minWidth = handler.minWidth + 'px';	
                  
-        var toolTipBounds = toolTip.getBoundingClientRect();		
-        
-        var left = pos.left + handler.offset.left + scrollLeft;
-        var top = pos.top + handler.offset.top + scrollTop;
-              
-        if (handler.positionY == 'top' && handler.ptypeY == 'outside') {
-
-            top = top - toolTipBounds.height;
-
-        } else if (handler.positionY == 'top' && handler.ptypeY == 'inside') {		
-                        
-        } else if (handler.positionY == 'bottom' && handler.ptypeY == 'outside') {             
-            top = top + pos.height; 
-        } else if (handler.positionY == 'bottom' && handler.ptypeY == 'inside') { 
-            top = top + pos.height - toolTipBounds.height; 
-        } else if (handler.positionY == 'center') {
-            top += pos.height / 2 - toolTipBounds.height / 2;
-        }
-        
-        if (handler.positionX == 'left' && handler.ptypeX == 'outside') {
-            left = left - toolTipBounds.width;			
-        } else if (handler.positionX == 'left' && handler.ptypeX == 'inside') {
+        var toolTipBounds = toolTip.getBoundingClientRect();
+        var calcPos = calcPosForTarget(targetPos, toolTipBounds, envBounds, handler.positionX, handler.positionY, handler.ptypeX, handler.ptypeY, handler.offset);
                 
-        } else if (handler.positionX == 'right' && handler.ptypeX == 'outside' ) {
-            left = left + pos.width;			
-        } else if (handler.positionX == 'right' && handler.ptypeX == 'inside' ) {
-            left = left + pos.width - toolTipBounds.width;	
-        } else if (handler.positionX == 'center') {
-            left += pos.width / 2 - toolTipBounds.width / 2;
-        }
-        
         if (this.avoidOutOfBounds && handler.target != 'screen') {
             
-            // move to full width \ height to another side if out of bounds
+            var modPos = {enabled : false, positionX : handler.positionX, positionY : handler.positionY, ptypeX : handler.ptypeX, ptypeY : handler.ptypeY, outY : false, outX : false};
+            var modOffset = {left : handler.offset.left, top : handler.offset.top};
             
-            if ( top + toolTipBounds.height > scrollTop + screenBounds.height) {
-                top = top - toolTipBounds.height - handler.offset.top; 
-                
-                if (handler.ptypeY == 'outside') {
-                    top -= pos.height;
-                } else {
-                    top += pos.height; // untested
-                }
-                
-            }  else if ( top + toolTipBounds.height < 0 ) {
-                top = top + toolTipBounds.height + handler.offset.top;  
-                
-                if (handler.ptypeY == 'outside') {
-                    top += pos.height;
-                } else {
-                    top -= pos.height; // untested
-                }
+            if ( calcPos.top + toolTipBounds.height > envBounds.scrollTop + envBounds.screenHeight) { // go under screen in bottom
+                modPos.enabled = true; modPos.positionY = 'top'; modPos.outY = 'bottom'; if (handler.avoidOffset.outBottom) modOffset.top += handler.avoidOffset.outBottom;
+            }  else if ( calcPos.top + toolTipBounds.height < 0 ) { // go out of screen from top
+                modPos.enabled = true; modPos.positionY = 'bottom'; modPos.outY = 'top'; if (handler.avoidOffset.outTop) modOffset.top += handler.avoidOffset.outTop;
             }
             
-            if ( left + toolTipBounds.width > scrollLeft + screenBounds.width) {
+            if ( calcPos.left + toolTipBounds.width > envBounds.scrollLeft + envBounds.screenWidth) { // from right
+                modPos.enabled = true; modPos.positionX = 'right'; modPos.outX = 'right'; if (handler.avoidOffset.outRight) modOffset.left += handler.avoidOffset.outRight;
+            } else if ( calcPos.left + toolTipBounds.width < 0 ) { // from left
+                modPos.enabled = true; modPos.positionX = 'left'; modPos.outX = 'left'; if (handler.avoidOffset.outLeft) modOffset.left += handler.avoidOffset.outLeft;
+            }
+            
+            if (modPos.enabled) {
                 
-                left = left - toolTipBounds.width - handler.offset.left;
+                if (handler.userEvents.onAvoidBounds && handler.userEvents.onAvoidBounds(handler, calcPos, modPos)) {
+                    return;
+                } 
                 
-                if (handler.ptypeX == 'outside') {
-                    left -= pos.width;
-                } else {
-                    left += pos.width;
-                }
-                
-            } else if ( left + toolTipBounds.width < 0 ) {
-                left = left + toolTipBounds.width + handler.offset.left;
-
-                if (handler.ptypeX == 'outside') {
-                    left += pos.width;
-                } else {
-                    left -= pos.width; // untested
-                }              
+                calcPos = calcPosForTarget(targetPos, toolTipBounds, envBounds, modPos.positionX, modPos.positionY, modPos.ptypeX, modPos.ptypeY, modOffset);
             }
         }
         
-        toolTip.style.top = top + 'px';
-        toolTip.style.left = left + 'px';
+        toolTip.style.top = calcPos.top + 'px';
+        toolTip.style.left = calcPos.left + 'px';
     }
         
     constructor(cfg);
@@ -518,22 +521,27 @@ KellyTooltip.loadDefaultCss = function(className) {
             z-index : 60;\
             pointer-events: none;\
         }\
+        .' + className + '-wrap.' + className + '-target-screen {\
+            padding : 16px;\
+        }\
+        .' + className + '-wrap.' + className + '-target-screen .' + className + '-close {\
+            top: -19px;\
+            left: 17px;\
+        }\
         .' + className + '-container {\
             min-width: 210px;\
             min-height: 52px;\
             margin : 0;\
-            background : rgba(96, 102, 126, 0.9490);\
-            border : ' + border + 'px dashed #c5c5c5;\
+            background: rgb(96, 96, 96);\
+            border : 0;\
             transition: opacity 0.1s;\
             color : #fff;\
-            border-radius : 4px;\
+            border-radius : 0px;\
             padding : 12px;\
+            max-width: 510px;\
         }\
         .' + className + '-close {\
-            left: 0px;\
-            right: auto;\
             position: absolute;\
-            top: 0px;\
             display: block;\
             cursor: pointer;\
             font-size: 25px;\
@@ -542,14 +550,23 @@ KellyTooltip.loadDefaultCss = function(className) {
             text-align: center;\
             line-height: 25px;\
             cursor : pointer;\
+            right: auto;\
+            top: 0px;\
+            left: -32px;\
+            background: rgb(96, 96, 96);\
+        }\
+        .' + className + '-close svg {\
+            width: 26px;\
+            height: 15px;\
         }\
         .' + className + '-close svg g line {\
-            stroke: #56400c;\
-            fill: #56400c;\
+            stroke: #fff;\
+            fill: #fff;\
         }\
         .' + className + '-content {\
             text-align: left;\
             font-size: 16px;\
+            overflow: auto;\
         }\
         .' + className + '-show {\
             opacity : 1;\

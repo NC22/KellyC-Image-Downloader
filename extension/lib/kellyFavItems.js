@@ -324,6 +324,16 @@ function KellyFavItems(cfg)
         return fastSave;
     }
     
+    this.getToolbar = function() {
+
+        if (typeof KellyToolbar == 'undefined') return false;
+        if (handler.toolbar) return handler.toolbar;
+        
+        handler.toolbar = new KellyToolbar({className : env.className + '-toolbar', container : document.createElement('DIV'), favController : handler});        
+        env.getMainContainers().body.appendChild(handler.toolbar.container);
+        return handler.toolbar;
+    }
+    
     this.getImageViewer = function() {
         
         if (imgViewer) return imgViewer;
@@ -980,6 +990,7 @@ function KellyFavItems(cfg)
           
         envContainers.sideBar.appendChild(sideBarWrap);        
         handler.getImageViewer();
+        handler.getToolbar();
         
         // add fav button on top
          
@@ -1038,7 +1049,7 @@ function KellyFavItems(cfg)
         
         if (index) menuButtonContainer.className += ' ' + env.className + '-MainMenuItem-' + index;
             
-        KellyTools.setHTMLData(menuButtonContainer, '<a href="#">' + name + '</a>');
+        KellyTools.setHTMLData(menuButtonContainer, '<a href="javascript:void(0)">' + name + '</a>');
         
         var menuButtonA = KellyTools.getElementByTag(menuButtonContainer, 'a');
             menuButtonA.onclick = onclick;
@@ -1071,6 +1082,7 @@ function KellyFavItems(cfg)
         if (env.hostClass == 'options_page') return;
         
         if (env.events.onDisplayBlock) env.events.onDisplayBlock(mode, 'hide');
+        if (handler.toolbar) handler.toolbar.events.onDisplayBlock(mode, 'hide'); 
         
         var envContainers = env.getMainContainers();
             envContainers.siteContent.style.display = 'block';
@@ -1109,7 +1121,7 @@ function KellyFavItems(cfg)
         KellyTools.classList('add', envContainers.favContent, env.className + '-active');
         
         if (env.events.onDisplayBlock) env.events.onDisplayBlock(mode, 'show', oldMode);
-            
+        if (handler.toolbar) handler.toolbar.events.onDisplayBlock(mode, 'show', oldMode);   
     }
     
     this.updateImageGrid = function() {
@@ -1396,6 +1408,23 @@ function KellyFavItems(cfg)
             logic : logic,
         };
     }
+    
+    function prepareDownloadItems() {
+        return new Promise(function(resolve, reject) {
+            
+            handler.dataFilterLock = {message : 'Preparing download items...'};
+            
+            window.setTimeout(function () {
+                
+                handler.getDownloadManager().setDownloadTasks(displayedItems);
+                handler.getDownloadManager().showGrabManager();
+                handler.dataFilterLock = false;
+                
+                resolve();
+                
+            }, 0);
+        });
+    }
           
     this.updateFilteredData = function() {
 
@@ -1406,16 +1435,13 @@ function KellyFavItems(cfg)
         updateDisplayItemsList();
         updateGoToPageButton();
         
-        if (imagesAsDownloadItems) {
-            
-            handler.getDownloadManager().setDownloadTasks(displayedItems);
-            handler.getDownloadManager().showGrabManager();
-        }
+        if (imagesAsDownloadItems) prepareDownloadItems();
         
         // init gallery only for current page, create gallery, by array
         imgViewer.addToGallery(galleryImages, 'fav-images', galleryImagesData);
         
         if (env.events.onUpdateFilteredData && env.events.onUpdateFilteredData(displayedItems)) return; 
+        if (handler.toolbar) handler.toolbar.events.onUpdateFilteredData(displayedItems);
         
         var tiles = handler.getImageGrid().getTiles();   
         if (!handler.mobileOptimization && tiles && tiles.length) window.scrollTo(0, tiles[0].getBoundingClientRect().top + KellyTools.getScrollTop() - 90);
@@ -2141,9 +2167,8 @@ function KellyFavItems(cfg)
                           
             // filter.onclick
             
-            var catSelector = document.createElement('a');
+            var catSelector = document.createElement('BUTTON');
                 catSelector.innerText = fav.categories[i].name;
-                catSelector.href = '#';
                 catSelector.setAttribute('filterId', fav.categories[i].id);
                 
                 var catSelectorActive = '';    
@@ -2178,9 +2203,8 @@ function KellyFavItems(cfg)
             
             if (readOnly) filterAdd.style.display = 'none';
             
-        var filterAddA = document.createElement('A');
+        var filterAddA = document.createElement('BUTTON');
             filterAddA.innerText = '+';
-            filterAddA.href = "#";
             filterAddA.onclick = function() { return false; };
             
             filterAdd.appendChild(filterAddA);
@@ -2337,8 +2361,7 @@ function KellyFavItems(cfg)
                 editButton.click();
             }
             
-            handler.sideBarLock = true;
-            handler.getDownloadManager().setDownloadTasks(displayedItems);                        
+            handler.sideBarLock = true;                      
             showDownloadManagerForm(true);
         }
         
@@ -2347,6 +2370,7 @@ function KellyFavItems(cfg)
         handler.updateImageGrid();  
                     
         if (env.events.onDisplayBlock) env.events.onDisplayBlock('fav', 'show', 'fav');
+        if (handler.toolbar) handler.toolbar.events.onDisplayBlock('fav', 'show', 'fav');
         
         return imagesAsDownloadItems;
     }
@@ -3412,6 +3436,7 @@ function KellyFavItems(cfg)
         else if (name == 'fav') return fav;
         else if (name == 'filtered') return displayedItems;
         else if (name == 'mode') return mode;
+        else if (name == 'read_only') return readOnly;
         else if (name == 'options') return fav.coptions;
         else if (name == 'image_events') return imageEvents;
     }

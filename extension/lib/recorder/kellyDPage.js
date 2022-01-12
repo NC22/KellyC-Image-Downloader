@@ -952,14 +952,19 @@ KellyDPage.init = function() {
                 fav.coptions.webRequest = false;  
             }
             
-            fav.coptions.storage = 'default'; // todo - в default всегда подгружаются сразу в showRecordedImages последние записанные картинки и потом после загрузки доп. доков не сохраняются если явно не сохранить профиль - мб сохранять автоматом
+            // fixed options, defaults setted in kellySyorageManager and KellyDPage.env.events.onValidateCfg
+            
+            fav.coptions.storage = 'default'; 
+            // todo - в default всегда подгружаются сразу в showRecordedImages последние записанные картинки и потом после загрузки доп. доков не сохраняются если явно не сохранить профиль - мб сохранять автоматом
+            
             fav.coptions.storageDesc = {'default' : {name : KellyLoc.s('', 'recorder_last_recorded')}};
             fav.coptions.newFirst = false;
-            fav.coptions.optionsSide
+            fav.coptions.optionsSide = false;
             fav.coptions.grid.fixed = 4;
             fav.coptions.grid.type = 'fixed';
             fav.coptions.grid.lazy = true; // gently creates loading pool with max queryes per second
-            fav.coptions.grid.perPage = 120;        
+            
+            // fav.coptions.grid.perPage = 60;        
         } 
         
         if (loadType == 'items' || !loadType) {
@@ -998,7 +1003,7 @@ KellyDPage.init = function() {
     } 
     
     KellyDPage.env.events.onCreateOptionsManager = function(options) {
-        options.protectedOptions = ['grid_fixed', 'grid_type', 'grid_lazy', 'grid_viewerShowAs', 'grid_perPage', 'optionsSide', 'webRequest', 'newFirst'];
+        options.protectedOptions = ['grid_fixed', 'grid_type', 'grid_lazy', 'grid_viewerShowAs', 'optionsSide', 'webRequest', 'newFirst'];
         
         delete options.tabData['BaseOptions'].parts.fast_download;
         delete options.tabData['BaseOptions'].parts.options_fav_add;

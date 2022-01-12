@@ -62,7 +62,7 @@ function KellyOptions(cfg) {
 
         /*'mobileOptimization': {loc : 'mobile_optimization', type : 'bool'}, -- currently enables automaticly when screen width < 1080px */
         'darkTheme': {loc : 'dark_theme', type : 'bool'},
-        'optionsSide': {loc : 'options_side', type : 'bool'},
+        'optionsSide': {loc : 'options_side', type : 'bool'}, // options button moved to side block
         //'hideTopMenu': {loc : 'hide_top_menu', type : 'bool'},
         'debug': {loc : 'debug', type : 'bool', onChange : function(newVal) { KellyTools.DEBUG = newVal; KellyTools.log('debug mode overloaded by user config', 'KellyOptions'); }},
         'webRequest': {loc : 'web_request_api', type : 'bool'},
