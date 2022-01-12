@@ -426,7 +426,7 @@ KellyDPage.showAdditionFilters = function() {
     html += '</div>';  
              
 
-    html += '<div class="' + cl + '-ModalBox ' + cl + '-Main-download-btn-ModalBox"><a href="#" class="' + cl + '-Main-download-btn" >' + KellyLoc.s('', 'download') + '</a></div>';
+    html += '<div class="' + cl + '-ModalBox ' + cl + '-Main-download-btn-ModalBox"><button class="' + cl + '-Main-download-btn ' + cl + '-btn-link" >' + KellyLoc.s('', 'download') + '</button></div>';
      
     KellyTools.setHTMLData(KellyDPage.commonFilters, html); 
     KellyTools.getElementByClass(KellyDPage.commonFilters, cl + '-Main-download-btn').onclick = function() {

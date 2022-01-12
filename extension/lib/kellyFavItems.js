@@ -325,9 +325,9 @@ function KellyFavItems(cfg)
     }
     
     this.getToolbar = function() {
-
-        if (typeof KellyToolbar == 'undefined') return false;
+        
         if (handler.toolbar) return handler.toolbar;
+        if (typeof KellyToolbar == 'undefined') return false;        
         
         handler.toolbar = new KellyToolbar({className : env.className + '-toolbar', container : document.createElement('DIV'), favController : handler});        
         env.getMainContainers().body.appendChild(handler.toolbar.container);
@@ -2385,8 +2385,7 @@ function KellyFavItems(cfg)
         
         controllsContainer.innerHTML = '';
         
-        var editButton = document.createElement('a');
-            editButton.href = '#';
+        var editButton = document.createElement('BUTTON');
             editButton.innerHTML = '';
             editButton.title = lng.s('Режим редактирования', 'edit_mode');
             editButton.onclick = function() {
@@ -2405,7 +2404,8 @@ function KellyFavItems(cfg)
                     this.className = this.className.replace('open', 'closed');                    
                 }
                                 
-                if (filterAdd) filterAdd.style.display = readOnly ? 'none' : 'inline-block';                
+                if (filterAdd) filterAdd.style.display = readOnly ? 'none' : 'inline-block'; 
+                if (fav.coptions.bottomToolbar && handler.toolbar) handler.toolbar.show(readOnly ? true : false);
                 return false;                
             }
             

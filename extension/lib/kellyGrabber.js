@@ -355,8 +355,8 @@ function KellyGrabber(cfg) {
                     </td></tr>\
                     <tr><td>\
                         <label class="' + className + '-controll-range">\
-                            <a href="#" class="' + className + '-controll-rangeSwitch ' + className + '-controll-itemsListBtn active" data-pointer="itemsList">' + lng.s('Элементы', 'grabber_selected_items') + '</a>\
-                            <a href="#" class="' + className + '-controll-rangeSwitch ' + className + '-controll-startFromBtn" data-pointer="startFrom">' + lng.s('Продолжить с', 'grabber_start_from') + '</a>\
+                            <button class="' + className + '-controll-rangeSwitch ' + className + '-controll-itemsListBtn active" data-pointer="itemsList">' + lng.s('Элементы', 'grabber_selected_items') + '</button>\
+                            <button class="' + className + '-controll-rangeSwitch ' + className + '-controll-startFromBtn" data-pointer="startFrom">' + lng.s('Продолжить с', 'grabber_start_from') + '</button>\
                         </label>\
                     </td><td>\
                         <input type="text" placeholder="1-2, 44-823, 1-999..." class="' + className + '-controll-rangeInput ' + className + '-itemsList active" value="' + options.itemsList + '">\
@@ -373,7 +373,7 @@ function KellyGrabber(cfg) {
                         <label><input type="radio" name="' + className + '_image_size[]" value="preview" class="' + className + '-quality" ' + (options.quality != 'hd' ? 'checked' : '') + '>' + lng.s('Превью', 'grabber_preview') + '</label>\
                     </td></tr>\
                     <tr class="' + className + '-extended-show-row"><td colspan="2">\
-                        <label><a href="#" class="' + className + '-extended-show">' + extendedShowTitle[extendedOptionsShown ? 'hide' : 'show'] + '</a></label>\
+                        <label><button class="' + className + '-extended-show">' + extendedShowTitle[extendedOptionsShown ? 'hide' : 'show'] + '</button></label>\
                     </td></tr>\
                     <tr class="' + extendedClass + ' ' + extendedClass + '-grabber_name_template' + extShown + '"><td>\
                         <label>' + lng.s('Шаблон названия', 'grabber_name_template') + ' (<a href="#" class="' + className + '-nameTemplate-help">' + lng.s('Подсказка', 'tip') + '</a>)</label>\
@@ -1032,9 +1032,7 @@ function KellyGrabber(cfg) {
             // KellyTools.log(imageClassName + '-' + downloads[i].item.id);
         
             var holder = KellyTools.getElementByClass(itemContainer, imageClassName + '-download-state-holder');  
-            var downloadEnabled = KellyTools.getElementByClass(itemContainer, imageClassName + '-download-enabled');
-            var numberTitle = KellyTools.getElementByClass(itemContainer, imageClassName + '-download-number-title');
-            
+
             var title = '#' + itemN;
             if (downloads[i].subItem !== false) {
                 
@@ -1057,7 +1055,7 @@ function KellyGrabber(cfg) {
                 }
                   
                 html += '\
-                    <div class="' + imageClassName + '-download-number" data-no-tip="1"><span class="' + imageClassName + '-download-number-title">' + title + '</span></div>\
+                    <div class="' + imageClassName + '-download-number" data-enabler="1"><span class="' + imageClassName + '-download-number-title" data-enabler="1">' + title + '</span></div>\
                     <div class="' + imageClassName + '-download-status"></div>\
                ';
                
@@ -1088,22 +1086,25 @@ function KellyGrabber(cfg) {
                 */
                 
                 if (options.manualExclude) {
-                    downloadEnabled = KellyTools.getElementByClass(itemContainer, imageClassName + '-download-enabled'); 
-                    downloadEnabled.onchange = function() {  
-                        var itemIndex = parseInt(this.value);
-                        var index = manualExcludeItems.indexOf(itemIndex);
-                        if (index == -1 && !this.checked) manualExcludeItems.push(itemIndex);
-                        if (index != -1 && this.checked) manualExcludeItems.splice(index, 1);
-                        
-                        
-                        updateProgressBar();
-                    }
+                    var downloadEnabled = KellyTools.getElementByClass(itemContainer, imageClassName + '-download-enabled'); 
+                        downloadEnabled.onchange = function() {  
+                            var itemIndex = parseInt(this.value);
+                            var index = manualExcludeItems.indexOf(itemIndex);
+                            if (index == -1 && !this.checked) manualExcludeItems.push(itemIndex);
+                            if (index != -1 && this.checked) manualExcludeItems.splice(index, 1);
+                            
+                            
+                            updateProgressBar();
+                        }
                 }
                     
                 holder.onclick = function(e) {                
                     
                     // if (fav.getTooltip().isShown()) return false;
-                    
+                    if (options.manualExclude && e.target.getAttribute('data-enabler')) {
+                        KellyTools.getElementByClass(this, imageClassName + '-download-enabled').click();
+                        return;
+                    }
                     
                     if (e.target.getAttribute('data-no-tip')) {
                         return;
@@ -1131,8 +1132,12 @@ function KellyGrabber(cfg) {
                 }  
                 */              
             } else {
-                numberTitle.innerText = title;
+                var numberTitle = KellyTools.getElementByClass(itemContainer, imageClassName + '-download-number-title');            
+                if (numberTitle) {
+                    numberTitle.innerText = title;
+                }
                 
+                var downloadEnabled = KellyTools.getElementByClass(itemContainer, imageClassName + '-download-enabled');
                 if (downloadEnabled) {
                     downloadEnabled.disabled = (mode == 'download' ? true : false);
                     downloadEnabled.checked = manualExcludeItems.indexOf(i) == -1;

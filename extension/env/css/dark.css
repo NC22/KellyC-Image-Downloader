@@ -8,6 +8,10 @@ body.__BASECLASS__-dark  {
     text-align: left;
 }
 
+.__BASECLASS__-dark button {
+    color: #e5e5e5;
+}
+
 .__BASECLASS__-dark input[type=submit] {
     background: #e63d3d;
     border: 0px;
@@ -17,6 +21,10 @@ body.__BASECLASS__-dark  {
     font-weight: bold;
     height: 40px;
     padding-right: 30px;
+}
+
+.__BASECLASS__-dark .__BASECLASS__-FavItem-small .__BASECLASS__-preview-wrap {
+    border: 3px solid rgb(102 102 102);
 }
 
 .__BASECLASS__-dark .__BASECLASS__-FavItem-tmp-bounds .__BASECLASS__-preview-wrap, 
@@ -172,10 +180,6 @@ body.__BASECLASS__-dark  {
 
 .__BASECLASS__-dark .__BASECLASS__-tab h3 {
     font-size : 18px;
-}
-
-.__BASECLASS__-dark .__BASECLASS__-ModalBox-downloader label a {
-    color: #e5e5e5;
 }
 
 .__BASECLASS__-dark ::placeholder, 
@@ -339,8 +343,7 @@ body.__BASECLASS__-dark  {
     color : #fff;
 }
 
-.__BASECLASS__-dark a.__BASECLASS__-Main-download-btn {
-    
+.__BASECLASS__-dark button.__BASECLASS__-Main-download-btn {    
     color : #fff;
 }
 
@@ -409,5 +412,15 @@ body.__BASECLASS__-dark  {
 }
 
 .__BASECLASS__-dark .__BASECLASS__-toolbar-theme:before {
-    box-shadow: -2px 2px 1px 1px white;
+    top: 50%;
+    left: 50%;
+    height: 10px;
+    width: 10px;
+    box-shadow: none;
+    background: #fff;
+}
+
+.__BASECLASS__-dark .__BASECLASS__-FavItem-download-enabled:checked+label:before  {
+
+    background-color: #8b8b8b;
 }

@@ -334,6 +334,15 @@
      text-decoration : none;
 }
 
+.__BASECLASS__-downloader-controll button,
+.__BASECLASS__-filters-AdditionButtons button,
+.__BASECLASS__-btn-link {
+    background-color: transparent;
+    border: 0;
+    text-decoration: underline;
+    cursor : pointer;
+}
+
 /* image grid */
 
 .__BASECLASS__-imagesBlock-container {
@@ -652,6 +661,7 @@
      position: absolute;
      z-index: 990;
      width: 326px;
+     padding-bottom: 50px;
      transition : opacity 0.3s;
 }
 
@@ -1557,7 +1567,7 @@
     color: #282828;
 }
 
-.__BASECLASS__-downloader-controll-range a {
+.__BASECLASS__-downloader-controll-range button {
     
     display: inline-block;
     padding: 6px;
@@ -1871,7 +1881,7 @@
     transform: translate(-50%, -50%);
     height: 11px;
     width: 11px;
-    box-shadow: -2px 2px 1px 1px white;
+    box-shadow: -2px 2px 1px 1px #fff;
     border-radius: 50%;
     content: "";
 }
@@ -1884,6 +1894,7 @@
 
 .__BASECLASS__-FavItem-download-enabled+label {
     display: block;
+    cursor: pointer;
 }
 
 .__BASECLASS__-toolbar .__BASECLASS__-FavItem-download-enabled+label:before {
@@ -1897,8 +1908,7 @@
     position: relative;
     padding-left: 33px;
     margin-left: 12px;
-    margin-right: 28px;
-    cursor: pointer;
+    margin-right: 6px;
     vertical-align: middle;
 }
 
@@ -1942,7 +1952,7 @@
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
     color : #000;  
-    cursor: default;
+    cursor: pointer;
 }
 
 .__BASECLASS__-FavItem-download-number span {
