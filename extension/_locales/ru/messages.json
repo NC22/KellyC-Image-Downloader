@@ -29,6 +29,9 @@
     "additions":{  
         "message":"Справка"
     },
+    "additions_donate":{  
+        "message":"Поддержать проект"
+    },
     "additions_modules":{  
         "message":"Модули сайтов"
     },

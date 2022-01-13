@@ -1,6 +1,6 @@
 KellyAdditionsForm = {    
     tpl :  ['menu-item', 'page', 'profile-selector', 'profile-selector-recorder'],
-    menu : ['additions_about', 'additions_help', 'additions_modules'],
+    menu : ['additions_about', 'additions_help', 'additions_modules', 'additions_donate'],
     
     initToggleProfile : function(p, favEnv) {    
 
@@ -28,9 +28,19 @@ KellyAdditionsForm = {
       
       KellyTools.getBrowser().runtime.sendMessage({method: "getResources", asObject : true, items : KellyAdditionsForm.tpl, itemsRoute : {module : 'additions', type : 'html'}}, function(request) {
              
-             var pModulesHtml = '', menuHtml = '';
+             var pModulesHtml = '', menuHtml = '', css = '';
              var pModules = [KellyProfileRecorder, KellyProfileJoyreactor];
-             var curP = favEnv.getGlobal('env'), bcEnv = curP.className, bc = bcEnv + '-additions';
+             var curP = favEnv.getGlobal('env'), options = favEnv.getGlobal('options'), bcEnv = curP.className, bc = bcEnv + '-additions';
+             
+             var languages = ['en', 'ru'], defaultLangugage = KellyLoc.detectLanguage();
+             
+             for (var i = 0; i < languages.length; i++) {
+                 if (defaultLangugage.indexOf(languages[i]) == -1) {
+                     css += '.' + bc + '-language-' + languages[i] + ' { display : none; }'; 
+                 }
+             }
+             
+             KellyTools.addCss(bc + '-language', css);
              
              KellyTools.tplClass = bc;
              
@@ -95,6 +105,35 @@ KellyAdditionsForm = {
                     selectMenu(menu[i]);
                 }
             }
+                        
+            var heart = container.getElementsByClassName(bc + '-heart');
+            var updateHeartsDisplay = function() {
+                for (var i = 0; i < heart.length; i++) {
+                    heart[i].style.display = '';
+                    if (options.toolbar.heartHidden && heart[i].classList.contains(bc + '-heart-hide')) {
+                        heart[i].style.display = 'none';
+                    } else if (!options.toolbar.heartHidden && heart[i].classList.contains(bc + '-heart-show')) {
+                        heart[i].style.display = 'none';
+                    }
+                }
+            }
+            for (var i = 0; i < heart.length; i++) {
+                heart[i].onclick = function() { 
+                    
+                    if (this.classList.contains(bc + '-heart-hide')) {
+                        options.toolbar.heartHidden = true;
+                    } else {
+                        options.toolbar.heartHidden = false;                        
+                    }
+                    
+                    favEnv.getToolbar().showHeart(!options.toolbar.heartHidden);
+                    favEnv.save('cfg');
+                    updateHeartsDisplay();
+                    return false;
+                };
+            }
+            
+            updateHeartsDisplay();
         });   
     },    
 }

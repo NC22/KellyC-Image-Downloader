@@ -1828,11 +1828,19 @@
 .__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed {
     width : 0px;
     right : 0px;
+    padding : 0px;
     overflow : visible;
-    background: transparent;
+    background : transparent;
 }
 
+.__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed .__BASECLASS__-toolbar-collapse {
+    margin-right: 12px;
+}
+
+/* toolbar */
+
 .__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed .__BASECLASS__-toolbar-theme,
+.__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed .__BASECLASS__-toolbar-help,
 .__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed .__BASECLASS__-toolbar-catlist,
 .__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed.__BASECLASS__-toolbar.__BASECLASS__-toolbar-downloader .__BASECLASS__-FavItem-download-enabled+label {
    display : none;
@@ -1943,6 +1951,37 @@
     box-shadow: -2px 2px 1px 1px #fff;
     border-radius: 50%;
     content: "";
+}
+
+.__BASECLASS__-toolbar-help {
+    position: relative;
+    width: 19px;
+    height: 19px;
+    display: inline-block;
+    margin-right: 0;
+    cursor: pointer;
+}
+
+.__BASECLASS__-toolbar-help::before {
+    left: 9px;
+    transform: rotate(-45deg);
+    transform-origin: 0 100%;
+}
+
+.__BASECLASS__-toolbar-help::after {
+    left: 0;
+    transform: rotate(45deg);
+    transform-origin: 100% 100%;
+}
+
+.__BASECLASS__-toolbar-help::before, .__BASECLASS__-toolbar-help::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    width: 9px;
+    height: 15px;
+    border-radius: 5px 5px 0 0;
+    background: #f35353;
 }
 
 /* Fav items importer, todo replace class, cause collisions */

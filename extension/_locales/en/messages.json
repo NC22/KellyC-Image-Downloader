@@ -32,6 +32,9 @@
     "additions":{  
         "message":"About"
     },
+    "additions_Donate":{  
+        "message":"Donate"
+    },
     "additions_modules":{  
         "message":"Enabled site modules"
     },

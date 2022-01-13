@@ -333,7 +333,8 @@ function KellyFavItems(cfg)
             className : env.className + '-toolbar',
             collapsed : fav.coptions.toolbar.collapsed, 
             container : document.createElement('DIV'), 
-            favController : handler
+            favController : handler,
+            heartHidden : fav.coptions.toolbar.heartHidden, 
         });        
         
         env.getMainContainers().body.appendChild(handler.toolbar.container);
@@ -1071,12 +1072,13 @@ function KellyFavItems(cfg)
         if (typeof URLSearchParams == 'undefined') return false;
         
         var url = new URL(window.location.href), tab = url.searchParams.get('tab');
-        if (!tab || ['options', 'profiles', 'help', 'modules'].indexOf(tab) == -1) return false;
+        if (!tab || ['options', 'profiles', 'help', 'modules', 'donate'].indexOf(tab) == -1) return false;
         
              if (tab == 'options') handler.showOptionsDialog();
         else if (tab == 'profiles') handler.showOptionsDialog(env.className + '-Storage');
         else if (tab == 'help') handler.showAdditionsDialog('additions_help');
-        else if (tab == 'modules') handler.showAdditionsDialog('additions_modules');
+        else if (tab == 'modules') handler.showAdditionsDialog('additions_modules');        
+        else if (tab == 'donate') handler.showAdditionsDialog('additions_donate');
         
         return tab;
     }
@@ -1412,6 +1414,7 @@ function KellyFavItems(cfg)
             catFilters : catFilters,
             catIgnoreFilters : catIgnoreFilters,
             logic : logic,
+            readOnly : readOnly,
         };
     }
     
@@ -3455,6 +3458,7 @@ function KellyFavItems(cfg)
         else if (name == 'filtered') return displayedItems;
         else if (name == 'mode') return mode;
         else if (name == 'read_only') return readOnly;
+        else if (name == 'logic') return logic;
         else if (name == 'options') return fav.coptions;
         else if (name == 'image_events') return imageEvents;
     }

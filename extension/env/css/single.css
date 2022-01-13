@@ -185,16 +185,27 @@ li.__BASECLASS__-additions-menu-item-li {
 }
 
 .__BASECLASS__-active.__BASECLASS__-additions-page-item h2 {
-    margin : 0;
-    margin-bottom : 6px;
+    margin: 0;
+    margin-bottom: 34px;
+    padding: 0 12px;
+    font-weight: normal;
 }
 
 .__BASECLASS__-active.__BASECLASS__-additions-page-item p {
     margin: 0;
     margin-bottom: 6px;
-    font-size: 14px;
+    font-size: 16px;
+    padding : 0 12px;
 }
 
+.__BASECLASS__-active.__BASECLASS__-additions-page-item li a {
+    text-decoration : none;
+}
+
+.__BASECLASS__-active.__BASECLASS__-additions-page-item a {
+    font-size: 16px;
+}
+    
 .__BASECLASS__-additions-page:after {
     content: "";
     clear: both;
@@ -231,7 +242,7 @@ a.__BASECLASS__-additions-menu-item {
     background: #ffefc9;
 }
 
-.__BASECLASS__-active.kelly-jr-ui-additions-page-item {
+.__BASECLASS__-active.__BASECLASS__-additions-page-item {
     min-height: 250px;
     padding: 0;
     background: transparent;
