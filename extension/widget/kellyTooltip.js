@@ -165,8 +165,10 @@ function KellyTooltip(cfg) {
         if (handler.closeButton) className += ' ' + handler.classGroup + '-close-btn';
         if (handler.ptypeX) className += ' ' + handler.classGroup + '-' + handler.ptypeX;
         if (handler.ptypeY) className += ' ' + handler.classGroup + '-' + handler.ptypeY;
-        if (handler.selfClass) className += ' ' + handler.selfClass;
         
+        if (handler.isShown()) className += ' ' + handler.classGroup + '-show';
+        if (handler.selfClass) className += ' ' + handler.selfClass;
+                
         return className;
     }
     
@@ -338,6 +340,7 @@ function KellyTooltip(cfg) {
             if (handler.userEvents.onShow) handler.userEvents.onShow(handler);
             
         } else {
+            
             if (handler.userEvents.onClose) handler.userEvents.onClose(handler);
             
             if (handler.removeOnClose) handler.remove();

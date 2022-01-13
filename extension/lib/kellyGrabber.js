@@ -349,21 +349,21 @@ function KellyGrabber(cfg) {
             <div class="' + className + '-controll">\
                 <table>\
                     <tr><td>\
-                        <label>' + lng.s('Основная директория', 'grabber_common_folder') + '</label>\
+                        <span>' + lng.s('Основная директория', 'grabber_common_folder') + '</span>\
                     </td><td>\
                         <input type="text" placeholder="' + lng.s('Директория', 'folder') + '" class="' + className + '-controll-baseFolder" value="' + options.baseFolder + '">\
                     </td></tr>\
                     <tr><td>\
-                        <label class="' + className + '-controll-range">\
+                        <span class="' + className + '-controll-range">\
                             <button class="' + className + '-controll-rangeSwitch ' + className + '-controll-itemsListBtn active" data-pointer="itemsList">' + lng.s('Элементы', 'grabber_selected_items') + '</button>\
                             <button class="' + className + '-controll-rangeSwitch ' + className + '-controll-startFromBtn" data-pointer="startFrom">' + lng.s('Продолжить с', 'grabber_start_from') + '</button>\
-                        </label>\
+                        </span>\
                     </td><td>\
                         <input type="text" placeholder="1-2, 44-823, 1-999..." class="' + className + '-controll-rangeInput ' + className + '-itemsList active" value="' + options.itemsList + '">\
                         <input type="text" placeholder="' + lng.s('Продолжить с N элемента', 'grabber_start_from_input') + '" class="' + className + '-controll-rangeInput ' + className + '-startFrom" value="' + options.itemsList + '">\
                     </td></tr>\
                     <!--tr class="' + className + '-range-tr"><td>\
-                        <label>' + lng.s('Диапазон', 'grabber_range') + '</label>\
+                        <span>' + lng.s('Диапазон', 'grabber_range') + '</span>\
                     </td><td>\
                         <input type="text" placeholder="С" class="' + className + '-from" value="">\
                         <input type="text" placeholder="По" class="' + className + '-to" value="">\
@@ -373,15 +373,15 @@ function KellyGrabber(cfg) {
                         <label><input type="radio" name="' + className + '_image_size[]" value="preview" class="' + className + '-quality" ' + (options.quality != 'hd' ? 'checked' : '') + '>' + lng.s('Превью', 'grabber_preview') + '</label>\
                     </td></tr>\
                     <tr class="' + className + '-extended-show-row"><td colspan="2">\
-                        <label><button class="' + className + '-extended-show">' + extendedShowTitle[extendedOptionsShown ? 'hide' : 'show'] + '</button></label>\
+                        <span><button class="' + className + '-extended-show">' + extendedShowTitle[extendedOptionsShown ? 'hide' : 'show'] + '</button></span>\
                     </td></tr>\
                     <tr class="' + extendedClass + ' ' + extendedClass + '-grabber_name_template' + extShown + '"><td>\
-                        <label>' + lng.s('Шаблон названия', 'grabber_name_template') + ' (<a href="#" class="' + className + '-nameTemplate-help">' + lng.s('Подсказка', 'tip') + '</a>)</label>\
+                        <span>' + lng.s('Шаблон названия', 'grabber_name_template') + ' (<a href="#" class="' + className + '-nameTemplate-help">' + lng.s('Подсказка', 'tip') + '</a>)</span>\
                     </td><td>\
                         <input type="text" placeholder="" class="' + className + '-nameTemplate" value="' + options.nameTemplate + '">\
                     </td></tr>\
                     <tr class="' + extendedClass + ' ' + extendedClass + '-grabber_anim_format' + extShown + '"><td colspan="2">\
-                        <label>' + lng.s('Формат для больших гифок', 'grabber_anim_format') + ' ' + htmlAnimSelect + '</label>\
+                        <span>' + lng.s('Формат для больших гифок', 'grabber_anim_format') + ' ' + htmlAnimSelect + '</span>\
                     </td></tr>\
                     <tr class="' + extendedClass + ' ' + extendedClass + '-keepAliveTimer' + extShown + '"><td colspan="2">\
                         <label><input type="checkbox" class="' + className + '-keepAliveTimer" data-option="keepAliveTimer" ' + (options.keepAliveTimer ? 'checked' : '') + '>\
@@ -404,30 +404,27 @@ function KellyGrabber(cfg) {
                         </label>\
                     </td></tr>\
                     <tr class="' + extendedClass + ' ' + extendedClass + '-grabber_threads_num' + extShown + '"><td>\
-                        <label>' + lng.s('Количество потоков', 'grabber_threads_num') + '</label>\
+                        <span>' + lng.s('Количество потоков', 'grabber_threads_num') + '</span>\
                     </td><td>\
                         <input type="text" placeholder="1" class="' + className + '-threads" value="' + options.maxDownloadsAtTime + '">\
                     </td></tr>\
                     <tr class="' + extendedClass + ' ' + extendedClass + '-grabber_interval' + extShown + '"><td>\
-                        <label>' + lng.s('Интервал загрузки (сек)', 'grabber_interval') + '</label>\
+                        <span>' + lng.s('Интервал загрузки (сек)', 'grabber_interval') + '</span>\
                     </td><td>\
                         <input type="text" placeholder="1" class="' + className + '-interval" value="' + options.interval + '">\
                     </td></tr>\
                     <tr class="' + extendedClass + ' ' + extendedClass + '-grabber_timeout' + extShown + '"><td>\
-                        <label>' + lng.s('Таймаут при долгом выполнении запроса (сек)', 'grabber_timeout') + '</label>\
+                        <span>' + lng.s('Таймаут при долгом выполнении запроса (сек)', 'grabber_timeout') + '</span>\
                     </td><td>\
                         <input type="text" placeholder="1" class="' + className + '-timeout" value="' + options.cancelTimer + '">\
                     </td></tr>\
-                    <!--tr><td colspan="2">\
-                        <label><input type="checkbox" class="' + className + '-exclude-low-res" value="1"></label>\
-                        <label>' + lng.s('Исключать изображения с низким разрешением', 'grabber_exclude_lowres') + '</label>\
-                    </td></tr-->\
+                    <tr class="' + extendedClass + ' ' + extendedClass + '-last' + extShown + '"><td colspan="2">&nbsp;</td></tr>\
                     <tr><td colspan="2"><div class="' + className + '-controll-buttons"></div></td></tr>\
                     <tr><td colspan="2">\
                         <div class="' + className + '-progressbar">\
-                            <span class="' + className + '-progressbar-line ' + className + '-progressbar-line-ok"></span>\
-                            <span class="' + className + '-progressbar-line ' + className + '-progressbar-line-err"></span>\
-                            <span class="' + className + '-progressbar-state"></span>\
+                            <div class="' + className + '-progressbar-line ' + className + '-progressbar-line-ok"></div>\
+                            <div class="' + className + '-progressbar-line ' + className + '-progressbar-line-err"></div>\
+                            <div class="' + className + '-progressbar-state"></div>\
                         </div>\
                     </td></tr>\
                     <tr class="' + className + '-error-wrap hidden"><td colspan="2">\

@@ -104,6 +104,13 @@ table.__BASECLASS__-options-table input[type="submit"] {
     color : #fff;
 }
 
+.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-downloader-controll button,
+.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-filters-AdditionButtons button,
+.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-TypeFiltersContainer button,
+.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-btn-link {
+    color: #cfcfcf;
+}
+
 #submenu.__BASECLASS__-top-joyreactor-cc {
     height: 32px;
     white-space: nowrap;
@@ -245,10 +252,6 @@ table.__BASECLASS__-options-table input[type="submit"] {
 
 .__BASECLASS__-top-joyreactor-cc .__BASECLASS__-pagination-item {
     color: #fff;
-}
-
-.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-FavFilter {
-    font-size : 12px;
 }
 
 .__BASECLASS__-top-joyreactor-cc .__BASECLASS__-pagination-item.active,
@@ -483,14 +486,35 @@ table.__BASECLASS__-options-table input[type="submit"] {
     padding-right: 24px;
 }
 
-#__BASECLASS__-ModalBox.__BASECLASS__-old-reactor-cc a {
-    color: #000;
+.__BASECLASS__-downloader-controll button,
+.__BASECLASS__-filters-AdditionButtons button,
+.__BASECLASS__-TypeFiltersContainer button,
+.__BASECLASS__-btn-link {
+    color: #383838;
+    text-transform: none;
+    font-weight: normal;
+    height : auto;
 }
 
-.__BASECLASS__-filters-AdditionButtons table .__BASECLASS__-FavFilter {
+.__BASECLASS__-filters-AdditionButtons button.__BASECLASS__-iconset1 {
+    height : 22px;
+}
+
+.__BASECLASS__-TypeFiltersContainer button {
+    padding : 4px;
+}
+
+.__BASECLASS__-filters-AdditionButtons table button.__BASECLASS__-FavFilter {
     margin : 0px;
-    padding-left: 3px;
-    padding-right: 3px;
+    padding: 0 3px;
+}
+
+.__BASECLASS__-old-reactor-cc .__BASECLASS__-filters-AdditionButtons table button.__BASECLASS__-FavFilter {
+    font-size : 12px;
+}
+
+#__BASECLASS__-ModalBox.__BASECLASS__-old-reactor-cc a {
+    color: #000;
 }
 
 #submenu .__BASECLASS__-old-reactor-cc.__BASECLASS__-MainMenuItem-fav .__BASECLASS__-icon {
