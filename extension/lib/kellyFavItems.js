@@ -2616,11 +2616,13 @@ function KellyFavItems(cfg)
             
         var additionButtons = document.createElement('div');
             additionButtons.className = env.className + '-filters-AdditionButtons';
-            
-            additionButtons.appendChild(resetButton);
-            additionButtons.appendChild(editButton);
+                    
+        var cOptionsTop = document.createElement('div'); 
+            cOptionsTop.className = env.className + '-coptions-top ' + env.className + '-clear';  
+            cOptionsTop.appendChild(resetButton);
+            cOptionsTop.appendChild(editButton);
         
-        if (optionsButton) additionButtons.appendChild(optionsButton);
+        if (optionsButton) cOptionsTop.appendChild(optionsButton);
          
         var gotoPage = editButton.cloneNode();
             gotoPage.innerText = lng.s('Страница', 'page');
@@ -2638,7 +2640,7 @@ function KellyFavItems(cfg)
                 return false;
             }
             
-        additionButtons.appendChild(gotoPage);        
+        cOptionsTop.appendChild(gotoPage);        
         updateGoToPageButton(gotoPage);
             
         if (!favNativeParser || (favNativeParser && !favNativeParser.isBeasy())) {  
@@ -2650,7 +2652,7 @@ function KellyFavItems(cfg)
                 
                 download.onclick = function () { handler.toogleDownloadManager(); return false; };
                 
-            additionButtons.appendChild(download);            
+            cOptionsTop.appendChild(download);            
             
             if (imagesAsDownloadItems) {
                 
@@ -2664,7 +2666,8 @@ function KellyFavItems(cfg)
        
         }
             
-        var cOptions = document.createElement('div');    
+        var cOptions = document.createElement('div'); 
+            cOptions.className = env.className + '-coptions ' + env.className + '-clear';        
         KellyTools.setHTMLData(cOptions, '<table><tbody><tr><td></td><td></td><td></td></tr></tbody></table><div style="clear : both;"></div>');
         
         var cOptionsSectors = cOptions.getElementsByTagName('td');
@@ -2675,6 +2678,7 @@ function KellyFavItems(cfg)
             cOptionsSectors[i].appendChild(cOptionsSectorItems[i]);
         }
             
+        additionButtons.appendChild(cOptionsTop);
         additionButtons.appendChild(cOptions);
             
         controllsContainer.appendChild(additionButtons);

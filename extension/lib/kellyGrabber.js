@@ -421,10 +421,12 @@ function KellyGrabber(cfg) {
                     <tr class="' + extendedClass + ' ' + extendedClass + '-last' + extShown + '"><td colspan="2">&nbsp;</td></tr>\
                     <tr><td colspan="2"><div class="' + className + '-controll-buttons"></div></td></tr>\
                     <tr><td colspan="2">\
-                        <div class="' + className + '-progressbar">\
-                            <div class="' + className + '-progressbar-line ' + className + '-progressbar-line-ok"></div>\
-                            <div class="' + className + '-progressbar-line ' + className + '-progressbar-line-err"></div>\
-                            <div class="' + className + '-progressbar-state"></div>\
+                        <div class="' + className + '-progressbar-wrap">\
+                            <div class="' + className + '-progressbar">\
+                                <div class="' + className + '-progressbar-line ' + className + '-progressbar-line-ok"></div>\
+                                <div class="' + className + '-progressbar-line ' + className + '-progressbar-line-err"></div>\
+                                <div class="' + className + '-progressbar-state"></div>\
+                            </div>\
                         </div>\
                     </td></tr>\
                     <tr class="' + className + '-error-wrap hidden"><td colspan="2">\

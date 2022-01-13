@@ -7,6 +7,12 @@
      display : none;
 }
 
+.__BASECLASS__-clear:after {
+    content : "";
+    display : block;
+    clear : both;
+}
+
 .__BASECLASS__-sidebar-wrap input:focus,
 .__BASECLASS__-sidebar-wrap button:focus {
     outline: 0px;
@@ -92,6 +98,7 @@
      background : #ffca61;
      border: 3px solid #ffcc66;     
      float: left;
+     margin-top: 12px;
 }
 
 .__BASECLASS__-pagination-item-100 {
@@ -600,7 +607,6 @@
 .__BASECLASS__-FiltersMenu {
     margin: 0;
     padding: 0;
-    margin-bottom : 12px;
 }
  
 .__BASECLASS__-FiltersMenu > li.includable:before {
