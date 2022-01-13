@@ -32,7 +32,12 @@ function KellyToolbar(cfg) {
         
         handler.container = cfg.container;
         handler.className = cfg.className;
+        handler.collapsed = cfg.collapsed ? true : false;
+        
         handler.container.classList.add(handler.className);
+        if (handler.collapsed) {
+           handler.container.classList.add(handler.className + '-collapsed'); 
+        }
         
         handler.favController = cfg.favController;
         handler.env = cfg.favController.getGlobal('env');
@@ -103,15 +108,35 @@ function KellyToolbar(cfg) {
                     <span>Donate</span>\
                </a-->\
                <div class="' + handler.className + '-theme" title="Переключить тему"></div>\
+               <div class="' + handler.className + '-collapse" title="Свернуть панель инструментов"><div class="' + handler.className + '-collapse-icon"></div></div>\
            </div>';       
        
         KellyTools.setHTMLData(handler.container, html);   
         handler.dom.deselectAll = handler.container.getElementsByClassName(handler.env.className +'-FavItem-download-enabled')[0];
         handler.dom.catList = handler.container.getElementsByClassName(handler.className + '-catlist')[0];
         handler.dom.themeToogle = handler.container.getElementsByClassName(handler.className + '-theme')[0];
-        
+        handler.dom.collapseToogle = handler.container.getElementsByClassName(handler.className + '-collapse')[0];
+
         handler.dom.deselectAll.onchange = function() {
             handler.favController.getDownloadManager().setManualExcluded(this.checked ? 'select_all' : 'deselect_all');
+        }
+        
+        handler.dom.collapseToogle.onclick = function() {
+            
+            var options = handler.favController.getGlobal('options');
+            
+            if (handler.container.classList.contains(handler.className + '-collapsed')) {
+                
+                handler.container.classList.remove(handler.className + '-collapsed'); 
+                options.toolbar.collapsed = false;                
+            } else {
+                
+                handler.container.classList.add(handler.className + '-collapsed'); 
+                options.toolbar.collapsed = true;
+            }
+            
+            handler.collapsed = options.toolbar.collapsed;
+            handler.favController.save('cfg');
         }
         
         handler.dom.themeToogle.onclick = function() {

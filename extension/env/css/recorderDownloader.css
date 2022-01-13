@@ -86,8 +86,8 @@
     min-height: unset;
 }
 
-.__BASECLASS__-related-links-options-wrap {
-    margin-top : 12px;
+.__BASECLASS__-related-links-options {
+    padding-top : 12px;
 }
 
 .__BASECLASS__-ModalBox-addition .__BASECLASS__-downloader-statistic.hidden, 

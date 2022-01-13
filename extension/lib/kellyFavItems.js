@@ -81,8 +81,8 @@ function KellyFavItems(cfg)
     
     var fav = {};
     
-    this.mobileOptimization = false; // FALSE | Or contains additional settings for grid display if page was optimized for mobile 
-    this.allowMobile = false; // TRUE | FALSE | Enable mobile optimization (display modalBoxes inline, adds "mobile" class) on initFormatPage for devices with < 1080px screen width
+    this.mobileOptimization = false; // FALSE | If page optimized for mobile, contains additional settings for grid display if page was optimized for mobile 
+    this.allowMobile = false; // TRUE | FALSE | Is auto mobile optimization enabled (display modalBoxes inline, adds "mobile" class) on initFormatPage for devices with < 1080px screen width
     
     this.isDownloadSupported = false;  
     
@@ -329,7 +329,13 @@ function KellyFavItems(cfg)
         if (handler.toolbar) return handler.toolbar;
         if (typeof KellyToolbar == 'undefined') return false;        
         
-        handler.toolbar = new KellyToolbar({className : env.className + '-toolbar', container : document.createElement('DIV'), favController : handler});        
+        handler.toolbar = new KellyToolbar({
+            className : env.className + '-toolbar',
+            collapsed : fav.coptions.toolbar.collapsed, 
+            container : document.createElement('DIV'), 
+            favController : handler
+        });        
+        
         env.getMainContainers().body.appendChild(handler.toolbar.container);
         return handler.toolbar;
     }
@@ -1082,7 +1088,7 @@ function KellyFavItems(cfg)
         if (env.hostClass == 'options_page') return;
         
         if (env.events.onDisplayBlock) env.events.onDisplayBlock(mode, 'hide');
-        if (fav.coptions.bottomToolbar && handler.toolbar) handler.toolbar.events.onDisplayBlock(mode, 'hide'); 
+        if (handler.toolbar && fav.coptions.toolbar.enabled) handler.toolbar.events.onDisplayBlock(mode, 'hide'); 
         
         var envContainers = env.getMainContainers();
             envContainers.siteContent.style.display = 'block';
@@ -1121,7 +1127,7 @@ function KellyFavItems(cfg)
         KellyTools.classList('add', envContainers.favContent, env.className + '-active');
         
         if (env.events.onDisplayBlock) env.events.onDisplayBlock(mode, 'show', oldMode);
-        if (fav.coptions.bottomToolbar && handler.toolbar) handler.toolbar.events.onDisplayBlock(mode, 'show', oldMode);   
+        if (handler.toolbar && fav.coptions.toolbar.enabled) handler.toolbar.events.onDisplayBlock(mode, 'show', oldMode);   
     }
     
     this.updateImageGrid = function() {
@@ -1441,7 +1447,7 @@ function KellyFavItems(cfg)
         imgViewer.addToGallery(galleryImages, 'fav-images', galleryImagesData);
         
         if (env.events.onUpdateFilteredData && env.events.onUpdateFilteredData(displayedItems)) return; 
-        if (fav.coptions.bottomToolbar && handler.toolbar) handler.toolbar.events.onUpdateFilteredData(displayedItems);
+        if (handler.toolbar && fav.coptions.toolbar.enabled) handler.toolbar.events.onUpdateFilteredData(displayedItems);
         
         var tiles = handler.getImageGrid().getTiles();   
         if (!handler.mobileOptimization && tiles && tiles.length) window.scrollTo(0, tiles[0].getBoundingClientRect().top + KellyTools.getScrollTop() - 90);
@@ -2266,7 +2272,7 @@ function KellyFavItems(cfg)
             if (!dm.container) dm.container = downloaderBox.content;
             
             fav.coptions.grabber.itemsList = ''; // is range set save needed ?
-            fav.coptions.grabber.manualExclude = fav.coptions.bottomToolbar;
+            fav.coptions.grabber.manualExclude = fav.coptions.toolbar.enabled;
             
             dm.updateCfg({
                 events : false,
@@ -2364,6 +2370,10 @@ function KellyFavItems(cfg)
             
             handler.sideBarLock = true;                      
             showDownloadManagerForm(true);
+            
+            if (handler.mobileOptimization) {
+                modalBox.classList.add('collapsed');
+            }
         }
         
         handler.updateFilteredData();                    
@@ -2371,7 +2381,7 @@ function KellyFavItems(cfg)
         handler.updateImageGrid();  
                     
         if (env.events.onDisplayBlock) env.events.onDisplayBlock('fav', 'show', 'fav');
-        if (fav.coptions.bottomToolbar && handler.toolbar) handler.toolbar.events.onDisplayBlock('fav', 'show', 'fav');
+        if (handler.toolbar && fav.coptions.toolbar.enabled) handler.toolbar.events.onDisplayBlock('fav', 'show', 'fav');
         
         return imagesAsDownloadItems;
     }
@@ -2405,7 +2415,7 @@ function KellyFavItems(cfg)
                 }
                                 
                 if (filterAdd) filterAdd.style.display = readOnly ? 'none' : 'inline-block'; 
-                if (fav.coptions.bottomToolbar && handler.toolbar) handler.toolbar.show(readOnly ? true : false);
+                if (handler.toolbar && fav.coptions.toolbar.enabled) handler.toolbar.show(readOnly ? true : false);
                 return false;                
             }
             
@@ -2775,12 +2785,15 @@ function KellyFavItems(cfg)
         if (width < 1080) {
             
             handler.mobileOptimization = {grid : {type : 'fixed', fixed : 3}};
+            
+            if (fav.coptions) fav.coptions.toolbar.enabled = false;
             document.body.classList.add(env.className + '-mobile');
             
             if (width > 800) handler.mobileOptimization.grid.fixed = 3;
             else handler.mobileOptimization.grid.fixed = 2;
             
             return true;
+            
         } else return false;        
     }
     

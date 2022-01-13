@@ -137,11 +137,8 @@
 }
     
 .__BASECLASS__-mobile .__BASECLASS__-sidebar-wrap .__BASECLASS__-ModalBox {
-    margin : 0px;
-}
-
-.__BASECLASS__-mobile .__BASECLASS__-sidebar-wrap .__BASECLASS__-ModalBox.__BASECLASS__-Main-download-btn-ModalBox {
-    margin-top : 6px;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 .__BASECLASS__-mobile .kelly-jr-ui-FavItem-grid-first,

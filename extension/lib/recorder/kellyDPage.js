@@ -361,7 +361,7 @@ KellyDPage.showAdditionFilters = function() {
                 <button class="' + cl + '-proportions-asc" data-sort="asc">' + KellyLoc.s('', 'recorder_asc') + '</button>\
              </div>';
              
-    html += '<div class="' + cl + '-buttons ' + cl + '-buttons-order">\
+    html += '<div class="' + cl + '-buttons ' + cl + '-buttons-order ' + cl + '-buttons-last">\
                 <p>' + KellyLoc.s('', 'recorder_sort_order') + '</p>\
                 <button class="' + cl + '-order-asc" data-sort="asc">' + KellyLoc.s('', 'recorder_order_direct') + '</button>\
                 <button class="' + cl + '-order-desc" data-sort="desc">' + KellyLoc.s('', 'recorder_order_reverse') + '</button>\
@@ -403,9 +403,11 @@ KellyDPage.showAdditionFilters = function() {
              </div>';
              
     html += '<div class="' + cl + '-related-links-options-wrap ' + cl + '-hidden">\
-                <input type="text" class="' + cl + '-filter-url-related ' + cl + '-relatedDocTrustedUrl" placeholder="' + KellyLoc.s('', 'recorder_related_doc_trusted_url') + '">\
-                <label><input type="checkbox" class="' + cl + '-relatedDocTrustedUrlReg"> ' + KellyLoc.s('Reqular expression', 'recorder_regular_expr') + '</label>\
-                <label><input type="checkbox" class="' + cl + '-relatedDocDeepSearch"> ' + KellyLoc.s('', 'recorder_related_doc_deep_search') + '</label>\
+                <div class="' + cl + '-related-links-options">\
+                    <input type="text" class="' + cl + '-filter-url-related ' + cl + '-relatedDocTrustedUrl" placeholder="' + KellyLoc.s('', 'recorder_related_doc_trusted_url') + '">\
+                    <label><input type="checkbox" class="' + cl + '-relatedDocTrustedUrlReg"> ' + KellyLoc.s('Reqular expression', 'recorder_regular_expr') + '</label>\
+                    <label><input type="checkbox" class="' + cl + '-relatedDocDeepSearch"> ' + KellyLoc.s('', 'recorder_related_doc_deep_search') + '</label>\
+                </div>\
             </div>';
             
     html += '</div>';                 
@@ -417,9 +419,9 @@ KellyDPage.showAdditionFilters = function() {
     
     html += '<div class="' + cl + '-downloader-statistic hidden"></div>';                
     html += '<div class="' + cl + '-downloader-progressbar hidden">\
-                 <span class="' + cl + '-downloader-progressbar-line ' + cl + '-downloader-progressbar-line-ok" style="width: 0%;"></span>\
-                 <span class="' + cl + '-downloader-progressbar-line ' + cl + '-downloader-progressbar-line-err" style="width: 0px;"></span>\
-                 <span class="' + cl + '-downloader-progressbar-state"></span>\
+                 <div class="' + cl + '-downloader-progressbar-line ' + cl + '-downloader-progressbar-line-ok" style="width: 0%;"></div>\
+                 <div class="' + cl + '-downloader-progressbar-line ' + cl + '-downloader-progressbar-line-err" style="width: 0px;"></div>\
+                 <div class="' + cl + '-downloader-progressbar-state"></div>\
              </div>';
              
     html += '</div>';          
@@ -1000,18 +1002,26 @@ KellyDPage.init = function() {
     
     KellyDPage.env.events.onValidateCfg = function(data) {
         KellyLoadDocControll.validateCfg(data);
-        if (typeof data.coptions.bottomToolbar == 'undefined') data.coptions.bottomToolbar = true;
+        
+        if (typeof data.coptions.toolbar == 'undefined') {
+            data.coptions.toolbar = {
+                enabled : true,
+                collapsed : false,
+            }
+        }
     } 
     
     KellyDPage.env.events.onCreateOptionsManager = function(options) {
-        options.protectedOptions = ['grid_fixed', 'grid_type', 'grid_lazy', 'grid_viewerShowAs', 'optionsSide', 'webRequest', 'newFirst'];
+        options.protectedOptions = ['grid_fixed', 'grid_type', 'grid_lazy', 'grid_viewerShowAs', 'toolbar_collapsed', 'optionsSide', 'bottomToolbarCollapsed', 'webRequest', 'newFirst'];
         
         delete options.tabData['BaseOptions'].parts.fast_download;
         delete options.tabData['BaseOptions'].parts.options_fav_add;
         delete options.tabData['Other'].parts.unlock_common;
         
-        options.tabData['BaseOptions'].parts['_common'] = ['bottomToolbar'];        
-        options.cfgInput['bottomToolbar'] = {loc : 'bottom_toolbar', type : 'bool', default : true};  
+        options.tabData['BaseOptions'].parts['_common'] = ['toolbar_'];    
+
+        options.cfgInput['toolbar_enabled'] = {name : 'enabled', parent : 'toolbar', loc : 'bottom_toolbar', type : 'bool', default : true};  
+        options.cfgInput['toolbar_collapsed'] = {name : 'collapsed', parent : 'toolbar', loc : 'bottom_toolbar', type : 'bool', default : true};   
         
         KellyLoadDocControll.initOptions(options);
         KellyDPage.defaultPageParser.filterCallback('onInitOptions', {options : options}); 

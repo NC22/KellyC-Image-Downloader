@@ -66,8 +66,11 @@
 
 /* pagination */
 
-.__BASECLASS__-pagination {
-     margin-bottom : 16px;
+.__BASECLASS__-pagination:after {
+    content: "";
+    clear: both;
+    display: block;
+    padding: 0;
 }
 
 .__BASECLASS__-pagination-item.active, .__BASECLASS__-pagination-item:hover, .__BASECLASS__-pagination-item:focus {
@@ -76,19 +79,19 @@
 
 .__BASECLASS__-pagination-item {
      overflow: hidden;
-     padding-left: 3px;
-     padding-right: 3px;
+     padding: 0px;
      border-radius : 2px;
      text-decoration : none;
      display : inline-block;
      margin-right : 3px;
-     line-height : 28px;
+     line-height : normal;
      text-align : center;
      width : 32px;
      height : 32px;
      font-size : 16px;
      background : #ffca61;
-     border : 2px solid #3c0905;
+     border: 3px solid #ffcc66;     
+     float: left;
 }
 
 .__BASECLASS__-pagination-item-100 {
@@ -1537,10 +1540,6 @@
     height : 30px;
 }
 
-.__BASECLASS__-downloader-controll div {
-    line-height: normal;
-}
-
 .__BASECLASS__-downloader-item-state-err {
     background : #ff2b2b; 
     border : 1px solid rgba(0,0,0,0.3); 
@@ -1764,7 +1763,7 @@
     background: rgba(239, 94, 126, 0.76);
 }
 
-.__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-progressbar-state {
+.__BASECLASS__-downloader-progressbar-state {
 
     z-index: 2;
     display: block;
@@ -1820,18 +1819,66 @@
     display : block;
 }
 
+.__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed {
+    width : 0px;
+    right : 0px;
+    overflow : visible;
+    background: transparent;
+}
+
+.__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed .__BASECLASS__-toolbar-theme,
+.__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed .__BASECLASS__-toolbar-catlist,
+.__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed.__BASECLASS__-toolbar.__BASECLASS__-toolbar-downloader .__BASECLASS__-FavItem-download-enabled+label {
+   display : none;
+}
+
 .__BASECLASS__-toolbar {
     position: fixed;
     bottom: 0;
     background: #ffefc9;
     width: 100%;
-    padding: 4px 12px;
+    right : 0;
+    padding: 0px 12px;
     padding-top: 0px;
     z-index: 991;
     display: none;
     font-size: 14px;
     color: #282828;
     vertical-align: middle;
+    transition : background-color 0.4s;
+}
+
+.__BASECLASS__-toolbar-collapse {
+    display: inline-block;
+    background: #2d2d2d;
+    width: 19px;
+    height: 19px;
+    position: relative;
+    margin-top: 3px;
+    margin-top: 3px;
+    overflow: hidden;
+    border-radius: 4px;
+    cursor : pointer;
+}
+
+.__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed .__BASECLASS__-toolbar-collapse-icon {
+    transform: rotate(135deg);
+    -webkit-transform: rotate(135deg);
+    left: 6px;
+}
+
+.__BASECLASS__-toolbar-collapse-icon {
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    display: inline-block;
+    padding: 3px;
+    vertical-align: middle;
+    transform: rotate(-45deg);
+    -webkit-transform: rotate(-45deg);
+    position: absolute;
+    top: 5px;
+    left: 3px;
+    transition: transform 0.4s;
 }
 
 .__BASECLASS__-toolbar .__BASECLASS__-toolbar-right {
@@ -1871,9 +1918,8 @@
 .__BASECLASS__-toolbar-theme {
     
     display: inline-block;
-    float: right;
     width: 19px;
-    height: 18px;
+    height: 19px;
     background: #2d2d2d;
     border-radius: 33px;
     position: relative;
@@ -1913,8 +1959,8 @@
 .__BASECLASS__-toolbar .__BASECLASS__-FavItem-download-enabled+label {
     display: none;
     position: relative;
-    padding-left: 33px;
-    margin-left: 12px;
+    padding-left: 26px;
+    margin-left: 0px;
     margin-right: 6px;
     vertical-align: middle;
 }

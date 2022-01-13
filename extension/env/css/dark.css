@@ -1,11 +1,6 @@
 body.__BASECLASS__-dark  {
     background-color: #222;
-    font-family: "Open Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
-    font-weight: 400;
-    line-height: 1.5;
-    font-size : 14px;
     color: #cdcdcd;
-    text-align: left;
 }
 
 .__BASECLASS__-dark button {
@@ -252,12 +247,13 @@ body.__BASECLASS__-dark  {
 .__BASECLASS__-dark a.__BASECLASS__-pagination-item:hover,
 .__BASECLASS__-dark a.__BASECLASS__-pagination-item:focus,
 .__BASECLASS__-dark .__BASECLASS__-pagination-item.active {
-    background: #a3a3a3;
+    background: #666666;
     color: #fff;
+    border: 3px solid #8d8d8d;
 }
 
 .__BASECLASS__-dark a.__BASECLASS__-pagination-item {
-    border: 2px solid #3c3c3c;
+    border: 3px solid #666666;
 }
 
 .__BASECLASS__-dark .__BASECLASS__-FavFilter {
@@ -384,8 +380,16 @@ body.__BASECLASS__-dark  {
     background: #5c5c5c;
 }
 
+.__BASECLASS__-dark  .__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed {
+    background: transparent;
+}
 
-.__BASECLASS__-dark  .__BASECLASS__-toolbar {
+.__BASECLASS__-dark .__BASECLASS__-toolbar-theme,
+.__BASECLASS__-dark .__BASECLASS__-toolbar-collapse {
+    background: #919191;
+}
+
+.__BASECLASS__-dark .__BASECLASS__-toolbar {
     background: #4d4d4d;
     color: #cdcdcd;
 }
@@ -404,11 +408,6 @@ body.__BASECLASS__-dark  {
     background: #fff;
     stroke: #dddddd;
     fill: #dddddd;
-}
-
-.__BASECLASS__-dark .__BASECLASS__-toolbar-theme {
-    
-    background: #2d2d2d;
 }
 
 .__BASECLASS__-dark .__BASECLASS__-toolbar-theme:before {

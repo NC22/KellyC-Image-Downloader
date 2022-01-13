@@ -13,7 +13,7 @@ function KellyProfileDefault() {
 
     this.sidebarConfig = {
         topMax : 0,
-        paddingTop : 24,
+        paddingTop : 0,
         nDisabled : -1, // 1 - sidebar not found or hidden (jras - sidebar can be hidden)
     };
     
@@ -196,10 +196,21 @@ function KellyProfileDefault() {
         
         var scrollTop = KellyTools.getScrollTop(), scrollLeft = KellyTools.getScrollLeft();   
         var topMax = handler.sidebarConfig.topMax, top = topMax;
-                           
-        if (!handler.fav.sideBarLock && handler.sidebarConfig.paddingTop + scrollTop > top) top = handler.sidebarConfig.paddingTop + scrollTop;
-                
+         
+        // if (!handler.fav.sideBarLock && handler.sidebarConfig.paddingTop + scrollTop > top) top = handler.sidebarConfig.paddingTop + scrollTop; - position absolute mode
+        
+        // position fixed
+        
+        sideBarWrap.style.position = ''; 
+        
+        if (!handler.fav.sideBarLock && handler.sidebarConfig.paddingTop + scrollTop > top) {
+            top = handler.sidebarConfig.paddingTop;
+            sideBarWrap.style.position = 'fixed'; 
+        }
+        
+        
         sideBarWrap.style.top = top + 'px';
+        
        
         if (sideBlock) {
             
