@@ -1031,7 +1031,7 @@ function KellyFavItems(cfg)
             return false;
         }, 'options');
         
-        if (env.profile == 'recorder' && typeof KellyAdditionsForm != 'undefined') {
+        if (env.hostClass == 'options_page' && typeof KellyAdditionsForm != 'undefined') {
             menuButtons['additions'] = createMainMenuButton(lng.s('', 'additions'), function() { 
                             
                 if (!checkDataFilterLock()) return false;
