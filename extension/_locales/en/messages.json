@@ -917,6 +917,39 @@
     "kb":{  
         "message":"kb"
     },   
+    "toolbar_deselect_all":{  
+        "message":"Deselect all"
+    }, 
+    "toolbar_help":{  
+        "message":"Support project"
+    },
+    "toolbar_theme":{  
+        "message":"Change theme"
+    },   
+    "toolbar_collapse":{  
+        "message":"Collapse toolbar"
+    },    
+    "toolbar_edit_mode":{  
+        "message":"Edit mode"
+    },
+    "toolbar_cat_not_selected":{  
+        "message":"Categories not selected"
+    },
+    "toolbar_selected_images":{  
+        "message":"Shown images"
+    },    
+    "toolbar_deselected_images":{  
+        "message":"Excluded images"
+    },
+    "toolbar_from_single_cat":{  
+        "message":"<b>from category</b>"
+    },  
+    "toolbar_from_and_cats":{  
+        "message":"contained <b>all listed categories</b>"
+    }, 
+    "toolbar_from_or_cats":{  
+        "message":"contained <b>one of listed categories</b>"
+    },
     "thread_sec_notice":{  
         "message":"Requests speed settings when use \"Load related docs\" function. <b>Change settings carefully.</b><br>* For randomize requests delays can be setted several values separated by comma"
     },

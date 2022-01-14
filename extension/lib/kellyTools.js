@@ -575,11 +575,12 @@ KellyTools.inputVal = function(el, type, parent) {
     return KellyTools.val(value, type);
 }
 
-KellyTools.fitText = function(parent, textEl, noExtHeight) {
+KellyTools.fitText = function(parent, textEl, noExtHeight, offsetWidth) {
     
     var bounds = textEl.getBoundingClientRect();
     var parentBounds = parent.getBoundingClientRect();
-
+    if (offsetWidth) parentBounds.width += offsetWidth;
+    
     if (parentBounds.width >= bounds.width && parentBounds.height >= bounds.height) {
         return;
     }    

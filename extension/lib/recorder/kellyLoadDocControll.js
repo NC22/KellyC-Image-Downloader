@@ -133,7 +133,7 @@ function KellyLoadDocControll(cfg)
                     
                     if (handler.events.onRelatedDocImageCheck && handler.events.onRelatedDocImageCheck(handler.docsImages[i]) === true) continue;
                     
-                    // todo - check ratio ? | optional skip other if one original found ?
+                    // todo - optional check ratio - preview can have different ratio because of crop for ex ? | optional skip other if one original found ?
                     if (!handler.docsImages[i].relatedItem.pw || (handler.docsImages[i].relatedItem.pw <= handler.docsImages[i].pw && handler.docsImages[i].relatedItem.ph <= handler.docsImages[i].ph)) {
                         handler.addDocItem(handler.docsImages[i]);
                     } else handler.docsImages[i].refused = 'proportions';
@@ -371,7 +371,7 @@ KellyLoadDocControll.createImageLoaderController = function(events, cfg) {
         // console.log(cfg);
         // configurable params before .run()
         
-        controller.loadingBWorkersMax = cfg && cfg.imgLoaderMaxThreads ? cfg.imgLoaderMaxThreads : 3; 
+        controller.loadingBWorkersMax = cfg && cfg.imgLoaderMaxThreads ? parseInt(cfg.imgLoaderMaxThreads) : 3; 
         controller.timeout = cfg && cfg.imgLoaderTimeout ? cfg.imgLoaderTimeout : 35; // max seconds for one job
       
         controller.stop = function() { // stop on goto new page
@@ -382,24 +382,29 @@ KellyLoadDocControll.createImageLoaderController = function(events, cfg) {
 
         controller.run = function() {
                         
-            console.log('[IMAGE LOAD RUN] - Threads : ' + controller.loadingBWorkersMax + ' | Timeout : ' + controller.timeout);
             for (var i = 1; i <= controller.loadingBWorkersMax; i++) {
                 if (!controller.applayJob()) break;
             }
             
+            console.log('[IMAGE LOAD RUN] - Threads : ' + controller.loadingBWorkersMax + ' | Timeout : ' + controller.timeout + ' | Start workers : ' + controller.loadingBWorkers.length);
             return controller.loadingBWorkers;
         }
 
         controller.applayJob = function() {
              
-             if (controller.loadingBWorkers.length >= controller.loadingBWorkersMax) return false;
+             if (controller.loadingBWorkers.length >= controller.loadingBWorkersMax) {
+                 return false;
+             }
+             
+             var job = controller.events.onAskJob(controller);    
                  
-             var job = controller.events.onAskJob(controller);       
              if (!job && controller.loadingBWorkers.length == 0) {
                  if (controller.events.onEnd) controller.events.onEnd('done');
              }
              
-             if (!job) return false;
+             if (!job) {
+                 return false;
+             }
              
              var endJob = function () {   
                  
@@ -419,8 +424,6 @@ KellyLoadDocControll.createImageLoaderController = function(events, cfg) {
              }
              
             job.imageEl = document.createElement('IMG');
-            job.imageEl.src = job.src;
-
             job.imageEl.onerror = function() { 
 
                 console.log('[IMAGE LOAD ERROR] - ' + this.src);
@@ -432,7 +435,7 @@ KellyLoadDocControll.createImageLoaderController = function(events, cfg) {
             job.imageEl.onload = function() {                 
 
                 var newBounds = [parseInt(this.naturalWidth), parseInt(this.naturalHeight)];
-
+                                
                 if (!newBounds[0] || !newBounds[1]) {
                     
                     console.log('[IMAGE LOAD ERROR] - Fail to read bounds, but image is loaded ' + this.src);                        
@@ -445,6 +448,7 @@ KellyLoadDocControll.createImageLoaderController = function(events, cfg) {
                 endJob();
             }
 
+            job.imageEl.src = job.src;
             job.loadTimeout = setTimeout(endJobByTimeout, controller.timeout * 1000);
             job.stopJob = function() {
 

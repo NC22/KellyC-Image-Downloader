@@ -283,7 +283,7 @@ KellyDPage.loadProportions = function(items, displayed, onEnd) {
     KellyDPage.aDProgress.imgLoader = KellyLoadDocControll.createImageLoaderController({
             onEnd : function(reason) {
                 
-                console.log('onEnd ' + reason);
+                console.log('[Load proportions] onEnd [' + reason + '] | Items : ' + KellyDPage.aDProgress.total);
                 K_FAV.dataFilterLock = false;
                 
                 if (reason == 'stop') {                    
@@ -307,6 +307,7 @@ KellyDPage.loadProportions = function(items, displayed, onEnd) {
                 
                 for (var i = 0; i < KellyDPage.aDProgress.total; i++) {
                     var item = displayed ? items[displayed[i]] : items[i];
+
                     if (!item.pw) {
                         item.pw = -2; item.ph = -2;
                         return {src : item.pImage, item : item};     
@@ -727,15 +728,26 @@ KellyDPage.showAdditionFilters = function() {
             if (reason == 'stop') return;
             
             items.sort(function(a, b) {
-                if (!a.pw) return -1;
-                var megaPixels = (a.pw * a.ph) / 1000000, megaPixelsB = (b.pw * b.ph) / 1000000;                           
+                
+                var megaPixels = -1, megaPixelsB = -1;
+                
+                if (typeof a.pw == "number" && !isNaN(a.pw)) {
+                    megaPixels = (a.pw * a.ph) / 1000000;
+                }
+                
+                if (typeof b.pw == "number" && !isNaN(b.pw)) {
+                    megaPixelsB = (b.pw * b.ph) / 1000000; 
+                }
+                
                 return sortby == 'desc' ? megaPixelsB - megaPixels : megaPixels - megaPixelsB;
             });
                 
             items.forEach(function(item) {
+                
                  if (item.pw && item.pw >= 1 && item.pw <= 3) {
                      item.categoryId.push(KellyDPage.getCat('imageError').id);                   
                  }
+                 
             });
         
             var filters = K_FAV.getFilters(filters);
@@ -1009,9 +1021,7 @@ KellyDPage.init = function() {
         
         delete options.tabData['BaseOptions'].parts.fast_download;
         delete options.tabData['BaseOptions'].parts.options_fav_add;
-        delete options.tabData['Other'].parts.unlock_common;
-        
-        options.tabData['BaseOptions'].parts['_common'] = ['toolbar_'];    
+        delete options.tabData['Other'].parts.unlock_common; 
 
         KellyLoadDocControll.initOptions(options);
         KellyDPage.defaultPageParser.filterCallback('onInitOptions', {options : options}); 

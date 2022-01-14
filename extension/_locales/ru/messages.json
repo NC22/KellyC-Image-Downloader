@@ -926,6 +926,39 @@
     "kb":{  
         "message":"кб"
     },     
+    "toolbar_deselect_all":{  
+        "message":"Исключить все"
+    }, 
+    "toolbar_help":{  
+        "message":"Помочь проекту"
+    },
+    "toolbar_theme":{  
+        "message":"Переключить тему"
+    },   
+    "toolbar_collapse":{  
+        "message":"Свернуть панель инструментов"
+    },    
+    "toolbar_edit_mode":{  
+        "message":"Режим редактирования"
+    },
+    "toolbar_cat_not_selected":{  
+        "message":"Категории не выбраны"
+    },
+    "toolbar_selected_images":{  
+        "message":"Выбраны картинки"
+    },    
+    "toolbar_deselected_images":{  
+        "message":"Исключены картинки"
+    },
+    "toolbar_from_single_cat":{  
+        "message":"<b>из категории</b>"
+    },  
+    "toolbar_from_and_cats":{  
+        "message":"содержащие <b>все категории</b>"
+    }, 
+    "toolbar_from_or_cats":{  
+        "message":"содержащие <b>одну из категорий</b>"
+    },
     "thread_sec_notice":{  
         "message":"Настройки скорости запросов при загрузке доп. документов. <b>Не менять без необходимости.</b><br>* Можно указать несколько значений через запятую, чтобы добавить неоднородность по времени при выполнении (значения выбираются случайно)"
     },

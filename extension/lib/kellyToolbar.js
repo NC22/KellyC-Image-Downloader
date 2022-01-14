@@ -57,10 +57,10 @@ function KellyToolbar(cfg) {
              html = '[' + title + '';
              
              if (filter.length == 1) {
-                html += ' <b>из категории</b>';
+                html += ' ' + KellyLoc.s('', 'toolbar_from_single_cat');
              } else {                 
-                if (logic == 'and') html += ' содержащие <b>все категории</b>';
-                else html += ' содержащие <b>одну из категорий</b>';
+                if (logic == 'and') html += ' '  + KellyLoc.s('', 'toolbar_from_and_cats');
+                else html += ' ' + KellyLoc.s('', 'toolbar_from_or_cats');
              }
              
              html += ': ';
@@ -68,7 +68,7 @@ function KellyToolbar(cfg) {
              for (var i = 0; i < filter.length; i++) {
                 
                 var group = handler.favController.getStorageManager().getCategoryById(db, filter[i]);
-                html += (i > 0 ? ', ' : '') + '<b>' + group.name + '</b>';
+                if (group.id > 0) html += (i > 0 ? ', ' : '') + '<b>' + group.name + '</b>'; // todo - check - after sort - some unexist items adds to exclude filter
              }
              
              html += ']';
@@ -83,15 +83,15 @@ function KellyToolbar(cfg) {
          var html = '';
          
          if (!filters.readOnly) {
-             html += '[<b>Режим редактирования</b>]';
+             html += '[<b>' + KellyLoc.s('', 'toolbar_edit_mode') + '</b>]';
          }
          
          if (filters.catFilters.length <= 0 && filters.catIgnoreFilters.length <= 0) {
-             html += '[Категории не выбраны]';
+             html += '[' + KellyLoc.s('', 'toolbar_cat_not_selected') + ']';
          } else {
-             html += getCatListHtml('Выбраны картинки', filters.catFilters, filters.logic);
+             html += getCatListHtml(KellyLoc.s('', 'toolbar_selected_images'), filters.catFilters, filters.logic);
              if (filters.catFilters.length > 0) html += ' ';
-             html += getCatListHtml('Исключены картинки', filters.catIgnoreFilters, filters.logic);
+             html += getCatListHtml(KellyLoc.s('', 'toolbar_deselected_images'), filters.catIgnoreFilters, filters.logic);
          }
          
          KellyTools.setHTMLData(handler.dom.catList, '<span>' + html + '</span>');  
@@ -101,15 +101,15 @@ function KellyToolbar(cfg) {
         
         var html = '\
             <input id="' + handler.className + '-deselect-all" type="checkbox" class="' + handler.env.className +'-FavItem-download-enabled" checked>\
-            <label for="' + handler.className + '-deselect-all">Исключить все</label>\
+            <label for="' + handler.className + '-deselect-all">' + KellyLoc.s('', 'toolbar_deselect_all') + '</label>\
             \
             <div class="' + handler.className + '-catlist"></div>\
             \
             <div class="' + handler.className + '-right">\
                 \
-               <div class="' + handler.className + '-help" title="Помочь проекту"></div>\
-               <div class="' + handler.className + '-theme" title="Переключить тему"></div>\
-               <div class="' + handler.className + '-collapse" title="Свернуть панель инструментов"><div class="' + handler.className + '-collapse-icon"></div></div>\
+               <div class="' + handler.className + '-help" title="' + KellyLoc.s('', 'toolbar_help') + '"></div>\
+               <div class="' + handler.className + '-theme" title="' + KellyLoc.s('', 'toolbar_theme') + '"></div>\
+               <div class="' + handler.className + '-collapse" title="' + KellyLoc.s('', 'toolbar_collapse') + '"><div class="' + handler.className + '-collapse-icon"></div></div>\
            </div>';       
        
         KellyTools.setHTMLData(handler.container, html);

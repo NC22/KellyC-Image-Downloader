@@ -1042,7 +1042,7 @@ function KellyGrabber(cfg) {
             if (!holder) {
                 
                 holder = document.createElement('DIV');
-                holder.className = imageClassName + '-download-state-holder';
+                holder.className = imageClassName + '-download-state-holder' + (options.manualExclude ? ' ' + imageClassName + '-manualExclude-mode' : '');
                 holder.setAttribute('downloadIndex', i);
                 
                 var html = '';
@@ -1060,41 +1060,24 @@ function KellyGrabber(cfg) {
                
                 KellyTools.setHTMLData(holder, html);
                 itemContainer.appendChild(holder);
-                                
-                /* не проработаны исключения
-                var envVars = fav.getGlobal('env');
-                
-                var tooltipOptions = {
-                    offset : {left : 0, top : 0}, 
-                    positionY : 'top',
-                    positionX : 'right',				
-                    ptypeX : 'outside',
-                    ptypeY : 'inside',
-                    closeButton : false,
-
-                    selfClass : envVars.hostClass + ' ' + envVars.className + '-ItemTip-tooltipster',
-                    classGroup : envVars.className + '-tooltipster',
-                    removeOnClose : true,
-                };
-                
-                KellyTooltip.addTipToEl(holder, function(el, e){
-                
-                    return showDownloadItemInfoTooltip(el.getAttribute('downloadIndex'));
-                
-                }, tooltipOptions, 100);       
-                */
-                
+                                                
                 if (options.manualExclude) {
+                    
                     var downloadEnabled = KellyTools.getElementByClass(itemContainer, imageClassName + '-download-enabled'); 
                         downloadEnabled.onchange = function() {  
+                        
                             var itemIndex = parseInt(this.value);
-                            var index = manualExcludeItems.indexOf(itemIndex);
-                            if (index == -1 && !this.checked) manualExcludeItems.push(itemIndex);
-                            if (index != -1 && this.checked) manualExcludeItems.splice(index, 1);
-                            
+                            var indexList = downloads[itemIndex].subItem !== false ? subItems[downloads[itemIndex].item.id] : [itemIndex];
+                            for (var b = 0; b < indexList.length; b++) {  
+                               
+                                var index = manualExcludeItems.indexOf(indexList[b]);
+                                if (index == -1 && !this.checked) manualExcludeItems.push(indexList[b]);
+                                if (index != -1 && this.checked) manualExcludeItems.splice(index, 1);
+                            }
                             
                             updateProgressBar();
                         }
+                        
                 }
                     
                 holder.onclick = function(e) {                
@@ -1130,7 +1113,14 @@ function KellyGrabber(cfg) {
                     fav.getTooltip().show(false);
                 }  
                 */              
-            } else {
+            }
+            
+            var statusPlaceholder = KellyTools.getElementByClass(holder, imageClassName + '-download-status');
+            
+            // update state by last item in collection
+
+            if (downloads[i].subItem === false || downloads[i].subItem == downloads[i].item.pImage.length-1) {
+                
                 var numberTitle = KellyTools.getElementByClass(itemContainer, imageClassName + '-download-number-title');            
                 if (numberTitle) {
                     numberTitle.innerText = title;
@@ -1140,14 +1130,7 @@ function KellyGrabber(cfg) {
                 if (downloadEnabled) {
                     downloadEnabled.disabled = (mode == 'download' ? true : false);
                     downloadEnabled.checked = manualExcludeItems.indexOf(i) == -1;
-                }   
-            }
-            
-            var statusPlaceholder = KellyTools.getElementByClass(holder, imageClassName + '-download-status');
-            
-            // update state by last item in collection
-
-            if (downloads[i].subItem === false || downloads[i].subItem == downloads[i].item.pImage.length-1) {
+                }  
                 
                 var html = '';
                 
@@ -1183,10 +1166,11 @@ function KellyGrabber(cfg) {
         
         setTimeout(function() {
             
+            var offsetWidth = options.manualExclude ? -40 : 0;
             var textNodes = document.getElementsByClassName(imageClassName + '-download-number');
             for (var i = 0; i < textNodes.length; i++) {
                 var textNode = KellyTools.getElementByTag(textNodes[i], 'span');                
-                KellyTools.fitText(textNodes[i], textNode);
+                KellyTools.fitText(textNodes[i], textNode, false, offsetWidth);
             }
             
         }, 100);
@@ -1575,6 +1559,7 @@ function KellyGrabber(cfg) {
         }
         
         handler.updateStateForImageGrid();
+        updateProgressBar();
     }
     
     // full reset

@@ -380,12 +380,16 @@ body.__BASECLASS__-dark  {
     background: #5c5c5c;
 }
 
-.__BASECLASS__-dark  .__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed {
+.__BASECLASS__-dark .__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed {
     background: transparent;
 }
 
 .__BASECLASS__-dark .__BASECLASS__-toolbar-collapse {
     background: #919191;
+}
+
+.__BASECLASS__-dark .__BASECLASS__-toolbar-help::before, .__BASECLASS__-dark .__BASECLASS__-toolbar-help::after {
+    background: #e63d3d;
 }
 
 .__BASECLASS__-dark .__BASECLASS__-toolbar {

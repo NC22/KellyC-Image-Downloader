@@ -1861,7 +1861,7 @@
 
 .__BASECLASS__-toolbar-collapse {
     display: inline-block;
-    background: #2d2d2d;
+    background: #faa22e;
     width: 19px;
     height: 19px;
     position: relative;
@@ -1931,7 +1931,7 @@
     display: inline-block;
     width: 19px;
     height: 19px;
-    background: #2d2d2d;
+    background: #786854;
     border-radius: 33px;
     position: relative;
     margin-top: 3px;
@@ -1978,7 +1978,7 @@
     width: 9px;
     height: 15px;
     border-radius: 5px 5px 0 0;
-    background: #f35353;
+    background: #ff5b00;
 }
 
 /* Fav items importer, todo replace class, cause collisions */
@@ -2034,6 +2034,11 @@
 
 .__BASECLASS__-FavItem-download-enabled:disabled+label:before {
     opacity: 0.4;
+}
+
+.__BASECLASS__-FavItem-manualExclude-mode .__BASECLASS__-FavItem-download-number {
+    text-align: right;
+    padding-right : 6px;
 }
 
 .__BASECLASS__-FavItem-download-number {
