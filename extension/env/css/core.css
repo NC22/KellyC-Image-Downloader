@@ -112,6 +112,10 @@
     padding-bottom : 6px;
 }
 
+.__BASECLASS__-tooltipster-wrap.__BASECLASS__-tooltipster-close-btn.__BASECLASS__-tooltipster-wrap.__BASECLASS__-Default-tooltipster {
+    z-index : 910;
+}
+
 .__BASECLASS__-tooltipster-wrap.__BASECLASS__-Default-tooltipster, 
 .__BASECLASS__-tooltipster-wrap.__BASECLASS__-ItemTip-tooltipster,
 .__BASECLASS__-tooltipster-wrap.__BASECLASS__-tooltipster-error,
@@ -1729,7 +1733,7 @@
     position: relative;
     color: #fff;
     background: #b0b0b0cf;
-    border-radius: 6px;
+    border-radius: 0;
     border: 2px solid #a2a2a2;
     box-sizing: content-box;
     width: 80%;
@@ -1846,7 +1850,7 @@
 .__BASECLASS__-toolbar {
     position: fixed;
     bottom: 0;
-    background: #ffefc9;
+    background: rgb(139, 139, 139, 0.84);    
     width: 100%;
     right : 0;
     padding: 0px 12px;
@@ -1854,14 +1858,14 @@
     z-index: 991;
     display: none;
     font-size: 14px;
-    color: #282828;
+    color: #ffffff;
     vertical-align: middle;
     transition : background-color 0.4s;
 }
 
 .__BASECLASS__-toolbar-collapse {
     display: inline-block;
-    background: #faa22e;
+    background: #5d5d5d;
     width: 19px;
     height: 19px;
     position: relative;
@@ -1931,7 +1935,7 @@
     display: inline-block;
     width: 19px;
     height: 19px;
-    background: #786854;
+    background: #5d5d5d;
     border-radius: 33px;
     position: relative;
     margin-top: 3px;

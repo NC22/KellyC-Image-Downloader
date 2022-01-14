@@ -393,7 +393,7 @@ body.__BASECLASS__-dark  {
 }
 
 .__BASECLASS__-dark .__BASECLASS__-toolbar {
-    background: #4d4d4d;
+    background: rgb(77, 77, 77, 0.84);
     color: #cdcdcd;
 }
 

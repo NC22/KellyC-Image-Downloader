@@ -936,12 +936,19 @@ function KellyGrabber(cfg) {
     function showDownloadItemInfoTooltip(downloadIndex, target) {
     
         if (KellyTools.getElementByClass(document, fav.getGlobal('env').className + '-tooltipster-help')) {
+            KellyTools.log('tooltip is not exist', 'KellyGrabber');
             return;
         }
         
-        if (!downloads[downloadIndex]) return;
+        if (!downloads[downloadIndex]) {
+            KellyTools.log('cant display item info by downloadIndex : ' + downloadIndex, 'KellyGrabber');
+            return;
+        }
         
-        if (!handler.initDownloadItemFile(downloads[downloadIndex])) return;
+        if (!handler.initDownloadItemFile(downloads[downloadIndex])) {
+            KellyTools.log('cant init download params for item : ' + downloadIndex, 'KellyGrabber');
+            return;
+        }
         
         var item = downloads[downloadIndex].item;
         var tooltipEl = fav.getTooltip();
@@ -1043,8 +1050,7 @@ function KellyGrabber(cfg) {
                 
                 holder = document.createElement('DIV');
                 holder.className = imageClassName + '-download-state-holder' + (options.manualExclude ? ' ' + imageClassName + '-manualExclude-mode' : '');
-                holder.setAttribute('downloadIndex', i);
-                
+
                 var html = '';
                 if (options.manualExclude) {
                     html += '\
@@ -1120,6 +1126,8 @@ function KellyGrabber(cfg) {
             // update state by last item in collection
 
             if (downloads[i].subItem === false || downloads[i].subItem == downloads[i].item.pImage.length-1) {
+                
+                holder.setAttribute('downloadIndex', i);
                 
                 var numberTitle = KellyTools.getElementByClass(itemContainer, imageClassName + '-download-number-title');            
                 if (numberTitle) {
