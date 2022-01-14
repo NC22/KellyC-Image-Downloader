@@ -96,7 +96,6 @@ table.__BASECLASS__-options-table input[type="submit"] {
 
 /* top.reactor */
 
-
 .__BASECLASS__-top-joyreactor-cc.__BASECLASS__-FavContainer,
 .__BASECLASS__-top-joyreactor-cc .__BASECLASS__-tab h3,
 .__BASECLASS__-top-joyreactor-cc .__BASECLASS__-ModalBox a,
@@ -109,6 +108,15 @@ table.__BASECLASS__-options-table input[type="submit"] {
 .__BASECLASS__-top-joyreactor-cc .__BASECLASS__-TypeFiltersContainer button,
 .__BASECLASS__-top-joyreactor-cc .__BASECLASS__-btn-link {
     color: #cfcfcf;
+}
+
+.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-toolbar-collapse {
+    background: #8a8a8a;
+}
+
+.__BASECLASS__-top-joyreactor-cc.__BASECLASS__-toolbar {
+    background: #505050;
+    color: #c7c7c7;
 }
 
 #submenu.__BASECLASS__-top-joyreactor-cc {
@@ -273,7 +281,8 @@ table.__BASECLASS__-options-table input[type="submit"] {
     border: 1px solid rgba(0,0,0,.125);
     border-radius: .25rem;
     max-width: 880px;
-    margin: 0px auto;
+    margin: 0;
+    width: max-content;
 }
 
 .jras-pcLinks-img .__BASECLASS__-post-FavAdd {

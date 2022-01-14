@@ -327,7 +327,7 @@ function KellyFavItems(cfg)
     this.getToolbar = function() {
         
         if (handler.toolbar) return handler.toolbar;
-        if (typeof KellyToolbar == 'undefined') return false;        
+        if (typeof KellyToolbar == 'undefined' || typeof fav.coptions.toolbar == 'undefined' || !fav.coptions.toolbar.enabled) return false;        
         
         handler.toolbar = new KellyToolbar({
             className : env.className + '-toolbar',
@@ -335,6 +335,8 @@ function KellyFavItems(cfg)
             container : document.createElement('DIV'), 
             favController : handler,
             heartHidden : fav.coptions.toolbar.heartHidden, 
+            heartNewWindow : env.hostClass == 'options_page' ? false : true,
+            themeHidden : env.hostClass == 'options_page' ? false : true,
         });        
         
         env.getMainContainers().body.appendChild(handler.toolbar.container);
@@ -1029,7 +1031,7 @@ function KellyFavItems(cfg)
             return false;
         }, 'options');
         
-        if (env.hostClass == 'options_page' && typeof KellyAdditionsForm != 'undefined') {
+        if (env.profile == 'recorder' && typeof KellyAdditionsForm != 'undefined') {
             menuButtons['additions'] = createMainMenuButton(lng.s('', 'additions'), function() { 
                             
                 if (!checkDataFilterLock()) return false;
@@ -1090,7 +1092,7 @@ function KellyFavItems(cfg)
         if (env.hostClass == 'options_page') return;
         
         if (env.events.onDisplayBlock) env.events.onDisplayBlock(mode, 'hide');
-        if (handler.toolbar && fav.coptions.toolbar.enabled) handler.toolbar.events.onDisplayBlock(mode, 'hide'); 
+        if (handler.getToolbar()) handler.toolbar.events.onDisplayBlock(mode, 'hide'); 
         
         var envContainers = env.getMainContainers();
             envContainers.siteContent.style.display = 'block';
@@ -1129,7 +1131,7 @@ function KellyFavItems(cfg)
         KellyTools.classList('add', envContainers.favContent, env.className + '-active');
         
         if (env.events.onDisplayBlock) env.events.onDisplayBlock(mode, 'show', oldMode);
-        if (handler.toolbar && fav.coptions.toolbar.enabled) handler.toolbar.events.onDisplayBlock(mode, 'show', oldMode);   
+        if (handler.getToolbar()) handler.toolbar.events.onDisplayBlock(mode, 'show', oldMode);   
     }
     
     this.updateImageGrid = function() {
@@ -1450,7 +1452,7 @@ function KellyFavItems(cfg)
         imgViewer.addToGallery(galleryImages, 'fav-images', galleryImagesData);
         
         if (env.events.onUpdateFilteredData && env.events.onUpdateFilteredData(displayedItems)) return; 
-        if (handler.toolbar && fav.coptions.toolbar.enabled) handler.toolbar.events.onUpdateFilteredData(displayedItems);
+        if (handler.getToolbar()) handler.toolbar.events.onUpdateFilteredData(displayedItems);
         
         var tiles = handler.getImageGrid().getTiles();   
         if (!handler.mobileOptimization && tiles && tiles.length) window.scrollTo(0, tiles[0].getBoundingClientRect().top + KellyTools.getScrollTop() - 90);
@@ -2275,7 +2277,7 @@ function KellyFavItems(cfg)
             if (!dm.container) dm.container = downloaderBox.content;
             
             fav.coptions.grabber.itemsList = ''; // is range set save needed ?
-            fav.coptions.grabber.manualExclude = fav.coptions.toolbar.enabled;
+            if (handler.getToolbar()) fav.coptions.grabber.manualExclude = fav.coptions.toolbar.enabled;
             
             dm.updateCfg({
                 events : false,
@@ -2384,7 +2386,7 @@ function KellyFavItems(cfg)
         handler.updateImageGrid();  
                     
         if (env.events.onDisplayBlock) env.events.onDisplayBlock('fav', 'show', 'fav');
-        if (handler.toolbar && fav.coptions.toolbar.enabled) handler.toolbar.events.onDisplayBlock('fav', 'show', 'fav');
+        if (handler.getToolbar()) handler.toolbar.events.onDisplayBlock('fav', 'show', 'fav');
         
         return imagesAsDownloadItems;
     }
@@ -2418,7 +2420,7 @@ function KellyFavItems(cfg)
                 }
                                 
                 if (filterAdd) filterAdd.style.display = readOnly ? 'none' : 'inline-block'; 
-                if (handler.toolbar && fav.coptions.toolbar.enabled) handler.toolbar.show(readOnly ? true : false);
+                if (handler.getToolbar()) handler.toolbar.show(readOnly ? true : false);
                 return false;                
             }
             
@@ -3457,8 +3459,6 @@ function KellyFavItems(cfg)
         else if (name == 'fav') return fav;
         else if (name == 'filtered') return displayedItems;
         else if (name == 'mode') return mode;
-        else if (name == 'read_only') return readOnly;
-        else if (name == 'logic') return logic;
         else if (name == 'options') return fav.coptions;
         else if (name == 'image_events') return imageEvents;
     }

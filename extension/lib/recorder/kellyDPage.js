@@ -1002,18 +1002,10 @@ KellyDPage.init = function() {
     
     KellyDPage.env.events.onValidateCfg = function(data) {
         KellyLoadDocControll.validateCfg(data);
-        
-        if (typeof data.coptions.toolbar == 'undefined') {
-            data.coptions.toolbar = {
-                enabled : true,
-                collapsed : false,
-                heartHidden : false,
-            }
-        }
     } 
     
     KellyDPage.env.events.onCreateOptionsManager = function(options) {
-        options.protectedOptions = ['grid_fixed', 'grid_type', 'grid_lazy', 'grid_viewerShowAs', 'toolbar_collapsed', 'toolbar_heartHidden', 'optionsSide', 'bottomToolbarCollapsed', 'webRequest', 'newFirst'];
+        options.protectedOptions = ['grid_fixed', 'grid_type', 'grid_lazy', 'grid_viewerShowAs', 'optionsSide', 'bottomToolbarCollapsed', 'webRequest', 'newFirst'];
         
         delete options.tabData['BaseOptions'].parts.fast_download;
         delete options.tabData['BaseOptions'].parts.options_fav_add;
@@ -1021,10 +1013,6 @@ KellyDPage.init = function() {
         
         options.tabData['BaseOptions'].parts['_common'] = ['toolbar_'];    
 
-        options.cfgInput['toolbar_enabled'] = {name : 'enabled', parent : 'toolbar', loc : 'bottom_toolbar', type : 'bool', default : true};  
-        options.cfgInput['toolbar_collapsed'] = {name : 'collapsed', parent : 'toolbar', loc : 'bottom_toolbar', type : 'bool', default : false};   
-        options.cfgInput['toolbar_heartHidden'] = {name : 'heartHidden', parent : 'toolbar', loc : 'bottom_toolbar', type : 'bool', default : false};   
-                
         KellyLoadDocControll.initOptions(options);
         KellyDPage.defaultPageParser.filterCallback('onInitOptions', {options : options}); 
     }

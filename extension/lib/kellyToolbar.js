@@ -4,6 +4,7 @@ function KellyToolbar(cfg) {
     
     var handler = this;
         handler.container = false;
+        handler.cfg = {heartHidden : false, heartNewWindow : false, themeHidden : false,};
         handler.className = 'toolbar';
         handler.dom = { help : false, deselectAll : false, collapseToogle : false, themeToogle : false, catlist : false};
         handler.events = {
@@ -33,7 +34,7 @@ function KellyToolbar(cfg) {
         handler.container = cfg.container;
         handler.className = cfg.className;
         handler.collapsed = cfg.collapsed ? true : false;
-        handler.heartHidden = cfg.heartHidden ? true : false;
+        handler.cfg = cfg;
         
         handler.container.classList.add(handler.className);
         if (handler.collapsed) {
@@ -42,6 +43,8 @@ function KellyToolbar(cfg) {
         
         handler.favController = cfg.favController;
         handler.env = cfg.favController.getGlobal('env');
+        
+        handler.container.classList.add(handler.env.hostClass); 
     }
     
     function getCatListHtml(title, filter, logic) {
@@ -109,22 +112,32 @@ function KellyToolbar(cfg) {
                <div class="' + handler.className + '-collapse" title="Свернуть панель инструментов"><div class="' + handler.className + '-collapse-icon"></div></div>\
            </div>';       
        
-        KellyTools.setHTMLData(handler.container, html);   
+        KellyTools.setHTMLData(handler.container, html);
+        
         handler.dom.deselectAll = handler.container.getElementsByClassName(handler.env.className +'-FavItem-download-enabled')[0];
         handler.dom.catList = handler.container.getElementsByClassName(handler.className + '-catlist')[0];
         handler.dom.themeToogle = handler.container.getElementsByClassName(handler.className + '-theme')[0];
         handler.dom.collapseToogle = handler.container.getElementsByClassName(handler.className + '-collapse')[0];
         handler.dom.help = handler.container.getElementsByClassName(handler.className + '-help')[0];
         
-        if (handler.heartHidden && handler.dom.help) handler.dom.help.style.display = 'none';
-        
+        if (handler.cfg.heartHidden && handler.dom.help) handler.dom.help.style.display = 'none';
+        if (handler.cfg.themeHidden && handler.dom.themeToogle) handler.dom.themeToogle.style.display = 'none';
+         
         handler.dom.help.onclick = function() {
-            // KellyTools.getBrowser().tabs.create({url: '/env/html/recorderDownloader.html?tab=donate'}, function(tab){}); 
-            handler.favController.showAdditionsDialog('additions_donate');
+            
+            if (handler.cfg.heartNewWindow) {
+                
+                window.open(KellyTools.getBrowser().runtime.getURL('/env/html/' + handler.env.profile + 'Downloader.html') + '?tab=donate');
+                
+            } else {
+                handler.dom.deselectAll.checked = true; // download mode resetes after leave main page
+                handler.favController.showAdditionsDialog('additions_donate');
+            }
+            
             return false;
         }
         
-        handler.dom.deselectAll.onchange = function() {
+        handler.dom.deselectAll.onclick = function() {
             handler.favController.getDownloadManager().setManualExcluded(this.checked ? 'select_all' : 'deselect_all');
         }
         
@@ -151,8 +164,10 @@ function KellyToolbar(cfg) {
             var options = handler.favController.getGlobal('options');
             
             if (document.body.classList.contains(handler.env.className + '-dark')) {
+                
                 document.body.classList.remove(handler.env.className + '-dark');
                 options.darkTheme = false;
+                
             } else {
                 
                 if (!document.getElementById(handler.className + '-dyn-css')) {
@@ -175,10 +190,11 @@ function KellyToolbar(cfg) {
     this.showHeart = function(visible) {
         if (!handler.dom.help) return false;
         
+        handler.cfg.heartHidden = !visible;
         handler.dom.help.style.display = visible ? '' : 'none';
     }
     
-    this.show = function(visible) {
+    this.show = function(visible, redraw) {
        
        if (!visible) {
            if (handler.container) handler.container.classList.remove(handler.className + '-shown');
@@ -187,7 +203,7 @@ function KellyToolbar(cfg) {
            handler.container.classList.add(handler.className + '-shown');
        }
        
-       if (!handler.container.innerHTML) {
+       if (!handler.container.innerHTML || redraw) {
             init();
        }
        

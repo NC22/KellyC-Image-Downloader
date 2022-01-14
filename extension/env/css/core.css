@@ -164,16 +164,11 @@
 	min-height: 40px;
 	margin : 0;
 	
-    background : rgba(96, 102, 126, 0.9490);
+    background : rgb(65, 65, 65, 0.95);
 	border : 0px dashed #c5c5c5;
 	color : #fff;
-    
-    /*
-    background: rgb(253, 218, 151);
-    border: 2px solid #634949;
-    color: #060303;
-    */
-	border-radius : 4px;
+        
+	border-radius : 0px;
 	padding : 12px;
     box-sizing: border-box;
 }
@@ -217,7 +212,7 @@
     
     top: -32px;
     
-    background: rgb(96, 102, 126);
+    background: rgb(71, 71, 71);
     color: #fff;
     
     /*
@@ -227,7 +222,6 @@
     */
     
     text-align: center;
-    border-radius: 6px;
     
 	left: 0px;
 	right: auto;
@@ -250,6 +244,9 @@
 .__BASECLASS__-tooltipster-close svg {
     width: 16px;
     vertical-align: baseline;
+    overflow: hidden;
+    height: 16px;
+    display: inline-block;
 }
 
 .__BASECLASS__-tooltipster-content {

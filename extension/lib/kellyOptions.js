@@ -21,7 +21,7 @@ function KellyOptions(cfg) {
     };
     
     this.tabData['BaseOptions'].parts = {
-        _common : [],
+        _common : ['toolbar_'],
         options_fav_add : ['syncByAdd', 'hideAddToFav', 'hideSoc', 'addToFavNoConfirm', 'addToFavSide'], 
         fast_download : 'fastsave_',
         cgrid_tiles_header : ['newFirst', 'grid_'],         
@@ -71,9 +71,11 @@ function KellyOptions(cfg) {
         'grabberDriver_requestMethod' : {name : 'requestMethod', parent : 'grabberDriver', loc : 'grabber_request', tip : 'grabber_request_help', listLoc : ['grabber_request_xml', 'grabber_request_iframe', 'grabber_request_fetch'], 
             list : [KellyGrabber.REQUEST_XML, KellyGrabber.REQUEST_IFRAME, KellyGrabber.REQUEST_FETCH], type : 'select', noticeUp : 'grabber_options_notice'},
         'grabberDriver_transportMethod' : {name : 'transportMethod', parent : 'grabberDriver', loc : 'grabber_transport', tip : 'grabber_transport_help', listLoc : ['grabber_transport_blob', 'grabber_transport_blobbase64'], 
-            list : [KellyGrabber.TRANSPORT_BLOB, KellyGrabber.TRANSPORT_BLOBBASE64], type : 'select'},       
-    }  
-    
+            list : [KellyGrabber.TRANSPORT_BLOB, KellyGrabber.TRANSPORT_BLOBBASE64], type : 'select'}, 
+
+        'toolbar_enabled' : {name : 'enabled', parent : 'toolbar', loc : 'bottom_toolbar', type : 'bool'}, 
+    }
+           
     function constructor(cfg) {
         for (var k in cfg) if (['favEnv', 'wrap'].indexOf(k) != -1) handler[k] = cfg[k];
         env = handler.favEnv.getGlobal('env');

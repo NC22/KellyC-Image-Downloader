@@ -1411,6 +1411,14 @@ function KellyFavStorageManager(cfg) {
             data.coptions.storageDriver = handler.configDriver;
         }
         
+        if (!data.coptions.toolbar) {
+            data.coptions.toolbar = {
+                enabled : true,
+                collapsed : false,
+                heartHidden : false,
+            }
+        }
+        
         data.coptions.webRequest = data.coptions.webRequest ? true : false;
         data.coptions.debug = data.coptions.debug ? true : false;
         data.coptions.newFirst = data.coptions.newFirst ? true : false;       
