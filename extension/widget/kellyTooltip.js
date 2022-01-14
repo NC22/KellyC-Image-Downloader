@@ -39,7 +39,7 @@ function KellyTooltip(cfg) {
     this.ptypeY = 'outside';
     
     this.offset = {left : 0, top : -20};
-    this.avoidOffset = {outBottom : -6, outLeft : 0};
+    this.avoidOffset = {outBottom : 0, outLeft : 0};
     
     this.removeOnClose = false;
     this.removeSelfDelay = 600;
@@ -475,17 +475,17 @@ function KellyTooltip(cfg) {
             
             var modPos = {enabled : false, positionX : handler.positionX, positionY : handler.positionY, ptypeX : handler.ptypeX, ptypeY : handler.ptypeY, outY : false, outX : false};
             var modOffset = {left : handler.offset.left, top : handler.offset.top};
-            
+
             if ( calcPos.top + toolTipBounds.height > envBounds.scrollTop + envBounds.screenHeight) { // go under screen in bottom
-                modPos.enabled = true; modPos.positionY = 'top'; modPos.outY = 'bottom'; if (handler.avoidOffset.outBottom) modOffset.top += handler.avoidOffset.outBottom;
+                modPos.enabled = true; modPos.positionY = 'top'; modPos.outY = 'bottom'; if (typeof handler.avoidOffset.outBottom != 'undefined') modOffset.top += handler.avoidOffset.outBottom;
             }  else if ( calcPos.top + toolTipBounds.height < 0 ) { // go out of screen from top
-                modPos.enabled = true; modPos.positionY = 'bottom'; modPos.outY = 'top'; if (handler.avoidOffset.outTop) modOffset.top += handler.avoidOffset.outTop;
+                modPos.enabled = true; modPos.positionY = 'bottom'; modPos.outY = 'top'; if (typeof handler.avoidOffset.outTop != 'undefined') modOffset.top += handler.avoidOffset.outTop;
             }
             
             if ( calcPos.left + toolTipBounds.width > envBounds.scrollLeft + envBounds.screenWidth) { // from right
-                modPos.enabled = true; modPos.positionX = 'right'; modPos.outX = 'right'; if (handler.avoidOffset.outRight) modOffset.left += handler.avoidOffset.outRight;
+                modPos.enabled = true; modPos.positionX = 'right'; modPos.outX = 'right'; if (typeof handler.avoidOffset.outRight != 'undefined') modOffset.left += handler.avoidOffset.outRight;
             } else if ( calcPos.left + toolTipBounds.width < 0 ) { // from left
-                modPos.enabled = true; modPos.positionX = 'left'; modPos.outX = 'left'; if (handler.avoidOffset.outLeft) modOffset.left += handler.avoidOffset.outLeft;
+                modPos.enabled = true; modPos.positionX = 'left'; modPos.outX = 'left'; if (typeof handler.avoidOffset.outLeft != 'undefined') modOffset.left += handler.avoidOffset.outLeft;
             }
             
             if (modPos.enabled) {
