@@ -1416,6 +1416,7 @@ function KellyFavStorageManager(cfg) {
                 enabled : true,
                 collapsed : false,
                 heartHidden : false,
+                tiny : false,
             }
         }
         

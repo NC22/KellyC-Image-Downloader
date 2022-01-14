@@ -329,17 +329,19 @@ function KellyFavItems(cfg)
         if (handler.toolbar) return handler.toolbar;
         if (typeof KellyToolbar == 'undefined' || typeof fav.coptions.toolbar == 'undefined' || !fav.coptions.toolbar.enabled) return false;        
         
+        if (handler.mobileOptimization && fav.coptions.toolbar.enabled) {
+            fav.coptions.toolbar.tiny = true;                
+        }
+        
         handler.toolbar = new KellyToolbar({
             className : env.className + '-toolbar',
-            collapsed : fav.coptions.toolbar.collapsed, 
-            container : document.createElement('DIV'), 
+            userCfg : fav.coptions.toolbar, 
+            container : env.getMainContainers().body, 
             favController : handler,
-            heartHidden : fav.coptions.toolbar.heartHidden, 
             heartNewWindow : env.hostClass == 'options_page' ? false : true,
             themeHidden : env.hostClass == 'options_page' ? false : true,
         });        
         
-        env.getMainContainers().body.appendChild(handler.toolbar.container);
         return handler.toolbar;
     }
     
@@ -1145,8 +1147,10 @@ function KellyFavItems(cfg)
     this.getOptionsManager = function() {
                 
         if (!optionsManager) {
-            optionsManager = new KellyOptions({favEnv : handler, wrap : favContent});       
+            optionsManager = new KellyOptions({favEnv : handler, wrap : favContent});             
             if (env.events.onCreateOptionsManager) env.events.onCreateOptionsManager(optionsManager);
+              
+            if (handler.mobileOptimization) optionsManager.protectedOptions.push('toolbar_tiny');
         }
         
         return optionsManager;        
@@ -2794,8 +2798,7 @@ function KellyFavItems(cfg)
         if (width < 1080) {
             
             handler.mobileOptimization = {grid : {type : 'fixed', fixed : 3}};
-            
-            if (fav.coptions) fav.coptions.toolbar.enabled = false;
+                        
             document.body.classList.add(env.className + '-mobile');
             
             if (width > 800) handler.mobileOptimization.grid.fixed = 3;

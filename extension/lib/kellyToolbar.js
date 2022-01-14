@@ -4,7 +4,7 @@ function KellyToolbar(cfg) {
     
     var handler = this;
         handler.container = false;
-        handler.cfg = {heartHidden : false, heartNewWindow : false, themeHidden : false,};
+        handler.cfg = {heartNewWindow : false, themeHidden : false,};
         handler.className = 'toolbar';
         handler.dom = { help : false, deselectAll : false, collapseToogle : false, themeToogle : false, catlist : false};
         handler.events = {
@@ -13,13 +13,8 @@ function KellyToolbar(cfg) {
                 
                 if (mode == 'fav') {
                     
-                    handler.show(true);
-                    
-                    if (K_FAV.getFilters().imagesAsDownloadItems) {
-                        handler.container.classList.add(handler.className + '-downloader');
-                    } else {
-                        handler.container.classList.remove(handler.className + '-downloader');
-                    } 
+                    handler.show(handler.cfg.userCfg.enabled);
+                    updateBlocksClass(K_FAV.getFilters().imagesAsDownloadItems, 'downloader-enabled');
                     
                 } else handler.show(false);
                                
@@ -33,23 +28,15 @@ function KellyToolbar(cfg) {
         
         handler.container = cfg.container;
         handler.className = cfg.className;
-        handler.collapsed = cfg.collapsed ? true : false;
+        
         handler.cfg = cfg;
-        
-        handler.container.classList.add(handler.className);
-        if (handler.collapsed) {
-           handler.container.classList.add(handler.className + '-collapsed'); 
-        }
-        
+        handler.env = cfg.favController.getGlobal('env');        
         handler.favController = cfg.favController;
-        handler.env = cfg.favController.getGlobal('env');
-        
-        handler.container.classList.add(handler.env.hostClass); 
     }
     
     function getCatListHtml(title, filter, logic) {
         
-         var html = '';         
+         var html = '';
          var db = handler.favController.getGlobal('fav');
          
          if (filter.length > 0) {
@@ -79,8 +66,14 @@ function KellyToolbar(cfg) {
     
     function updateStatesInfo() {
         
+         if (handler.cfg.userCfg.tiny) {
+             handler.dom.catList.innerHTML = '';
+             return;
+         }
+         
          var filters = handler.favController.getFilters();
          var html = '';
+         // var maxWidth = KellyTools.getViewport().screenWidth - (handler.cfg.tiny ? 0 : 150) - 75; // todo - pixels per char - 7.5
          
          if (!filters.readOnly) {
              html += '[<b>' + KellyLoc.s('', 'toolbar_edit_mode') + '</b>]';
@@ -97,32 +90,44 @@ function KellyToolbar(cfg) {
          KellyTools.setHTMLData(handler.dom.catList, '<span>' + html + '</span>');  
     }
     
-    function init() {
+    function initBlock(html, name) {
         
-        var html = '\
-            <input id="' + handler.className + '-deselect-all" type="checkbox" class="' + handler.env.className +'-FavItem-download-enabled" checked>\
-            <label for="' + handler.className + '-deselect-all">' + KellyLoc.s('', 'toolbar_deselect_all') + '</label>\
-            \
-            <div class="' + handler.className + '-catlist"></div>\
-            \
-            <div class="' + handler.className + '-right">\
-                \
-               <div class="' + handler.className + '-help" title="' + KellyLoc.s('', 'toolbar_help') + '"></div>\
-               <div class="' + handler.className + '-theme" title="' + KellyLoc.s('', 'toolbar_theme') + '"></div>\
-               <div class="' + handler.className + '-collapse" title="' + KellyLoc.s('', 'toolbar_collapse') + '"><div class="' + handler.className + '-collapse-icon"></div></div>\
-           </div>';       
-       
-        KellyTools.setHTMLData(handler.container, html);
+        handler.dom[name] = KellyTools.setHTMLData(handler.dom[name] ? handler.dom[name] : document.createElement('DIV'), html);
+        handler.dom[name].className = handler.env.hostClass + ' ' + handler.className + ' ' + handler.className + '-' + name + (handler.cfg.userCfg.tiny ? ' ' + handler.className + '-tiny' : '');
+        handler.container.appendChild(handler.dom[name]);
+    }
+    
+    function updateBlocksClass(add, className) {
+        handler.dom['main'].classList[(add ? 'add' : 'remove')](handler.className + '-' + className);
+        handler.dom['downloader-container'].classList[(add ? 'add' : 'remove')](handler.className + '-' + className);        
+    } 
+    
+    this.init = function() {
+        
+        initBlock('\
+                <input id="' + handler.className + '-deselect-all" type="checkbox" class="' + handler.env.className +'-FavItem-download-enabled" checked>\
+                <label for="' + handler.className + '-deselect-all">' + KellyLoc.s('', 'toolbar_deselect_all') + '</label>\
+        ', 'downloader-container'); 
+        
+        initBlock('\
+               <div class="' + handler.className + '-catlist"></div>\
+               <div class="' + handler.className + '-right">\
+                   <div class="' + handler.className + '-help" title="' + KellyLoc.s('', 'toolbar_help') + '"></div>\
+                   <div class="' + handler.className + '-theme" title="' + KellyLoc.s('', 'toolbar_theme') + '"></div>\
+                   <div class="' + handler.className + '-collapse" title="' + KellyLoc.s('', 'toolbar_collapse') + '"><div class="' + handler.className + '-collapse-icon"></div></div>\
+               </div>\
+        ', 'main');
         
         handler.dom.deselectAll = handler.container.getElementsByClassName(handler.env.className +'-FavItem-download-enabled')[0];
         handler.dom.catList = handler.container.getElementsByClassName(handler.className + '-catlist')[0];
         handler.dom.themeToogle = handler.container.getElementsByClassName(handler.className + '-theme')[0];
         handler.dom.collapseToogle = handler.container.getElementsByClassName(handler.className + '-collapse')[0];
         handler.dom.help = handler.container.getElementsByClassName(handler.className + '-help')[0];
-        
-        if (handler.cfg.heartHidden && handler.dom.help) handler.dom.help.style.display = 'none';
+
         if (handler.cfg.themeHidden && handler.dom.themeToogle) handler.dom.themeToogle.style.display = 'none';
-         
+        if (handler.cfg.userCfg.heartHidden && handler.dom.help) handler.dom.help.style.display = 'none';
+        if (handler.cfg.userCfg.collapsed) updateBlocksClass(true, 'collapsed');
+            
         handler.dom.help.onclick = function() {
             
             if (handler.cfg.heartNewWindow) {
@@ -143,19 +148,8 @@ function KellyToolbar(cfg) {
         
         handler.dom.collapseToogle.onclick = function() {
             
-            var options = handler.favController.getGlobal('options');
-            
-            if (handler.container.classList.contains(handler.className + '-collapsed')) {
-                
-                handler.container.classList.remove(handler.className + '-collapsed'); 
-                options.toolbar.collapsed = false;                
-            } else {
-                
-                handler.container.classList.add(handler.className + '-collapsed'); 
-                options.toolbar.collapsed = true;
-            }
-            
-            handler.collapsed = options.toolbar.collapsed;
+            handler.cfg.userCfg.collapsed = !handler.dom['main'].classList.contains(handler.className + '-collapsed');
+            updateBlocksClass(handler.cfg.userCfg.collapsed, 'collapsed');
             handler.favController.save('cfg');
         }
         
@@ -187,27 +181,14 @@ function KellyToolbar(cfg) {
         }
     }
     
-    this.showHeart = function(visible) {
-        if (!handler.dom.help) return false;
-        
-        handler.cfg.heartHidden = !visible;
-        handler.dom.help.style.display = visible ? '' : 'none';
-    }
-    
-    this.show = function(visible, redraw) {
+    this.show = function(visible) {
        
-       if (!visible) {
-           if (handler.container) handler.container.classList.remove(handler.className + '-shown');
-           return;
-       } else {
-           handler.container.classList.add(handler.className + '-shown');
-       }
+       if (!handler.dom['main']) handler.init();
        
-       if (!handler.container.innerHTML || redraw) {
-            init();
-       }
+       updateBlocksClass(visible, 'shown');
+       updateBlocksClass(handler.cfg.userCfg.tiny, 'tiny');
        
-       updateStatesInfo();
+       if (visible) updateStatesInfo();
     }
     
     constructor(cfg);    

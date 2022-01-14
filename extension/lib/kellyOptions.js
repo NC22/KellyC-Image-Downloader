@@ -21,7 +21,8 @@ function KellyOptions(cfg) {
     };
     
     this.tabData['BaseOptions'].parts = {
-        _common : ['toolbar_'],
+        _common : [],
+        bottom_toolbar_header : ['toolbar_'],  
         options_fav_add : ['syncByAdd', 'hideAddToFav', 'hideSoc', 'addToFavNoConfirm', 'addToFavSide'], 
         fast_download : 'fastsave_',
         cgrid_tiles_header : ['newFirst', 'grid_'],         
@@ -74,6 +75,7 @@ function KellyOptions(cfg) {
             list : [KellyGrabber.TRANSPORT_BLOB, KellyGrabber.TRANSPORT_BLOBBASE64], type : 'select'}, 
 
         'toolbar_enabled' : {name : 'enabled', parent : 'toolbar', loc : 'bottom_toolbar', type : 'bool'}, 
+        'toolbar_tiny' : {name : 'tiny', parent : 'toolbar', loc : 'bottom_toolbar_tiny', type : 'bool'}, 
     }
            
     function constructor(cfg) {
@@ -342,10 +344,7 @@ function KellyOptions(cfg) {
         handler.favEnv.save('cfg');	
 
         if (env.events.onOptionsUpdate && env.events.onOptionsUpdate(refreshPosts)) return;        
-        if (refreshPosts) handler.favEnv.formatPostContainers(); 
-        if (handler.cfgInput['bottomToolbar'] && handler.favEnv.getToolbar() && !fav.coptions.bottomToolbar) {
-            handler.favEnv.getToolbar().show(false);
-        } 
+        if (refreshPosts) handler.favEnv.formatPostContainers();
     }
     
     constructor(cfg);

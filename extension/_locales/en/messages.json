@@ -44,8 +44,14 @@
     "additions_about":{
         "message":"Links and related documents"
     },
+    "bottom_toolbar_header":{
+        "message":"Bottom toolbar"
+    },
     "bottom_toolbar":{
         "message":"Display bottom toolbar"
+    },
+    "bottom_toolbar_tiny":{
+        "message":"Tiny mode"
     },
     "close":{  
         "message":"Close"

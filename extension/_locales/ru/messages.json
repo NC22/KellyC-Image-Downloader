@@ -43,9 +43,15 @@
     },
     "associations_tags":{  
         "message":"Ассоциации с тегами (через запятую)"
+    },  
+    "bottom_toolbar_header":{
+        "message":"Панель инструментов"
     },
     "bottom_toolbar":{
         "message":"Показывать доп. панель инструментов"
+    },
+    "bottom_toolbar_tiny":{
+        "message":"Компактный режим"
     },
     "close":{  
         "message":"Закрыть"

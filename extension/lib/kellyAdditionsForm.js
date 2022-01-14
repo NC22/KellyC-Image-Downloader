@@ -126,7 +126,7 @@ KellyAdditionsForm = {
                         options.toolbar.heartHidden = false;                        
                     }
                     
-                    favEnv.getToolbar().showHeart(!options.toolbar.heartHidden);
+                    favEnv.getToolbar().init();
                     favEnv.save('cfg');
                     updateHeartsDisplay();
                     return false;

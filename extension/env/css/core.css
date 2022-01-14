@@ -1822,37 +1822,64 @@
     color: #ff7600;
 }
 
-.__BASECLASS__-toolbar.__BASECLASS__-toolbar-shown {
-    display : block;
-}
-
-.__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed {
-    width : 0px;
-    right : 0px;
-    padding : 0px;
-    overflow : visible;
-    background : transparent;
-}
+/* toolbar */
 
 .__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed .__BASECLASS__-toolbar-collapse {
     margin-right: 12px;
 }
 
-/* toolbar */
+.__BASECLASS__-toolbar-downloader-container.__BASECLASS__-toolbar-downloader-enabled.__BASECLASS__-toolbar-shown,
+.__BASECLASS__-toolbar-main.__BASECLASS__-toolbar-shown {
+    display : block;
+}
 
 .__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed .__BASECLASS__-toolbar-theme,
 .__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed .__BASECLASS__-toolbar-help,
 .__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed .__BASECLASS__-toolbar-catlist,
-.__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed.__BASECLASS__-toolbar.__BASECLASS__-toolbar-downloader .__BASECLASS__-FavItem-download-enabled+label {
+.__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed.__BASECLASS__-toolbar-downloader-container.__BASECLASS__-toolbar-downloader-enabled {
    display : none;
+}
+
+.__BASECLASS__-toolbar-main.__BASECLASS__-toolbar-downloader-enabled {
+    padding-left: 160px;
+}
+
+.__BASECLASS__-toolbar.__BASECLASS__-toolbar-collapsed, 
+.__BASECLASS__-toolbar.__BASECLASS__-toolbar-main.kelly-jr-ui-toolbar-tiny {
+    background : transparent;
+}
+
+.__BASECLASS__-toolbar.__BASECLASS__-toolbar-main,
+.__BASECLASS__-toolbar.__BASECLASS__-toolbar-downloader-container.kelly-jr-ui-toolbar-tiny {
+    background: rgb(139, 139, 139, 0.84);
+}
+
+
+.__BASECLASS__-toolbar.__BASECLASS__-toolbar-main.__BASECLASS__-toolbar-collapsed {
+    width : 0px;
+    right : 0px;
+    padding : 0px;
+    overflow : visible;
+}
+
+.__BASECLASS__-toolbar.__BASECLASS__-toolbar-main {  
+    width: 100%;
+    right : 0;
+    left : none;
+    bottom : 0;
+    z-index : 990; 
+}
+
+.__BASECLASS__-toolbar.__BASECLASS__-toolbar-downloader-container {
+    padding: 0;
+    padding-bottom: 4px;
+    padding-left: 6px;
+    bottom: 0;
+    left: 19px;
 }
 
 .__BASECLASS__-toolbar {
     position: fixed;
-    bottom: 0;
-    background: rgb(139, 139, 139, 0.84);    
-    width: 100%;
-    right : 0;
     padding: 0px 12px;
     padding-top: 0px;
     z-index: 991;
@@ -2011,7 +2038,7 @@
     vertical-align: middle;
 }
 
-.__BASECLASS__-toolbar.__BASECLASS__-toolbar-downloader .__BASECLASS__-FavItem-download-enabled+label {
+.__BASECLASS__-toolbar.__BASECLASS__-toolbar-downloader-enabled .__BASECLASS__-FavItem-download-enabled+label {
     display : inline-block;
 }
 
