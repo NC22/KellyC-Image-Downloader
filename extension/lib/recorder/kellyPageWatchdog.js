@@ -58,7 +58,12 @@ function KellyPageWatchdog(cfg)
         
         if (this.host) {
             this.hostname = KellyTools.getLocationFromUrl(handler.host).hostname;
-            if (handler.hostname.indexOf('www.') === 0) handler.hostname = handler.hostname.replace('www.', '');
+            
+            if (typeof handler.hostname == 'undefined') {
+                handler.hostname = false;
+            } else {            
+                if (handler.hostname.indexOf('www.') === 0) handler.hostname = handler.hostname.replace('www.', '');
+            }
         }
         
         resetConfig();

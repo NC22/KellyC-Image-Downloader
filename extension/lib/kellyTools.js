@@ -1155,7 +1155,7 @@ KellyTools.readInputFile = function(input, onRead, readAs) {
 KellyTools.getLocationFromUrl = function(str) {
     
     var l = document.createElement("a");
-    l.href = str;
+        l.href = str;
     
     return l;
 };

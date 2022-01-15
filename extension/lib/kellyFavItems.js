@@ -2364,6 +2364,10 @@ function KellyFavItems(cfg)
             
             handler.sideBarLock = false;
             showDownloadManagerForm(false);
+            if (handler.getToolbar()) { 
+                handler.getToolbar().setDeselectBtn(false);
+            }
+            
         } else {
             imagesAsDownloadItems = true;
             
@@ -2379,6 +2383,13 @@ function KellyFavItems(cfg)
             
             handler.sideBarLock = true;                      
             showDownloadManagerForm(true);
+            if (handler.getToolbar()) { 
+                handler.getToolbar().setDeselectBtn({
+                    callback : function(self, btn, e) {
+                        handler.getDownloadManager().setManualExcluded(btn.checked ? 'select_all' : 'deselect_all');
+                    },
+                });
+            }
             
             if (handler.mobileOptimization) {
                 modalBox.classList.add('collapsed');
