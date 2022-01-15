@@ -429,6 +429,11 @@ body.__BASECLASS__-dark  {
     background-color: #8b8b8b;
 }
 
+@media (max-width: 1040px) { 
+    .__BASECLASS__-mobile .page-content {
+        padding: 4px;
+    }
+}
 
 @media (max-width: 590px) { 
 

@@ -54,6 +54,8 @@ function KellyGrabber(cfg) {
     var acceptItems = false; // select items by numeration
     var manualExcludeItems = [];
     
+    var blobData = []; // temp threads download blob urls, cleanup in onDownloadProcessChanged and downloadUrl
+    
     var events = { 
     
         /*
@@ -1239,7 +1241,15 @@ function KellyGrabber(cfg) {
         
         if (downloadDelta.state) {
             
-            if (downloadDelta.state.current != "in_progress") {
+            if (downloadDelta.state.current == "interrupted" || downloadDelta.state.current == "complete") {
+                if (blobData[downloadDelta.id]) {
+                    
+                    URL.revokeObjectURL(blobData[downloadDelta.id]);
+                    delete blobData[downloadDelta.id];
+                } 
+            }
+            
+            if (downloadDelta.state.current != "in_progress") {                
                 
                 // KellyTools.log(downloadDelta);
                 downloadingIds.splice(downloadingIds.indexOf(downloadDelta.id), 1);
@@ -1799,16 +1809,26 @@ function KellyGrabber(cfg) {
         if (!downloadOptions.filename) return false;
         
         if (downloadOptions.ext && downloadOptions.filename.indexOf('.') == -1) downloadOptions.filename += '.' + downloadOptions.ext;
-        if (typeof downloadOptions.url == 'object' && downloadOptions.url.blob) downloadOptions.url.blob = URL.createObjectURL(downloadOptions.url.blob);
- 
-        if (!onDownload) onDownload = function(response) {}; // some browser require default response function for API
         
+        var blob = false;
+        if (typeof downloadOptions.url == 'object' && downloadOptions.url.blob) {
+            
+            downloadOptions.url.blob = URL.createObjectURL(downloadOptions.url.blob);
+            blob = downloadOptions.url.blob;
+        }
+ 
         var download = {}, validKeys = ['filename', 'conflictAction', 'method', 'url'];
         for (var i = 0; i < validKeys.length; i++) {
             if (typeof downloadOptions[validKeys[i]] != 'undefined') download[validKeys[i]] = downloadOptions[validKeys[i]];
         }
         
-        KellyTools.getBrowser().runtime.sendMessage({method: "downloads.download", referrer : downloadOptions.referrer, download : download}, onDownload);             
+        KellyTools.getBrowser().runtime.sendMessage({method: "downloads.download", referrer : downloadOptions.referrer, download : download}, function(downloadDelta){
+            
+                 if (blob && downloadDelta.id == -1) URL.revokeObjectURL(blob); // revoke 
+            else if (blob && downloadDelta.id > 0) blobData[downloadDelta.id] = blob; // revoke in onDownloadProcessChanged
+            
+            if (onDownload) onDownload(downloadDelta);
+        });             
         
         return true;
     }
@@ -2106,7 +2126,7 @@ function KellyGrabber(cfg) {
             referrer: fav.getGlobal('env').location.protocol  + '//' + fav.getGlobal('env').location.domain + '/',
         }
         
-        toTxtLog('DOWNLOADID ' + download.id + ' | download : ' + downloadOptions.filename + '.' + downloadOptions.ext);
+        toTxtLog('DOWNLOADID ' + download.id + ' | download : ' + downloadOptions.filename + (downloadOptions.ext ? '.' + downloadOptions.ext : ' | Extension not detected'));
         
         // download of Blob data throw browser download API started, next catch changes throw onDownloadProcessChanged method until comlete state
                 
@@ -2114,7 +2134,7 @@ function KellyGrabber(cfg) {
                 
             if (!response.downloadId || response.downloadId < 0) {
                                
-                toTxtLog('DOWNLOADID ' + download.id + ' | download REJECTED by browser API : ' + downloadOptions.filename + '.' + downloadOptions.ext);
+                toTxtLog('DOWNLOADID ' + download.id + ' | download REJECTED by browser API : ' + downloadOptions.filename);
                 toTxtLog('DOWNLOADID ' + download.id + ' | error : ' + response.error + "\n\r");
                                 
                 if (mode != 'download') { 
@@ -2190,7 +2210,7 @@ function KellyGrabber(cfg) {
                     
                     // get DATA ARRAY OR BLOB fail, download as url - bad way, due to copyright marks, so call onDownloadApi event with error
                                    
-                    toTxtLog('DOWNLOADID ' + download.id + ' | file NOT LOADED as DATA ARRAY OR BLOB ' + download.url + ' : ' + downloadOptions.filename + '.' + downloadOptions.ext);
+                    toTxtLog('DOWNLOADID ' + download.id + ' | file NOT LOADED as DATA ARRAY OR BLOB ' + download.url + ' : ' + downloadOptions.filename);
                     toTxtLog('DOWNLOADID ' + download.id + ' | LOAD FAIL NOTICE error code ' + errorCode + ', message : ' + errorNotice);
 
                     onDownloadApiStart({downloadId : false, error : 'DATA ARRAY get fail. Error code : ' + errorCode + ' |  error message : ' + errorNotice});                
@@ -2198,7 +2218,7 @@ function KellyGrabber(cfg) {
                 
             } else {
                 
-                toTxtLog('DOWNLOADID ' + download.id + ' | file LOADED as DATA ARRAY OR BLOB ' + download.url + ', send to browser API for save to folder : ' + downloadOptions.filename + '.' + downloadOptions.ext);
+                toTxtLog('DOWNLOADID ' + download.id + ' | file LOADED as DATA ARRAY OR BLOB ' + download.url + ', send to browser API for save to folder : ' + downloadOptions.filename);
                 if (!downloadOptions.ext) downloadOptions.ext = KellyTools.getExtByMimeType(fileData.type);
                 downloadOptions.url = fileData;     
 

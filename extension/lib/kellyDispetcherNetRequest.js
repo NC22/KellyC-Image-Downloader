@@ -3,89 +3,13 @@
 // createObjectURL - dosnt work from background (window - is undefined), so base64 transport method is impossible to implement
 // downloader.download - api - crashs browser if you try to download blob - tested on 88.0.4324.96 chrome
 
-// todo - persistent bg process is impossible in service worker model - check if we need to cache tablist \ ids and restore it every time
-
 KellyEDispetcher.declaredRulesId = 1000;
 
-/* UNUSED NON persistent cache implementation -- looks like dont really needed, cause we always create port connection when tab is using extension download funtions */
-
-KellyEDispetcher.tabSettings = {'downloaderTabsCache' : [], 'downloaderRules' : [], 'downloaderRulesId' : 1000};
-KellyEDispetcher.getConnectedTabs = function(callback) {
-    
-    var api = KellyTools.getBrowser();
-    if (KellyEDispetcher.downloaderTabsCache) {
-        console.log('CACHE ALREADY LOADED');
-        
-        callback(KellyEDispetcher.downloaderTabsCache);
-        return;
-    }
-    
-    var settings = [];
-    
-    Object.keys(KellyEDispetcher.tabSettings).forEach(function(key) { settings.push('bg_' + key)});
-    
-    api.storage.local.get(settings, function(data) {
-        
-        Object.keys(KellyEDispetcher.tabSettings).forEach(function(key) { 
-            KellyEDispetcher[key] = typeof data != 'undefined' && typeof data['bg_' + key] != 'undefined' ? data['bg_' + key] : KellyEDispetcher.tabSettings[key];
-        });
-        
-        if (api.runtime.lastError) {
-            console.log(api.runtime.lastError);       
-        }
-        
-        console.log('CACHE LOADED');
-        if (callback) callback(downloaderTabs);
-    });	
-}
-
-KellyEDispetcher.saveConnectedTabs = function(callback) {
-        
-    var data = {};
-    
-    Object.keys(KellyEDispetcher.tabSettings).forEach(function(key) { 
-        data[key] = typeof KellyEDispetcher[key] != 'undefined' ? KellyEDispetcher[key] : KellyEDispetcher.tabSettings[key];
-    });
-    
-    KellyTools.getBrowser().storage.local.set(data, function() {
-        
-        if (callback) callback(downloaderTabs);
-    });
-}
-
-KellyEDispetcher.removeTab = function(tabData, callback) {
-    
-    KellyEDispetcher.getConnectedTabs(function(downloaderTabs) {
-           if (downloaderTabs.indexOf(tabData) != -1) {
-               downloaderTabs.splice(downloaderTabs.indexOf(tabData), 1); 
-           }
-           
-           KellyEDispetcher.downloaderTabsCache = downloaderTabs;
-           if (callback) callback(downloaderTabs);
-    });
-}
-
-KellyEDispetcher.addTab = function(tabData, callback) {
-        
-    KellyEDispetcher.getConnectedTabs(function(downloaderTabs) {
-        
-        KellyTools.log('[Downloader] CONNECTED  Tab  ' + tabData.id, 'KellyEDispetcher | declarativeNetRequest');
-        for (var i = 0; i < downloaderTabs.length; i++) {
-            if (downloaderTabs.id == tabData.id) {
-                KellyTools.log('[Downloader] CONNECTED  [Error] already connected', 'KellyEDispetcher | declarativeNetRequest');
-                return;
-            }
-        }
-        
-        KellyEDispetcher.downloaderTabs.push(tabData);
-    });
-}
-
-/* cache implementation */
-
-KellyEDispetcher.addRequestListeners = function(tabData) {
+KellyEDispetcher.addRequestListenersDR = function(tabData) {
     
     tabData.declaredRules = [];
+       
+    // original global host matches of addRequestListeners matched only with urls that has image type extensions - todo reproduce same logic here - add common pool of media extensions
        
     var matches = [];
     for (var i = 0; i < tabData.hostList.length; i++) {
@@ -101,9 +25,6 @@ KellyEDispetcher.addRequestListeners = function(tabData) {
         
         return [
             { "header": "cache-control", "operation": "set", "value": "no-cache, must-revalidate, post-check=0, pre-check=0" },
-            { "header": "cache-control", "operation": "set", "value": "max-age=0" },
-            { "header": "expires", "operation": "set", "value": "0" },
-            { "header": "expires", "operation": "set", "value": "Tue, 01 Jan 1980 1:00:00 GMT" },
             { "header": "pragma", "operation": "set",  "value": 'no-cache' },
             { "header": "Referer", "operation": "set", "value": referrer },                    
         ]
@@ -159,7 +80,7 @@ KellyEDispetcher.addRequestListeners = function(tabData) {
     tabData.eventsEnabled = true;
 }
 
-KellyEDispetcher.onDownloaderConnect = function(port) {
+KellyEDispetcher.onDownloaderConnectDR = function(port) {
     
     KellyTools.log('[Downloader] CONNECTED  Tab  ' + port.sender.tab.id, 'KellyEDispetcher | declarativeNetRequest');
     for (var i = 0; i < KellyEDispetcher.downloaderTabs.length; i++) {
@@ -196,7 +117,7 @@ KellyEDispetcher.onDownloaderConnect = function(port) {
                 tabData.hostList = request.hostList;
                 if (request.urlMap) tabData.urlMap = request.urlMap;
                 
-                KellyEDispetcher.addRequestListeners(tabData);
+                KellyEDispetcher.addRequestListenersDR(tabData);
             }
             
             KellyTools.log('Update registerDownloader request modifiers', 'KellyEDispetcher [PORT]');
@@ -209,11 +130,19 @@ KellyEDispetcher.onDownloaderConnect = function(port) {
             port.postMessage({method : 'setDebugMode', message : "ok"});
             
         } else if (request.method == 'updateUrlMap') {
-        
+            if (!tabData.eventsEnabled) {               
+                port.postMessage({method : 'updateUrlMap', message : "tab not registered"});
+                return;
+            }
+            
             if (request.urlMap) {
                 tabData.urlMap = request.urlMap;
             }
+                        
+            resetEvents(); 
+            KellyEDispetcher.addRequestListenersDR(tabData);
             
+            // todo - redeclare rules
             port.postMessage({method : 'updateUrlMap', message : "ok"});
             
         }

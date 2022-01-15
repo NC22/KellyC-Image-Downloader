@@ -254,3 +254,16 @@ a.__BASECLASS__-additions-menu-item {
     font-weight: bold;
     font-size: 14px;
 }
+
+@media (max-width: 1240px) {
+    
+     .content {
+        width: 65%;
+        min-height: 100px;
+    }
+    
+    #sidebar {
+        width: 35%;
+        min-height: 100px;
+    }
+}

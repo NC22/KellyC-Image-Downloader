@@ -3,7 +3,7 @@
 KellyTools = new Object();
 
 KellyTools.PROGNAME = '';
-KellyTools.DEBUG = false;
+KellyTools.DEBUG = true;
 
 KellyTools.E_NOTICE = 1;
 KellyTools.E_ERROR = 2;
@@ -690,7 +690,9 @@ KellyTools.getUrlExt = function(url) {
 
     if (!url || typeof url.split != 'function') return false;
     
-    if (url.indexOf('data:') === 0) {
+    url = url.trim();
+    
+    if (url.indexOf('data:') === 0 || url.indexOf('blob:') === 0) {
         return 'dataUrl';
     } 
     

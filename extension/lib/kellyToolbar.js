@@ -1,4 +1,4 @@
-// make optional, connect to kellyFavItems
+// todo readonly check on after delete
 
 function KellyToolbar(cfg) {
     
@@ -44,9 +44,18 @@ function KellyToolbar(cfg) {
              html += ': ';
              
              for (var i = 0; i < filter.length; i++) {
+                if (i >= 3) {
+                    html += '...';
+                    break;
+                }
                 
                 var group = handler.favController.getStorageManager().getCategoryById(db, filter[i]);
-                if (group.id > 0) html += (i > 0 ? ', ' : '') + '<b>' + group.name + '</b>'; // todo - check - after sort - some unexist items adds to exclude filter
+                var name = group.name;
+                if (name.length > 20) {
+                    name = name.substring(0, 20) + '...';
+                }
+                
+                if (group.id > 0) html += (i > 0 ? ', ' : '') + '<b>' + name + '</b>'; // todo - check - after sort - some unexist items adds to exclude filter
              }
              
              html += ']';
@@ -59,7 +68,6 @@ function KellyToolbar(cfg) {
          
          var filters = handler.favController.getFilters();
          var html = '';
-         // var maxWidth = KellyTools.getViewport().screenWidth - (handler.cfg.tiny ? 0 : 150) - 75; // todo - pixels per char - 7.5
          
          if (!filters.readOnly) {
              html += '[<b>' + KellyLoc.s('', 'toolbar_edit_mode') + '</b>]';
@@ -137,6 +145,7 @@ function KellyToolbar(cfg) {
         handler.dom['theme'].onclick = function() {
             
             var options = handler.favController.getGlobal('options');
+            var delayUpdate = false;
             
             if (document.body.classList.contains(handler.env.className + '-dark')) {
                 
@@ -150,14 +159,17 @@ function KellyToolbar(cfg) {
                         if (!request || !request.data.loadedData) return false; 
                         
                         KellyTools.addCss(handler.className + '-dyn-css', KellyTools.replaceAll(request.data.loadedData, '__BASECLASS__', handler.env.className), true);
-                        
+                        handler.favController.updateImageGrid();
                     });  
-                }
+                    
+                    delayUpdate = true;
+                } 
                 
                 document.body.classList.add(handler.env.className + '-dark');
                 options.darkTheme = true;
             }
-
+            
+            if (!delayUpdate) handler.favController.updateImageGrid();
             handler.favController.save('cfg');
         }
         
@@ -165,6 +177,8 @@ function KellyToolbar(cfg) {
     }
     
     this.setDeselectBtn = function(btn) {
+        
+        if (!handler.dom['main']) handler.init();
         
         handler.dom['deselect-wrap'].innerHTML = '';        
         handler.cfg.deselectBtn = btn;
@@ -183,7 +197,8 @@ function KellyToolbar(cfg) {
     }
     
     this.show = function(visible) {
-       
+        
+        if (!handler.cfg.userCfg.enabled) return false;        
         if (!handler.dom['main']) handler.init();
         
         handler.cfg.show = visible;

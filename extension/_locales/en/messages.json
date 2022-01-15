@@ -942,7 +942,7 @@
         "message":"Categories not selected"
     },
     "toolbar_selected_images":{  
-        "message":"Shown images"
+        "message":"Selected images"
     },    
     "toolbar_deselected_images":{  
         "message":"Excluded images"

@@ -80,8 +80,14 @@ function KellyOptions(cfg) {
            
     function constructor(cfg) {
         for (var k in cfg) if (['favEnv', 'wrap'].indexOf(k) != -1) handler[k] = cfg[k];
+        
         env = handler.favEnv.getGlobal('env');
         handler.tabActive = env.className + '-BaseOptions';
+                
+        var manifest = KellyTools.getBrowser().runtime.getManifest();        
+        if (manifest['manifest_version'] == 3) {
+            handler.cfgInput['grabberDriver_transportMethod'].list = [KellyGrabber.TRANSPORT_BLOB]; // createObjectURL unavailable from BG
+        }
     }   
     
     this.showSection = function(key, close) {

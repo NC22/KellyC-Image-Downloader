@@ -4,9 +4,10 @@
 var KellyEDispetcher = new Object;
     KellyEDispetcher.eventsAccepted = false;
     KellyEDispetcher.envDir = 'env/';
+    KellyEDispetcher.dRules = false; // manifest v3 net requests
     KellyEDispetcher.api = KellyTools.getBrowser();
     KellyEDispetcher.downloaderTabs = []; 
-    KellyEDispetcher.events = [];
+    KellyEDispetcher.events = []; // [... , {onMessage : callback, onTabConnect : callback}]
     
     KellyEDispetcher.addRequestListeners = function(tabData) {
           
@@ -166,13 +167,12 @@ var KellyEDispetcher = new Object;
     KellyEDispetcher.initEvents = {
         onChanged :  function(downloadDelta) {
             
-            // Clean up 
+            // Clean up for localy (from bg) created blob urls
                                  
             if (downloadDelta && downloadDelta.state) {
                 
                 if (downloadDelta.state.current == "interrupted" || downloadDelta.state.current == "complete") {
-                    
-                    
+                                        
                     if (KellyEDispetcher.blobData[downloadDelta.id]) {
                         
                         URL.revokeObjectURL(KellyEDispetcher.blobData[downloadDelta.id]);
@@ -227,6 +227,12 @@ var KellyEDispetcher = new Object;
     KellyEDispetcher.init = function() {
     
         if (this.eventsAccepted) return true;
+        
+        this.dRules = false;
+        var manifestData = this.api.runtime.getManifest();
+        if (manifestData['manifest_version'] == 3) {
+            this.dRules = true;
+        }
         
         this.api.runtime.onMessage.addListener(this.onMessage);    
         this.api.runtime.onConnect.addListener(this.onDownloaderConnect);
@@ -283,7 +289,7 @@ var KellyEDispetcher = new Object;
 
             response.downloadId = -1;
                  
-            var saveDownloadedBlobData = function() {
+            var saveDownloadedBlobData = function(localBlob) {
                 KellyTools.getBrowser().downloads.download(request.download, function (downloadId) {
                     
                     // download job created
@@ -302,12 +308,14 @@ var KellyEDispetcher = new Object;
                         }
                     }
                                       
-                    KellyEDispetcher.blobData[downloadId] = request.download.url;
+                    if (localBlob) KellyEDispetcher.blobData[downloadId] = request.download.url;
                     
                     if (callback) callback(response);                    
                 });
             }
-               
+            
+            /* deprecated - manifest v3 not supported */
+            
             if (typeof request.download.url == 'object') { // base64 \ blob
                 
                 KellyTools.log('Data recieved | data type ' + request.download.url.type , 'KellyEDispetcher'); 
@@ -316,10 +324,13 @@ var KellyEDispetcher = new Object;
                     var blob = KellyTools.base64toBlob(request.download.url.base64, request.download.url.type);                    
                     delete request.download.url.base64;
                     
-                    request.download.url = URL.createObjectURL(blob);
-                } else request.download.url = request.download.url.blob;
+                    request.download.url = URL.createObjectURL(blob);                    
+                    saveDownloadedBlobData(true);
                 
-                saveDownloadedBlobData();
+                } else {
+                    request.download.url = request.download.url.blob;
+                    saveDownloadedBlobData();
+                }
                 
             } else {
                 
@@ -708,6 +719,17 @@ var KellyEDispetcher = new Object;
     }
     
     KellyEDispetcher.onDownloaderConnect = function(port) {
+              
+        // addition events - can be implemented in separate files
+        
+        for (var i = 0; i < KellyEDispetcher.events.length; i++) {
+            if (KellyEDispetcher.events[i].onTabConnect && KellyEDispetcher.events[i].onTabConnect(KellyEDispetcher, port)) return;
+        }
+            
+        if (KellyEDispetcher.dRules) {
+            KellyEDispetcher.onDownloaderConnectDR(port);
+            return;
+        }
         
         KellyTools.log('[Downloader] CONNECTED | Tab : ' + port.sender.tab.id, 'KellyEDispetcher');
         for (var i = 0; i < KellyEDispetcher.downloaderTabs.length; i++) {

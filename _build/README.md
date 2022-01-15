@@ -3,6 +3,6 @@
 <br>
 Old versions was merged to single files for background and front js by merge.bat script. It's not allowed in some extension stores, so I replaced this behave.
 <br>
-Use manifest_all_extracted.json as main manifest.json file for extension with manifest v2 spec. 
+Use manifest_all_extracted.json as main manifest.json file for extension for manifest v2. 
 <br>
 Manifest v3 support not fully tested yet. If manifest v3 needed, use manifest_all_v3.json as dummy file.

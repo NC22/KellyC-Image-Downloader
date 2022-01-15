@@ -325,10 +325,8 @@ function KellyFavItems(cfg)
     }
     
     this.getToolbar = function() {
-        
+
         if (handler.toolbar) return handler.toolbar;
-        if (typeof KellyToolbar == 'undefined' || typeof fav.coptions.toolbar == 'undefined' || !fav.coptions.toolbar.enabled) return false;        
-        
         if (handler.mobileOptimization && fav.coptions.toolbar.enabled) {
             fav.coptions.toolbar.tiny = true;                
         }
@@ -1094,7 +1092,7 @@ function KellyFavItems(cfg)
         if (env.hostClass == 'options_page') return;
         
         if (env.events.onDisplayBlock) env.events.onDisplayBlock(mode, 'hide');
-        if (handler.getToolbar()) handler.toolbar.events.onDisplayBlock(mode, 'hide'); 
+        handler.getToolbar().events.onDisplayBlock(mode, 'hide'); 
         
         var envContainers = env.getMainContainers();
             envContainers.siteContent.style.display = 'block';
@@ -1133,7 +1131,7 @@ function KellyFavItems(cfg)
         KellyTools.classList('add', envContainers.favContent, env.className + '-active');
         
         if (env.events.onDisplayBlock) env.events.onDisplayBlock(mode, 'show', oldMode);
-        if (handler.getToolbar()) handler.toolbar.events.onDisplayBlock(mode, 'show', oldMode);   
+        handler.getToolbar().events.onDisplayBlock(mode, 'show', oldMode);   
     }
     
     this.updateImageGrid = function() {
@@ -1425,20 +1423,34 @@ function KellyFavItems(cfg)
     }
     
     function prepareDownloadItems() {
-        return new Promise(function(resolve, reject) {
+        
+        if (imagesAsDownloadItems) {
             
-            handler.dataFilterLock = {message : 'Preparing download items...'};
+            handler.getToolbar().setDeselectBtn({
+                callback : function(self, btn, e) {
+                    handler.getDownloadManager().setManualExcluded(btn.checked ? 'select_all' : 'deselect_all');
+                },
+            }); 
             
-            window.setTimeout(function () {
+            return new Promise(function(resolve, reject) {
                 
-                handler.getDownloadManager().setDownloadTasks(displayedItems);
-                handler.getDownloadManager().showGrabManager();
-                handler.dataFilterLock = false;
+                handler.dataFilterLock = {message : 'Preparing download items...'};
                 
-                resolve();
-                
-            }, 0);
-        });
+                window.setTimeout(function () {
+                         
+                    handler.getDownloadManager().setDownloadTasks(displayedItems);
+                    handler.getDownloadManager().showGrabManager();
+                    handler.dataFilterLock = false;
+                    
+                    resolve();
+                    
+                }, 0);
+            });
+        } else {
+            
+            handler.getToolbar().setDeselectBtn(false);
+            return true;
+        }        
     }
           
     this.updateFilteredData = function() {
@@ -1449,14 +1461,13 @@ function KellyFavItems(cfg)
                 
         updateDisplayItemsList();
         updateGoToPageButton();
-        
-        if (imagesAsDownloadItems) prepareDownloadItems();
+        prepareDownloadItems();
         
         // init gallery only for current page, create gallery, by array
         imgViewer.addToGallery(galleryImages, 'fav-images', galleryImagesData);
         
         if (env.events.onUpdateFilteredData && env.events.onUpdateFilteredData(displayedItems)) return; 
-        if (handler.getToolbar()) handler.toolbar.events.onUpdateFilteredData(displayedItems);
+        handler.getToolbar().events.onUpdateFilteredData(displayedItems);
         
         var tiles = handler.getImageGrid().getTiles();   
         if (!handler.mobileOptimization && tiles && tiles.length) window.scrollTo(0, tiles[0].getBoundingClientRect().top + KellyTools.getScrollTop() - 90);
@@ -2364,9 +2375,6 @@ function KellyFavItems(cfg)
             
             handler.sideBarLock = false;
             showDownloadManagerForm(false);
-            if (handler.getToolbar()) { 
-                handler.getToolbar().setDeselectBtn(false);
-            }
             
         } else {
             imagesAsDownloadItems = true;
@@ -2383,13 +2391,6 @@ function KellyFavItems(cfg)
             
             handler.sideBarLock = true;                      
             showDownloadManagerForm(true);
-            if (handler.getToolbar()) { 
-                handler.getToolbar().setDeselectBtn({
-                    callback : function(self, btn, e) {
-                        handler.getDownloadManager().setManualExcluded(btn.checked ? 'select_all' : 'deselect_all');
-                    },
-                });
-            }
             
             if (handler.mobileOptimization) {
                 modalBox.classList.add('collapsed');
@@ -2401,7 +2402,7 @@ function KellyFavItems(cfg)
         handler.updateImageGrid();  
                     
         if (env.events.onDisplayBlock) env.events.onDisplayBlock('fav', 'show', 'fav');
-        if (handler.getToolbar()) handler.toolbar.events.onDisplayBlock('fav', 'show', 'fav');
+        handler.getToolbar().events.onDisplayBlock('fav', 'show', 'fav');
         
         return imagesAsDownloadItems;
     }
@@ -2435,7 +2436,7 @@ function KellyFavItems(cfg)
                 }
                                 
                 if (filterAdd) filterAdd.style.display = readOnly ? 'none' : 'inline-block'; 
-                if (handler.getToolbar()) handler.toolbar.show(readOnly ? true : false);
+                handler.getToolbar().show(readOnly ? true : false);
                 return false;                
             }
             

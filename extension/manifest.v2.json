@@ -9,8 +9,10 @@
             "lib/kellyThreadWork.js", 
             "lib/kellyGrabber.js", 
             "lib/kellyFastSave.js", 
+            "lib/kellyToolbar.js", 
             "lib/kellyTools.js", 
             "lib/kellyOptions.js", 
+            "lib/kellyAdditionsForm.js", 
             "lib/kellyFavItems.js", 
             "lib/profiles/joyreactor.js", 
             "lib/profiles/joyreactor.unlock.js", 
@@ -27,6 +29,9 @@
             "lib/recorder/filters/pixiv.js", 
             "lib/recorder/filters/twitter.js", 
             "lib/recorder/filters/vk.js", 
+            "lib/recorder/filters/flickr.js", 
+            "lib/recorder/filters/pikabu.js", 
+            "lib/recorder/filters/yandex.js",
             "lib/recorder/filters/_validators.js", 
             "lib/profiles/default.js", 
             "lib/profiles/recorder.js", 
@@ -40,7 +45,7 @@
         ]
    } ],
    "manifest_version" : 2,
-   "version": "1.2.0.5",
+   "version": "1.2.1.5",
    "name": "KellyC Image Downloader",
    "description": "__MSG_ext_description_recorder__",
    "icons": { 
@@ -69,7 +74,7 @@
     "persistent": true
    },  
    "options_ui": {
-    "page": "env/html/options.html",
+    "page": "env/html/recorderDownloader.html?tab=modules",
     "open_in_tab": true
    },
    "browser_action": {
