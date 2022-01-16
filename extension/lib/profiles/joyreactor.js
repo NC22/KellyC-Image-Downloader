@@ -54,7 +54,6 @@ function KellyProfileJoyreactor() {
         
         handler.webRequestsRules = {
             referrer : handler.location.protocol  + '//' + handler.location.domain + '/',
-            cors : true,
             hostList : handler.hostList,
             types : ['xmlhttprequest'],            
             urlMap : [['https://api.joyreactor.cc/graphql?unlocker=1', 'https://api.joyreactor.cc', {'Origin' : 'https://api.joyreactor.cc'}, {'Access-Control-Allow-Headers' : 'Content-Type'}]],

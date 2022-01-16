@@ -9,13 +9,22 @@ var KellyEDispetcher = new Object;
     KellyEDispetcher.downloaderTabs = []; 
     KellyEDispetcher.events = []; // [... , {onMessage : callback, onTabConnect : callback}]
     
+    /*
+        tabData request rules
+        
+        .hostlist - array of hostnames - [example.com, test.com] - matches - [*://*.example.com/*, *://example.com/*, *://*.test.com/*, *://test.com/*]
+        .referrer - [optional] default referrer, applyed for .hostlist generated matches urls with MIME type image/*, video/*
+        .urlMap   - [optional] array of urls in format [[url, referrer, additionRequestHeaders, additionResponseHeaders], [...], ...]
+        .types    - [optional] filter by request type - xmlhttprequest
+        
+        [always additionaly filters by tab id]
+        
+        Priority [STRICT math by url in urlMap array] -> [ALL media data urls by match with - hostlist + media MIME type]
+         
+    */
+    
     KellyEDispetcher.addRequestListeners = function(tabData) {
           
-         // when sets referer priority to .urlMap 
-         // 
-         // 1. search matches in urlMap array - return reffer 
-         // 2. if urlMap is unset - check common referrer + mimeType
-         
          var getRulesDataForUrl = function(url) {
         
             if (!tabData.urlMap) return false;
@@ -51,13 +60,7 @@ var KellyEDispetcher = new Object;
             return;
         }
         
-        var matches = [];
-        for (var i = 0; i < tabData.hostList.length; i++) {
-            matches.push('*://' + tabData.hostList[i] + '/*');
-            matches.push('*://*.' + tabData.hostList[i] + '/*');
-        }
-        
-        var filter = {urls : matches}; 
+        var filter = {urls : KellyTools.getHostlistMatches(tabData.hostList)}; 
         if (tabData.types) { 
             filter.types = tabData.types; // xmlhttprequest always, except options tab
         }
@@ -88,10 +91,6 @@ var KellyEDispetcher = new Object;
                         KellyTools.wRequestSetHeader('If-Modified-Since', 'Tue, 01 Jan 1980 1:00:00 GMT');
                     }
                     
-                    // KellyTools.wRequestSetHeader(e.requestHeaders, 'cache-control', 'max-age=0');
-                    // KellyTools.wRequestSetHeader(e.requestHeaders, 'expires', '0');
-                    // KellyTools.wRequestSetHeader(e.requestHeaders, 'expires', 'Tue, 01 Jan 1980 1:00:00 GMT');
-                    
                     KellyTools.wRequestSetHeader(e.requestHeaders, 'pragma', 'no-cache');
                     KellyTools.wRequestSetHeader(e.requestHeaders, "Referer", referrer);
                     
@@ -107,17 +106,12 @@ var KellyEDispetcher = new Object;
                     
                 }
                 
-                KellyTools.log(e.url + ' | ' + referrer + ' [Modify HEADERS]');
-                KellyTools.log(e.requestHeaders);
-                
+                KellyTools.log(e.url + ' | ' + referrer + ' [Modify REQUEST HEADERS]');                
                 return {requestHeaders: e.requestHeaders};
             }
           
-            KellyTools.wRequestAddListener('onBeforeSendHeaders', tabData.onBeforeSendHeaders, filter, ['requestHeaders', 'blocking'], true);            
-        }
-        
-        if (tabData.cors) {    
-
+            KellyTools.wRequestAddListener('onBeforeSendHeaders', tabData.onBeforeSendHeaders, filter, ['requestHeaders', 'blocking'], true);   
+   
             tabData.onHeadersReceived = function(e) {  
                 
                    var validatorResult = isValidRequest(e);
@@ -125,9 +119,7 @@ var KellyEDispetcher = new Object;
                        KellyTools.log('[SKIP RESPONSE] ' + validatorResult  + ' | ' + e.url);
                        return;
                    }
-                    
-                   KellyTools.log(e.url + ' [Allow access][Status code : ' + e.statusCode + ']');
-                
+                   
                    if (e.statusCode == 200) KellyTools.wRequestSetHeader(e.responseHeaders, 'expires', 'Tue, 01 Jan 1980 1:00:00 GMT');
                        
                    if (tabData.urlMap && e.statusCode == 301) { // extend url map list with redirect links for use in (onBeforeSendHeaders | onHeadersReceived) on new request
@@ -149,15 +141,16 @@ var KellyEDispetcher = new Object;
                    
                    KellyTools.wRequestSetHeader(e.responseHeaders, "Access-Control-Allow-Origin",  "*" );  
                    
-                    var urlData = getRulesDataForUrl(e.url);
-                    if (urlData !== false && typeof urlData[3] != 'undefined') {
+                   var urlData = getRulesDataForUrl(e.url);
+                   if (urlData !== false && typeof urlData[3] != 'undefined') {
                         for (var key in urlData[3]) KellyTools.wRequestSetHeader(e.responseHeaders, key, urlData[3][key]);  
-                    }
+                   }
                    
+                   KellyTools.log(e.url + ' [Modify RECEIVED HEADERS][Allow access][Status code : ' + e.statusCode + ']');    
                    return {responseHeaders: e.responseHeaders};
-                }
+            }
             
-            KellyTools.wRequestAddListener('onHeadersReceived', tabData.onHeadersReceived, filter, ['responseHeaders', 'blocking'], true);               
+            KellyTools.wRequestAddListener('onHeadersReceived', tabData.onHeadersReceived, filter, ['responseHeaders', 'blocking'], true);              
         }
         
         KellyTools.log(filter);
@@ -773,7 +766,6 @@ var KellyEDispetcher = new Object;
                 if (!request.disable) {
                     
                     tabData.eventsEnabled = true;
-                    tabData.cors = request.cors;
                     tabData.referrer = request.referrer;
                     tabData.types = request.types;
                     tabData.hostList = request.hostList;

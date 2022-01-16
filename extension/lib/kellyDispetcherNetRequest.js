@@ -5,52 +5,59 @@
 
 KellyEDispetcher.declaredRulesId = 1000;
 
+/*
+
+    tabData request rules described in kellyDispetcher
+    
+*/
+    
 KellyEDispetcher.addRequestListenersDR = function(tabData) {
     
     tabData.declaredRules = [];
-       
-    // original global host matches of addRequestListeners matched only with urls that has image type extensions - todo reproduce same logic here - add common pool of media extensions
-       
-    var matches = [];
-    for (var i = 0; i < tabData.hostList.length; i++) {
-        matches.push('' + tabData.hostList[i] + '');
-        matches.push('.' + tabData.hostList[i] + '');
-    }
-    
-    var types = tabData.types ? tabData.types : ['main_frame', 'image', 'xmlhttprequest', 'media'];
-    
-    var getRequestHeaders = function(referrer) {
-        
-        // reset cache headers - todo - compare to kellyDispetcher headers - and remove dublicates
-        
-        return [
-            { "header": "cache-control", "operation": "set", "value": "no-cache, must-revalidate, post-check=0, pre-check=0" },
-            { "header": "pragma", "operation": "set",  "value": 'no-cache' },
-            { "header": "Referer", "operation": "set", "value": referrer },                    
-        ]
-    }
-    
-    var getResponseHeaders = function(referrer) {
-        return [
-            { "header": "Access-Control-Allow-Origin", "operation": "set", "value": "*" },                    
-        ]
-    }
-    
+     
     var addRule = function(params) {
        
-       // todo - add addition headers arrays support
-       
        KellyEDispetcher.declaredRulesId++;
+       
+       var responseHeaders = [
+            { "header" : "Access-Control-Allow-Origin", "operation" : "set", "value": "*" },  
+            
+            { "header" : "Pragma-directive", "operation" : "set", "value": "no-cache" },             
+            { "header" : "Cache-directive", "operation" : "set", "value": "no-cache" }, 
+            { "header" : "Cache-control", "operation" : "set", "value": "no-cache" }, 
+            { "header" : "Pragma", "operation" : "set", "value": "no-cache" },
+            { "header" : "Expires", "operation" : "set", "value": "0" }, 
+        ];
+        
+        if (typeof params.additionResponseHeaders != 'undefined') {
+            for (var key in params.additionResponseHeaders) {
+                responseHeaders.push({"header" : key, "operation" : "set", "value" : params.additionResponseHeaders[key]});
+            }
+        }
+        
+        var requestHeaders = [
+            { "header" : "cache-control", "operation" : "set", "value" : "no-cache, must-revalidate, post-check=0, pre-check=0" },
+            { "header" : "pragma", "operation" : "set",  "value" : 'no-cache' },
+            { "header" : "Referer", "operation" : "set", "value" : params.referrer },    
+        ];
+
+        if (typeof params.additionRequestHeaders != 'undefined') {
+            for (var key in params.additionRequestHeaders) {
+                requestHeaders.push({"header" : key, "operation" : "set", "value" : params.additionRequestHeaders[key]});
+            }
+        }
+
        tabData.declaredRules.push({
             "id" : KellyEDispetcher.declaredRulesId, // tabData.declaredRules.length + 1,
             "action": {
                 "type" : "modifyHeaders",
-                "requestHeaders" : getRequestHeaders(params.referrer),
-                "responseHeaders" : getResponseHeaders(params.referrer),
+                "requestHeaders" : requestHeaders,
+                "responseHeaders" : responseHeaders,
             },
             "condition": { 
                 "urlFilter" : params.matches, 
-                "resourceTypes" : types,
+                "resourceTypes" : tabData.types ? tabData.types : ['main_frame', 'image', 'xmlhttprequest', 'media'],
+                "tabId" : tabData.id,
             },
             "priority" : 1,
        }); 
@@ -58,12 +65,17 @@ KellyEDispetcher.addRequestListenersDR = function(tabData) {
      
     if (tabData.referrer) {
         // untested
-        addRule({matches : matches, referrer : tabData.referrer});
+        addRule({matches : KellyTools.getHostlistMatches(tabData.hostList, true), referrer : tabData.referrer});
     } 
     
     if (tabData.urlMap) {
         for (var i = 0; i < tabData.urlMap.length; i++) {
-            addRule({matches : tabData.urlMap[i][0], referrer : tabData.urlMap[i][1], additionRequestHeaders :  tabData.urlMap[i][2], additionResponseHeaders :  tabData.urlMap[i][3]});
+            addRule({
+                matches : tabData.urlMap[i][0], 
+                referrer : tabData.urlMap[i][1], 
+                additionRequestHeaders : tabData.urlMap[i][2], 
+                additionResponseHeaders : tabData.urlMap[i][3],
+            });
         }  
     }
         
@@ -111,7 +123,6 @@ KellyEDispetcher.onDownloaderConnectDR = function(port) {
             resetEvents(); 
 
             if (!request.disable) {
-                tabData.cors = request.cors;
                 tabData.referrer = request.referrer;
                 tabData.types = request.types;
                 tabData.hostList = request.hostList;

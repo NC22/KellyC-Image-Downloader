@@ -205,7 +205,6 @@ KellyDPage.updateUrlMap = function(onReady, restart) {
           
     KellyDPage.env.webRequestsRules = {
         referrer : false,
-        cors : true,
         urlMap : KellyDPage.urlMap,
         hostList : KellyDPage.env.hostList,
         types : false,

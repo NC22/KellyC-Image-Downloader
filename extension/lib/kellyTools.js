@@ -299,6 +299,29 @@ KellyTools.getExtByMimeType = function(mimetype) {
     return false;
 }
 
+KellyTools.getHostlistMatches = function(hostList, media, array) {
+    
+    array = array ? array : [], mediaTypes = ['jpg', 'jpeg', 'gif', 'web', 'bmp', 'tiff', 'tif', 'png', 'mp4', 'webm'];
+    
+    for (var i = 0; i < hostList.length; i++) {
+        
+        if (!media) {
+            
+            array.push('*://' + hostList[i] + '/*');
+            array.push('*://*.' + hostList[i] + '/*');
+            
+        } else {        
+        
+            for (var b = 0; b < mediaTypes.length; b++) {             
+                array.push('*://' + hostList[i] + '/*.' + mediaTypes[b]);
+                array.push('*://*.' + hostList[i] + '/*.' + mediaTypes[b]);                
+            }
+        }
+    }
+    
+    return array;
+}
+
 KellyTools.getMimeType = function(ext) {
     
     if (!ext || typeof ext.split != 'function') return 'application/x-undefined';

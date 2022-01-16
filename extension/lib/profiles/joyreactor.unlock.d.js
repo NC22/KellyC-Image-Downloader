@@ -3,7 +3,9 @@
 KellyEDispetcher.initJRApiUnlocker = function() {
          
      var defaultCfg = {webRequest : true, unlock : {censored : true}}, cfgName = 'kelly_cfg_joyreactor_config';
+     
      var getInitiatorUrl = function(e) {
+         
               if (typeof e.initiator != 'undefined') return e.initiator;
          else if (typeof e.documentUrl != 'undefined') return KellyTools.getLocationFromUrl(e.documentUrl).origin;
          else if (typeof e.originUrl != 'undefined') return KellyTools.getLocationFromUrl(e.originUrl).origin;
@@ -52,7 +54,7 @@ KellyEDispetcher.initJRApiUnlocker = function() {
      
     } else {    
         
-         // mobile version, urlMap keeped in joyreactor.js profile (dont needed to set allow origin there)
+         // mobile version, urlMap keeped in joyreactor.js profile (dont needed to set dynamic allow origin there)
          
          KellyEDispetcher.api.storage.local.get(cfgName, function(item) {
             
@@ -70,6 +72,7 @@ KellyEDispetcher.initJRApiUnlocker = function() {
                     
                     KellyTools.wRequestSetHeader(e.requestHeaders, "Origin", 'https://api.joyreactor.cc');
                     
+                    KellyTools.log(e.url + ' [JOYREACTOR UNLOCKER] [Modify REQUEST HEADERS]');                    
                     return {requestHeaders: e.requestHeaders};
                     
                 }, filter, ['requestHeaders', 'blocking'], true);         
@@ -84,6 +87,7 @@ KellyEDispetcher.initJRApiUnlocker = function() {
                    KellyTools.wRequestSetHeader(e.responseHeaders, 'Access-Control-Allow-Headers', "Content-Type"); 
                                    
                    // console.log(e.responseHeaders)
+                   KellyTools.log(e.url + ' [JOYREACTOR UNLOCKER] [Modify RECEIVED HEADERS]');
                    return {responseHeaders: e.responseHeaders};
                     
                 }, filter, ['responseHeaders', 'blocking'], true); 
