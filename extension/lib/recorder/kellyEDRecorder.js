@@ -12,8 +12,16 @@ var KellyEDRecorder = new Object;
          };
     }
     
-    KellyEDRecorder.onMessage = function(dispetcher, response, request, sender, callback) {
-           
+    KellyEDRecorder.init = function() {
+        KellyEDispetcher.events.push({onMessage : KellyEDRecorder.onMessage});
+    }
+    
+    KellyEDRecorder.onMessage = function(dispetcher, data) {
+        
+        var response = data.response;
+        var request = data.request
+        var callback = data.callback;
+        
         if (request.method == 'addRecord') {
             
             if (request.clean) KellyEDRecorder.recorder = KellyEDRecorder.getDefaultRecorder();
@@ -118,4 +126,4 @@ var KellyEDRecorder = new Object;
         return false;
     }
     
-    KellyEDispetcher.events.push({onMessage : KellyEDRecorder.onMessage});
+    KellyEDRecorder.init();

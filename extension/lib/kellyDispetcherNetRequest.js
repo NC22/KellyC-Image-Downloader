@@ -3,21 +3,28 @@
 // createObjectURL - dosnt work from background (window - is undefined), so base64 transport method is impossible to implement
 // downloader.download - api - crashs browser if you try to download blob - tested on 88.0.4324.96 chrome
 
-KellyEDispetcher.declaredRulesId = 1000;
+// todo - keep alive
+
+var KellyEDispetcherDR = {
+    declaredRulesId : 1000,
+};
+
+KellyEDispetcherDR.init = function() {
+    var manifestData = KellyEDispetcher.api.runtime.getManifest();
+    if (manifestData['manifest_version'] == 3) {
+        KellyEDispetcher.events.push({onTabConnect : KellyEDispetcherDR.onTabConnect});
+    }
+}
 
 /*
-
     tabData request rules described in kellyDispetcher
-    
 */
     
-KellyEDispetcher.addRequestListenersDR = function(tabData) {
+KellyEDispetcherDR.addRequestListeners = function(tabData, onRegistered) {
     
     tabData.declaredRules = [];
      
     var addRule = function(params) {
-       
-       KellyEDispetcher.declaredRulesId++;
        
        var responseHeaders = [
             { "header" : "Access-Control-Allow-Origin", "operation" : "set", "value": "*" },  
@@ -46,25 +53,33 @@ KellyEDispetcher.addRequestListenersDR = function(tabData) {
                 requestHeaders.push({"header" : key, "operation" : "set", "value" : params.additionRequestHeaders[key]});
             }
         }
-
-       tabData.declaredRules.push({
-            "id" : KellyEDispetcher.declaredRulesId, // tabData.declaredRules.length + 1,
-            "action": {
-                "type" : "modifyHeaders",
-                "requestHeaders" : requestHeaders,
-                "responseHeaders" : responseHeaders,
-            },
-            "condition": { 
-                "urlFilter" : params.matches, 
-                "resourceTypes" : tabData.types ? tabData.types : ['main_frame', 'image', 'xmlhttprequest', 'media'],
-                "tabId" : tabData.id,
-            },
-            "priority" : 1,
-       }); 
+        
+        if (typeof params.matches == "string") {
+            params.matches = [params.matches];
+        }
+        
+        for (var i = 0; i < params.matches.length; i++) {
+            
+           KellyEDispetcherDR.declaredRulesId++;
+           
+           tabData.declaredRules.push({
+                "id" : KellyEDispetcherDR.declaredRulesId, // tabData.declaredRules.length + 1,
+                "action": {
+                    "type" : "modifyHeaders",
+                    "requestHeaders" : requestHeaders,
+                    "responseHeaders" : responseHeaders,
+                },
+                "condition": { 
+                    "urlFilter" : params.matches[i], 
+                    "resourceTypes" : tabData.types ? tabData.types : ['main_frame', 'image', 'xmlhttprequest', 'media'],
+                    "tabIds" : [tabData.id],
+                },
+                "priority" : 1,
+           }); 
+       }
     }
      
     if (tabData.referrer) {
-        // untested
         addRule({matches : KellyTools.getHostlistMatches(tabData.hostList, true), referrer : tabData.referrer});
     } 
     
@@ -79,26 +94,27 @@ KellyEDispetcher.addRequestListenersDR = function(tabData) {
         }  
     }
         
-    KellyTools.getBrowser().declarativeNetRequest.updateDynamicRules({addRules : tabData.declaredRules, removeRuleIds : []}, function() {
-        
-        // todo - add callback - on registered
+    KellyTools.getBrowser().declarativeNetRequest.updateSessionRules({addRules : tabData.declaredRules, removeRuleIds : []}, function() {
         
         if (KellyTools.getBrowser().runtime.lastError) {                
-            KellyTools.log('Error : ' + KellyTools.getBrowser().runtime.lastError.message, 'KellyEDispetcher | declarativeNetRequest');
-            return;    
+            KellyTools.log('Error : ' + KellyTools.getBrowser().runtime.lastError.message, 'KellyEDispetcher | declarativeNetRequest');         
         }
+        
+        onRegistered();
     });
     
     tabData.eventsEnabled = true;
 }
 
-KellyEDispetcher.onDownloaderConnectDR = function(port) {
+KellyEDispetcherDR.onTabConnect = function(self, data) {
+    
+    var port = data.port;
     
     KellyTools.log('[Downloader] CONNECTED  Tab  ' + port.sender.tab.id, 'KellyEDispetcher | declarativeNetRequest');
     for (var i = 0; i < KellyEDispetcher.downloaderTabs.length; i++) {
         if (KellyEDispetcher.downloaderTabs[i].id == port.sender.tab.id) {
             KellyTools.log('[Downloader] CONNECTED  Error  already connected', 'KellyEDispetcher | declarativeNetRequest');
-            return;
+            return true;
         }
     }
     
@@ -113,36 +129,47 @@ KellyEDispetcher.onDownloaderConnectDR = function(port) {
             ruleIds.push(rule.id);
         });
         
-        KellyTools.getBrowser().declarativeNetRequest.updateDynamicRules({addRules : [], removeRuleIds : ruleIds});
+        KellyTools.getBrowser().declarativeNetRequest.updateSessionRules({addRules : [], removeRuleIds : ruleIds});
     }
-    
+        
     var onDownloaderMessage = function(request) {
         
+       var response = {
+           notice : false,
+           message : 'ok',
+           method : request.method,
+           ready : function() {
+                if (response.notice) KellyTools.log(response.notice, 'KellyEDispetcher [PORT]');
+                port.postMessage({method : response.method, message : response.message});        
+           }
+       }
+       
        if (request.method == 'registerDownloader') {
             
             resetEvents(); 
-
+            response.notice = 'Update registerDownloader request modifiers';
+            response.message = request.disable ? "disabled" : "registered";
+            
             if (!request.disable) {
                 tabData.referrer = request.referrer;
                 tabData.types = request.types;
                 tabData.hostList = request.hostList;
                 if (request.urlMap) tabData.urlMap = request.urlMap;
                 
-                KellyEDispetcher.addRequestListenersDR(tabData);
-            }
-            
-            KellyTools.log('Update registerDownloader request modifiers', 'KellyEDispetcher [PORT]');
-            port.postMessage({method : 'registerDownloader', message : request.disable ? "disabled" : "registered"});
+                KellyEDispetcherDR.addRequestListeners(tabData, response.ready);
+            } else response.ready();
             
        } else if (request.method == 'setDebugMode') {
         
             KellyTools.DEBUG = request.state;
-            KellyTools.log('Tab loaded in debug mode, switch background process debug mode to ' + (KellyTools.DEBUG ? 'TRUE' : 'FALSE'), 'KellyEDispetcher [PORT]');
-            port.postMessage({method : 'setDebugMode', message : "ok"});
+            response.notice = 'Tab loaded in debug mode, switch background process debug mode to ' + (KellyTools.DEBUG ? 'TRUE' : 'FALSE');
+            response.ready();
             
         } else if (request.method == 'updateUrlMap') {
-            if (!tabData.eventsEnabled) {               
-                port.postMessage({method : 'updateUrlMap', message : "tab not registered"});
+            
+            if (!tabData.eventsEnabled) {
+                response.message = "tab not registered";
+                response.ready();
                 return;
             }
             
@@ -151,11 +178,7 @@ KellyEDispetcher.onDownloaderConnectDR = function(port) {
             }
                         
             resetEvents(); 
-            KellyEDispetcher.addRequestListenersDR(tabData);
-            
-            // todo - redeclare rules
-            port.postMessage({method : 'updateUrlMap', message : "ok"});
-            
+            KellyEDispetcherDR.addRequestListeners(tabData, response.ready);
         }
     }
     
@@ -168,4 +191,8 @@ KellyEDispetcher.onDownloaderConnectDR = function(port) {
         
         if (KellyEDispetcher.downloaderTabs.indexOf(tabData) != -1) KellyEDispetcher.downloaderTabs.splice(KellyEDispetcher.downloaderTabs.indexOf(tabData), 1);
     });
+    
+    return true;
 }
+
+KellyEDispetcherDR.init();

@@ -1,3 +1,11 @@
+KellyDPage = new Object();
+KellyDPage.env = false;
+KellyDPage.sandBox = false;
+
+KellyDPage.urlMapDocs = false; // urlmap for docs was added to common urlmap array
+KellyDPage.urlMap = []; // common urlmap for current loaded storage
+
+// todo - move common progress bar methods to this object (init, reset, update, etc.)
 // todo - follow related data - search images bigger then original preview and add if something founded +\-
 // todo - remove bad links +\-
 // 
@@ -17,15 +25,7 @@
 // todo - лог ошибок при запросах доп. доков.
 // todo - данные для POST запросов в FETCH_RULES
 
-KellyDPage = new Object();
-KellyDPage.env = false;
-KellyDPage.sandBox = false;
-
-KellyDPage.urlMapDocs = false; // urlmap for docs was added to common urlmap array
-KellyDPage.urlMap = []; // common urlmap for current loaded storage
-
 // progress bar - used for [Load related docs.], [Load proportions], [Filter] (only text \ proggress bar unused) actions
-// todo - move common progress bar methods to this object (init, reset, update, etc.)
 
 KellyDPage.aDProgress = {
     current : 0, total : 0, fail : 0, 

@@ -4,10 +4,9 @@
 var KellyEDispetcher = new Object;
     KellyEDispetcher.eventsAccepted = false;
     KellyEDispetcher.envDir = 'env/';
-    KellyEDispetcher.dRules = false; // manifest v3 net requests
     KellyEDispetcher.api = KellyTools.getBrowser();
     KellyEDispetcher.downloaderTabs = []; 
-    KellyEDispetcher.events = []; // [... , {onMessage : callback, onTabConnect : callback}]
+    KellyEDispetcher.events = []; // [... , {onMessage : callback(KellyEDispetcher, response, request, sender, callback), onTabConnect : callback(KellyEDispetcher, port), onTabMessage : callback(KellyEDispetcher, tabData)}]
     
     /*
         tabData request rules
@@ -220,15 +219,9 @@ var KellyEDispetcher = new Object;
     KellyEDispetcher.init = function() {
     
         if (this.eventsAccepted) return true;
-        
-        this.dRules = false;
-        var manifestData = this.api.runtime.getManifest();
-        if (manifestData['manifest_version'] == 3) {
-            this.dRules = true;
-        }
-        
+               
         this.api.runtime.onMessage.addListener(this.onMessage);    
-        this.api.runtime.onConnect.addListener(this.onDownloaderConnect);
+        this.api.runtime.onConnect.addListener(this.onTabConnect);
 
         this.api.downloads.onChanged.addListener( this.initEvents.onChanged );
                 
@@ -702,27 +695,27 @@ var KellyEDispetcher = new Object;
             
             // addition events - can be implemented in separate files
             
-            for (var i = 0; i < KellyEDispetcher.events.length; i++) {
-                if (KellyEDispetcher.events[i].onMessage && KellyEDispetcher.events[i].onMessage(KellyEDispetcher, response, request, sender, callback)) return;
-            }
-            
+            if (KellyEDispetcher.callEvent('onMessage', {response : response, request : request, sender : sender, callback : callback})) return;
         }
         
         if (callback) callback(response);        
     }
     
-    KellyEDispetcher.onDownloaderConnect = function(port) {
+    KellyEDispetcher.callEvent = function(name, data) {
+        
+        var preventDefault = false;
+        for (var i = 0; i < KellyEDispetcher.events.length; i++) {
+            if (KellyEDispetcher.events[i][name] && KellyEDispetcher.events[i][name](KellyEDispetcher, data)) preventDefault = true;
+        }
+        
+        return preventDefault;
+    } 
+    
+    KellyEDispetcher.onTabConnect = function(port) {
               
         // addition events - can be implemented in separate files
         
-        for (var i = 0; i < KellyEDispetcher.events.length; i++) {
-            if (KellyEDispetcher.events[i].onTabConnect && KellyEDispetcher.events[i].onTabConnect(KellyEDispetcher, port)) return;
-        }
-            
-        if (KellyEDispetcher.dRules) {
-            KellyEDispetcher.onDownloaderConnectDR(port);
-            return;
-        }
+        if (KellyEDispetcher.callEvent('onTabConnect', {port : port})) return;
         
         KellyTools.log('[Downloader] CONNECTED | Tab : ' + port.sender.tab.id, 'KellyEDispetcher');
         for (var i = 0; i < KellyEDispetcher.downloaderTabs.length; i++) {
@@ -757,8 +750,10 @@ var KellyEDispetcher = new Object;
             
         }
         
-        var onDownloaderMessage = function(request) {
+        var onTabMessage = function(request) {
             
+            if (KellyEDispetcher.callEvent('onTabMessage', {tabData : tabData})) return;
+        
             if (request.method == 'registerDownloader') {
                 
                 resetEvents(); 
@@ -797,7 +792,7 @@ var KellyEDispetcher = new Object;
         }
         
         port.postMessage({method : 'onPortCreate', message : "connected", isDownloadSupported : KellyEDispetcher.isDownloadSupported()});
-        port.onMessage.addListener(onDownloaderMessage);
+        port.onMessage.addListener(onTabMessage);
         port.onDisconnect.addListener(function(p){
             
             KellyTools.log('DISCONECTED | Reason : ' + (p.error ? p.error : 'Close tab'), 'KellyEDispetcher [PORT]');
