@@ -4311,6 +4311,14 @@ function KellyFavItems(cfg)
             handler.runtime.webRequestPort.onMessage.addListener(onRegisteredEvent);
         }
         
+        handler.runtime.webRequestPort.onDisconnect.addListener(function() {
+    
+             log('[PORT] [Disconected] BG Process. Attempt to reconnect...');
+             setTimeout(function() {
+                    handler.runtime = {};
+                    handler.initBgEvents();
+             }, 400);
+        });
         return true;
     }
     

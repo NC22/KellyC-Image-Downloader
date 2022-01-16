@@ -12,10 +12,58 @@ var KellyEDispetcherDR = {
 };
 
 KellyEDispetcherDR.init = function() {
+    
     var manifestData = KellyEDispetcher.api.runtime.getManifest();
     if (manifestData['manifest_version'] == 3) {
+        
+        KellyEDispetcher.api.declarativeNetRequest.getSessionRules(function(rules) {
+            
+              if (KellyTools.getBrowser().runtime.lastError) {                
+                    KellyTools.log('Error : ' + KellyTools.getBrowser().runtime.lastError.message, 'KellyEDispetcher | declarativeNetRequest'); 
+                    return;
+              }
+                
+              if (rules.length > 0) {
+                    for (var i = 0; i < rules.length; i++) {
+                         if (KellyEDispetcherDR.declaredRulesId < rules[i].id) {
+                             KellyEDispetcherDR.declaredRulesId = rules[i].id + 1;
+                         }
+                    }
+              }
+        });
+        
         KellyEDispetcher.events.push({onTabConnect : KellyEDispetcherDR.onTabConnect});
     }
+}
+
+KellyEDispetcherDR.cleanupSessionRulesForTab = function(tabId) {
+            
+     KellyEDispetcher.api.declarativeNetRequest.getSessionRules(function(rules) {
+          
+          if (KellyTools.getBrowser().runtime.lastError) {                
+                KellyTools.log('Error : ' + KellyTools.getBrowser().runtime.lastError.message, 'KellyEDispetcher | declarativeNetRequest'); 
+                return;
+          }
+            
+          if (rules.length > 0) {
+                var ids = [];
+                for (var i = 0; i < rules.length; i++) {                    
+                    if (rules[i].condition.tabIds && rules[i].condition.tabIds.indexOf(tabId) !== -1) {
+                        ids.push(rules[i].id);
+                    }
+                }
+                
+                KellyEDispetcher.api.declarativeNetRequest.updateSessionRules({addRules : [], removeRuleIds : ids}, function() {
+                    
+                    KellyTools.log('[TabId : ' + tabId + '] Cleanup session rules : ' + ids.length,  'KellyEDispetcher | declarativeNetRequest'); 
+                    
+                    if (KellyTools.getBrowser().runtime.lastError) {                
+                        KellyTools.log('Error : ' + KellyTools.getBrowser().runtime.lastError.message, 'KellyEDispetcher | declarativeNetRequest'); 
+                        return;
+                    }
+               });
+          }
+    });
 }
 
 /*
@@ -111,29 +159,32 @@ KellyEDispetcherDR.addRequestListeners = function(tabData, onRegistered) {
 KellyEDispetcherDR.onTabConnect = function(self, data) {
     
     var port = data.port;
+    var tabData = false;
     
     KellyTools.log('[Downloader] CONNECTED  Tab  ' + port.sender.tab.id, 'KellyEDispetcher | declarativeNetRequest');
     for (var i = 0; i < KellyEDispetcher.downloaderTabs.length; i++) {
         if (KellyEDispetcher.downloaderTabs[i].id == port.sender.tab.id) {
-            KellyTools.log('[Downloader] CONNECTED  Error  already connected', 'KellyEDispetcher | declarativeNetRequest');
-            return true;
+            KellyTools.log('[Downloader] already connected : reset connection, change port', 'KellyEDispetcher | declarativeNetRequest');
+            KellyEDispetcher.downloaderTabs[i].resetEvents();
+            tabData = KellyEDispetcher.downloaderTabs[i];
+            tabData.port = port;
+            break;
         }
+    } 
+    
+    if (tabData === false) {
+        
+        tabData = {port : port, tab : port.sender.tab, id : port.sender.tab.id, declaredRules : []};
+        tabData.resetEvents = function() {
+            tabData.eventsEnabled = false;
+            
+            KellyEDispetcherDR.cleanupSessionRulesForTab(tabData.id);
+            tabData.declaredRules = [];
+        }
+    
+        KellyEDispetcher.downloaderTabs.push(tabData);
     }
     
-    var tabData = {port : port, tab : port.sender.tab, id : port.sender.tab.id, declaredRules : []};
-    KellyEDispetcher.downloaderTabs.push(tabData);
-    
-    var resetEvents = function() {
-        tabData.eventsEnabled = false;
-        
-        var ruleIds = [];
-        tabData.declaredRules.forEach(function(rule) {
-            ruleIds.push(rule.id);
-        });
-        
-        KellyTools.getBrowser().declarativeNetRequest.updateSessionRules({addRules : [], removeRuleIds : ruleIds});
-    }
-        
     var onDownloaderMessage = function(request) {
         
        var response = {
@@ -148,7 +199,7 @@ KellyEDispetcherDR.onTabConnect = function(self, data) {
        
        if (request.method == 'registerDownloader') {
             
-            resetEvents(); 
+            tabData.resetEvents(); 
             response.notice = 'Update registerDownloader request modifiers';
             response.message = request.disable ? "disabled" : "registered";
             
@@ -179,7 +230,7 @@ KellyEDispetcherDR.onTabConnect = function(self, data) {
                 tabData.urlMap = request.urlMap;
             }
                         
-            resetEvents(); 
+            tabData.resetEvents(); 
             KellyEDispetcherDR.addRequestListeners(tabData, response.ready);
         }
     }
@@ -189,7 +240,7 @@ KellyEDispetcherDR.onTabConnect = function(self, data) {
     port.onDisconnect.addListener(function(p){
         
         KellyTools.log('DISCONECTED  Reason  ' + (p.error ? p.error : 'Close tab'), 'KellyEDispetcher [PORT]');
-        resetEvents();
+        tabData.resetEvents();
         
         if (KellyEDispetcher.downloaderTabs.indexOf(tabData) != -1) KellyEDispetcher.downloaderTabs.splice(KellyEDispetcher.downloaderTabs.indexOf(tabData), 1);
     });

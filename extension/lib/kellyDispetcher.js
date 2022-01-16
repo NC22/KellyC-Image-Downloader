@@ -721,42 +721,43 @@ var KellyEDispetcher = new Object;
         for (var i = 0; i < KellyEDispetcher.downloaderTabs.length; i++) {
             if (KellyEDispetcher.downloaderTabs[i].id == port.sender.tab.id) {
                 KellyTools.log('[Downloader] CONNECTED | Error : already connected', 'KellyEDispetcher');
+                
                 return;
             }
         }
         
         var tabData = {port : port, tab : port.sender.tab, id : port.sender.tab.id, eventsEnabled : false};
-        KellyEDispetcher.downloaderTabs.push(tabData);
-    
-        var resetEvents = function() {
-            
-            KellyTools.log('[registerDownloader][EVENTS-REGISTERED-RESET]', 'KellyEDispetcher [PORT]');
-            
-            tabData.eventsEnabled = false;
-            
-            try {
-                if (tabData.onBeforeSendHeaders) {
-                    KellyTools.getBrowser().webRequest.onBeforeSendHeaders.removeListener(tabData.onBeforeSendHeaders);
-                    tabData.onBeforeSendHeaders = false;
+            tabData.resetEvents = function() {
+                
+                KellyTools.log('[registerDownloader][EVENTS-REGISTERED-RESET]', 'KellyEDispetcher [PORT]');
+                
+                tabData.eventsEnabled = false;
+                
+                try {
+                    if (tabData.onBeforeSendHeaders) {
+                        KellyTools.getBrowser().webRequest.onBeforeSendHeaders.removeListener(tabData.onBeforeSendHeaders);
+                        tabData.onBeforeSendHeaders = false;
+                    }
+                    
+                    if (tabData.onHeadersReceived) {
+                        KellyTools.getBrowser().webRequest.onHeadersReceived.removeListener(tabData.onHeadersReceived);
+                        tabData.onHeadersReceived = false;
+                    } 
+                } catch (e) { 
+                    KellyTools.log('FAIL to reset webRequest events', KellyTools.E_ERROR);
                 }
                 
-                if (tabData.onHeadersReceived) {
-                    KellyTools.getBrowser().webRequest.onHeadersReceived.removeListener(tabData.onHeadersReceived);
-                    tabData.onHeadersReceived = false;
-                } 
-            } catch (e) { 
-                KellyTools.log('FAIL to reset webRequest events', KellyTools.E_ERROR);
             }
-            
-        }
-        
+    
+        KellyEDispetcher.downloaderTabs.push(tabData);
+    
         var onTabMessage = function(request) {
             
             if (KellyEDispetcher.callEvent('onTabMessage', {tabData : tabData})) return;
         
             if (request.method == 'registerDownloader') {
                 
-                resetEvents(); 
+                tabData.resetEvents(); 
 
                 if (!request.disable) {
                     
@@ -796,7 +797,7 @@ var KellyEDispetcher = new Object;
         port.onDisconnect.addListener(function(p){
             
             KellyTools.log('DISCONECTED | Reason : ' + (p.error ? p.error : 'Close tab'), 'KellyEDispetcher [PORT]');
-            resetEvents();
+            tabData.resetEvents();
             
             if (KellyEDispetcher.downloaderTabs.indexOf(tabData) != -1) KellyEDispetcher.downloaderTabs.splice(KellyEDispetcher.downloaderTabs.indexOf(tabData), 1);
         });

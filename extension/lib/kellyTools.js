@@ -1178,9 +1178,16 @@ KellyTools.readInputFile = function(input, onRead, readAs) {
 }	
 
 KellyTools.getLocationFromUrl = function(str) {
+
+    if (typeof URL != 'undefined') {
+
+        var l = new URL(str); // bg scripts not support document object, priority to URL ent
+        
+    } else {
     
-    var l = document.createElement("a");
-        l.href = str;
+        var l = document.createElement("a");
+            l.href = str;
+    }
     
     return l;
 };
