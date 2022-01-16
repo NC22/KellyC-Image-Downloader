@@ -3,6 +3,8 @@
 // createObjectURL - dosnt work from background (window - is undefined), so base64 transport method is impossible to implement
 // downloader.download - api - crashs browser if you try to download blob - tested on 88.0.4324.96 chrome
 
+// check rules acception - some passed only after page reload. check difference between dinamic rules and session rules
+// CONNECTED  Error  already connected - check tab disconnect
 // todo - keep alive
 
 var KellyEDispetcherDR = {

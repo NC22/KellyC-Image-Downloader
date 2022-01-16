@@ -24,6 +24,9 @@ KellyEDJRUnlocker.getInitiatorUrl = function(e) {
 
 KellyEDJRUnlocker.initDRequest = function() {
     
+    
+     return; // need to fix origin before tests
+    
      KellyEDJRUnlocker.declaredRules = [];
      KellyEDispetcher.events.push({onTabConnect : function(self, data) {
                     
