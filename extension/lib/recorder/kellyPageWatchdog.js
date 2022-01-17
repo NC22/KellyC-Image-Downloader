@@ -3,6 +3,7 @@ function KellyPageWatchdog(cfg)
     var handler = this;
     var lng = KellyLoc;
     var updateAF = true;
+    var directAccessEls = {'A' : ['href'], 'IMG' : ['src']};  // to get absolute link from img \ a elements 
     
     this.addDriverAction = {SKIP : 1, ADD : 2, CONTINUE : 3};
     
@@ -205,6 +206,12 @@ function KellyPageWatchdog(cfg)
         return true;
     }
     
+    var lastError = function(error) {
+            
+        handler.lastError = error;
+        return false;
+    }
+    
     /* 
         Validate source [src] url (link or dataurl) and add it to an [item] object (validation based on related el tag name \ attribute from where string is taken (context))        
         Maximum trusted element with minimum validation - [el] = an <img> element, context = "addSrcFromAttributes-src"
@@ -214,11 +221,13 @@ function KellyPageWatchdog(cfg)
     
     this.addSingleSrc = function(item, src, context, el, groups) {
         
-        if (!src || typeof src != 'string') return false;
+        handler.lastError = false;
+        if (!src || typeof src != 'string') return lastError('empty string');
 
-        src = getUrl(src);
-        if (!src) return false;
-                
+        var tmpSrc = getUrl(src);
+        if (!tmpSrc) return lastError('fail to get url from string ' + src);
+        
+        src = tmpSrc;
         var ext = KellyTools.getUrlExt(src), sourceType = 'unknown', tagName = el.tagName.toLowerCase();        
         
         if (src.indexOf('blob:') === 0) { // todo - optional disable blob detection
@@ -234,7 +243,7 @@ function KellyPageWatchdog(cfg)
                 src = converter.toDataURL();
                 ext = 'dataUrl';
                 
-            } else return false;
+            } else return lastError('unknown blob el tag');
         }
         
              if (tagName == 'source') sourceType = 'video';
@@ -242,7 +251,7 @@ function KellyPageWatchdog(cfg)
           
         if (sourceType == 'unknown') {
                                 
-            if (!ext) return false;
+            if (!ext) return lastError('extension not specified for unknown source type');
             
             var type = KellyTools.getMimeType(ext == 'dataUrl' ? src : ext);
       
@@ -251,17 +260,17 @@ function KellyPageWatchdog(cfg)
         }      
       
         if (sourceType == 'video') {            
-            if (!handler.videoDetect) return false;            
-        } else if (sourceType == 'unknown') return false;
+            if (!handler.videoDetect) return lastError('video detection not supported');            
+        } else if (sourceType == 'unknown') return lastError('element type is untrusted and no media extension is specified');
                 
         // todo optional allow spaces in url for all contexts ? (usually spaces uses for gallery sets and could require additional logic)
         if (src.indexOf(' ') != -1) {            
-            if (sourceType == 'untrust-image' || sourceType == 'untrust-video' || context != 'addSrcFromAttributes-src') return false;
+            if (sourceType == 'untrust-image' || sourceType == 'untrust-video' || context != 'addSrcFromAttributes-src') return lastError('found spaces in parsed url but its not image or src-set');
         }
                         
         if (ext != 'dataUrl') {
             for (var i = 0; i < KellyPageWatchdog.bannedUrls.length; i++) {
-                if (src.indexOf(KellyPageWatchdog.bannedUrls[i]) != -1) return false;
+                if (src.indexOf(KellyPageWatchdog.bannedUrls[i]) != -1) return lastError('image url is blacklisted');
             }
         }
         
@@ -293,8 +302,8 @@ function KellyPageWatchdog(cfg)
             src = (handler.url.indexOf('http://') === 0 ? 'http' : 'https') + '://' + src;
         }
         
-             if (ext == 'dataUrl' && handler.srcs.indexOf(src.substr(0, 258)) != -1) return false;
-        else if (handler.srcs.indexOf(src) != -1) return false;
+             if (ext == 'dataUrl' && handler.srcs.indexOf(src.substr(0, 258)) != -1) return lastError('dataUrl already added');
+        else if (handler.srcs.indexOf(src) != -1) return lastError('src already added');
         
         var newIndex = addItemSrc(item, src, groups);     
         
@@ -325,7 +334,12 @@ function KellyPageWatchdog(cfg)
                 
             } else {
             
-                var posibleLink = el.attributes[i].value; 
+                var posibleLink = el.attributes[i].value;
+                               
+                if (directAccessEls[el.tagName] && directAccessEls[el.tagName].indexOf(el.attributes[i].name) != -1) {
+                    posibleLink = el[el.attributes[i].name];
+                }
+                
                 if (item.relatedSrc.indexOf(posibleLink) == -1) handler.addSingleSrc(item, posibleLink, 'addSrcFromAttributes-' + el.attributes[i].name, el);
             }
        }              
@@ -384,7 +398,18 @@ function KellyPageWatchdog(cfg)
                       
         handler.addSrcFromStyle(el, item);                
         handler.addSrcFromAttributes(el, item); 
-
+        
+        /*
+        if (el.tagName == 'IMG') {
+            console.log('test ' + el.getAttribute('src'));
+            
+            handler.addSingleSrc(item, el.getAttribute('src'), 'addSrcFromAttributes-src', el);
+            console.log(handler.lastError);
+            console.log(el);
+            console.log(item);
+        }
+        */
+        
         if (item.relatedSrc.length <= 0) return false;
     
         // detect related document - common case - <a href="RELATED DOC"> ... <> ... <img> ... </> ... </a>
@@ -534,7 +559,7 @@ function KellyPageWatchdog(cfg)
             updateAF = true;
             
             KellyTools.getBrowser().runtime.sendMessage({method: "addRecord", images : handler.imagesPool, cats : handler.additionCats, url : handler.url, host : handler.host}, function(response) {
-                console.log(response);
+
                 showRecorder(response.imagesNum);
             });   
             

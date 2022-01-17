@@ -1251,7 +1251,6 @@ function KellyGrabber(cfg) {
             
             if (downloadDelta.state.current != "in_progress") {                
                 
-                // KellyTools.log(downloadDelta);
                 downloadingIds.splice(downloadingIds.indexOf(downloadDelta.id), 1);
             
                 var downloadIndex = handler.getDownloadById(downloadDelta.id);
@@ -1264,7 +1263,10 @@ function KellyGrabber(cfg) {
                 }
                 
                 var downloadItem = downloads[downloadIndex];
-                   
+                var error = downloadDelta.error && downloadDelta.error.current ? downloadDelta.error.current : false;
+                
+                toTxtLog('DOWNLOADID ' + downloadItem.id + ' | download STATE update by browser API : ' + downloadDelta.state.current + (error ? ' Error : ' + error : ''));
+                
                 if (downloadItem.cancelTimer) {
                     clearTimeout(downloadItem.cancelTimer);
                     downloadItem.cancelTimer = false;
@@ -1272,6 +1274,21 @@ function KellyGrabber(cfg) {
                  
                 downloadItem.downloadDelta = downloadDelta;
                 downloadItem.workedout = true;
+                      
+                if (error) {
+                    
+                    var errorText = 'Системная ошибка : ' + error;
+                    
+                    if (error == 'USER_CANCELED') {
+                        errorText = 'Загрузка прервана (проверьте настройку "Всегда указывать место для скачивания")';
+                    }
+                    
+                    addFailItem(downloadItem, errorText); 
+                    resetItem(downloadItem);
+                    
+                    downloadItem.error = errorText;
+                    downloadItem.workedout = true;
+                }
                 
                 updateProgressBar();
                 
@@ -1817,7 +1834,7 @@ function KellyGrabber(cfg) {
             blob = downloadOptions.url.blob;
         }
  
-        var download = {}, validKeys = ['filename', 'conflictAction', 'method', 'url'];
+        var download = {}, validKeys = ['filename', 'conflictAction', 'method', 'url', 'saveAs'];
         for (var i = 0; i < validKeys.length; i++) {
             if (typeof downloadOptions[validKeys[i]] != 'undefined') download[validKeys[i]] = downloadOptions[validKeys[i]];
         }
@@ -2122,8 +2139,8 @@ function KellyGrabber(cfg) {
             ext : download.ext, // file extension to save to
             filename : baseFileFolder + download.filename, // patch to save file to without extension (extension addes at last moment at downloadUrl)
             conflictAction : download.conflictAction, // todo - check some times dialog save as shown (may be if file with same name already exists?)
+            saveAs : false,
             method : 'GET',
-            referrer: fav.getGlobal('env').location.protocol  + '//' + fav.getGlobal('env').location.domain + '/',
         }
         
         toTxtLog('DOWNLOADID ' + download.id + ' | download : ' + downloadOptions.filename + (downloadOptions.ext ? '.' + downloadOptions.ext : ' | Extension not detected'));
