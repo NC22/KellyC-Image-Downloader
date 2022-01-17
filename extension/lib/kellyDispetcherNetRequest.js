@@ -13,8 +13,7 @@ var KellyEDispetcherDR = {
 
 KellyEDispetcherDR.init = function() {
     
-    var manifestData = KellyEDispetcher.api.runtime.getManifest();
-    if (manifestData['manifest_version'] == 3) {
+    if (KellyTools.getManifestVersion() > 2) {
         
         KellyEDispetcher.api.declarativeNetRequest.getSessionRules(function(rules) {
             

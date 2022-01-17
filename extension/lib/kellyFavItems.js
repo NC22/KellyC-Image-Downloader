@@ -4293,17 +4293,16 @@ function KellyFavItems(cfg)
                     
         if (!data) return false;
         
-        data.method = 'registerDownloader';
+        data.method = data.method ? data.method : 'registerDownloader';
         data.browser = KellyTools.getBrowserName();
         
         handler.runtime.webRequestPort.postMessage(data);
         
-        // todo add unregister feature, put bottom event block before post?
         var onRegisteredEvent = false;
         if (onRegistered) {
              onRegisteredEvent = function(request) {                
-                if (request.method == "registerDownloader") {                    
-                    onRegistered(request.message == 'registered' ? true : false);
+                if (request.method == data.method) {                    
+                    onRegistered(request.message);
                     handler.runtime.webRequestPort.onMessage.removeListener(onRegisteredEvent);
                 }
             }
@@ -4311,14 +4310,6 @@ function KellyFavItems(cfg)
             handler.runtime.webRequestPort.onMessage.addListener(onRegisteredEvent);
         }
         
-        handler.runtime.webRequestPort.onDisconnect.addListener(function() {
-    
-             log('[PORT] [Disconected] BG Process. Attempt to reconnect...');
-             setTimeout(function() {
-                    handler.runtime = {};
-                    handler.initBgEvents();
-             }, 400);
-        });
         return true;
     }
     
@@ -4367,7 +4358,15 @@ function KellyFavItems(cfg)
                 }
             }
             
-            handler.runtime.webRequestPort.onMessage.addListener(handler.runtime.onMessage);
+            handler.runtime.webRequestPort.onMessage.addListener(handler.runtime.onMessage);                
+            handler.runtime.webRequestPort.onDisconnect.addListener(function() {
+                
+                 log('[PORT] [Disconected] BG Process. Attempt to reconnect...');
+                 setTimeout(function() {
+                        handler.runtime = {};
+                        handler.initBgEvents();
+                 }, 400);
+            });
         }
     }
         

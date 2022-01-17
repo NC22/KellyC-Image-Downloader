@@ -1,5 +1,8 @@
 var KellyEDRecorder = new Object;
+    KellyEDRecorder.cacheEnabled = false;
     KellyEDRecorder.recorder = {};
+    
+    // todo - save recorder state cache for manifest v3
     
     KellyEDRecorder.getDefaultRecorder = function() {
         return {
@@ -9,24 +12,78 @@ var KellyEDRecorder = new Object;
             host : false,    // used as profile name only, images[] could be taken from various hosts and contain different [referrer]
             url : false,     // used as profile name only
             srcs : [],       // list of all added relatedSrc strings during record process, to prevent dublicates
-         };
+        };
+    }
+    
+    KellyEDRecorder.loadState = function() {
+        KellyEDispetcher.api.storage.local.get('kelly_cache_recorder', function(response) {
+            
+            var result = 'OK';
+            if (KellyEDispetcher.api.runtime.lastError) {
+                result = KellyEDispetcher.api.runtime.lastError.message;
+            }
+            
+            if (!response || response === null || !response['kelly_cache_recorder'] || typeof response['kelly_cache_recorder'].srcs == 'undefined') {
+                result = 'Bad storage item - Reset';
+                response['kelly_cache_recorder'] = KellyEDRecorder.getDefaultRecorder();
+            } 
+            
+            KellyEDRecorder.recorder = response['kelly_cache_recorder'];
+            KellyTools.log('[loadState] [' + result + ']', 'KellyEDRecorder');  
+        });
+    }
+    
+    // base64 items can be very heavy, calc max size ?
+    
+    KellyEDRecorder.saveState = function() {
+        
+        KellyEDispetcher.api.storage.local.set({'kelly_cache_recorder' : KellyEDRecorder.recorder}, function() {
+            
+            var result = 'OK';
+            if (KellyEDispetcher.api.runtime.lastError) {
+                result = KellyEDispetcher.api.runtime.lastError.message;
+            }
+            
+            KellyTools.log('[saveState] [' + result + ']', 'KellyEDRecorder');
+        });
     }
     
     KellyEDRecorder.init = function() {
+        
+        KellyEDRecorder.cacheEnabled = KellyTools.getManifestVersion() > 2 ? true : false;
+        if (KellyEDRecorder.cacheEnabled) KellyEDRecorder.loadState();
+        
         KellyEDispetcher.events.push({onMessage : KellyEDRecorder.onMessage});
     }
     
     KellyEDRecorder.onMessage = function(dispetcher, data) {
         
-        var response = data.response;
-        var request = data.request
-        var callback = data.callback;
+        var response = data.response; // default response array {senderId : 'dispetcher', error : '', method : request.method,}
+        var request = data.request;
+        var callback = function () {
+           
+           if (KellyEDRecorder.cacheEnabled) KellyEDRecorder.saveState(); 
+           if (data.callback) data.callback(response);
+           
+           return true;
+        }
         
         if (request.method == 'addRecord') {
             
-            if (request.clean) KellyEDRecorder.recorder = KellyEDRecorder.getDefaultRecorder();
+            response.imagesNum = 0;
+            
+            if (request.clean) {
+                       
+                 KellyEDRecorder.recorder = KellyEDRecorder.getDefaultRecorder();
+                     
+            } else if (!KellyEDRecorder.recorder.record) {
+                
+                response.error = 'Record is not enabled';
+                return callback();
+            }
             
             if (request.host && !KellyEDRecorder.recorder.host) {
+                
                 KellyEDRecorder.recorder.host = request.host;
                 KellyEDRecorder.recorder.url = request.url;
             }
@@ -34,8 +91,16 @@ var KellyEDRecorder = new Object;
             KellyTools.log('[addRecord] : images : ' + request.images.length + ' | cats : ' + (request.cats ? Object.keys(request.cats).length : 'not setted'));
             
             // addition categories information (color \ name etc.)
+            
             if (request.cats) {
-                for (var k in request.cats) if (typeof KellyEDRecorder.recorder.cats[k] == 'undefined') KellyEDRecorder.recorder.cats[k] = request.cats[k];
+                
+                for (var k in request.cats) {
+                    
+                    if (typeof KellyEDRecorder.recorder.cats[k] == 'undefined') {
+                        
+                        KellyEDRecorder.recorder.cats[k] = request.cats[k];
+                    }
+                }
             }
             
             if (request.images) {
@@ -75,20 +140,20 @@ var KellyEDRecorder = new Object;
             }
             
             response.imagesNum = KellyEDRecorder.recorder.images.length;
-            
-            if (callback) callback(response); 
-            
-            return true;
+            return callback();
             
         } else if (request.method == 'getRecord') {
             
-            if (!KellyEDRecorder.recorder || !KellyEDRecorder.recorder.images) KellyEDRecorder.recorder = KellyEDRecorder.getDefaultRecorder();
+            if (!KellyEDRecorder.recorder || !KellyEDRecorder.recorder.images) {
+                KellyEDRecorder.recorder = KellyEDRecorder.getDefaultRecorder();
+            }
+            
             response.images = KellyEDRecorder.recorder.images;
             response.cats = KellyEDRecorder.recorder.cats;
             response.url = KellyEDRecorder.recorder.url;
             response.host = KellyEDRecorder.recorder.host;
             
-            if (callback) callback(response); 
+            return callback();
             
         } else if (request.method == 'startRecord') {
             
@@ -97,9 +162,7 @@ var KellyEDRecorder = new Object;
             KellyEDRecorder.recorder = KellyEDRecorder.getDefaultRecorder();            
             KellyEDRecorder.recorder.record = true;
             
-            if (callback) callback(response); 
-            
-            return true;
+            return callback();
             
         }  else if (request.method == 'stopRecord') {
             
@@ -109,18 +172,16 @@ var KellyEDRecorder = new Object;
             response.imagesNum = KellyEDRecorder.recorder.images.length;
             KellyEDRecorder.recorder.record = false;
             
-            if (callback) callback(response); 
-            
-            return true;
+            return callback();
             
         } else if (request.method == 'isRecorded') {
             
-            response.isRecorded = KellyEDRecorder.recorder.record ? true : false;   
+            response.isRecorded = KellyEDRecorder.recorder.record ? true : false; 
+            response.imagesNum = 0;
+            
             if (response.isRecorded) response.imagesNum = KellyEDRecorder.recorder.images.length;
             
-            if (callback) callback(response); 
-            
-            return true;
+            return callback();
         }
         
         return false;

@@ -543,6 +543,11 @@ var KellyEDispetcher = new Object;
                     
                     response.item = item;
                     
+                    if (KellyEDispetcher.api.runtime.lastError) {
+                       
+                        response.error = KellyEDispetcher.api.runtime.lastError.message;
+                    }
+                    
                     if (callback) callback(response);
                 });	
                 

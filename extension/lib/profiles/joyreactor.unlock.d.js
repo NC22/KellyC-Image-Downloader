@@ -24,7 +24,7 @@ KellyEDJRUnlocker.getInitiatorUrl = function(e) {
 
 KellyEDJRUnlocker.initDRequest = function() {
     
-    
+     // todo - make static list with constant ids below 1000, passed only once on init - check current rules by getSessionRules
      return; // need to fix origin before tests
     
      KellyEDJRUnlocker.declaredRules = [];
@@ -128,9 +128,7 @@ KellyEDJRUnlocker.init = function() {
     
         KellyEDJRUnlocker.cfg = item && item[cfgName] && item[cfgName]['coptions'] ? item[cfgName]['coptions'] : KellyEDJRUnlocker.defaultCfg;
         
-        var manifestData = KellyEDispetcher.api.runtime.getManifest();
-        
-        if (manifestData['manifest_version'] == 3) {
+        if (KellyTools.getManifestVersion() > 2) {
             KellyEDJRUnlocker.initDRequest();
         } else {
             KellyEDJRUnlocker.initWebRequest();

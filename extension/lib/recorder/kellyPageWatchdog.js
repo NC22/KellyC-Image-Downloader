@@ -534,6 +534,7 @@ function KellyPageWatchdog(cfg)
             updateAF = true;
             
             KellyTools.getBrowser().runtime.sendMessage({method: "addRecord", images : handler.imagesPool, cats : handler.additionCats, url : handler.url, host : handler.host}, function(response) {
+                console.log(response);
                 showRecorder(response.imagesNum);
             });   
             

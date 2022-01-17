@@ -1044,8 +1044,8 @@ function KellyGrabber(cfg) {
             var title = '#' + itemN;
             if (downloads[i].subItem !== false) {
                 
-                var itemNto = options.invertNumeration ? itemN - downloads[i].item.pImage.length+1 : itemN + downloads[i].item.pImage.length-1;
-                title += '-#' + itemNto;
+                var itemNto = options.invertNumeration ? itemN + downloads[i].item.pImage.length-1 : itemN - downloads[i].item.pImage.length+1 ;
+                title = options.invertNumeration ? '#' + itemN + '-#' + itemNto : '#' + itemNto + '-#' + itemN;
             }
                 
             if (!holder) {

@@ -202,7 +202,8 @@ KellyDPage.addStorageItem = function(src, doc, referrer, groups) {
 // full restart needed only first time and when hostlist modified
 
 KellyDPage.updateUrlMap = function(onReady, restart) {
-          
+        
+    console.log('[updateUrlMap] ' + (restart ? '[full restart]' : '[update urlmap]') + ' ...');
     KellyDPage.env.webRequestsRules = {
         referrer : false,
         urlMap : KellyDPage.urlMap,
@@ -211,19 +212,15 @@ KellyDPage.updateUrlMap = function(onReady, restart) {
         method : 'registerDownloader',
         browser : KellyTools.getBrowserName(),
     };
-
-    var onUpdatedEvent = function(request) {                
-        if (request.method == "updateUrlMap" || request.method == "registerDownloader") {
-            onReady();
-            K_FAV.runtime.webRequestPort.onMessage.removeListener(onUpdatedEvent);
-        }
+    
+    if (restart) {
+        var request = KellyDPage.env.webRequestsRules;
+    } else {
+        var request = {method : 'updateUrlMap', urlMap : KellyDPage.urlMap};
     }
     
-    var request = restart ?  KellyDPage.env.webRequestsRules : {method : 'updateUrlMap', urlMap : KellyDPage.urlMap};
-
-    K_FAV.getGlobal('fav').coptions.webRequest = true;          
-    K_FAV.runtime.webRequestPort.onMessage.addListener(onUpdatedEvent);
-    K_FAV.runtime.webRequestPort.postMessage(request);
+    K_FAV.getGlobal('fav').coptions.webRequest = true;  
+    K_FAV.initWebRequestRules(request, onReady);
 }
 
 KellyDPage.updateDisplayedState = function() {
@@ -840,6 +837,7 @@ KellyDPage.showRecordedImages = function(onShow) {
           KellyDPage.setDefaultCatFilters();
           K_FAV.updateFavCounter();
           
+          if (!response.host) response.host = 'https://default.default/';
           var responseLocation = KellyTools.getLocationFromUrl(response.host);
           
           K_FAV.getGlobal('fav').dbName = KellyTools.generateIdWord(responseLocation.hostname.replace('.', '_') + '_record');          

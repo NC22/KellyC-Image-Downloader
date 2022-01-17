@@ -1181,7 +1181,16 @@ KellyTools.getLocationFromUrl = function(str) {
 
     if (typeof URL != 'undefined') {
 
-        var l = new URL(str); // bg scripts not support document object, priority to URL ent
+        try {
+            var l = new URL(str); // bg scripts not support document object, priority to URL ent
+        } catch (e) {
+            
+            console.log('Fail to parse url string ' + str);
+            // console.log(e);
+            
+            return new URL('https://default.default/');
+        }
+        
         
     } else {
     
@@ -1359,6 +1368,18 @@ KellyTools.setCopyright = function(id, context) {
         KellyTools.getBrowser().tabs.create({url: this.href}, function(tab){}); 
         return false;
     }
+}
+
+KellyTools.getManifestVersion = function() {
+    
+    var manifestData = KellyTools.getBrowser().runtime.getManifest();
+    var version = parseInt(manifestData['manifest_version']);
+    if (isNaN(version) || version < 2) {
+        version = 2;        
+        console.error('Fail to detect manifest version. Default version [2] is used');
+    }
+    
+    return manifestData['manifest_version'];
 }
 
 // params - paginationContainer, curPage, onGoTo, classPrefix, pageItemsNum, itemsNum, perPage
