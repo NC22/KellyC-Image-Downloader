@@ -3,6 +3,6 @@
 <br>
 Old versions was merged to single files for background and front js by merge.bat script. It's not allowed in some extension stores, so I replaced this behave. Old bat files for merge scripts placed in "old" folder.
 <br>
-Use manifest.v[1-2].json from main "extension" folder as main manifest.json file for extension. 
+Use manifest.v[2-3].json from main "extension" folder as main manifest.json file for extension. 
 <br>
 Manifest v3 support currently in testing mode.
