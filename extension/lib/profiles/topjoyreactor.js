@@ -41,10 +41,34 @@ var KellyProfileTopJoyreactor = new Object();
         
         // currently no any direct links on page
         handler.initPosts = function(onInit) {
-            KellyTools.addCss(handler.className + '-hide-popup', ".ant-dropdown { display : none;}", true);
+            // KellyTools.addCss(handler.className + '-hide-popup', ".ant-dropdown { display : none;}", true);
             
             var post = document.body.querySelectorAll('.post-card'), postValid = [];
             for (var i = 0; i < post.length; i++) {
+                
+                var link = post[i].querySelector('.post-footer a.ant-btn.ant-btn-text');
+                if (link) {
+                    link.classList.add(handler.className + '-post-link'); 
+                    post[i].classList.add(handler.className + '-post');
+                } else {
+                    // var linkButton = post[i].querySelector('.post-footer button.ant-dropdown-trigger');
+                    // if (linkButton) {
+                    //    var link = document.createElement('A');
+                    //        link.className = handler.className + '-post-link';
+                    //        link.href='/';
+                    //    linkButton.parentNode.insertBefore(link, linkButton);
+                    // }
+                }
+            }
+            
+            onInit();
+        
+            /*
+            
+            need testing, wait final style for m. domain, now postValid and link length may mismatch
+            
+            for (var i = 0; i < post.length; i++) {
+                
                 var linkButton = post[i].querySelector('.post-footer button.ant-dropdown-trigger');
                 if (linkButton) {
                     postValid.push(post[i]); linkButton.click();
@@ -66,6 +90,8 @@ var KellyProfileTopJoyreactor = new Object();
                 setTimeout(function() { KellyTools.addCss(handler.className + '-hide-popup', "", true); }, 1000);
                 onInit();
             }, 100);
+            
+            */
         }
         
         handler.getPosts = function(container) {
