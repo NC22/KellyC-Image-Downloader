@@ -96,6 +96,8 @@ KellyDPage.cats = {
     imagePreview : {name : 'Preview', selected : 2, color : '#45dbea'},
     imageAny : {name : 'Media', selected : 1, color : '#45dbea'},
     
+    imageTrash : {name : 'Misc', exclude : true},
+        
     imageBg : {name : 'Background image'},
     
     withDoc : {name : 'With doc link'},

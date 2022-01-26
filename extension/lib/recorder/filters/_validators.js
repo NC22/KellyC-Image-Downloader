@@ -2,7 +2,7 @@ KellyPageWatchdog.validators.push({url : 'catface.ru', host : 'catface.ru', patt
 KellyPageWatchdog.validators.push({url : 'patreon.com', host : 'patreon.com', patterns : [['patreon-media/p/post/', 'imageAny']]});
 KellyPageWatchdog.validators.push({url : 'pinterest.', host : ['pinterest.com', 'pinterest.ru'],  patterns : [['/originals/', 'imageOriginal'], ['i.pinimg.com/474x', 'imagePreview'], ['i.pinimg.com/736x', 'imagePreview'], ['i.pinimg.com/236x', 'imagePreview']]});
 KellyPageWatchdog.validators.push({url : 'discord.', host : 'discord.com', patterns : [['cdn.discordapp.com/attachments', 'imageOriginal'], ['&height=', 'imagePreview']]});
-KellyPageWatchdog.validators.push({url : 'reddit.com', host : 'reddit.com',  patterns : [['preview.redd.it', 'imagePreview'], ['thumbs.redditmedia.com', 'imagePreview'], ['i.imgur.com', 'imagePreview'], ['i.redd.it', 'imagePreview']]});
+KellyPageWatchdog.validators.push({url : 'reddit.com', host : 'reddit.com',  patterns : [['preview.redd.it/award_images', 'imageTrash'], ['thumbs.redditmedia.com', 'imageTrash'], ['external-preview.redd.it', 'imageTrash'], ['preview.redd.it', 'imagePreview'], ['i.imgur.com', 'imagePreview'], ['i.redd.it', 'imagePreview'], ]});
 KellyPageWatchdog.validators.push({url : 'fanbox.cc', host : 'fanbox.cc',  patterns : [['fanbox/public/images', 'imagePreview']]});
 KellyPageWatchdog.validators.push({url : 'hentai-foundry.', host : 'hentai-foundry.com', patterns : [['thumb.php', 'imagePreview'], [new RegExp('pictures.hentai-foundry.com/[0-9a-zA-Z]+\/'), 'imageByDocument']]});
 KellyPageWatchdog.validators.push({url : '2ch.hk', host : '2ch.hk', patterns : [[new RegExp('//2ch.hk/[a-zA-Z0-9]+/src/'), 'imageOriginal'], [new RegExp('//2ch.hk/[a-zA-Z0-9]+/thumb/'), 'imagePreview']]});

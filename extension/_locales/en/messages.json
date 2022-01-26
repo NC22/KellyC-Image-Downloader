@@ -462,7 +462,7 @@
         "message":"Please select file name template, with include relative patch from base folder in browser <b>Downloads</b> folder<br><br>Allowed variables :<br>"
     },
     "grabber_name_template_help_1":{  
-        "message":"<b>#category_1#</b>, <b>#category_2#</b>, <b>#category_N#</b> - names of 1, 2 and N categorys of downloaded item (by priority)<br>"
+        "message":"<b>#category_1#</b>, <b>#category_2#</b>, <b>#category_N#</b> - names of 1, 2 and N categorys of downloaded item (by priority) with \"Use in name template\" enabled option<br>"
     },
     "grabber_name_template_help_2":{  
         "message":"<b>#filename#</b> - original file name<br><b>#id#</b> - unique id in current selected local storage<br><b>#number#</b> - item number in current order<br>"
