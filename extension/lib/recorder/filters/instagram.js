@@ -23,22 +23,35 @@ KellyRecorderFilterInstagram.addItemByDriver = function(handler, data) {
     }
 }
 
+KellyRecorderFilterInstagram.getBestQuality = function(instImageItem, imagesPool) {
+    
+    var mediaQuality = false;
+    instImageItem.image_versions2.candidates.forEach(function(srcData) {
+        if (!mediaQuality || srcData.width > mediaQuality.width) mediaQuality = srcData;
+    });
+
+    if (mediaQuality) imagesPool.push({relatedSrc : [mediaQuality.url]});
+}
+
 KellyRecorderFilterInstagram.parseImagesDocByDriver = function(handler, data) {
     
     if (handler.url.indexOf('instagram') != -1){ 
     
         try {
-            var pageDataRegExp = /__additionalDataLoaded\([\'\"]?[-A/-Za-z0-9_]+[\'\"],\{([\s\S]*)\}\);/g, pageData = pageDataRegExp.exec(data.thread.response), mediaQuality = false;
+            var pageDataRegExp = /__additionalDataLoaded\([\'\"]?[-A/-Za-z0-9_]+[\'\"],\{([\s\S]*)\}\);/g, pageData = pageDataRegExp.exec(data.thread.response);
             if (pageData === null) return;
             
             handler.lastThreadJson = JSON.parse('{' + pageData[1] + '}');
             // console.log(handler.lastThreadJson);
-            
-            handler.lastThreadJson.items[0].image_versions2.candidates.forEach(function(srcData) {
-                if (!mediaQuality || srcData.width > mediaQuality.width) mediaQuality = srcData;
-            });
-
-            if (mediaQuality) handler.imagesPool.push({relatedSrc : [mediaQuality.url]});
+             
+            var item = handler.lastThreadJson.items[0];
+            if (item.carousel_media) {
+                item.carousel_media.forEach(function(instImageItem) {
+                    KellyRecorderFilterInstagram.getBestQuality(instImageItem, handler.imagesPool);
+                });
+            } else {
+                KellyRecorderFilterInstagram.getBestQuality(handler.lastThreadJson.items[0], handler.imagesPool);
+            }
             
         } catch (e) {
             console.log(e);
