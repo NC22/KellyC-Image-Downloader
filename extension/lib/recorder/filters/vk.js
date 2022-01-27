@@ -10,11 +10,22 @@ KellyRecorderFilterVK.addItemByDriver = function(handler, data) {
             else handler.addSrcFromStyle(data.el, data.item, 'imagePreview');
             
             return data.item.relatedSrc.length > 0 ? handler.addDriverAction.ADD : handler.addDriverAction.SKIP;
-            
+        
+        // Album items
+        
         } else if (handler.url.indexOf('vk.com') != -1 && (data.el.getAttribute('data-id') || data.el.getAttribute('data-photo-id'))) {
             
             handler.addSrcFromStyle(data.el, data.item, 'imagePreview');             
             if (data.item.relatedSrc.length <= 0) return handler.addDriverAction.SKIP;
+            
+            // Mobile
+            
+            if (data.el.getAttribute('data-src_big')) {
+                handler.addSingleSrc(data.item, data.el.getAttribute('data-src_big'), 'addSrcFromAttributes-src', data.el, 'imageOriginal');
+                return handler.addDriverAction.ADD;
+            }
+                         
+            // Desktop
             
             var query = '&module=feed', marks = '', relatedDoc = data.el.tagName == 'A' ? data.el : KellyTools.getElementByTag(data.el, 'A');
 
