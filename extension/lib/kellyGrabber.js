@@ -1487,13 +1487,7 @@ function KellyGrabber(cfg) {
                 fileUrlName = KellyTools.val(fileUrlName, 'filename');
                 
             if (!fileUrlName) {
-                
-                KellyTools.log('cant find filename for ' + item.id);
-                KellyTools.log(item);
-                KellyTools.log(getNameTemplate());
-                
-                addFailItem(ditem, 'Ошибка получения имени файла (#filename#) для Url ' + ditem.url);                
-                return false;
+                fileUrlName = 'default' + item.id; 
             }
             
             fileName = KellyTools.replaceAll(fileName, '#filename#', fileUrlName);
