@@ -1043,8 +1043,9 @@ function KellyFavItems(cfg)
             }, 'additions');
         }
         
-        if (fav.coptions.optionsSide) optionsButton.style.display = 'none';
         favContent = envContainers.favContent; 
+        if (fav.coptions.optionsSide) menuButtons['ctoptions'].style.display = 'none';
+        
         return true;
     }
       

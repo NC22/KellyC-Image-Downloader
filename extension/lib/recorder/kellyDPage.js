@@ -97,7 +97,8 @@ KellyDPage.cats = {
     imageAny : {name : 'Media', selected : 1, color : '#45dbea'},
     
     imageTrash : {name : 'Misc', exclude : true},
-        
+    imageSrcSet : {name : 'Alt Sizes'},
+    
     imageBg : {name : 'Background image'},
     
     withDoc : {name : 'With doc link'},

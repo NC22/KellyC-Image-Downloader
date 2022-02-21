@@ -1,0 +1,11 @@
+@media (max-width: 1040px) {
+    .__BASECLASS__-FavContainer.__BASECLASS__-top-joyreactor-cc {
+        width: 100%; 
+        max-width: unset;
+        min-width: unset;
+    }  
+
+    .__BASECLASS__-MainMenuItem.__BASECLASS__-top-joyreactor-cc {
+       margin-right: 6px;
+    }
+}

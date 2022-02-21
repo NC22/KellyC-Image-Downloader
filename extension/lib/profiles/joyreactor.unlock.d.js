@@ -24,7 +24,8 @@ KellyEDJRUnlocker.getInitiatorUrl = function(e) {
 
 KellyEDJRUnlocker.initDRequest = function() {
     
-     // todo - make static list with constant ids below 1000, passed only once on init - check current rules by getSessionRules
+     // todo - make static list with constant ids below 1000, passed only once on init - check current rules by getSessionRules if not tye to host
+     // currently apply rules only for port.sender.tab.url = m.reactor
      return; // need to fix origin before tests
     
      KellyEDJRUnlocker.declaredRules = [];
@@ -52,7 +53,7 @@ KellyEDJRUnlocker.initDRequest = function() {
                             { "header": "Origin", "operation": "set", "value": 'https://api.joyreactor.cc' },                    
                         ],
                         "responseHeaders" : [
-                             { "header": "Access-Control-Allow-Origin", "operation": "set", "value": KellyTools.getLocationFromUrl(port.sender.tab.url).origin}, ///// todo - manifest v3 dosnt have document in bg
+                             { "header": "Access-Control-Allow-Origin", "operation": "set", "value": KellyTools.getLocationFromUrl(port.sender.tab.url).origin}, 
                              { "header": "Access-Control-Allow-Credentials", "operation": "set", "value": "true" },
                              { "header": "Access-Control-Allow-Headers", "operation": "set", "value": "Content-Type" },
                         ],

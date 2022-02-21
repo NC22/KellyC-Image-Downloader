@@ -22,6 +22,10 @@ KellyAdditionsForm = {
     },
     show : function(container, favEnv, pageId) {
       
+      if (typeof KellyProfileRecorder == 'undefined') {
+           KellyAdditionsForm.menu = ['additions_about', 'additions_donate'];
+      }
+      
       pageId = pageId ? pageId : KellyAdditionsForm.menu[0];
             
       favEnv.closeSidebar();
@@ -29,7 +33,12 @@ KellyAdditionsForm = {
       KellyTools.getBrowser().runtime.sendMessage({method: "getResources", asObject : true, items : KellyAdditionsForm.tpl, itemsRoute : {module : 'additions', type : 'html'}}, function(request) {
              
              var pModulesHtml = '', menuHtml = '', css = '';
-             var pModules = [KellyProfileRecorder, KellyProfileJoyreactor];
+             var pModules = [];
+             var defaultLinks = false;
+             
+             if (typeof KellyProfileRecorder != 'undefined') pModules.push(KellyProfileRecorder);
+             if (typeof KellyProfileJoyreactor != 'undefined') pModules.push(KellyProfileJoyreactor);
+             
              var curP = favEnv.getGlobal('env'), options = favEnv.getGlobal('options'), bcEnv = curP.className, bc = bcEnv + '-additions';
              
              var languages = ['en', 'ru'], defaultLangugage = KellyLoc.detectLanguage();
@@ -47,6 +56,9 @@ KellyAdditionsForm = {
              for (var i = 0; i < pModules.length; i++) {
         
                 var p = pModules[i].getInstance(), tplName = '', tplData = '';
+                
+                if (!defaultLinks && p.extLinks) defaultLinks = p.extLinks;
+                
                 if (p.profile == 'recorder') {
                     
                     tplName = 'profile-selector-recorder';
@@ -72,7 +84,16 @@ KellyAdditionsForm = {
                 menuHtml += KellyTools.getTpl(request.data.loadedData, 'menu-item', {NAME : KellyLoc.s(KellyAdditionsForm.menu[i], KellyAdditionsForm.menu[i]), TARGET : KellyAdditionsForm.menu[i]});
             }
             
-            KellyTools.setHTMLData(container, KellyTools.getTpl(request.data.loadedData, 'page', {MODULES : pModulesHtml, MENU : menuHtml, HIDDENCLASS : bcEnv + '-hidden'}));
+            KellyTools.setHTMLData(container, KellyTools.getTpl(request.data.loadedData, 'page', {
+                MODULES : pModulesHtml, 
+                MENU : menuHtml,
+                HIDDENCLASS : bcEnv + '-hidden',
+                INSTALL_FF : defaultLinks['install_ff'],
+                INSTALL_CHROME : defaultLinks['install_chrome'],
+                AUTHOR : defaultLinks['author'],
+                GITHUB : defaultLinks['github'],
+                PP : defaultLinks['pp'],
+            }));
             
             for (var i = 0; i < pModules.length; i++) {
                 KellyAdditionsForm.initToggleProfile(pModules[i].getInstance(), curP == pModules[i].getInstance() ? favEnv : false);

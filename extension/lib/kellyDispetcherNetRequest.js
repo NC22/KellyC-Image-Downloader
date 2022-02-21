@@ -161,9 +161,14 @@ KellyEDispetcherDR.onTabConnect = function(self, data) {
     var tabData = false;
     
     KellyTools.log('[Downloader] CONNECTED  Tab  ' + port.sender.tab.id, 'KellyEDispetcher | declarativeNetRequest');
+        
+    // Check is extension from front was already connected before
+    // This can happen IN case worker was killed, or some other unpredicted event happend (port closed, page reloaded without callback, etc.)
+    
     for (var i = 0; i < KellyEDispetcher.downloaderTabs.length; i++) {
         if (KellyEDispetcher.downloaderTabs[i].id == port.sender.tab.id) {
-            KellyTools.log('[Downloader] already connected : reset connection, change port', 'KellyEDispetcher | declarativeNetRequest');
+            KellyTools.log('[Downloader] Tab was already connected : reset connection, change port', 'KellyEDispetcher | declarativeNetRequest');
+            port.postMessage({method : 'onPortCreate', message : 'connected', isDownloadSupported : KellyEDispetcher.isDownloadSupported(), reconect : true});
             KellyEDispetcher.downloaderTabs[i].resetEvents();
             tabData = KellyEDispetcher.downloaderTabs[i];
             tabData.port = port;

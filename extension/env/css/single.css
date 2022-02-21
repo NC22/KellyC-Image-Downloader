@@ -102,6 +102,10 @@ input[type=submit] {
 	font-size: 14px;
 }
 
+.__BASECLASS__-FavFilter.active {
+     padding : 6px;
+}
+
 .__BASECLASS__-FavItemsCount.__BASECLASS__-FavItemsCount-1 {
 	border-radius : 6px;
 }

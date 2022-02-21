@@ -723,10 +723,14 @@ var KellyEDispetcher = new Object;
         if (KellyEDispetcher.callEvent('onTabConnect', {port : port})) return;
         
         KellyTools.log('[Downloader] CONNECTED | Tab : ' + port.sender.tab.id, 'KellyEDispetcher');
-        for (var i = 0; i < KellyEDispetcher.downloaderTabs.length; i++) {
+        
+        // Check is extension from front was already connected before
+        // This can happen IN case worker was killed, or some other unpredicted event happend (port closed, page reloaded without callback, etc.)
+        
+        for (var i = 0; i < KellyEDispetcher.downloaderTabs.length; i++) { 
             if (KellyEDispetcher.downloaderTabs[i].id == port.sender.tab.id) {
-                KellyTools.log('[Downloader] CONNECTED | Error : already connected', 'KellyEDispetcher');
-                
+                KellyTools.log('[Downloader] CONNECTED | Notice : Tab was already connected : reset connection', 'KellyEDispetcher');
+                port.postMessage({method : 'onPortCreate', message : "connected", isDownloadSupported : KellyEDispetcher.isDownloadSupported(), reconect : true});
                 return;
             }
         }

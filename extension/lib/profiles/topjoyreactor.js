@@ -11,6 +11,12 @@ var KellyProfileTopJoyreactor = new Object();
         
         handler.events.onPageReadyOrig = handler.events.onPageReady;
         handler.events.onExtensionReady = function() {
+            handler.sidebarConfig.widthBase = 0;
+            
+            setTimeout(function() {
+                handler.sidebarConfig.topMax = handler.mContainers.siteContent.getBoundingClientRect().top + KellyTools.getScrollTop() + 24;   
+            }, 300);
+            
             if (handler.unlockManager) handler.unlockManager.formatCensoredPosts();
         };
         
@@ -26,6 +32,77 @@ var KellyProfileTopJoyreactor = new Object();
         
         handler.initOnLoad = function(onLoad) {
             
+            window.addEventListener('message', function(e) {
+                    
+                    if (!e.data || !e.data.method || e.data.method != 'kelly_fetch_hook_event' || !e.data.requestId) return false;
+                    
+                    var getGraphQLPosts = function(inData) {
+                        
+                        if (!inData) return false;
+                        
+                        if (inData.node) { // e.data.eventDataIn.requestCfg.body.indexOf(...) RefetchPagerQuery
+                             return inData.node.postPager.posts;
+                        } else if (inData.blog) { // e.data.eventDataIn.requestCfg.body.indexOf(...) TagPageQuery 
+                            return inData.blog.postPager.posts; 
+                        } else if (inData.user) { // e.data.eventDataIn.requestCfg.body.indexOf(...) UserProfilePageQuery
+                            return inData.user.postPager.posts;     
+                        } else if (inData.weekTopPosts) { // e.data.eventDataIn.requestCfg.body.indexOf(...) WeekTopPageQuery
+                            return inData.weekTopPosts;  
+                        } else { // main page
+                            return false;
+                        }
+                        
+                    }
+                    
+                    var response = {
+                        method : 'kelly_fetch_hook_event_complite',
+                        requestId : e.data.requestId,
+                        eventName : e.data.eventName,
+                        eventDataOut : false,
+                    };     
+                    
+                    if (e.data.eventName == 'onRequestReady') {
+                                                    
+                        var posts = false;
+                        try {
+                            
+                            if (Object.prototype.toString.call(e.data.eventDataIn.responseJson) === '[object Array]') {
+                                
+                                for (var i = 0; i < e.data.eventDataIn.responseJson.length; i++) {
+                                    posts = getGraphQLPosts(e.data.eventDataIn.responseJson[i].data);
+                                   
+                                    if (posts) break;
+                                }
+                                
+                            } else {
+                                
+                                posts = getGraphQLPosts(e.data.eventDataIn.responseJson.data);
+                            }
+                             console.log(posts);
+                        } catch(e) {      
+                            console.log(e);
+                            
+                            posts = false;
+                        }
+                        
+                        if (posts) {
+                            for (var i = 0; i < posts.length; i++) {
+                                posts[i].text += '<span class="kelly-post-id" style="display : none;" data-id="' + (KellyProfileJoyreactorUnlock.getNodeId(posts[i].id)) + '"></span>';
+                                posts[i].unsafe = false;
+                            }
+                        }
+                        
+                        response.eventDataOut = {
+                            responseBody : JSON.stringify(e.data.eventDataIn.responseJson),
+                            responseOptions : { "status" : 200 , "statusText" : "OK", "headers" : e.data.eventDataIn.responseHeaders },
+                        };
+                    }
+                    
+                    e.source.postMessage(response, window.location.origin);
+            }); 
+            
+            KellyTools.injectAddition('fetch', function() {});
+            
             if (handler.getPosts().length > 0) return onLoad();
             
             handler.observer = new MutationObserver(function(mutations) {
@@ -39,9 +116,7 @@ var KellyProfileTopJoyreactor = new Object();
             handler.observer.observe(document.getElementById('root'), {childList: true, subtree: true});
         }
         
-        // currently no any direct links on page
         handler.initPosts = function(onInit) {
-            // KellyTools.addCss(handler.className + '-hide-popup', ".ant-dropdown { display : none;}", true);
             
             var post = document.body.querySelectorAll('.post-card'), postValid = [];
             for (var i = 0; i < post.length; i++) {
@@ -51,47 +126,18 @@ var KellyProfileTopJoyreactor = new Object();
                     link.classList.add(handler.className + '-post-link'); 
                     post[i].classList.add(handler.className + '-post');
                 } else {
-                    // var linkButton = post[i].querySelector('.post-footer button.ant-dropdown-trigger');
-                    // if (linkButton) {
-                    //    var link = document.createElement('A');
-                    //        link.className = handler.className + '-post-link';
-                    //        link.href='/';
-                    //    linkButton.parentNode.insertBefore(link, linkButton);
-                    // }
+                    var linkButton = post[i].querySelector('.post-footer button.ant-dropdown-trigger'), postId = post[i].querySelector('.kelly-post-id');
+                    if (linkButton && postId) {
+                        link = document.createElement('A');
+                        link.className = handler.className + '-post-link';
+                        link.href = '/post/' + postId.getAttribute('data-id');
+                        linkButton.parentNode.insertBefore(link, linkButton); 
+                        post[i].classList.add(handler.className + '-post');
+                    }
                 }
             }
             
             onInit();
-        
-            /*
-            
-            need testing, wait final style for m. domain, now postValid and link length may mismatch
-            
-            for (var i = 0; i < post.length; i++) {
-                
-                var linkButton = post[i].querySelector('.post-footer button.ant-dropdown-trigger');
-                if (linkButton) {
-                    postValid.push(post[i]); linkButton.click();
-                    var link = document.createElement('A');
-                        link.className = handler.className + '-post-link';
-                    linkButton.parentNode.insertBefore(link, linkButton);
-                }
-            }
-            
-            setTimeout(function() {
-                
-                var link = document.body.querySelectorAll('.ant-dropdown-placement-topCenter .ant-dropdown-menu-item:last-child a');
-                for (var i = 0; i < link.length; i++) {   
-                    postValid[i].querySelector('.post-footer button.ant-dropdown-trigger').click(); 
-                    postValid[i].getElementsByClassName(handler.className + '-post-link')[0].href = link[i].href;
-                    postValid[i].classList.add(handler.className + '-post');
-                }
-                
-                setTimeout(function() { KellyTools.addCss(handler.className + '-hide-popup', "", true); }, 1000);
-                onInit();
-            }, 100);
-            
-            */
         }
         
         handler.getPosts = function(container) {
@@ -101,7 +147,7 @@ var KellyProfileTopJoyreactor = new Object();
         
         handler.getAllMedia = function(publication) {
             
-            var data = [], content = KellyTools.getElementByClass(publication, 'post-content');
+            var data = [], content = KellyTools.getElementByClass(publication,publication.classList.contains('comment') ? 'comment-content' : 'post-content');
             if (!content || !publication) return data;
                  
             var imagesEl = content.getElementsByTagName('img');
@@ -120,6 +166,11 @@ var KellyProfileTopJoyreactor = new Object();
             return data;
         }
         
+        handler.getCommentText = function(comment) {
+            var contentContainer = comment.querySelector('.comment-content');
+            if (contentContainer) return KellyTools.getElementText(contentContainer);
+        }
+    
         handler.getPostLinkEl = function(publication) { 
             return publication.getElementsByClassName(handler.className + '-post-link')[0];
         }
@@ -175,13 +226,48 @@ var KellyProfileTopJoyreactor = new Object();
             }     
         }   
         
+        handler.formatComments = function(block) {
+            
+            if (handler.fav.getGlobal('fav').coptions.hideAddToFav) return;
+            
+            var comments = block.getElementsByClassName('comment');        
+            for(var i = 0; i < comments.length; i++) {
+                 
+                var link = KellyTools.getRelativeUrl(handler.getCommentLink(comments[i]));
+                if (!link) continue;
+                
+                var addToFavButton = comments[i].getElementsByClassName(handler.className + '-addToFavComment');            
+                if (!addToFavButton.length) {
+            
+                    var bottomLink = comments[i].getElementsByClassName('comment-link');
+
+                    addToFavButton = document.createElement('a');
+                    addToFavButton.href = '#';
+                    addToFavButton.className = handler.hostClass + ' ' + handler.className + '-addToFavComment';
+                    bottomLink[0].parentNode.insertBefore(addToFavButton, bottomLink[0].nextSibling);                     
+                }         
+                
+                handler.updateCommentAddToFavButtonState(block, comments[i], link);
+            }
+            
+            KellyTools.log('formatComments : ' + comments.length + ' - '+ block.id);
+        }    
+        
         handler.initUpdateWatcher = function() {
             
             handler.observer = new MutationObserver(function(mutations) {
 
                 for (var i = 0; i < mutations.length; i++) {
                     
-                    if (mutations[i].target.className.indexOf(handler.mainContainerClass) != -1) {
+                   if (mutations[i].target.classList.contains('content')) {
+                        var post = KellyTools.getParentByClass(mutations[i].target, handler.className + '-post');
+                        if (post) {
+                            handler.formatComments(post);
+                        }
+                        
+                        return;
+                        
+                   } else if (mutations[i].target.classList.contains(handler.mainContainerClass)) {
                         handler.initPosts(function() {
                             KellyTools.log('New page loaded, format publications');   
                             handler.getMainContainers();

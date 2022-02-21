@@ -23,8 +23,9 @@ function KellyProfileJoyreactor() {
     this.className = 'kelly-jr-ui'; // base class for every extension container \ element
 
     this.sidebarConfig = {
-        topMax : 0,
+        topMax : 24,
         paddingTop : 24,
+        widthBase : 24,
         nDisabled : -1, // 1 - sidebar not found or hidden (jras - sidebar can be hidden)
     };
     
@@ -115,7 +116,6 @@ function KellyProfileJoyreactor() {
                 // private
                  
                 sideBlock : document.getElementById('sidebar'), // helps to detect width of sideBar, only for updateSidebarPosition()
-                tagList : document.getElementById('tagList'),   // helps to detect lowest position of sideBar by Y (top), only for updateSidebarPosition()
             };
             
             handler.mContainers.sideBar = handler.mContainers.body;
@@ -153,8 +153,10 @@ function KellyProfileJoyreactor() {
         */     
         
         onInitWorktop : function() {
+            
             handler.sidebarConfig.topMax = handler.mContainers.siteContent.getBoundingClientRect().top + KellyTools.getScrollTop();   
-
+            if (handler.hostClass.indexOf('old') == -1) handler.sidebarConfig.widthBase = 24;
+            
             KellyTools.addEventPListener(window, "resize", updateSidebarPosition, 'fav_dialog_');
             KellyTools.addEventPListener(window, "scroll", updateSidebarPosition, 'fav_dialog_');               
             return false;
@@ -299,11 +301,7 @@ function KellyProfileJoyreactor() {
         
         if ((addTofav && !item.classList.contains('favorite')) || (!addTofav && item.classList.contains('favorite'))) KellyTools.dispatchEvent(item);
     }
-    
-    function getCommentsList(postBlock) {   
-        return postBlock.getElementsByClassName('comment');
-    }
-    
+        
     function isPostCensored(postBlock) {
         return (postBlock.innerHTML.indexOf('/images/censorship') != -1 || postBlock.innerHTML.indexOf('/images/unsafe_ru') != -1) ? true : false;
     }
@@ -379,32 +377,19 @@ function KellyProfileJoyreactor() {
        
         if (sideBlock) {
             
-            var widthBase = 0, sideBlockBounds = sideBlock.getBoundingClientRect();  
+            var sideBlockBounds = sideBlock.getBoundingClientRect();  
             if (sideBlockBounds.width <= 50) sideBlock = false; 
             else {
-                if (handler.hostClass.indexOf('old') == -1) widthBase = 24;
                 
                 sideBarWrap.style.right = 'auto';
                 sideBarWrap.style.left = Math.round(sideBlockBounds.left + scrollLeft) + 'px';
-                sideBarWrap.style.width = Math.round(sideBlockBounds.width + widthBase) + 'px';
+                sideBarWrap.style.width = Math.round(sideBlockBounds.width + handler.sidebarConfig.widthBase) + 'px';
             }
         } 
 
         if (!sideBlock) {
             sideBarWrap.style.right = '20px';
             sideBarWrap.style.left = 'auto';
-        }		
-        
-        var tagList = handler.getMainContainers().tagList;
-        if (tagList) {
-            
-            var sideBarWrapBounds = sideBarWrap.getBoundingClientRect();
-            var bottomLimit = tagList.getBoundingClientRect().top + scrollTop;
-            
-            if (sideBarWrapBounds.height + sideBarWrapBounds.top + scrollTop >= bottomLimit) {
-                var newTop = bottomLimit - sideBarWrapBounds.height;
-                if (topMax < newTop)  sideBarWrap.style.top = newTop + 'px';
-            }
         }
     }
     
@@ -491,8 +476,8 @@ function KellyProfileJoyreactor() {
     }
         
     this.formatComments = function(block) {
-    
-        var comments = getCommentsList(block);        
+   
+        var comments = block.getElementsByClassName('comment');        
         for(var i = 0; i < comments.length; i++) {
              
             var link = KellyTools.getRelativeUrl(handler.getCommentLink(comments[i]));
@@ -525,15 +510,26 @@ function KellyProfileJoyreactor() {
                 } else {
                      KellyTools.log('formatComments : cant find placeholder for append "Add to fav button"'); 
                 }
-                
-            } else {
-                addToFavButton = addToFavButton[0];
-            }            
+            }    
             
+            handler.updateCommentAddToFavButtonState(block, comments[i], link);
+        }
+        
+        KellyTools.log('formatComments : ' + comments.length + ' - '+ block.id);
+    }
+    
+    /* used only in child classes */
+    
+    this.updateCommentAddToFavButtonState = function(block, comment, link) {
+        
+            var addToFavButton = comment.getElementsByClassName(handler.className + '-addToFavComment');            
+            if (!addToFavButton.length) return;
+            
+            addToFavButton = addToFavButton[0];
             addToFavButton.innerText = KellyLoc.s('в избранное', 'add_to_fav_comment');
             addToFavButton.removeAttribute('data-item-index');
             
-            var inFav = handler.fav.getStorageManager().searchItem(handler.fav.getGlobal('fav'), {link : false, commentLink : link}); // search comment by link            
+            var inFav = handler.fav.getStorageManager().searchItem(handler.fav.getGlobal('fav'), {link : false, commentLink : link}); 
             if (inFav !== false) {
                 addToFavButton.setAttribute('data-item-index', inFav);
                 addToFavButton.innerText = KellyLoc.s('удалить из избранного', 'remove_from_fav_comment');
@@ -542,14 +538,10 @@ function KellyProfileJoyreactor() {
             addToFavButton.onclick =  function() {
                 var itemIndex = this.getAttribute('data-item-index');
                 var onUpdateItem = function() { handler.formatComments(block); }
-                var comment = KellyTools.getParentByClass(this, 'comment');
-                if (comment) handler.fav.showAddToFavDialog(itemIndex ? parseInt(itemIndex) : block, comment, onUpdateItem, onUpdateItem);
+                handler.fav.showAddToFavDialog(itemIndex ? parseInt(itemIndex) : block, comment, onUpdateItem, onUpdateItem);
                 return false;					
             }
-        }
-        
-        KellyTools.log('formatComments : ' + comments.length + ' - '+ block.id);
-    }    
+    }
         
     this.formatPostContainer = function(postBlock) {
         

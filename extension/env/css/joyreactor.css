@@ -67,7 +67,7 @@ table.__BASECLASS__-options-table input[type="submit"] {
     background-color: transparent;
 } 
 
-/* m.reactor */
+/* old m.reactor - deprecated */
 
 .__BASECLASS__-m-reactor-cc.__BASECLASS__-MainMenuItem-fav, .__BASECLASS__-m-joyreactor-cc.__BASECLASS__-MainMenuItem-fav {
     width : 30px;
@@ -92,9 +92,13 @@ table.__BASECLASS__-options-table input[type="submit"] {
     background-color: inherit;
 }
 
-/* m.reactor */
+/* old m.reactor */
 
 /* top.reactor */
+
+.__BASECLASS__-top-joyreactor-cc .kelly-jr-ui-PreviewText-container {
+    background: #666666;
+}
 
 .__BASECLASS__-top-joyreactor-cc.__BASECLASS__-FavContainer,
 .__BASECLASS__-top-joyreactor-cc .__BASECLASS__-tab h3,
@@ -250,6 +254,7 @@ table.__BASECLASS__-options-table input[type="submit"] {
     display : none;
 }
 
+.__BASECLASS__-top-joyreactor-cc .__BASECLASS__-ModalBox,
 .__BASECLASS__-top-joyreactor-cc .__BASECLASS__-ModalBox-content {
     background: #303030;
 }
@@ -281,8 +286,10 @@ table.__BASECLASS__-options-table input[type="submit"] {
     border: 1px solid rgba(0,0,0,.125);
     border-radius: .25rem;
     max-width: 880px;
+    min-width: 880px;
     margin: 0;
     width: max-content;
+    margin-top: 24px;
 }
 
 .jras-pcLinks-img .__BASECLASS__-post-FavAdd {

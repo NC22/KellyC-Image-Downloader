@@ -329,8 +329,10 @@ function KellyPageWatchdog(cfg)
             
             if (el.attributes[i].name == 'srcset') {
                 
-                var srcs = el.attributes[i].value.split(',');             
-                for (var b = 0; b < srcs.length; b++) handler.addSingleSrc(item, srcs[b].trim().split(' ')[0], 'addSrcFromAttributes-src', el);
+                var regexp = /([^ ]+)[ ]+([0-9]+)/g, matches = null;
+                while ((matches = regexp.exec(el.attributes[i].value)) !== null) {
+                    handler.addSingleSrc(item, matches[1].trim(), 'addSrcFromAttributes-src', el, 'imageSrcSet');
+                }
                 
             } else {
             
