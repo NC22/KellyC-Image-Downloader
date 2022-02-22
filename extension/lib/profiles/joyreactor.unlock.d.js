@@ -24,21 +24,9 @@ KellyEDJRUnlocker.getInitiatorUrl = function(e) {
 
 KellyEDJRUnlocker.initDRequest = function() {
     
-     // todo - make static list with constant ids below 1000, passed only once on init - check current rules by getSessionRules if not tye to host
-     // currently apply rules only for port.sender.tab.url = m.reactor
-     return; // need to fix origin before tests
-    
-     KellyEDJRUnlocker.declaredRules = [];
-     KellyEDispetcher.events.push({onTabConnect : function(self, data) {
-                    
-            if (KellyEDJRUnlocker.enabled) return; 
-            
-            
-            KellyEDJRUnlocker.enabled = true;
-            KellyTools.log('Unlock active', 'KellyEDispetcher'); 
-            
-            var urlFilter = ['*://api.joyreactor.cc/graphql', '*://api.joyreactor.cc/graphql?unlocker=1'];
-            var port = data.port;
+     KellyEDispetcher.events.push({onBeforeUpdateNetRequestRules : function(self, tabData) {
+             
+            var urlFilter = ['https://api.joyreactor.cc/graphql', 'http://api.joyreactor.cc/graphql', 'http://api.joyreactor.cc/graphql?unlocker=1', 'https://api.joyreactor.cc/graphql?unlocker=1'], newRules = [];
             var getDefaultRule = function(url) {
                 
                  KellyEDispetcherDR.declaredRulesId++;
@@ -53,7 +41,7 @@ KellyEDJRUnlocker.initDRequest = function() {
                             { "header": "Origin", "operation": "set", "value": 'https://api.joyreactor.cc' },                    
                         ],
                         "responseHeaders" : [
-                             { "header": "Access-Control-Allow-Origin", "operation": "set", "value": KellyTools.getLocationFromUrl(port.sender.tab.url).origin}, 
+                             { "header": "Access-Control-Allow-Origin", "operation": "set", "value": KellyTools.getLocationFromUrl(tabData.port.sender.tab.url).origin}, 
                              { "header": "Access-Control-Allow-Credentials", "operation": "set", "value": "true" },
                              { "header": "Access-Control-Allow-Headers", "operation": "set", "value": "Content-Type" },
                         ],
@@ -62,7 +50,7 @@ KellyEDJRUnlocker.initDRequest = function() {
                     "condition": { 
                         "urlFilter" : url, 
                         "resourceTypes" : ['xmlhttprequest', 'other'],
-                        "tabIds" : [port.sender.tab.id],
+                        "tabIds" : [tabData.port.sender.tab.id],
                     },
                     
                     "priority" : 1,
@@ -71,16 +59,11 @@ KellyEDJRUnlocker.initDRequest = function() {
             }
             
             for (var i = 0; i < urlFilter.length; i++) {
-                KellyEDJRUnlocker.declaredRules.push(getDefaultRule(urlFilter[i]));
+                 tabData.declaredRules.push(getDefaultRule(urlFilter[i]));
             }
-                      
-            KellyTools.getBrowser().declarativeNetRequest.updateSessionRules({addRules : KellyEDJRUnlocker.declaredRules, removeRuleIds : []}, function() {
-                
-                if (KellyTools.getBrowser().runtime.lastError) {                
-                    KellyTools.log('Error : ' + KellyTools.getBrowser().runtime.lastError.message, 'KellyEDispetcher | declarativeNetRequest');
-                    return;    
-                }
-            });
+            
+            KellyTools.log('Unlock active', 'KellyEDispetcher | declarativeNetRequest | [JoyReactor Unlocker]');             
+           
      }});
 }
 
@@ -133,8 +116,9 @@ KellyEDJRUnlocker.init = function() {
             KellyEDJRUnlocker.initDRequest();
         } else {
             KellyEDJRUnlocker.initWebRequest();
-            KellyEDJRUnlocker.enabled = true;
         }
+                
+        KellyEDJRUnlocker.enabled = true;
         
     });
 };

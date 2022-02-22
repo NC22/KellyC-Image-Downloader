@@ -725,12 +725,11 @@ var KellyEDispetcher = new Object;
         KellyTools.log('[Downloader] CONNECTED | Tab : ' + port.sender.tab.id, 'KellyEDispetcher');
         
         // Check is extension from front was already connected before
-        // This can happen IN case worker was killed, or some other unpredicted event happend (port closed, page reloaded without callback, etc.)
+        // This cant happen IN manifest v2 persistent mode, see NetRequest implementation
         
         for (var i = 0; i < KellyEDispetcher.downloaderTabs.length; i++) { 
             if (KellyEDispetcher.downloaderTabs[i].id == port.sender.tab.id) {
                 KellyTools.log('[Downloader] CONNECTED | Notice : Tab was already connected : reset connection', 'KellyEDispetcher');
-                port.postMessage({method : 'onPortCreate', message : "connected", isDownloadSupported : KellyEDispetcher.isDownloadSupported(), reconect : true});
                 return;
             }
         }

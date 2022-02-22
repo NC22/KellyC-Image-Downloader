@@ -4294,22 +4294,23 @@ function KellyFavItems(cfg)
                     
         if (!data) return false;
         
+        log('webRequest init...');
         data.method = data.method ? data.method : 'registerDownloader';
         data.browser = KellyTools.getBrowserName();
         
         handler.runtime.webRequestPort.postMessage(data);
         
         var onRegisteredEvent = false;
-        if (onRegistered) {
-             onRegisteredEvent = function(request) {                
+            onRegisteredEvent = function(request) {                
                 if (request.method == data.method) {                    
-                    onRegistered(request.message);
-                    handler.runtime.webRequestPort.onMessage.removeListener(onRegisteredEvent);
+                        if (onRegistered) onRegistered(request.message);
+                        if (env.events.onWebRequestReady) env.events.onWebRequestReady(data.method, data);
+                        handler.runtime.webRequestPort.onMessage.removeListener(onRegisteredEvent);
                 }
-            }
+           }
             
-            handler.runtime.webRequestPort.onMessage.addListener(onRegisteredEvent);
-        }
+        handler.runtime.webRequestPort.onMessage.addListener(onRegisteredEvent);
+            
         
         return true;
     }
@@ -4323,11 +4324,11 @@ function KellyFavItems(cfg)
             
             handler.runtime.onMessage = function(request) {
                 
-                if (request.method == "onChanged") {
+                if (init && request.method == "onChanged") {
                     
                     handler.getDownloadManager().onDownloadProcessChanged(request.downloadDelta);
                     
-                } else if (request.method == "onUpdateStorage") {
+                } else if (init && request.method == "onUpdateStorage") {
                     
                     var dbName = handler.getStorageManager().prefix + fav.coptions.storage;
                
@@ -4354,7 +4355,10 @@ function KellyFavItems(cfg)
                     } else {
                         
                         if (fav.coptions && fav.coptions.webRequest) handler.initWebRequestRules(env.webRequestsRules); // cur not wait callback
-                        else log('webRequests API is [Disabled] by config');                       
+                        else {
+                            log('webRequests API is [Disabled] by config');                       
+                            if (env.events.onWebRequestReady) env.events.onWebRequestReady('registerDownloader', false);
+                        }
                     }
                 }
             }

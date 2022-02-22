@@ -35,12 +35,13 @@ KellyEDispetcherDR.init = function() {
     }
 }
 
-KellyEDispetcherDR.cleanupSessionRulesForTab = function(tabId) {
+KellyEDispetcherDR.cleanupSessionRulesForTab = function(tabId, onReady) {
             
      KellyEDispetcher.api.declarativeNetRequest.getSessionRules(function(rules) {
           
           if (KellyTools.getBrowser().runtime.lastError) {                
                 KellyTools.log('Error : ' + KellyTools.getBrowser().runtime.lastError.message, 'KellyEDispetcher | declarativeNetRequest'); 
+                if (onReady) onReady(false);
                 return;
           }
             
@@ -58,9 +59,15 @@ KellyEDispetcherDR.cleanupSessionRulesForTab = function(tabId) {
                     
                     if (KellyTools.getBrowser().runtime.lastError) {                
                         KellyTools.log('Error : ' + KellyTools.getBrowser().runtime.lastError.message, 'KellyEDispetcher | declarativeNetRequest'); 
+                        if (onReady) onReady(false);
                         return;
+                    } else {
+                        if (onReady) onReady(true);
                     }
+                    
                });
+          } else {
+              if (onReady) onReady(true);
           }
     });
 }
@@ -142,11 +149,17 @@ KellyEDispetcherDR.addRequestListeners = function(tabData, onRegistered) {
             });
         }  
     }
-        
+    
+                      
+    KellyEDispetcher.callEvent('onBeforeUpdateNetRequestRules', tabData)
+                    
     KellyTools.getBrowser().declarativeNetRequest.updateSessionRules({addRules : tabData.declaredRules, removeRuleIds : []}, function() {
         
         if (KellyTools.getBrowser().runtime.lastError) {                
             KellyTools.log('Error : ' + KellyTools.getBrowser().runtime.lastError.message, 'KellyEDispetcher | declarativeNetRequest');         
+        } else {
+               
+            KellyTools.log('init Tab Rules | Num : ' + tabData.declaredRules.length, 'KellyEDispetcher | declarativeNetRequest');
         }
         
         onRegistered();
@@ -157,7 +170,7 @@ KellyEDispetcherDR.addRequestListeners = function(tabData, onRegistered) {
 
 KellyEDispetcherDR.onTabConnect = function(self, data) {
     
-    var port = data.port;
+    var port = data.port, reconect = false;
     var tabData = false;
     
     KellyTools.log('[Downloader] CONNECTED  Tab  ' + port.sender.tab.id, 'KellyEDispetcher | declarativeNetRequest');
@@ -168,53 +181,48 @@ KellyEDispetcherDR.onTabConnect = function(self, data) {
     for (var i = 0; i < KellyEDispetcher.downloaderTabs.length; i++) {
         if (KellyEDispetcher.downloaderTabs[i].id == port.sender.tab.id) {
             KellyTools.log('[Downloader] Tab was already connected : reset connection, change port', 'KellyEDispetcher | declarativeNetRequest');
-            port.postMessage({method : 'onPortCreate', message : 'connected', isDownloadSupported : KellyEDispetcher.isDownloadSupported(), reconect : true});
-            KellyEDispetcher.downloaderTabs[i].resetEvents();
-            tabData = KellyEDispetcher.downloaderTabs[i];
+            reconect = true;
+            
+            tabData = KellyEDispetcher.downloaderTabs[i];      
+            tabData.closePort();
+            
             tabData.port = port;
             break;
         }
     } 
-    
-    if (tabData === false) {
-        
-        tabData = {port : port, tab : port.sender.tab, id : port.sender.tab.id, declaredRules : []};
-        tabData.resetEvents = function() {
-            tabData.eventsEnabled = false;
-            
-            KellyEDispetcherDR.cleanupSessionRulesForTab(tabData.id);
-            tabData.declaredRules = [];
-        }
-    
-        KellyEDispetcher.downloaderTabs.push(tabData);
-    }
-    
+         
     var onDownloaderMessage = function(request) {
-        
+
        var response = {
            notice : false,
            message : 'ok',
            method : request.method,
            ready : function() {
                 if (response.notice) KellyTools.log(response.notice, 'KellyEDispetcher [PORT]');
-                port.postMessage({method : response.method, message : response.message});        
+                tabData.port.postMessage({method : response.method, message : response.message});        
            }
        }
        
        if (request.method == 'registerDownloader') {
             
-            tabData.resetEvents(); 
-            response.notice = 'Update registerDownloader request modifiers';
-            response.message = request.disable ? "disabled" : "registered";
-            
-            if (!request.disable) {
-                tabData.referrer = request.referrer;
-                tabData.types = request.types;
-                tabData.hostList = request.hostList;
-                if (request.urlMap) tabData.urlMap = request.urlMap;
+            tabData.resetEvents('Init new tab', function() {
                 
-                KellyEDispetcherDR.addRequestListeners(tabData, response.ready);
-            } else response.ready();
+                response.notice = 'Update registerDownloader request modifiers';
+                response.message = request.disable ? "disabled" : "registered";
+
+                if (!request.disable) {
+                    
+                    tabData.referrer = request.referrer;
+                    tabData.types = request.types;
+                    tabData.hostList = request.hostList;
+                    
+                    if (request.urlMap) tabData.urlMap = request.urlMap;
+                    
+                    KellyEDispetcherDR.addRequestListeners(tabData, response.ready);  
+       
+                } else response.ready();
+                
+            });            
             
        } else if (request.method == 'setDebugMode') {
         
@@ -223,28 +231,60 @@ KellyEDispetcherDR.onTabConnect = function(self, data) {
             response.ready();
             
         } else if (request.method == 'updateUrlMap') {
+                                 
+            tabData.resetEvents('Update url map', function() {
+                   
+                if (!tabData.eventsEnabled) {
+                    response.message = "tab not registered";
+                    response.ready();
+                    return;
+                }
+                
+                if (request.urlMap) {
+                    tabData.urlMap = request.urlMap;
+                }
+                
+                KellyEDispetcherDR.addRequestListeners(tabData, response.ready);
+                
+            }); 
+        } else {
             
-            if (!tabData.eventsEnabled) {
-                response.message = "tab not registered";
-                response.ready();
-                return;
-            }
             
-            if (request.urlMap) {
-                tabData.urlMap = request.urlMap;
-            }
-                        
-            tabData.resetEvents(); 
-            KellyEDispetcherDR.addRequestListeners(tabData, response.ready);
+            KellyTools.log('Unknown request', 'KellyEDispetcher [PORT]');
+            KellyTools.log(request);
         }
     }
     
-    port.postMessage({method : 'onPortCreate', message : 'connected', isDownloadSupported : KellyEDispetcher.isDownloadSupported()});
-    port.onMessage.addListener(onDownloaderMessage);
-    port.onDisconnect.addListener(function(p){
+    if (tabData === false) {
         
-        KellyTools.log('DISCONECTED  Reason  ' + (p.error ? p.error : 'Close tab'), 'KellyEDispetcher [PORT]');
-        tabData.resetEvents();
+        tabData = {port : port, tab : port.sender.tab, id : port.sender.tab.id, declaredRules : []};
+        tabData.resetEvents = function(reason, onReady) {
+
+            KellyEDispetcherDR.cleanupSessionRulesForTab(tabData.id, function() {
+                tabData.eventsEnabled = false;
+            
+                KellyTools.log('resetEvents [READY] | Reason : ' + (reason ? reason : 'no reason'), 'KellyEDispetcher [PORT]');                
+                tabData.declaredRules = [];
+                if (onReady) onReady();
+            });
+        }
+        
+        tabData.closePort = function() {
+            tabData.port.onMessage.removeListener(onDownloaderMessage);
+            tabData.port.disconnect();
+        }
+    
+        KellyEDispetcher.downloaderTabs.push(tabData);
+    }
+    
+    tabData.port.postMessage({method : 'onPortCreate', message : 'connected', isDownloadSupported : KellyEDispetcher.isDownloadSupported()});
+    tabData.port.onMessage.addListener(onDownloaderMessage);
+        
+    tabData.port.onDisconnect.addListener(function(p){
+        
+        KellyTools.log('[DISCONECTED] | Reason : ' + (p.error ? p.error : 'Close tab'), 'KellyEDispetcher [PORT]');
+        tabData.resetEvents('Disconect tab');
+        tabData.closePort();
         
         if (KellyEDispetcher.downloaderTabs.indexOf(tabData) != -1) KellyEDispetcher.downloaderTabs.splice(KellyEDispetcher.downloaderTabs.indexOf(tabData), 1);
     });
