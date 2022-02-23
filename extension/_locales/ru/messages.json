@@ -626,6 +626,12 @@
     "fav_list_empty":{  
         "message":"Список картинок пуст"
     },
+    "link_support": {
+        "message":"Поддержать проект"
+    },
+    "link_report_issue": {
+        "message":"Сообщить о проблеме"
+    },
     "loading":{  
         "message":"Загрузка"
     },

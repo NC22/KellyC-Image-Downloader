@@ -616,6 +616,12 @@
     },  
     "fav_list_empty":{  
         "message":"List of images is empty"
+    },      
+    "link_support": {
+        "message":"Support project"
+    },
+    "link_report_issue": {
+        "message":"Report problem"
     },
     "loading":{  
         "message":"Loading"
@@ -1105,7 +1111,7 @@
     },
     "recorder_load_proportions":{  
         "message":"Load proportions..."
-    },  
+    },
     "recorder_displayed_info":{  
         "message":"Items : __ITEMS__ | Documents : __RELATED_DOCS__"
     }
