@@ -14,9 +14,6 @@
             "lib/kellyOptions.js", 
             "lib/kellyAdditionsForm.js", 
             "lib/kellyFavItems.js", 
-            "lib/profiles/joyreactor.js", 
-            "lib/profiles/joyreactor.unlock.js", 
-            "lib/profiles/topjoyreactor.js", 
             "lib/recorder/kellyPageWatchdog.js", 
             "lib/recorder/kellyLoadDocControll.js", 
             "lib/recorder/kellyDPage.js", 
@@ -35,8 +32,7 @@
             "lib/recorder/filters/_validators.js", 
             "lib/profiles/default.js", 
             "lib/profiles/recorder.js", 
-            "env/init/recorderFront.js", 
-            "env/init/joyreactorFront.js" 
+            "env/init/recorderFront.js" 
       ],
       "matches": ["*://*/*"]
    } ],
