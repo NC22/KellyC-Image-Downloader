@@ -207,6 +207,7 @@ KellyDPage.addStorageItem = function(src, doc, referrer, groups) {
 KellyDPage.updateUrlMap = function(onReady, restart) {
         
     console.log('[updateUrlMap] ' + (restart ? '[full restart]' : '[update urlmap]') + ' ...');
+    
     KellyDPage.env.webRequestsRules = {
         referrer : false,
         urlMap : KellyDPage.urlMap,
@@ -222,7 +223,6 @@ KellyDPage.updateUrlMap = function(onReady, restart) {
         var request = {method : 'updateUrlMap', urlMap : KellyDPage.urlMap};
     }
     
-    K_FAV.getGlobal('fav').coptions.webRequest = true;  
     K_FAV.initWebRequestRules(request, onReady);
 }
 
@@ -963,7 +963,6 @@ KellyDPage.init = function() {
                  
                 fav.selected_cats_ids = [];
                 fav.categories = [];
-                fav.coptions.webRequest = false;  
             }
             
             // fixed options, defaults setted in kellySyorageManager and KellyDPage.env.events.onValidateCfg
@@ -971,7 +970,8 @@ KellyDPage.init = function() {
             fav.coptions.storage = 'default'; 
             // todo - в default всегда подгружаются сразу в showRecordedImages последние записанные картинки и потом после загрузки доп. доков не сохраняются если явно не сохранить профиль - мб сохранять автоматом
             
-            fav.coptions.storageDesc = {'default' : {name : KellyLoc.s('', 'recorder_last_recorded')}};
+            fav.coptions.storageDesc = {'default' : {name : KellyLoc.s('', 'recorder_last_recorded')}};            
+            fav.coptions.webRequest = true;  
             fav.coptions.newFirst = false;
             fav.coptions.optionsSide = false;
             fav.coptions.grid.fixed = 4;
@@ -1026,7 +1026,24 @@ KellyDPage.init = function() {
         KellyLoadDocControll.initOptions(options);
         KellyDPage.defaultPageParser.filterCallback('onInitOptions', {options : options}); 
     }
+
+    KellyDPage.env.events.onWebRequestReady = function(method, data) {
         
+        if (method == 'registerDownloader' && !KellyDPage.rendered) {
+            
+            KellyDPage.rendered = true;
+            
+            var resources = ['core', 'single', 'recorderDownloader'];
+            
+            if (K_FAV.getGlobal('options').darkTheme) {
+                document.body.classList.add(KellyDPage.env.className + '-dark');
+                resources.push('dark');
+            }
+            
+            K_FAV.initFormatPage(resources); 
+        }
+    }       
+       
     /*
         getGlobal('mode') - fav | ctoptions
         setFilters
@@ -1039,22 +1056,10 @@ KellyDPage.init = function() {
         env.events.onUpdateFilteredData(displayedItems); 
         env.events.onCreateOptionsManager(options)
         env.events.onValidateCfg(data)
+        env.events.onWebRequestReady(method, data)
     */
             
-    K_FAV.load('cfg', function(fav) {
-    
-        // todo hide this options on options tab
-        // динамически менять minHeight для рядов с < 50x50 картинками
-                
-        var resources = ['core', 'single', 'recorderDownloader'];
-        
-        if (fav.coptions.darkTheme) {
-            document.body.classList.add(KellyDPage.env.className + '-dark');
-            resources.push('dark');
-        }
-        
-        K_FAV.initFormatPage(resources);         
-    });
+    K_FAV.load('cfg', K_FAV.initBgEvents);
         
     KellyTools.setHTMLData(
         document.getElementById('submenu'), 

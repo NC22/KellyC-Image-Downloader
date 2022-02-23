@@ -6,7 +6,7 @@ function KellyProfileDefault() {
     var handler = this;
     
     this.hostList = [];    
-    this.webRequestsRules = { disable : true };
+    this.webRequestsRules = false;
 	
     this.profile = 'default';
     this.className = 'kelly-jr-ui'; // base class for every extension container \ element

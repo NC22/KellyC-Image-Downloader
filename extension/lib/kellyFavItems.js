@@ -4291,9 +4291,9 @@ function KellyFavItems(cfg)
                         
                     } else {
                         
-                        if (fav.coptions && fav.coptions.webRequest) handler.initWebRequestRules(env.webRequestsRules); // cur not wait callback
+                        if (fav.coptions && fav.coptions.webRequest && env.webRequestsRules) handler.initWebRequestRules(env.webRequestsRules); // cur not wait callback
                         else {
-                            log('webRequests API is [Disabled] by config');                       
+                            log('webRequests API is [Disabled] or unconfigured in config');                       
                             if (env.events.onWebRequestReady) env.events.onWebRequestReady('registerDownloader', false);
                         }
                     }
@@ -4309,7 +4309,10 @@ function KellyFavItems(cfg)
                         handler.initBgEvents();
                  }, 400);
             });
+                               
         }
+        
+        if (fav.coptions.debug) handler.runtime.webRequestPort.postMessage({method: "setDebugMode", state : true});  
     }
         
     this.initResources = function(resources) {
@@ -4375,10 +4378,7 @@ function KellyFavItems(cfg)
         // currently we can modify post containers without waiting css, looks fine
         handler.formatPostContainers();
         handler.initResources(resources);
-        handler.initBgEvents();
         
-        if (fav.coptions.debug) handler.runtime.webRequestPort.postMessage({method: "setDebugMode", state : true});
-         
         return false;
     }
     
