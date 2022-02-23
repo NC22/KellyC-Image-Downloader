@@ -1,5 +1,4 @@
-
-if (typeof K_FAV == 'undefined' || K_FAV === null) {
+if ((typeof K_FAV == 'undefined' || K_FAV === null) && window.location === window.parent.location) {
     
     // wait body element rendered 
     

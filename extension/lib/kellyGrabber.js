@@ -123,20 +123,13 @@ function KellyGrabber(cfg) {
     var transportMethod = KellyGrabber.TRANSPORT_BLOB; // TRANSPORT_BLOBBASE64;
     
     /*
-        REQUEST_IFRAME 
-        
-        load url by iframe and get data from it throw postMessage, to avoid CORS
-               
+    
         REQUEST_XML 
 
         request url data by XML http request
     */
     
-    var requestMethod = KellyGrabber.REQUEST_IFRAME;
-    
-    // used for REQUEST_IFRAME method only
-    
-    var requestIframeId = 0;
+    var requestMethod = KellyGrabber.REQUEST_XML;
     
     var buttons = {};
     
@@ -1886,124 +1879,6 @@ function KellyGrabber(cfg) {
             
             return KellyTools.fetchRequest(urlOrig, false, defaultCallback);
             
-        } else {
-            
-            var iHttpRequest = {};
-                iHttpRequest.type = 'iframe';
-                iHttpRequest.iframe = null;                
-                iHttpRequest.eventPrefix = null;
-                
-                iHttpRequest.closeConnection = false;
-                
-                iHttpRequest.initIframe = function() {
-                    
-                    if (this.iframe) return this.iframe;
-                    
-                    requestIframeId++;
-                    
-                    this.iframe = document.createElement('iframe');
-                    this.iframe.name = className + '-iframe-' + requestIframeId;
-                    this.iframe.setAttribute('style', 'display : none; width : 1px; height : 1px;');
-                    
-                    this.eventPrefix = 'input_message_' + this.iframe.name;
-                    
-                    document.getElementsByTagName('body')[0].appendChild(this.iframe);  
-                    
-                    return this.iframe;    
-                };
-                
-                iHttpRequest.onLoadIframe = function(e) {
-                    
-                    var handler = iHttpRequest;
-                    
-                    if (!e.data || !e.data.method || handler.closeConnection) return false;
-                    
-                    if (handler.iframe && handler.iframe.contentWindow === e.source) {        
-                        
-                        if (e.data.method.indexOf('mediaReady') != -1) {
-                            
-                            e.source.postMessage({method : 'getMedia'}, "*");
-                            
-                        } else if (e.data.method.indexOf('sendResourceMedia') != -1) {
-                            
-                            handler.closeConnection = true;
-                            
-                            if (e.data.base64) callback(urlOrig, {base64 : e.data.base64, type : e.data.type});  
-                            else {
-                                
-                                // если разорвано подключение \ картинка недоступна - e.data.error = url load fail
-                                // в случае если подключение блокирует adblock или еще какой-либо внешний процесс, то обратная связь пропадает (остается только таймаут)
-                                
-                                var code = -1;
-                                
-                                if (e.data.error && e.data.error.indexOf('404') != -1) {
-                                    code = 404;
-                                }
-                                
-                                callback(urlOrig, false, code, 'iframe load fail - ' + e.data.error);
-                            }
-                            
-                            handler.abort();                       
-                        }                    
-                    }
-                };
-                
-                iHttpRequest.aborted = false;
-                
-                // required method
-                
-                iHttpRequest.abort = function() {
-                    
-                    if (!this.iframe || this.aborted) return;
-                    
-                    var handler = this;
-                    
-                    KellyTools.removeEventPListener(window, "message", this.eventPrefix);
-                
-                    this.iframe.src = 'about:blank';
-                    this.iframe.onload = function() {};
-                    this.iframe.onerror = function() {};
-                    
-                    this.onLoadIframe = null;
-                    this.send = null;
-                    this.abort = null;
-                    this.initIframe = null;
-                    
-                    this.aborted = true;
-                    
-                    setTimeout(function() {
-                        
-                        if (handler.iframe.parentElement) {
-                            handler.iframe.parentElement.removeChild(handler.iframe);
-                        }
-                        
-                        handler.iframe = null;    
-                        iHttpRequest = null;
-                    
-                    }, 1200);
-                };
-                
-                iHttpRequest.send = function() {
-                    
-                    var handler = this;
-                    
-                    this.initIframe();
-                    
-                    this.iframe.onerror = function() {      
-                    
-                        callback(urlOrig, false, -1, 'iframe load fail - connection error');                
-                        handler.abort();
-                    }
-
-                    KellyTools.removeEventPListener(window, "message", this.eventPrefix);	
-                    KellyTools.addEventPListener(window, "message", this.onLoadIframe, this.eventPrefix);
-                    
-                    this.iframe.src = urlOrig;
-                };
-                
-                iHttpRequest.send();
-            
-            return iHttpRequest;
         }
     }
     
@@ -2581,7 +2456,7 @@ KellyGrabber.DOWNLOADID_INACTIVE = false;
 KellyGrabber.validateDriver = function(driver) {
             
     var availableTransport = [KellyGrabber.TRANSPORT_BLOB, KellyGrabber.TRANSPORT_BLOBBASE64];          
-    var availableRequest = [KellyGrabber.REQUEST_XML, KellyGrabber.REQUEST_IFRAME, KellyGrabber.REQUEST_FETCH, KellyGrabber.REQUEST_FETCHBG];
+    var availableRequest = [KellyGrabber.REQUEST_XML, KellyGrabber.REQUEST_FETCH, KellyGrabber.REQUEST_FETCHBG];
     
     var defaultDriver = {
            requestMethod : availableRequest[0], 

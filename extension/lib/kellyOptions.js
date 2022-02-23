@@ -69,8 +69,8 @@ function KellyOptions(cfg) {
         'webRequest': {loc : 'web_request_api', type : 'bool'},
         'baseFolder' : {loc : 'options_storage', type : 'folder'},
         
-        'grabberDriver_requestMethod' : {name : 'requestMethod', parent : 'grabberDriver', loc : 'grabber_request', tip : 'grabber_request_help', listLoc : ['grabber_request_xml', 'grabber_request_iframe', 'grabber_request_fetch'], 
-            list : [KellyGrabber.REQUEST_XML, KellyGrabber.REQUEST_IFRAME, KellyGrabber.REQUEST_FETCH], type : 'select', noticeUp : 'grabber_options_notice'},
+        'grabberDriver_requestMethod' : {name : 'requestMethod', parent : 'grabberDriver', loc : 'grabber_request', tip : 'grabber_request_help', listLoc : ['grabber_request_xml', 'grabber_request_fetch'], 
+            list : [KellyGrabber.REQUEST_XML, KellyGrabber.REQUEST_FETCH], type : 'select', noticeUp : 'grabber_options_notice'},
         'grabberDriver_transportMethod' : {name : 'transportMethod', parent : 'grabberDriver', loc : 'grabber_transport', tip : 'grabber_transport_help', listLoc : ['grabber_transport_blob', 'grabber_transport_blobbase64'], 
             list : [KellyGrabber.TRANSPORT_BLOB, KellyGrabber.TRANSPORT_BLOBBASE64], type : 'select'}, 
 
