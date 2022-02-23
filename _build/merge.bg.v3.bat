@@ -9,7 +9,7 @@ for %%x in (
     "%~dp0..\extension\lib\kellyTools.js" 
     "%~dp0..\extension\lib\kellyDispetcher.js" 
     "%~dp0..\extension\lib\kellyDispetcherNetRequest.js" 
-    "%~dp0..\extension\lib\profiles\joyreactor.unlock.d.js"
+    ::"%~dp0..\extension\lib\profiles\joyreactor.unlock.d.js"
     "%~dp0..\extension\lib\recorder\kellyEDRecorder.js"
     "%~dp0..\extension\env\init\background.js"
 ) do (
