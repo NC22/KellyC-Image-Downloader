@@ -9,20 +9,61 @@ var KellyProfileTopJoyreactor = new Object();
         
         handler.mainContainerClass = 'content-container';
         
+        handler.webRequestsReady = false;
+        handler.onWebRequestReadyE = [];
+        
         handler.events.onPageReadyOrig = handler.events.onPageReady;
         handler.events.onExtensionReady = function() {
-            handler.sidebarConfig.widthBase = 0;
-            
-            setTimeout(function() {
-                handler.sidebarConfig.topMax = handler.mContainers.siteContent.getBoundingClientRect().top + KellyTools.getScrollTop() + 24;   
-            }, 300);
-            
+           
             if (handler.unlockManager) handler.unlockManager.formatCensoredPosts();
+            setTimeout(handler.updateSidebarConfig, 400);
         };
         
+        handler.updateSidebarConfig = function() {
+            
+            handler.sidebarConfig.widthBase = 0;
+            var pointer = handler.mContainers.siteContent;
+            if (!pointer || pointer.style.display == 'none') {
+                pointer = handler.mContainers.favContent;
+            }
+            
+            handler.sidebarConfig.topMax = pointer.getBoundingClientRect().top + KellyTools.getScrollTop() + 24;   
+            console.log(handler.sidebarConfig);
+            console.log(pointer);
+        }
+        
+        /* 
+           
+           Calls when all web request hooks initialized in background
+           We collect all window.fetch request untill then and place them in to pool - handler.onWebRequestReadyE, to procced when webRequests ready
+           
+        */
+        
+        handler.events.onWebRequestReady = function(method, data) {
+            
+            if (method == 'registerDownloader' && !handler.webRequestsReady) {
+                
+                KellyTools.log('webRequests ready | Delayed events : ' + handler.onWebRequestReadyE.length);
+                handler.webRequestsReady = true;
+                
+                for (var i = 0; i < handler.onWebRequestReadyE.length; i++) {
+                   handler.onWebRequestReadyE[i][0].postMessage(handler.onWebRequestReadyE[i][1], window.location.origin);                    
+                }
+            }
+        }
+        
+        /*
+            
+            After page fully loaded, and all hooks initialized and ready
+            
+        */
+        
         handler.events.onPageReady = function() {
+            
             handler.events.onPageReadyOrig();
-            handler.initUpdateWatcher();
+            
+            handler.initUpdateWatcher(); // watch any updates on navigation on page
+            
             handler.fav.getFastSave().tooltipOptions = {
                 positionY : 'bottom',
                 positionX : 'left',
@@ -30,7 +71,11 @@ var KellyProfileTopJoyreactor = new Object();
             }
         }
         
-        handler.initOnLoad = function(onLoad) {
+        /*
+            Replace original window.fetch method to extension one with window.postMessage callbacks 
+        */
+        
+        handler.initFetchHook = function(onReady) {
             
             window.addEventListener('message', function(e) {
                     
@@ -69,8 +114,8 @@ var KellyProfileTopJoyreactor = new Object();
                             if (Object.prototype.toString.call(e.data.eventDataIn.responseJson) === '[object Array]') {
                                 
                                 for (var i = 0; i < e.data.eventDataIn.responseJson.length; i++) {
-                                    posts = getGraphQLPosts(e.data.eventDataIn.responseJson[i].data);
-                                   
+                                    
+                                    posts = getGraphQLPosts(e.data.eventDataIn.responseJson[i].data);                                   
                                     if (posts) break;
                                 }
                                 
@@ -78,10 +123,12 @@ var KellyProfileTopJoyreactor = new Object();
                                 
                                 posts = getGraphQLPosts(e.data.eventDataIn.responseJson.data);
                             }
-                             console.log(posts);
-                        } catch(e) {      
-                            console.log(e);
+                             
+                            console.log(posts);
+                             
+                        } catch(e) {
                             
+                            console.log(e);                            
                             posts = false;
                         }
                         
@@ -93,51 +140,104 @@ var KellyProfileTopJoyreactor = new Object();
                         }
                         
                         response.eventDataOut = {
+                            
                             responseBody : JSON.stringify(e.data.eventDataIn.responseJson),
-                            responseOptions : { "status" : 200 , "statusText" : "OK", "headers" : e.data.eventDataIn.responseHeaders },
+                            
+                            responseOptions : { 
+                                "status" : 200 ,
+                                "statusText" : "OK", 
+                                "headers" : e.data.eventDataIn.responseHeaders,
+                            },
                         };
+                                                
+                        e.source.postMessage(response, window.location.origin);
+                                        
+                    } else if (e.data.eventName == 'onBeforeRequestReady') {
+                        
+                        if (handler.webRequestsReady) {                            
+                          
+                            e.source.postMessage(response, window.location.origin);
+                            
+                        } else {
+                            
+                            KellyTools.log('onBeforeRequestReady : wait webrequests ready');
+                            handler.onWebRequestReadyE.push([e.source, response]);
+                        }
+                    
+                    } else {
+                        
+                        e.source.postMessage(response, window.location.origin);
                     }
                     
-                    e.source.postMessage(response, window.location.origin);
             }); 
             
-            KellyTools.injectAddition('fetch', function() {});
-            
-            if (handler.getPosts().length > 0) return onLoad();
-            
-            handler.observer = new MutationObserver(function(mutations) {
-                
-                if (mutations.length > 0 && document.body.querySelector('.post-card')) {
-                    handler.observer.disconnect();
-                    handler.initPosts(onLoad); 
-                }                
-            });
-            
-            handler.observer.observe(document.getElementById('root'), {childList: true, subtree: true});
-        }
+            KellyTools.injectAddition('fetch', onReady);
+        }        
         
-        handler.initPosts = function(onInit) {
+        handler.initPosts = function(onReady) {
             
             var post = document.body.querySelectorAll('.post-card'), postValid = [];
             for (var i = 0; i < post.length; i++) {
                 
+                // user unath style - link is accessable
+                
                 var link = post[i].querySelector('.post-footer a.ant-btn.ant-btn-text');
                 if (link) {
+                    
                     link.classList.add(handler.className + '-post-link'); 
                     post[i].classList.add(handler.className + '-post');
+                
+                // user is logged-in - post id \ link is hidden in [...] and not accessable until click. Post id is recovered by fetch hook and placed to element [class=kelly-post-id] 
+                
                 } else {
+                    
                     var linkButton = post[i].querySelector('.post-footer button.ant-dropdown-trigger'), postId = post[i].querySelector('.kelly-post-id');
                     if (linkButton && postId) {
+                        
                         link = document.createElement('A');
                         link.className = handler.className + '-post-link';
                         link.href = '/post/' + postId.getAttribute('data-id');
                         linkButton.parentNode.insertBefore(link, linkButton); 
                         post[i].classList.add(handler.className + '-post');
                     }
+                    
                 }
             }
             
-            onInit();
+            onReady();
+        }
+        
+        handler.initOnLoad = function(onLoad) {
+            
+            var ready = 0;
+            var addReady = function() {
+                ready += 1;
+                if (ready == 3) onLoad();
+            }
+            
+            handler.initFetchHook(addReady);
+            handler.fav.load('cfg', function(fav) {
+                
+                if (fav.coptions.disabled) return;
+                
+                handler.fav.initBgEvents();
+                handler.fav.load('items', addReady);   
+            });   
+                
+            if (handler.getPosts().length > 0) {
+                addReady();
+            } else {
+            
+                handler.observer = new MutationObserver(function(mutations) {
+                    
+                    if (mutations.length > 0 && document.body.querySelector('.post-card')) {
+                        handler.observer.disconnect();
+                        handler.initPosts(addReady); 
+                    }                
+                });
+                
+                handler.observer.observe(document.getElementById('root'), {childList: true, subtree: true});
+            }
         }
         
         handler.getPosts = function(container) {
@@ -251,14 +351,18 @@ var KellyProfileTopJoyreactor = new Object();
             }
             
             KellyTools.log('formatComments : ' + comments.length + ' - '+ block.id);
-        }    
-        
+        }  
+
         handler.initUpdateWatcher = function() {
             
             handler.observer = new MutationObserver(function(mutations) {
-
+                
                 for (var i = 0; i < mutations.length; i++) {
-                    
+
+                   //if ( mutations[i].addedNodes.length > 0) {
+                   //    console.log( mutations[i]);
+                   //}
+                   
                    if (mutations[i].target.classList.contains('content')) {
                         var post = KellyTools.getParentByClass(mutations[i].target, handler.className + '-post');
                         if (post) {
@@ -267,22 +371,27 @@ var KellyProfileTopJoyreactor = new Object();
                         
                         return;
                         
-                   } else if (mutations[i].target.classList.contains(handler.mainContainerClass)) {
-                        handler.initPosts(function() {
-                            KellyTools.log('New page loaded, format publications');   
-                            handler.getMainContainers();
-                            if (handler.fav.getGlobal('mode') == 'main') handler.fav.closeSidebar();
-                            else handler.fav.hideFavoritesBlock();
-                            handler.fav.formatPostContainers();
-                            if (handler.unlockManager) handler.unlockManager.formatCensoredPosts();    
-                        });
-                        return;
+                   } else if ( 
+                        KellyTools.searchNode(mutations[i].addedNodes, false, 'content-container') ||
+                        KellyTools.searchNode(mutations[i].addedNodes, false, 'jr-container') ||
+                        (mutations[i].target.classList.contains(handler.mainContainerClass) && mutations[i].addedNodes.length > 0)
+                    ) {
                         
-                    } else if (mutations[i].target.id == 'root' && 
-                               mutations[i].removedNodes.length > 0 && 
-                               mutations[i].removedNodes[0].nodeType == Node.ELEMENT_NODE && 
-                               mutations[i].removedNodes[0].classList.contains('container') &&
-                               handler.fav.getGlobal('mode') == 'main') {
+                       handler.getMainContainers();
+                       setTimeout(handler.updateSidebarConfig, 400);
+                       handler.initPosts(function() {
+                            
+                           KellyTools.log('New page loaded, format publications');
+                                                
+                           if (handler.fav.getGlobal('mode') == 'main') handler.fav.closeSidebar();
+                           else handler.fav.hideFavoritesBlock();
+                            
+                           handler.fav.formatPostContainers();  
+                       });
+                        
+                       return;
+                        
+                    } else if (mutations[i].target.id == 'root' && KellyTools.searchNode(mutations[i].removedNodes, false, 'container') && handler.fav.getGlobal('mode') == 'main') {
                                    
                         handler.fav.closeSidebar();
                         KellyTools.log('Page publications removed');

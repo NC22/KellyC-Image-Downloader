@@ -3,7 +3,7 @@
 KellyTools = new Object();
 
 KellyTools.PROGNAME = '';
-KellyTools.DEBUG = false;
+KellyTools.DEBUG = true;
 
 KellyTools.E_NOTICE = 1;
 KellyTools.E_ERROR = 2;
@@ -40,6 +40,27 @@ KellyTools.loadFrontJs = function(callback) {
 
     load();
 }
+
+KellyTools.searchNode = function(nodes, tagName, className, id) {
+    
+    if (!nodes || nodes.length <= 0) return false;
+    
+    if (tagName) tagName = tagName.toLowerCase();
+    for (var i = 0; i < nodes.length; i++) {
+                
+       if (nodes[i].nodeType == Node.ELEMENT_NODE && nodes[i].tagName) {
+            if (tagName && nodes[i].tagName.toLowerCase() != tagName) continue;
+            if (className && !nodes[i].classList.contains(className)) continue;
+            if (id && nodes[i].id != id) continue;
+            
+            return nodes[i];
+       }
+       
+    }
+    
+    return false;
+}
+    
 
 KellyTools.getViewport = function() {
 

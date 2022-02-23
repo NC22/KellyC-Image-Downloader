@@ -18,6 +18,18 @@ function KellyProfileJoyreactor() {
         "safereactor.cc",
         "reactorccdnf36aqvq34zbfzqyrcrpg3eyhilauovitrvmcjovsujmid.onion",
     ];
+    
+    this.extLinks = {
+        
+        pp : 'https://github.com/NC22/KellyC-Image-Downloader/wiki/%5BPP%5D-Privacy-Policy',
+        github : 'https://github.com/NC22/KellyC-JoyReactor',
+        
+        install_ff : 'ff',
+        install_chrome : 'chrome',
+        install_edge : 'edge',
+        
+        author : 'https://nradiowave.catface.ru/',
+    };
 	
     this.profile = 'joyreactor';
     this.className = 'kelly-jr-ui'; // base class for every extension container \ element
@@ -138,6 +150,10 @@ function KellyProfileJoyreactor() {
     
     this.events = {
         
+        onValidateCfg : function(data) {
+            // todo - redirect events from unlock js here
+        },
+        
         /* 
             calls on document.ready, or if getPosts find some data
             if return true prevent native init environment logic (initFormatPage -> InitWorktop)
@@ -153,7 +169,6 @@ function KellyProfileJoyreactor() {
         */     
         
         onInitWorktop : function() {
-            
             handler.sidebarConfig.topMax = handler.mContainers.siteContent.getBoundingClientRect().top + KellyTools.getScrollTop();   
             if (handler.hostClass.indexOf('old') == -1) handler.sidebarConfig.widthBase = 24;
             

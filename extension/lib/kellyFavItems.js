@@ -182,71 +182,7 @@ function KellyFavItems(cfg)
         env.setLocation(cfg.location ? cfg.location : { href : '', protocol : 'http:', host : ''});          
         env.setFav(handler);     
     }
-    
-    this.exec = function() {
-    
-        if (!env) {
-            log('empty environment attribute or profile name', KellyTools.E_ERROR);
-            return false;
-        }
         
-        if (env.isDomainMatch && !env.isDomainMatch()) return false;
-        
-        var isMedia = document.contentType.indexOf('image') === 0 || document.contentType.indexOf('video') === 0;
-        var childFrame = window.location !== window.parent.location;
-        if (isMedia && childFrame) {
-            
-             // for Iframe hook, may be removed in future because of WebRequest API replacement 
-            log(KellyTools.getProgName() + ' load as media item helper | profile ' + env.profile);
-            KellyTools.addEventPListener(window, "message", getMediaMessage, 'input_message_');             
-            window.parent.postMessage({filename : KellyTools.getUrlFileName(selfUrl, false, true), method : 'mediaReady'}, "*");
-            
-        } else if (!isMedia && !childFrame) {
-            
-            handler.load('cfg', function() {
-                
-                if (fav.coptions.disabled && env.hostClass != 'options_page') {
-                    log('Site module is disabled - turn off');
-                    return;
-                }
-                
-                handler.load('items', function() {
-                    handler.initFormatPage();
-                    KellyTools.addEventPListener(window, "load", function() {
-                        if (env.getMainContainers()) {
-                            log('full page load, reinit post containers');
-                            handler.formatPostContainers();                            
-                        }
-                    }, 'init_');                            
-                }); 
-            });
-            
-            log(KellyTools.getProgName() + ' init | loaded | profile ' + env.profile + ' | DEBUG ' + (KellyTools.DEBUG ? 'enabled' : 'disabled'));           
-        }
-        
-        return true;
-    }
-        
-    function getMediaMessage(e) {
-        
-        if (!e.data || !e.data.method) return false;
-        if (e.data.method.indexOf('getMedia') != -1) { // get self as blob
-        
-            KellyTools.xmlRequest(selfUrl, false, function(urlOrig, blob, errorCode, errorText, controller) {
-                
-                var response = {filename : KellyTools.getUrlFileName(selfUrl, false, true), method : 'sendResourceMedia', error : blob === false ? '[' + errorCode + ']' + errorText : false, base64 : false};
-                if (blob !== false) {
-                    
-                    KellyTools.blobToBase64(blob, function(base64) {  
-                         response.type = document.contentType; response.base64 = base64;
-                         window.parent.postMessage(response, "*");                        
-                    });                             
-                    
-                } else window.parent.postMessage(response, "*");
-            });
-        }
-    }
-    
     function setPreventClose(active) {
         
         KellyTools.log('setPreventClose - new state - [' + (active ? 'CLOSE BLOCKED' : 'CLOSE UNLOCKED') + ']');
@@ -1075,9 +1011,10 @@ function KellyFavItems(cfg)
         if (typeof URLSearchParams == 'undefined') return false;
         
         var url = new URL(window.location.href), tab = url.searchParams.get('tab');
-        if (!tab || ['options', 'profiles', 'help', 'modules', 'donate'].indexOf(tab) == -1) return false;
+        if (!tab || ['options', 'profiles', 'help', 'modules', 'donate', 'images'].indexOf(tab) == -1) return false;
         
              if (tab == 'options') handler.showOptionsDialog();
+        else if (tab == 'images') handler.showFavouriteImages();
         else if (tab == 'profiles') handler.showOptionsDialog(env.className + '-Storage');
         else if (tab == 'help') handler.showAdditionsDialog('additions_help');
         else if (tab == 'modules') handler.showAdditionsDialog('additions_modules');        

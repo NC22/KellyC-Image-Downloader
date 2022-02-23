@@ -28,7 +28,7 @@
             
             return originalFetch(input, init).then(function(response){
                 
-                return new Promise(function(resolve){
+                return new Promise(function(resolve){ // reject for json parser?
                     
                     if (response.headers.get("Content-Type").indexOf('json') != -1) {
                         

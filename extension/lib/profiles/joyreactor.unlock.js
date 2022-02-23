@@ -467,6 +467,8 @@ var KellyProfileJoyreactorUnlock = {
                 data.coptions.unlock = {censored : true, censoredMode : 'auto', cache : true, auth : true};
             }
             
+            if (typeof data.coptions.darkTheme == 'undefined') data.coptions.darkTheme = true;
+        
             if (typeof data.coptions.unlock.cache == 'undefined') data.coptions.unlock.cache = true;
             if (typeof data.coptions.unlock.auth == 'undefined') data.coptions.unlock.auth = true;   
             
