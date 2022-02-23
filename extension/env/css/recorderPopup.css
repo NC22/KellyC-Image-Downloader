@@ -2,7 +2,7 @@ body {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    width: 212px;
+    width: 248px;
     font-size: 12px;
     font-family: 'Open Sans',Sans-serif;
     background: #ffffff;
@@ -14,10 +14,10 @@ body {
 }
 
 button {
-    background: #e5e5e5;
+    background: #f4f4f4;
     color: #000;
-    border: 1px solid;
-    border-radius: 0;
+    border: 1px solid #9f9f9f;
+    border-radius: 2px;
     width: 100%;
     margin-bottom: 2px;
     padding: 10px 16px;
@@ -30,9 +30,25 @@ button {
 }
 
 button:hover {
-    background: #b7b7b7;
+    background-color: #b7b7b7;
 }
 
+.popup-page-button-support_project:hover {
+    background-color : #56afdf;
+}
+
+.popup-page-button-support_project {
+    background-color: #3cc0ff;
+    color: #fff;
+    border-color: #717171;
+    background-image: url(../../env/img/cup.png);
+    background-size: 28px;
+    background-repeat: no-repeat;
+    background-position-y: center;
+    background-position-x: 12px;
+    color: #fff;
+}   
+    
 .popup-page-recorded-block {
     width: 100%;
     padding: 6px;
@@ -48,6 +64,7 @@ button:hover {
 
 .popup-page-button-download_recorded {
     background: #ff782a;
+    border-color : #b04f18;
 }
 
 .popup-page-button-download_recorded:hover {
@@ -68,7 +85,7 @@ button:hover {
 
 #copyright-software {
     text-align: right;
-    color: #ff610f;
+    color: #242424;
     background: #ffffff;
     padding: 4px 3px;
 }
@@ -78,5 +95,5 @@ button:hover {
 }
 
 #copyright-software a {
-    color: #ff610f;
+    color: #242424;
 }

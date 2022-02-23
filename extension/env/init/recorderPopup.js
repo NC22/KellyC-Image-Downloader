@@ -108,6 +108,9 @@ KellyPopupPage.buttons = {
          KellyTools.getBrowser().tabs.create({url: '/env/html/recorderDownloader.html?tab=profiles'}, function(tab){});
         
     }}, 
+    'support_project' : {loc : 'link_support', event : function() {
+         KellyTools.getBrowser().tabs.create({url: 'https://ko-fi.com/nradiowave'}, function(tab){});  
+    }},
 };
 
 KellyPopupPage.updateNotice = function(str) {
@@ -132,7 +135,8 @@ KellyPopupPage.updateRecordButton = function() {
         KellyPopupPage.buttons['download_current_tab'].btn.style.display = KellyPopupPage.buttons['download_recorded'].btn.style.display == 'none' ? '' : 'none';
         KellyPopupPage.buttons['options'].btn.style.display = KellyPopupPage.buttons['download_current_tab'].btn.style.display;
         KellyPopupPage.buttons['download_record'].btn.style.display = KellyPopupPage.buttons['download_current_tab'].btn.style.display;
-                
+        KellyPopupPage.buttons['support_project'].btn.style.display = KellyPopupPage.buttons['download_current_tab'].btn.style.display;
+        
         KellyPopupPage.updateNotice(KellyPopupPage.recordingNum ? KellyLoc.s('Recorded images', 'download_recorded_images') + ': ' + KellyPopupPage.recordingNum : false);
         
     } else KellyPopupPage.updateNotice(false);

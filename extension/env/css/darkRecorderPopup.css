@@ -7,10 +7,19 @@ button {
     background: #444646;
     color: #fff;
     border: 0;
+    border-radius : 0;
 }
 
 button:hover {
-    background: #5d5d5d;
+    background-color: #5d5d5d;
+}
+
+.popup-page-button-support_project {
+    background-color: #56afdf;
+}
+
+.popup-page-button-support_project:hover {
+    background-color: #79c2ea;
 }
 
 .popup-page-recorded-block {
