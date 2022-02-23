@@ -38,7 +38,7 @@
             "env/init/recorderFront.js", 
             "env/init/joyreactorFront.js" 
       ],
-      "all_frames": true,
+      "all_frames": false,
       "matches": [ 
         "http://*/*",
         "https://*/*"
