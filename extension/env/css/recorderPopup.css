@@ -41,13 +41,27 @@ button:hover {
     background-color: #3cc0ff;
     color: #fff;
     border-color: #717171;
+}   
+
+button span.popup-page-icon {
+    display: inline-block;
+    vertical-align: middle;
+    margin : 0;
+}
+
+button span.popup-page-icon-cup {
     background-image: url(../../env/img/cup.png);
     background-size: 28px;
+    width: 28px;
+    height: 20px;
     background-repeat: no-repeat;
-    background-position-y: center;
-    background-position-x: 12px;
-    color: #fff;
-}   
+    background-position: center;
+}
+
+button span.popup-page-text {
+    vertical-align: middle;
+    margin-left: 4px;
+}
     
 .popup-page-recorded-block {
     width: 100%;

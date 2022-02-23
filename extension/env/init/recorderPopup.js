@@ -108,7 +108,7 @@ KellyPopupPage.buttons = {
          KellyTools.getBrowser().tabs.create({url: '/env/html/recorderDownloader.html?tab=profiles'}, function(tab){});
         
     }}, 
-    'support_project' : {loc : 'link_support', event : function() {
+    'support_project' : {loc : 'link_support', icon : 'cup', event : function() {
          KellyTools.getBrowser().tabs.create({url: 'https://ko-fi.com/nradiowave'}, function(tab){});  
     }},
 };
@@ -131,11 +131,19 @@ KellyPopupPage.updateRecordButton = function() {
 
     if (KellyPopupPage.recordingState == 'disabled') {
         
-        KellyPopupPage.buttons['download_recorded'].btn.style.display = KellyPopupPage.recordingNum && KellyPopupPage.recordingState == 'disabled' ? '' : 'none'; 
-        KellyPopupPage.buttons['download_current_tab'].btn.style.display = KellyPopupPage.buttons['download_recorded'].btn.style.display == 'none' ? '' : 'none';
+        KellyPopupPage.buttons['download_recorded'].hidden = KellyPopupPage.recordingNum && KellyPopupPage.recordingState == 'disabled' ? false : true;
+        KellyPopupPage.buttons['download_recorded'].btn.style.display = KellyPopupPage.buttons['download_recorded'].hidden ? 'none' : ''; 
+        
+        // buttons that shown when "Download record" button is hidden
+        
+        KellyPopupPage.buttons['download_current_tab'].btn.style.display = KellyPopupPage.buttons['download_recorded'].hidden ? '' : 'none';
         KellyPopupPage.buttons['options'].btn.style.display = KellyPopupPage.buttons['download_current_tab'].btn.style.display;
-        KellyPopupPage.buttons['download_record'].btn.style.display = KellyPopupPage.buttons['download_current_tab'].btn.style.display;
+        KellyPopupPage.buttons['download_record'].btn.style.display = KellyPopupPage.buttons['download_current_tab'].btn.style.display;        
         KellyPopupPage.buttons['support_project'].btn.style.display = KellyPopupPage.buttons['download_current_tab'].btn.style.display;
+        
+        // support button also can be disabled manualy by user 
+        
+        if (KellyPopupPage.buttons['support_project'].hidden) KellyPopupPage.buttons['support_project'].btn.style.display = 'none';
         
         KellyPopupPage.updateNotice(KellyPopupPage.recordingNum ? KellyLoc.s('Recorded images', 'download_recorded_images') + ': ' + KellyPopupPage.recordingNum : false);
         
@@ -201,7 +209,16 @@ KellyPopupPage.showRecorder = function() {
          KellyPopupPage.buttons[buttonKey].btn = document.createElement('button');
          KellyPopupPage.buttons[buttonKey].btn.onclick = KellyPopupPage.buttons[buttonKey].event;
          KellyPopupPage.buttons[buttonKey].btn.className = KellyPopupPage.className + '-button-' + buttonKey;
-         KellyPopupPage.buttons[buttonKey].btn.innerText = KellyPopupPage.buttons[buttonKey].loc ? KellyLoc.s('', KellyPopupPage.buttons[buttonKey].loc) : buttonKey;
+         
+         var locText = KellyPopupPage.buttons[buttonKey].loc ? KellyLoc.s('', KellyPopupPage.buttons[buttonKey].loc) : buttonKey;
+         
+         if (KellyPopupPage.buttons[buttonKey].icon) {
+             var html = '<span class="' + KellyPopupPage.className + '-icon ' + KellyPopupPage.className + '-icon-' + KellyPopupPage.buttons[buttonKey].icon + '"></span><span class="' + KellyPopupPage.className + '-text">' + locText + '</span>';
+             KellyTools.setHTMLData(KellyPopupPage.buttons[buttonKey].btn, html);
+         } else {   
+            KellyPopupPage.buttons[buttonKey].btn.innerText = locText;
+         }
+         
          if (KellyPopupPage.buttons[buttonKey].hidden) KellyPopupPage.buttons[buttonKey].btn.style.display = 'none'; 
          KellyPopupPage.wrap.appendChild(KellyPopupPage.buttons[buttonKey].btn);
     }
@@ -213,6 +230,12 @@ KellyPopupPage.init = function() {
     
     var favEnv = new KellyFavItems({env : KellyProfileRecorder.getInstance()});
         favEnv.load('cfg', function(fav) { 
+            
+            if (fav.coptions.toolbar && fav.coptions.toolbar.heartHidden) {
+                KellyPopupPage.buttons['support_project'].hidden = true; 
+            }
+            
+            console.log(fav.coptions);
             
             if (fav.coptions.darkTheme) KellyPopupPage.css.push('darkRecorderPopup');
             
