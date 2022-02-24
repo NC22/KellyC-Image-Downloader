@@ -717,48 +717,28 @@ var KellyEDispetcher = new Object;
     } 
     
     KellyEDispetcher.onTabConnect = function(port) {
-              
+        
+        var tabData = false, reconect = false;
+        
         // addition events - can be implemented in separate files
         
         if (KellyEDispetcher.callEvent('onTabConnect', {port : port})) return;
         
         KellyTools.log('[Downloader] CONNECTED | Tab : ' + port.sender.tab.id, 'KellyEDispetcher');
         
-        // Check is extension from front was already connected before
-        // This cant happen IN manifest v2 persistent mode, see NetRequest implementation
+        // Check is extension from front was already connected before, happen in some cases in manifest v2 too (ex. after basic auth dialog shows + tab reload)
         
         for (var i = 0; i < KellyEDispetcher.downloaderTabs.length; i++) { 
             if (KellyEDispetcher.downloaderTabs[i].id == port.sender.tab.id) {
                 KellyTools.log('[Downloader] CONNECTED | Notice : Tab was already connected : reset connection', 'KellyEDispetcher');
-                return;
+                reconect = true;
+                tabData = KellyEDispetcher.downloaderTabs[i]; 
+                tabData.closePort();
+                tabData.port = port;
+                break;
             }
         }
         
-        var tabData = {port : port, tab : port.sender.tab, id : port.sender.tab.id, eventsEnabled : false};
-            tabData.resetEvents = function() {
-                
-                KellyTools.log('[registerDownloader][EVENTS-REGISTERED-RESET]', 'KellyEDispetcher [PORT]');
-                
-                tabData.eventsEnabled = false;
-                
-                try {
-                    if (tabData.onBeforeSendHeaders) {
-                        KellyTools.getBrowser().webRequest.onBeforeSendHeaders.removeListener(tabData.onBeforeSendHeaders);
-                        tabData.onBeforeSendHeaders = false;
-                    }
-                    
-                    if (tabData.onHeadersReceived) {
-                        KellyTools.getBrowser().webRequest.onHeadersReceived.removeListener(tabData.onHeadersReceived);
-                        tabData.onHeadersReceived = false;
-                    } 
-                } catch (e) { 
-                    KellyTools.log('FAIL to reset webRequest events', KellyTools.E_ERROR);
-                }
-                
-            }
-    
-        KellyEDispetcher.downloaderTabs.push(tabData);
-    
         var onTabMessage = function(request) {
             
             if (KellyEDispetcher.callEvent('onTabMessage', {tabData : tabData})) return;
@@ -781,13 +761,13 @@ var KellyEDispetcher = new Object;
                 }
                 
                 KellyTools.log('[registerDownloader][EVENTS-REGISTERED-OK]', 'KellyEDispetcher [PORT]');
-                port.postMessage({method : 'registerDownloader', message: request.disable ? "disabled" : "registered"});
+                tabData.port.postMessage({method : 'registerDownloader', message: request.disable ? "disabled" : "registered"});
                 
             } else if (request.method == 'setDebugMode') {
             
                 KellyTools.DEBUG = request.state;
                 KellyTools.log('[DEBUG MODE] ' + (KellyTools.DEBUG ? 'TRUE' : 'FALSE'), 'KellyEDispetcher [PORT]');
-                port.postMessage({method : 'setDebugMode', message: "ok"});
+                tabData.port.postMessage({method : 'setDebugMode', message: "ok"});
                 
             } else if (request.method == 'updateUrlMap') {
             
@@ -795,11 +775,45 @@ var KellyEDispetcher = new Object;
                     tabData.urlMap = request.urlMap;
                 }
                 
-                port.postMessage({method : 'updateUrlMap', message: "ok"});
+                tabData.port.postMessage({method : 'updateUrlMap', message: "ok"});
                 
             }
         }
         
+        if (tabData === false) {
+            
+            var tabData = {port : port, tab : port.sender.tab, id : port.sender.tab.id, eventsEnabled : false};
+                tabData.resetEvents = function() {
+                    
+                    KellyTools.log('[registerDownloader][EVENTS-REGISTERED-RESET]', 'KellyEDispetcher [PORT]');
+                    
+                    tabData.eventsEnabled = false;
+                    
+                    try {
+                        if (tabData.onBeforeSendHeaders) {
+                            KellyTools.getBrowser().webRequest.onBeforeSendHeaders.removeListener(tabData.onBeforeSendHeaders);
+                            tabData.onBeforeSendHeaders = false;
+                        }
+                        
+                        if (tabData.onHeadersReceived) {
+                            KellyTools.getBrowser().webRequest.onHeadersReceived.removeListener(tabData.onHeadersReceived);
+                            tabData.onHeadersReceived = false;
+                        } 
+                    } catch (e) { 
+                        KellyTools.log('FAIL to reset webRequest events', KellyTools.E_ERROR);
+                    }
+                    
+                }    
+
+                tabData.closePort = function() {
+                    tabData.port.onMessage.removeListener(onTabMessage);
+                    tabData.port.disconnect();
+                }
+        
+            KellyEDispetcher.downloaderTabs.push(tabData);
+            
+        }
+                
         port.postMessage({method : 'onPortCreate', message : "connected", isDownloadSupported : KellyEDispetcher.isDownloadSupported()});
         port.onMessage.addListener(onTabMessage);
         port.onDisconnect.addListener(function(p){
