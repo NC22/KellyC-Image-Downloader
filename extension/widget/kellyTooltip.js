@@ -561,6 +561,7 @@ KellyTooltip.loadDefaultCss = function(className) {
         .' + className + '-close svg {\
             width: 26px;\
             height: 15px;\
+            display: inline-block;\
         }\
         .' + className + '-close svg g line {\
             stroke: #fff;\

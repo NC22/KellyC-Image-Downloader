@@ -1038,6 +1038,10 @@ KellyDPage.init = function() {
             if (K_FAV.getGlobal('options').darkTheme) {
                 document.body.classList.add(KellyDPage.env.className + '-dark');
                 resources.push('dark');
+            } else {
+            // todo    
+            //    document.body.classList.add(KellyDPage.env.className + '-white');
+            //    resources.push('white');
             }
             
             K_FAV.initFormatPage(resources); 

@@ -73,16 +73,18 @@ button span.popup-page-text {
 
 .__BASECLASS__-recorded-block a {
     float : right;
-    color: #ff610f;
+    color: #ff1515;
 }
 
 .popup-page-button-download_recorded {
-    background: #ff782a;
-    border-color : #b04f18;
+    background: #4bb9ff;
+    border-color: #4b8db7;
+    color: #fff;
+    margin-bottom: 10px;
 }
 
 .popup-page-button-download_recorded:hover {
-    background: #ff8c4a;
+    background: #70bff2;
 }
 
 .popup-page-button-download_record span:before {

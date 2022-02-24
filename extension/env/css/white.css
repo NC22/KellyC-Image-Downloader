@@ -1,0 +1,176 @@
+.__BASECLASS__-white button {
+    color: #262626;
+}
+
+.__BASECLASS__-white .__BASECLASS__-FavItem-small .__BASECLASS__-preview-wrap {
+    border: 3px solid rgb(102 102 102);
+}
+
+.__BASECLASS__-white .__BASECLASS__-FavItem-tmp-bounds .__BASECLASS__-preview-wrap, 
+.__BASECLASS__-white .__BASECLASS__-FavItem-tmp-bounds .__BASECLASS__-preview   {
+    background: #2f2f2f;
+}
+
+.__BASECLASS__-white .__BASECLASS__-displayed-info {
+    background: #c2c2c2ab;
+    color: #2d1717;
+}
+
+.__BASECLASS__-white #submenu {
+    color: #2c1e52;
+    background-color: #dedede;
+    border-color: #9f9f9f;
+}
+
+.__BASECLASS__-white .__BASECLASS__-MainMenuItem.__BASECLASS__-MainMenuItem-fav a,
+.__BASECLASS__-white .__BASECLASS__-MainMenuItem.__BASECLASS__-MainMenuItem-fav.active a {
+    background : transparent;
+}
+
+.__BASECLASS__-white input[type=submit],
+.__BASECLASS__-white .__BASECLASS__-MainMenuItem a {
+    background: #80838d;
+    font-size: 16px;
+    color: #fff;
+}
+
+.__BASECLASS__-white .__BASECLASS__-MainMenuItem-fav.active .__BASECLASS__-icon {
+    background-color: #80838d;
+}
+
+.__BASECLASS__-white .__BASECLASS__-MainMenuItem.active a {
+    background: #b4b7c2;
+    color : #fff;
+}
+
+.__BASECLASS__-white .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a {
+    color : #000;
+}
+
+.__BASECLASS__-white #submenu a,
+.__BASECLASS__-white a.__BASECLASS__-help {
+    color: #535353;
+}
+
+.__BASECLASS__-white a, .__BASECLASS__-white a:hover {
+    color: #fff;
+}
+
+.__BASECLASS__-white .__BASECLASS__-tab-list ul li:hover {
+    background : #858585;
+    
+}
+
+.__BASECLASS__-white .__BASECLASS__-tab-list ul li {
+    background: #b4b7c2;
+}
+
+.__BASECLASS__-white .__BASECLASS__-tab-list ul li.active {
+    background: #80838d;
+}
+
+.__BASECLASS__-white .__BASECLASS__-DBItem {
+    background-color: #4e4e4e;   
+}
+
+.__BASECLASS__-white .__BASECLASS__-DBItem, .__BASECLASS__-white .__BASECLASS__-DBItem a {
+    color: #fff;
+}
+
+.__BASECLASS__-white .__BASECLASS__-downloader-controll-rangeSwitch.active,
+.__BASECLASS__-white .__BASECLASS__-DBItem.active {
+    background-color: #979aa7;
+    color: #fff;
+}
+
+.__BASECLASS__-white .__BASECLASS__-ModalBox-controll-buttons a {
+    padding-left: 2px;
+    padding-right: 2px;    
+}
+
+.__BASECLASS__-white a.__BASECLASS__-FavItem-collection,
+.__BASECLASS__-white a.__BASECLASS__-FavItem-overlay-button,
+.__BASECLASS__-white .__BASECLASS__-preview-text {
+    background: #5d5d5d;
+}
+
+.__BASECLASS__-white .__BASECLASS__-FavItem-grid-empty,
+.__BASECLASS__-white .__BASECLASS__-FavItem-download-number,
+.__BASECLASS__-white .__BASECLASS__-preview-dimensions,
+.__BASECLASS__-white .__BASECLASS__-message.__BASECLASS__-success, 
+.__BASECLASS__-white .__BASECLASS__-OptionsMessage,
+.__BASECLASS__-white .__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons p,
+.__BASECLASS__-white .__BASECLASS__-section-header-inline,
+.__BASECLASS__-white a.__BASECLASS__-pagination-item,
+.__BASECLASS__-white .__BASECLASS__-FavFilter.active,
+.__BASECLASS__-white .__BASECLASS__-FavEditButton.active {
+    background: #80838d;
+    color: #fffbfb;
+}
+
+.__BASECLASS__-white .__BASECLASS__-section-header-inline a, .__BASECLASS__-white .__BASECLASS__-section-header-inline a:hover {
+    
+    color : #cdcdcd;    
+}
+
+.__BASECLASS__-white .__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons button.selected, 
+.__BASECLASS__-white .__BASECLASS__-ModalBox-addition .__BASECLASS__-buttons button:hover {
+    
+    background-color: #a9a9a9;
+}
+
+.__BASECLASS__-white .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a.__BASECLASS__-downloader-button-save_as_json, 
+.__BASECLASS__-white .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a.__BASECLASS__-downloader-button-save_as_txt, 
+.__BASECLASS__-white .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a.__BASECLASS__-downloader-button-save_log,
+.__BASECLASS__-white .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a {
+    background: rgb(183 185 192);
+    color : #fff;
+}
+
+.__BASECLASS__-white .__BASECLASS__-Main-download-btn,
+.__BASECLASS__-white .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a.__BASECLASS__-downloader-button-init {
+    background-color: #e63d3d;
+}
+
+.__BASECLASS__-white .__BASECLASS__-Main-download-btn:hover,
+.__BASECLASS__-white .__BASECLASS__-ModalBox-downloader .__BASECLASS__-downloader-controll-buttons a:hover {
+    background-color : #e95757;
+}
+
+.__BASECLASS__-white .__BASECLASS__-buttons button {
+    background-color: #80838d;
+    color : #fff;
+}
+
+.__BASECLASS__-white .__BASECLASS__-buttons button.__BASECLASS__-related-links-options {
+    background-color: #4e4e4e;
+}
+
+.__BASECLASS__-white .__BASECLASS__-message.__BASECLASS__-error {
+    background: #ff7878;
+    color : #fff;
+}
+
+.__BASECLASS__-white button.__BASECLASS__-Main-download-btn {    
+    color : #fff;
+}
+
+.__BASECLASS__-white .profile-selector {
+    background: #7c7c7c;
+}
+
+.__BASECLASS__-white .profile-selector-selected {
+    color: #ffffff;
+}
+
+.__BASECLASS__-white li.__BASECLASS__-additions-menu-item-li.kelly-jr-ui-additions-active a {
+    background: #b4b7c2;
+}
+
+.__BASECLASS__-white .__BASECLASS__-active.__BASECLASS__-additions-page-item ul li a {
+    background: #b4b7c2;
+}
+
+.__BASECLASS__-white a.__BASECLASS__-additions-menu-item {
+    background: #80838d;
+}
