@@ -124,8 +124,8 @@ function KellyToolbar(cfg) {
         handler.dom['help'].onclick = function() {
             
             if (handler.cfg.heartNewWindow) {
-                
-                window.open(KellyTools.getBrowser().runtime.getURL('/env/html/' + handler.env.profile + 'Downloader.html') + '?tab=donate');
+                 
+                KellyTools.getBrowser().runtime.sendMessage({method: "openTab", url : '/env/html/' + handler.env.profile + 'Downloader.html?tab=donate'}, function(request) {});
                 
             } else {
                 handler.setDeselectBtn(handler.cfg.deselectBtn); // reset state

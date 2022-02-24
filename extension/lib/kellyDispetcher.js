@@ -696,6 +696,19 @@ var KellyEDispetcher = new Object;
                 setTimeout(function() { callback(response); }, request.ms);
             }
             
+        } else if (request.method == 'openTab') {
+            
+            if (request.url) {
+                
+                KellyTools.getBrowser().tabs.create({url: request.url}, function(tab){
+                    response.opened = true;
+                    if (callback) callback(response);
+                });
+                
+                
+                return true; // async mode
+            }
+            
         } else {
             
             // addition events - can be implemented in separate files
