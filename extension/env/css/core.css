@@ -943,6 +943,7 @@
 
 .__BASECLASS__-ImgView-img-self {
     background: rgb(255, 255, 255, 0.79);
+    max-width : unset;
 }
 
 .__BASECLASS__-ImgView-loader {
