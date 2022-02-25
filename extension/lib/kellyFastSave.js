@@ -5,6 +5,21 @@ function KellyFastSave(cfg) {
     this.downloadTooltip = false;    
     this.favEnv = false;
     this.tooltipOptions = false;
+    this.beasyButtons = false; // false or pool of fastSave elements, if downloading in process
+    
+    function addPostMedia(postMedia) {
+        
+        var item = {
+            pImage : postMedia,
+            id : -1,
+            categoryId : []
+        };
+            
+        var conflict = handler.favEnv.getGlobal('fav').coptions.fastsave.conflict, dm = handler.favEnv.getDownloadManager();
+        for (var i = 0; i < postMedia.length; i++) {
+            dm.addDownloadItem(item, i, conflict);
+        }
+    }
     
     /*
         Check is download methods supported by browser
@@ -52,17 +67,39 @@ function KellyFastSave(cfg) {
                         handler.downloadCancel();
                         fastSave.classList.remove(classPrefix + '-fast-save-loading');                          
                         
-                    } else {
+                    } else {  
                         
-                        var onDownloadSuccess = function(success) {
-                            fastSave.classList.remove(classPrefix + '-fast-save-loading');
-                            fastSave.className = fastSaveBaseClass + classPrefix + '-fast-save-' + (success ? '' : 'not') + 'downloaded';
+                        var onDownloadSuccess = function(success) {                            
+                            for (var i = 0; i < handler.beasyButtons.length; i++) {                                
+                                handler.beasyButtons[i].classList.remove(classPrefix + '-fast-save-loading');
+                                handler.beasyButtons[i].className = fastSaveBaseClass + classPrefix + '-fast-save-' + (success ? '' : 'not') + 'downloaded';
+                            }
+                            
+                            handler.beasyButtons = false;
                         };
                         
-                        var onDownloadInit = function() {
+                        var onDownloadInit = function() {   
+                        
+                            if (!handler.beasyButtons) handler.beasyButtons = [];
+                            handler.beasyButtons.push(fastSave);
+                            
                             fastSave.classList.remove(classPrefix + '-fast-save-unchecked');
                             fastSave.classList.add(classPrefix + '-fast-save-loading');
                         };
+                        
+                        // if something still loading, add to current process
+                        
+                        if (handler.favEnv.getDownloadManager().getState() == 'download' && handler.beasyButtons) {
+                            
+                            var additionMedia = handler.favEnv.getGlobal('env').getAllMedia(postBlock);
+                            if (additionMedia && additionMedia.length > 0) {
+                                
+                                addPostMedia(additionMedia);
+                                onDownloadInit();
+                                
+                                return false;
+                            }
+                        }
                         
                         if (configurable) {
                             handler.showDownloadPostDataForm(fastSave, postBlock, onDownloadSuccess, onDownloadInit);
@@ -197,7 +234,7 @@ function KellyFastSave(cfg) {
         var dm = handler.favEnv.getDownloadManager();
         if (dm.getState() != 'wait') {
             
-            KellyTools.log('downloadPostData - beasy state ' + dm.getState(), 'KellyFastSave');
+            KellyTools.log('downloadPostData - beasy state by something else ' + dm.getState(), 'KellyFastSave');
             
             if (onDownloadEnd) onDownloadEnd(false);
             return false;
@@ -243,7 +280,7 @@ function KellyFastSave(cfg) {
                 },          
                 
                 onDownloadAllEnd : function(handler, result) { 
-                
+                    
                     handler.clearDownloads();
                     
                     KellyTools.log(result, 'KellyFastSave | downloadPostData');   
@@ -256,13 +293,7 @@ function KellyFastSave(cfg) {
             }
         });
         
-        for (var i = 0; i < postMedia.length; i++) {
-            dm.addDownloadItem({
-                pImage : postMedia,
-                id : -1,
-                categoryId : []
-            }, i, options.fastsave.conflict);
-        }
+        addPostMedia(postMedia);
         
         if (!dm.download()) {
             if (onDownloadEnd) onDownloadEnd(false);   
