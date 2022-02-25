@@ -9,9 +9,9 @@
 <b><a href="https://kellydownloader.com/">Project homepage</a> | <a href="https://twitter.com/KellyCLibs">Twitter</a></b>
 <p></p>
 <h2>EN | Description</h2>
-<p>An browser extension for batch downloading artworks and images from sites. It allows you to download all images on the page filtering by size or other settings.</p>
-<p>Some of the sites (priority to Pixiv, Pinterest, Twitter, Joyreactor) support extended features (list of all sites described <a href="https://kellydownloader.com/crawlers/">here</a>) for collect "Original" version of images from preview automaticaly without use filters by size manualy.</p>
-<p>"Load related document" - feature allows you to download addition images from related documents of preview, if original image is not acutally placed on current page. (may be helpfull in some cases, see if site is supported)</p>
+<p>A browser extension for batch downloading artworks and images from sites. It allows you to download all images on the page filtering by size or other settings.</p>
+<p>Some of the sites (priority to Pixiv, Pinterest, Twitter, Joyreactor) support extended features (list of all sites described <a href="https://kellydownloader.com/crawlers/">here</a>) for collect "Original" version of images from preview automatically without use filters by size manually.</p>
+<p>"Load related document" - feature allows you to download additional images from related documents of preview, if original image is not actually placed on current page. (may be helpful in some cases, check if site is supported)</p>
 
 <p>Several usage examples:</p>
 <p></p>
@@ -19,7 +19,7 @@
 <p><a href="https://www.youtube.com/watch?v=x1-kqKMnMmA">Download images from <b>Twitter</b></a> (Collect "Media" section)</p>
 <p><a href="https://youtu.be/1Nivs34BDbI">Download images from <b>Pixiv</b></a> (Collect "Bookmarks" example)</p>
 <p></p>
-<p>If you know JS and want to extend list of supported sites read documentation about addition filters <a href="https://kellydownloader.com/links/dev/">here</a></p>
+<p>If you know JS and want to extend the list of supported sites read the documentation about addition filters <a href="https://kellydownloader.com/links/dev/">here</a></p>
 
 <p></p>
 <h2>RU | Описание</h2>
