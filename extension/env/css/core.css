@@ -1116,6 +1116,16 @@
     display : none;
 }
 
+p.__BASECLASS__-options-notice a {
+    font-size: 12px;
+}
+
+p.__BASECLASS__-options-notice {
+    margin-top: 4px;
+    margin-left: 24px;
+    font-size: 12px;
+}
+
 .__BASECLASS__-options-table td > span {
     padding-left : 16px;
 }

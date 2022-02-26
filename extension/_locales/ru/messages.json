@@ -734,6 +734,18 @@
     "unlock_common" : {
         "message" : "Снятие блокировок"
     },
+    "unlock_censored_anon":{  
+        "message":"Видеть посты требующие входа в аккаунт даже если не авторизован"
+    },
+    "unlock_censored_anon_notice":{  
+        "message":"Относится к <a href=\"//m.reactor.cc\" target=\"_blank\">m.reactor.cc</a>"
+    }, 
+    "unlock_censored_unsafe":{  
+        "message":"Отображать скрытые \"небезопасные\" посты"
+    },
+    "unlock_censored_unsafe_notice":{  
+        "message":"Относится только к публикациям скрытым без подписки (теги \"секретные разделы\", \"песочница\" и т.п.) на <a href=\"//m.reactor.cc\" target=\"_blank\">m.reactor.cc</a>"
+    },
     "unlock_censored":{  
         "message":"Отображать \\ Восстанавливать при выгрузке заблокированные посты "
     },    

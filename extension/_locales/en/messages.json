@@ -724,7 +724,19 @@
     },  
     "unlock_common" : {
         "message" : "Unlock tweaks"
-    }, 
+    },
+    "unlock_censored_anon":{  
+        "message":"Set anon user if not logged in"
+    },
+    "unlock_censored_anon_notice":{  
+        "message":"Helps to show content that require be logged in (only on <a href=\"//m.reactor.cc\" target=\"_blank\">m.reactor.cc</a>)"
+    },    
+    "unlock_censored_unsafe":{  
+        "message":"Show hidden \"unsafe\" publications"
+    },
+    "unlock_censored_unsafe_notice":{  
+        "message":"Related to only hidden publications without subscription on \"секретные разделы\", \"песочница\" and other similar tags on <a href=\"//m.reactor.cc\" target=\"_blank\">m.reactor.cc</a>"
+    },
     "unlock_censored":{  
         "message":"Unlock blocked data"
     }, 

@@ -107,13 +107,13 @@ function KellyOptions(cfg) {
         if (type == 'enum' && handler.cfgInput[cfgKey].list.indexOf(val) == -1) val = handler.cfgInput[cfgKey].default;
         if (typeof val == 'undefined' && handler.cfgInput[cfgKey].default) val = handler.cfgInput[cfgKey].default;
                     
-        if (handler.cfgInput[cfgKey].noticeUp) output += '<tr><td colspan="2">' + lng.s('', handler.cfgInput[cfgKey].noticeUp) + '</td></tr>';
+        if (handler.cfgInput[cfgKey].noticeUp) output += '<tr><td colspan="2" class="' + env.className + '-options-notice ' + env.className + '-options-notice-up">' + lng.s('', handler.cfgInput[cfgKey].noticeUp) + '</td></tr>';
         if (type.indexOf('varlist') != -1) type = type.split('-')[1]; 
         
         if (type == 'bool') {
              
           output = '<tr class="' + rowBc + '"><td colspan="2"><label><input type="checkbox" value="1" class="' + bc + '" ' + (val ? 'checked' : '') + '> ' + lng.s('', handler.cfgInput[cfgKey].loc) + '</label>'; 
-          if (handler.cfgInput[cfgKey].notice) output += ' <p>' + lng.s('', handler.cfgInput[cfgKey].notice) + '</p>';     
+          if (handler.cfgInput[cfgKey].notice) output += ' <p class="' + env.className + '-options-notice">' + lng.s('', handler.cfgInput[cfgKey].notice) + '</p>';     
              
         } else if (type == 'enum') {
             
@@ -138,7 +138,7 @@ function KellyOptions(cfg) {
             
              output += '<tr class="' + rowBc + '"><td>' + lng.s('', handler.cfgInput[cfgKey].loc) + '</td><td><input type="text" class="' + bc + '" placeholder="' + placeholder + '" value="' + val + '">';                            
              if (handler.cfgInput[cfgKey].tip) output += '&nbsp;&nbsp;&nbsp;(<a href="#" class="' + env.className + '-help" data-tip="' + handler.cfgInput[cfgKey].tip + '">' + lng.s('', 'tip') + '</a>)';  
-             if (handler.cfgInput[cfgKey].notice) output += '</td></tr>' + '<tr><td colspan="2">' + lng.s('', handler.cfgInput[cfgKey].notice);
+             if (handler.cfgInput[cfgKey].notice) output += '</td></tr>' + '<tr><td colspan="2" class="' + env.className + '-options-notice">' + lng.s('', handler.cfgInput[cfgKey].notice);
        
         } else return '';   
 
