@@ -16,5 +16,8 @@ KellyPageWatchdog.filtersHelp.push({host : 'vk.com', link : 'https://www.youtube
 KellyPageWatchdog.filtersHelp.push({host : 'twitter.com', link : 'https://www.youtube.com/watch?v=x1-kqKMnMmA', loc : 'help_twitter'});
 KellyPageWatchdog.filtersHelp.push({host : 'pixiv.net', link : 'https://www.youtube.com/watch?v=1Nivs34BDbI', loc : 'help_pixiv'});
 KellyPageWatchdog.filtersHelp.push({host : 'pinterest.com', link : 'https://www.youtube.com/watch?v=ImKbC_1Oz8c', loc : 'help_pinterest'});
+KellyPageWatchdog.filtersHelp.push({host : 'deviantart.com', link : 'https://www.youtube.com/watch?v=O3JDEhig0P8', loc : 'help_deviantart'});
+KellyPageWatchdog.filtersHelp.push({host : 'instagram.com', link : 'https://www.youtube.com/watch?v=RenHptOCnh8', loc : 'help_instagram'});
+KellyPageWatchdog.filtersHelp.push({host : 'pikabu.ru', link : 'https://www.youtube.com/watch?v=QNm4L8hmoDs', loc : 'help_pikabu'});
 
 KellyPageWatchdog.bannedUrls.push('counter.yadro.ru', 'bat.bing.com', 'ads.adfox'); 
