@@ -14,7 +14,8 @@ function KellyPageWatchdog(cfg)
     // video items partly supported (SOURCE tag OR when url extension is specified (mp4 \ webm), viewer functional is limited)
     this.videoDetect = true;
     
-    this.observer = false; // recorder change dom events state
+    this.observer = false; // if recorder tracking changes enabled by .exec method (DOM observer object)
+    this.observerLocation = true; // update handler.url, host if observer enabled
     
     this.recorder = false;
     this.recorderTick = false;
@@ -39,7 +40,7 @@ function KellyPageWatchdog(cfg)
     // context for parser functions    
           
     function constructor(cfg) {
-        if (!cfg || !cfg.url) handler.setLocation({url : window.location.href, host : window.location.origin}); 
+        if (!cfg || !cfg.url) setDefaultLocation(); 
         else handler.setLocation(cfg);
     }
         
@@ -47,7 +48,13 @@ function KellyPageWatchdog(cfg)
         
         // some changable by filters options | more will be added here
         
-        this.videoDetect = true;        
+        handler.additionCats = {};
+        handler.videoDetect = true;        
+    }
+    
+    function setDefaultLocation() {
+        handler.setLocation({url : window.location.href, host : window.location.origin});   
+        handler.log('Set location by window ' + handler.url);
     }
     
     this.setLocation = function(data) {
@@ -67,7 +74,6 @@ function KellyPageWatchdog(cfg)
             }
         }
         
-        resetConfig();
         handler.filterCallback('onInitLocation', data);
     }
     
@@ -303,7 +309,7 @@ function KellyPageWatchdog(cfg)
         }
         
              if (ext == 'dataUrl' && handler.srcs.indexOf(src.substr(0, 258)) != -1) return lastError('dataUrl already added');
-        else if (handler.srcs.indexOf(src) != -1) return lastError('src already added');
+        else if (handler.srcs.indexOf(src) != -1) return lastError('src already added ' + src);
         
         var newIndex = addItemSrc(item, src, groups);     
         
@@ -349,7 +355,7 @@ function KellyPageWatchdog(cfg)
             
     this.addSrcFromStyle = function(el, item, bgGroup) {
         if (el.getAttribute('style') && el.getAttribute('style').indexOf('url(') != -1) {
-            var styleRegExp = /url\((.*)\)/g, styleUrlData = styleRegExp.exec(el.getAttribute('style')), src = '';
+            var styleRegExp = /url\((.*?)\)/g, styleUrlData = styleRegExp.exec(el.getAttribute('style')), src = '';
             if (styleUrlData !== null && typeof styleUrlData[1] == 'string') src = styleUrlData[1].replace(/['"]+/g, '').trim();
             
             handler.addSingleSrc(item, src, 'addSrcFromStyle', el, bgGroup ? bgGroup : 'imageBg');
@@ -478,6 +484,7 @@ function KellyPageWatchdog(cfg)
         if (request.method == "parseImages") {       
             
             resetPool();
+            if (handler.observerLocation) setDefaultLocation();
             handler.filterCallback('onStartRecord', {context : 'parseImages'});
             
             handler.parseImages(); 
@@ -492,12 +499,12 @@ function KellyPageWatchdog(cfg)
             if (callback) callback(response); 
 
             resetPool();	
-            handler.additionCats = {};
+            resetConfig();
             
         } else if (request.method == "startRecord") {       
             
-            resetPool();            
-            handler.additionCats = {};
+            resetPool();  
+            resetConfig();          
             handler.filterCallback('onStartRecord', 'startRecord');
             
             initObserver();
@@ -597,7 +604,11 @@ function KellyPageWatchdog(cfg)
             // common observer for any ADD new node to DOM events
             
             handler.observer = new MutationObserver(function(mutations) {
-
+                
+                if (handler.observerLocation && handler.url != window.location.href) {
+                    setDefaultLocation();
+                }
+                
                 for (var i = 0; i < mutations.length; i++) {
                     
                     if (mutations[i].addedNodes.length > 0) {

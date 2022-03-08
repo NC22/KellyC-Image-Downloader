@@ -254,9 +254,11 @@ function KellyLoadDocControll(cfg)
                     
                     var itemGroups = handler.parser.imagesPool[i].relatedGroups && handler.parser.imagesPool[i].relatedGroups[index] ? handler.parser.imagesPool[i].relatedGroups[index] : [];
                     
+                    // array, that will be used in callback KellyDPage.aDProgress.docLoader.events.onQualityImageFound, after all image proportions will be loaded (or will be used imidiatly if untrustedData = false)
+                    
                     handler.docsImages.push({
                         src : src,
-                        groups : itemGroups, // currently used for check is trusted item or not (trusted group - imageByDocument)
+                        groups : itemGroups, // itemGroups currently only used here in untrustedData key for check is trusted item or not (trusted group - imageByDocument)
                         relatedItem : thread.job.data, // item data attached to request by [handler.thread.addJob] method 
                         untrustedData : itemGroups.indexOf('imageByDocument') != -1 ? false : handler.parser.untrustedData,
                     });
@@ -265,7 +267,7 @@ function KellyLoadDocControll(cfg)
             }
         }
         
-        handler.updateState('onDownloadDoc');
+        handler.updateState('onDownloadDoc'); // after preparations on event in controller, handler.runImgLoad will be called
         
         if (error) {
         

@@ -257,7 +257,14 @@ KellyTools.fetchRequest = function(urlOrig, cfg, callback) {
         };
         
         if (cfg) {
-            for (var k in cfg) fetchRequest.cfg[k] = cfg[k];
+            for (var k in cfg) {
+                
+                if (k == 'formData') {
+                    fetchRequest.cfg['body'] = cfg[k];
+                } else {
+                    fetchRequest.cfg[k] = cfg[k];
+                }
+            }
         }
         
         fetchRequest.cfg.signal = fetchRequest.abortController.signal;      
@@ -1161,6 +1168,16 @@ KellyTools.getGMTDate = function() {
     return new Date().toJSON().slice(0, 19).replace('T', ' ');
 }
 
+KellyTools.getParentByAttribute = function(el, attributeName, attributeValue) {
+    
+    var parent = el; 
+    while (parent && !parent.getAttribute(attributeName) && parent.getAttribute(attributeName) != attributeValue) {
+        parent = parent.parentElement;
+    }
+    
+    return parent;
+}
+
 // isChild
 KellyTools.getParentByClass = function(el, className) {
     
@@ -1260,15 +1277,17 @@ KellyTools.getElementByClass = function(parent, className) {
     return childNodes[0];
 }
 
-KellyTools.parseJSON = function(json) {
+KellyTools.parseJSON = function(json, escaped, log) {
     
     var data = false;
     
     if (json) {
         try {
+            if (escaped) json = JSON.parse('"' + json + '"');
             data = JSON.parse(json);
         } catch (e) {
             data = false;
+            if (log) console.log(e);
         }
     }
     

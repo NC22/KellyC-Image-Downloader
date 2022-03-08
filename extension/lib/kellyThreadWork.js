@@ -201,7 +201,7 @@ function KellyThreadWork(cfg) {
             error : '',
         }  
         
-        var config = {method : 'GET', responseType : 'text'};
+        var config = thread.job.config ? thread.job.config : {method : 'GET', responseType : 'text'};
         var defaultCallback = function(urlOrig, data, errorCode, errorText, controller) {
 
             if (data !== false) {
@@ -298,7 +298,7 @@ function KellyThreadWork(cfg) {
     
     // data - page \ nik \ etc
     
-    this.addJob = function(url, onLoad, data) {
+    this.addJob = function(url, onLoad, data, requestCfg) {
     
         if (typeof onLoad !== 'function') {
             onLoad = false;
@@ -308,9 +308,11 @@ function KellyThreadWork(cfg) {
             url : url,
             onLoad : onLoad,
             data : data,
+            config : requestCfg ? requestCfg : false,
         };
         
         jobs[jobs.length] = job;
+        return job;
     }
     
     constructor(cfg);
