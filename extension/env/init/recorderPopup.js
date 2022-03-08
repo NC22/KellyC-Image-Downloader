@@ -22,7 +22,8 @@ KellyPopupPage.buttons = {
                  if (response && response.images) {
                      
                      KellyTools.getBrowser().runtime.sendMessage({method: "addRecord", clean : true, images : response.images, cats : response.cats, url : response.url, host : response.host}, function(request) {                         
-                           KellyTools.getBrowser().tabs.create({url: '/env/html/recorderDownloader.html'}, function(tab){});                           
+                           KellyTools.getBrowser().tabs.create({url: '/env/html/recorderDownloader.html'}, function(tab){});
+                           window.close();
                      });
                      
                  } else KellyPopupPage.updateNotice('Вкладка недоступна');              
@@ -32,7 +33,8 @@ KellyPopupPage.buttons = {
         
     }},   
     'download_recorded' : {loc : 'download_recorded', hidden : true, event : function() {
-        KellyTools.getBrowser().tabs.create({url: '/env/html/recorderDownloader.html'}, function(tab){});        
+        KellyTools.getBrowser().tabs.create({url: '/env/html/recorderDownloader.html'}, function(tab){});  
+        window.close();
     }},  
     'download_record' : {loc_disabled : 'download_record', loc_enabled : 'download_record_stop', loc_stopping : 'download_record_stopping', event : function() {
           
@@ -106,10 +108,12 @@ KellyPopupPage.buttons = {
     'options' : {loc : 'saved', event : function() {
          
          KellyTools.getBrowser().tabs.create({url: '/env/html/recorderDownloader.html?tab=profiles'}, function(tab){});
-        
+         window.close();
     }}, 
     'support_project' : {loc : 'link_support', icon : 'cup', event : function() {
-         KellyTools.getBrowser().tabs.create({url: 'https://kellydownloader.com/donate/'}, function(tab){});  
+        
+         KellyTools.getBrowser().tabs.create({url: 'https://kellydownloader.com/donate/'}, function(tab){}); 
+         window.close();
     }},
 };
 

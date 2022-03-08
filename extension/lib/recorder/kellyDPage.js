@@ -807,7 +807,7 @@ KellyDPage.showRelatedLinksNotice = function() {
       
       var options = K_FAV.getGlobal('options');
       // options.noticeTriggers.relatedLinks = false;K_FAV.save('cfg');
-      if (KellyDPage.stat.uniqDocsNum > 0 && !KellyTools.getElementByClass(KellyDPage.commonFilters, KellyDPage.env.className + '-checkmark') || options.noticeTriggers.relatedLinks) return;
+      if (KellyDPage.stat.uniqDocsNum <= 0 || !KellyTools.getElementByClass(KellyDPage.commonFilters, KellyDPage.env.className + '-checkmark') || options.noticeTriggers.relatedLinks) return;
    
       var tooltip = KellyTools.getNoticeTooltip(KellyDPage.env.hostClass, KellyDPage.env.className);
           tooltip.saveNoticeReadedState = function(self) {

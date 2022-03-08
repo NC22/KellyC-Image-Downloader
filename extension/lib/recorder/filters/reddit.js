@@ -40,6 +40,8 @@ KellyRecorderFilterReddit.addItemByDriver = function(handler, data) {
             data.item.relatedSrc = [];
         }
         
+        console.log(data.item);
+        
         return data.item.relatedSrc.length > 0 ? handler.addDriverAction.ADD : handler.addDriverAction.SKIP;
     }
 }
@@ -105,7 +107,6 @@ KellyPageWatchdog.validators.push({
     host : 'reddit.com', 
     patterns : [
         ['preview.redd.it/award_images', 'imageTrash'],
-        ['external-preview.redd.it', 'imageTrash'], 
         ['preview.redd.it', 'imagePreview'], 
         ['i.imgur.com', 'imagePreview'], 
         ['i.redd.it', 'imagePreview'], 
