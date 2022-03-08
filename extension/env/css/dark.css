@@ -425,6 +425,10 @@ body.__BASECLASS__-dark  {
     background-color: #8b8b8b;
 }
 
+.__BASECLASS__-pointer-up {
+    border-bottom: 2em solid #d4d4d4;
+}
+
 @media (max-width: 1040px) { 
     .__BASECLASS__-mobile .page-content {
         padding: 4px;

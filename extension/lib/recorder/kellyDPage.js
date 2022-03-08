@@ -5,83 +5,17 @@ KellyDPage.sandBox = false;
 KellyDPage.urlMapDocs = false; // urlmap for docs was added to common urlmap array
 KellyDPage.urlMap = []; // common urlmap for current loaded storage
 
-// todo - move common progress bar methods to this object (init, reset, update, etc.)
-// todo - follow related data - search images bigger then original preview and add if something founded +\-
-// todo - remove bad links +\-
-// 
-// ToDo Google | Yandex :
-// на сайтах которые подгружают данные с внешних сайтов нужно выставлять динамический реферер равный ссылке на внешний хост а не на текущий хост вкладки (добавить как отдельную опцию)
-// очищать кеш dispetcher.recorder после сбора данных из фона ? (лучше оставлять, они перезаписываются корректно и стек не переполняется)
-//
-// Tor - очищает cookie при зарпросах с окна расширения - добавить опцию для записи cookie вместе с url. таба 
-//
-// todo - optional skip loadimg stage +\- - реализовано для фильтра по параметрам / не реализовано для Related Docs
-// todo - хранить реферер и ссылку для вебреквестов как два отдельных массива для ускорения поиска -
-//        Если netRequests прижевется (manifest v3), придется переходить с webRequests на него. Там совсем другой принцип хранения и переделывать смысла сейчас нет 
-// todo - доп. опции для парсера - захват видосов \ вывод статуса (подробнее в kellyPageWatchdog)
-// todo - доп. опции для загрузчика доп. документов. Глубокий поиск (не скипать untrasted изображения если чтото найдено на этапе loadDoc), Строка соответствия - для маркировки изображений untrusted = false
-// todo - замена таймеров в kellyThreadWork на "не засыпающий" через вызовы по sendMessage
+KellyDPage.storage = false;
+KellyDPage.stat = {uniqDocsNum : 0, displayedItemsNum : 0};
 
-// todo - лог ошибок при запросах доп. доков.
-// todo - данные для POST запросов в FETCH_RULES
+// .defaultPageParser
 
-// progress bar - used for [Load related docs.], [Load proportions], [Filter] (only text \ proggress bar unused) actions
-
-KellyDPage.aDProgress = {
-    current : 0, total : 0, fail : 0, 
-    minW : 0, maxW : 0, 
-    minH : 0, maxH : 0,
-    set : function(cfg) {
-        for (var k in cfg) KellyDPage.aDProgress[k] = cfg[k];
-    },
-    update : function(show) {
-        
-        var handler = KellyDPage.aDProgress;
-        
-        if (!show) {
-            KellyDPage.commonFiltersInfo.classList.add('collapsed');
-            handler.progressbar.classList.add('hidden');
-            handler.statistic.classList.add('hidden');
-            return;
-        }
-                
-        handler.statistic.classList.remove('hidden');
-        KellyDPage.commonFiltersInfo.classList.remove('collapsed');
-        
-        if (handler.current && handler.total) {
-           
-            handler.progressbar.classList.remove('hidden');        
-            
-            var complete = Math.round(handler.current / (handler.total / 100));
-            
-            var bad = handler.fail ? Math.round(handler.fail / (handler.total / 100)) : 0;
-            if (bad > 100) bad = 100;
-            
-            handler.state.innerText = handler.current + ' / ' + handler.total;        
-            handler.line.style.width = complete + '%';
-            handler.lineErr.style.width = bad > 0 ?  bad + '%' : '0px';
-            
-        } else handler.progressbar.classList.add('hidden');
-    }
-};
-
-// get category by .cats array key, creates it in items storage if its not created yet 
-
-KellyDPage.getCat = function(key) {
+/*
+    DOM
     
-    if (!KellyDPage.cats[key]) {
-         KellyDPage.cats[key] = {name : key};
-    }
-    
-    if (!KellyDPage.cats[key].id) {
-        var cat = K_FAV.getStorageManager().getCategoryBy(KellyDPage.storage, KellyDPage.cats[key].name, 'name');
-        if (cat.id == -1) cat = {id : K_FAV.getStorageManager().categoryCreate(KellyDPage.cats[key], KellyDPage.storage)};
-        
-        KellyDPage.cats[key].id = cat.id;
-    }
-    
-    return KellyDPage.cats[key];
-}
+    .statInfoBlock
+    .commonFilters
+*/
 
 KellyDPage.cats = {
     
@@ -112,6 +46,88 @@ KellyDPage.cats = {
     SVG : {name : 'SVG', exclude : true},
 }
 
+// todo - на сайтах которые подгружают данные с внешних сайтов (Google, fixed in Yandex) нужно выставлять динамический реферер равный ссылке на внешний хост а не на текущий хост вкладки (добавить как отдельную опцию)
+// очищать кеш dispetcher.recorder после сбора данных из фона ? (лучше оставлять, они перезаписываются корректно и стек не переполняется)
+//
+// Tor - очищает cookie при зарпросах с окна расширения - добавить опцию для записи cookie вместе с url. таба 
+//
+// todo - optional skip loadimg stage +\- - реализовано для фильтра по параметрам / не реализовано для Related Docs
+// todo - доп. опции для парсера - захват видео \ вывод статуса (подробнее в kellyPageWatchdog)
+// todo - замена таймеров в kellyThreadWork на "не засыпающий" через вызовы по sendMessage
+
+// todo - лог ошибок при запросах доп. доков.
+// todo - данные для POST запросов в FETCH_RULES
+
+// progress bar controller - used for [Load related docs.], [Load proportions], [Filter] (only text \ proggress bar unused) actions
+// todo - move common progress bar methods to this object (init, reset, update, etc.)
+
+KellyDPage.aDProgress = {
+    
+    current : 0, total : 0, fail : 0, 
+    
+    minW : 0, maxW : 0, 
+    minH : 0, maxH : 0,
+    
+    progressbar : false, // progressbar container
+    statistic : false, // statistic container
+    
+    set : function(cfg) {
+        for (var k in cfg) KellyDPage.aDProgress[k] = cfg[k];
+    },
+    
+    update : function(show) {
+        
+        var handler = KellyDPage.aDProgress;
+        
+        if (!show) {
+            
+            KellyDPage.commonFiltersInfo.classList.add('collapsed');
+            
+            handler.progressbar.classList.add('hidden');
+            handler.statistic.classList.add('hidden');
+            return;
+        }
+                
+        handler.statistic.classList.remove('hidden');
+        KellyDPage.commonFiltersInfo.classList.remove('collapsed');
+        
+        if (handler.current && handler.total) {
+           
+            handler.progressbar.classList.remove('hidden');        
+            
+            var complete = Math.round(handler.current / (handler.total / 100));
+            
+            var bad = handler.fail ? Math.round(handler.fail / (handler.total / 100)) : 0;
+            if (bad > 100) bad = 100;
+            
+            handler.state.innerText = handler.current + ' / ' + handler.total;        
+            handler.line.style.width = complete + '%';
+            handler.lineErr.style.width = bad > 0 ?  bad + '%' : '0px';
+            
+        } else {
+            handler.progressbar.classList.add('hidden');
+        }
+    }
+};
+
+// get category by .cats array key, creates it in items storage if its not created yet 
+
+KellyDPage.getCat = function(key) {
+    
+    if (!KellyDPage.cats[key]) {
+         KellyDPage.cats[key] = {name : key};
+    }
+    
+    if (!KellyDPage.cats[key].id) {
+        var cat = K_FAV.getStorageManager().getCategoryBy(KellyDPage.storage, KellyDPage.cats[key].name, 'name');
+        if (cat.id == -1) cat = {id : K_FAV.getStorageManager().categoryCreate(KellyDPage.cats[key], KellyDPage.storage)};
+        
+        KellyDPage.cats[key].id = cat.id;
+    }
+    
+    return KellyDPage.cats[key];
+}
+
 KellyDPage.addUrlMapItem = function(ext, location, referrer) {
     if (ext != 'dataUrl') {
 
@@ -137,7 +153,7 @@ KellyDPage.tileMapControll = {
         url = url.split(';')[1].split(',');            
         var data = {tileMapSrc : url[0], x : url[1], y : url[2], width : url[3], height : url[4], postItem : false}, mapIndex = KellyDPage.tileMapControll.mapsSrcs.indexOf(data.tileMapSrc);        
             data.src = KellyDPage.tileMapControll.getBlankCanvas(data.width, data.height).toDataURL();
-            data.location = KellyTools.getLocationFromUrl(data.src);
+            data.location = KellyTools.getLocationFromUrl(data.src); // need to keep it as URL object for compatibility with KellyDPage.addStorageItem method 
                           
          if (mapIndex == -1) {            
             KellyDPage.addUrlMapItem(KellyTools.getUrlExt(data.tileMapSrc), KellyTools.getLocationFromUrl(data.tileMapSrc), referrer);
@@ -230,7 +246,6 @@ KellyDPage.updateDisplayedState = function() {
     
     if (!KellyDPage.commonFilters) return;
 
-    var stat = {uniqDocsNum : 0, displayedItemsNum : 0};   
     var items = K_FAV.getGlobal('fav').items, displayed = K_FAV.getGlobal('filtered'), docs = [];
     
     for (var i = 0; i < displayed.length; i++) {
@@ -239,8 +254,8 @@ KellyDPage.updateDisplayedState = function() {
     }
         
     KellyDPage.statInfoBlock.innerText = KellyLoc.s('Элементы : __ITEMS__ | Документы : __RELATED_DOCS__', 'recorder_displayed_info', {ITEMS : displayed.length, RELATED_DOCS : docs.length});
-           
-    return {uniqDocsNum : docs.length, displayedItemsNum : displayed.length};
+    KellyDPage.stat = {uniqDocsNum : docs.length, displayedItemsNum : displayed.length};
+    return KellyDPage.stat;
 }
 
 KellyDPage.loadProportions = function(items, displayed, onEnd) {
@@ -782,8 +797,61 @@ KellyDPage.showAdditionFilters = function() {
     KellyTools.getElementByClass(KellyDPage.commonFilters, cl + '-proportions-asc').onclick = proportionsSort;  
     KellyTools.getElementByClass(KellyDPage.commonFilters, cl + '-order-desc').onclick = orderSort;  
     KellyTools.getElementByClass(KellyDPage.commonFilters, cl + '-order-asc').onclick = orderSort;  
-
+   
     KellyDPage.updateDisplayedState();    
+}
+
+// todo - make universal if more similar notices be needed, currently used for related links only
+
+KellyDPage.showRelatedLinksNotice = function() {
+      
+      var options = K_FAV.getGlobal('options');
+      // options.noticeTriggers.relatedLinks = false;K_FAV.save('cfg');
+      if (KellyDPage.stat.uniqDocsNum > 0 && !KellyTools.getElementByClass(KellyDPage.commonFilters, KellyDPage.env.className + '-checkmark') || options.noticeTriggers.relatedLinks) return;
+   
+      var tooltip = KellyTools.getNoticeTooltip(KellyDPage.env.hostClass, KellyDPage.env.className);
+          tooltip.saveNoticeReadedState = function(self) {
+                
+                clearTimeout(tooltip.readTimer);
+                
+                if (tooltip.noticeReaded && !options.noticeTriggers.relatedLinks) {
+                    options.noticeTriggers.relatedLinks = true;
+                    K_FAV.save('cfg');
+                }
+          }
+          
+          tooltip.updateCfg({
+              target : KellyTools.getElementByClass(KellyDPage.commonFilters, KellyDPage.env.className + '-related-links'), 
+              closeButton : false,
+              positionY : 'bottom',
+              positionX : 'right',
+              ptypeX : 'inside',
+              ptypeY : 'outside',
+              closeByBody : true,
+              offset : {left : 0, top : 40},
+              events : {
+                  onClose : tooltip.saveNoticeReadedState,
+              },
+          });
+          
+        //  tooltip.readTimer = setTimeout(function() { tooltip.noticeReaded = true; }, 5000);
+          
+        var html = '<a href="#" class="' + KellyDPage.env.className + '-pointer-arrow ' + KellyDPage.env.className +  '-pointer-up" style="top: -37px; right: 0;">Up</a>\
+                    <p>' + KellyLoc.s('', 'recorder_related_links_notice', {HOST : KellyDPage.defaultPageParser.getCompatibleFilter().manifest.host }) + '</p>\
+                    <p>' + KellyLoc.s('', 'recorder_related_links_notice_1') + '</p>\
+                    <ul class="' + KellyDPage.env.className + '-menu-links">\
+                        <li><a href="#" class="' + KellyDPage.env.className + '-readed">' + KellyLoc.s('', 'recorder_dont_show_again') + '</a></li>\
+                        <li><a href="https://kellydownloader.com/links/loadrelated/" target="_blank" class="' + KellyDPage.env.className + '-more">' + KellyLoc.s('', 'recorder_read_about') + '</a></li>\
+                    </ul>';
+                    
+        KellyTools.setHTMLData(tooltip.getContent(), '<div style="max-width : 330px;">' + html + '</div>');     
+        KellyTools.getElementByClass(tooltip.getContent(), KellyDPage.env.className + '-readed').onclick = function() {
+            tooltip.noticeReaded = true;
+            tooltip.show(false);
+            return false;
+        }
+        
+        tooltip.show(true);
 }
 
 KellyDPage.setDefaultCatFilters = function() {
@@ -1010,6 +1078,12 @@ KellyDPage.init = function() {
         
         KellyDPage.getContainer().removeAttribute('style');
         if (!K_FAV.defaultNavigation()) KellyDPage.showRecordedImages(); 
+    }
+    
+    var nativeOnSideBarShow = KellyDPage.env.events.onSideBarShow;            
+    KellyDPage.env.events.onSideBarShow = function(sideBarWrap, close) {
+        
+        if (!close) KellyDPage.showRelatedLinksNotice();
     }
     
     KellyDPage.env.events.onValidateCfg = function(data) {

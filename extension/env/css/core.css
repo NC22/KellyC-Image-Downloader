@@ -107,6 +107,41 @@
      padding-right: 0px!important;
 }
 
+@keyframes __BASECLASS__-up-pointer {
+    
+  0% {
+      transform: translateY(0); 
+      opacity: 0.4 
+  }
+  
+  100% { 
+    transform: translateY(-0.4em); 
+    opacity: 0.9 
+  }
+  
+}
+
+.__BASECLASS__-pointer-arrow {
+  border-color : transparent;
+  border-style : solid;
+  border-width : 0 2em;
+  display : block;
+  height : 0;
+  margin : 0;
+  padding : 0!important;
+  opacity : 0.4;
+  text-indent : -9999px;
+  transform-origin : 50% 50%;
+  width : 0;
+}
+
+.__BASECLASS__-pointer-up {
+  animation : __BASECLASS__-up-pointer 0.6s infinite alternate ease-in-out;
+  border-bottom : 2em solid #403d3e;
+  position : absolute;
+  top : 0;
+}
+
 .__BASECLASS__-tooltipster-wrap.__BASECLASS__-Default-tooltipster {
 	padding-top : 6px; /* to avoid onmouse out, usualy dont needed */
     padding-bottom : 6px;
@@ -175,6 +210,31 @@
 	border-radius : 0px;
 	padding : 12px;
     box-sizing: border-box;
+}
+
+.__BASECLASS__-tooltipster-container ul {
+    list-style: none;
+}
+
+.__BASECLASS__-tooltipster-container ul li {
+    margin-bottom : 12px;
+}
+
+.__BASECLASS__-tooltipster-container ul li:last-child {
+    margin-bottom : 0;
+}
+
+.__BASECLASS__-tooltipster-container .__BASECLASS__-menu-links a:hover {
+    background: #b4b4b4;
+}
+
+.__BASECLASS__-tooltipster-container .__BASECLASS__-menu-links a {
+    display: block;
+    background: #959595;
+    padding: 6px;   
+    text-align: center;
+    font-weight: bold;
+    text-decoration: none;
 }
 
 .__BASECLASS__-tooltipster-container a {

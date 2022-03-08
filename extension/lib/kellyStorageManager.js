@@ -1420,6 +1420,12 @@ function KellyFavStorageManager(cfg) {
             }
         }
         
+        if (!data.coptions.noticeTriggers) {
+             data.coptions.noticeTriggers = {
+                    // any "readed" markers during time
+             }
+        }
+        
         data.coptions.webRequest = data.coptions.webRequest ? true : false;
         data.coptions.debug = data.coptions.debug ? true : false;
         data.coptions.newFirst = data.coptions.newFirst ? true : false;       

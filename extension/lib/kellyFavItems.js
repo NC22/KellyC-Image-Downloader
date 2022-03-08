@@ -1029,8 +1029,6 @@ function KellyFavItems(cfg)
         
         if (env.hostClass == 'options_page') return;
         
-        if (env.events.onDisplayBlock) env.events.onDisplayBlock(mode, 'hide');
-        handler.getToolbar().events.onDisplayBlock(mode, 'hide'); 
         
         var envContainers = env.getMainContainers();
             envContainers.siteContent.style.display = 'block';
@@ -1050,6 +1048,9 @@ function KellyFavItems(cfg)
             imagesAsDownloadItems = false;
             handler.sideBarLock = false;
         }
+        
+        if (env.events.onDisplayBlock) env.events.onDisplayBlock(mode, 'hide');
+        handler.getToolbar().events.onDisplayBlock(mode, 'hide'); 
     }
     
     // вывести контент расширения и назначить режим отображения

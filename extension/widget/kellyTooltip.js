@@ -136,6 +136,8 @@ function KellyTooltip(cfg) {
             for (var k in cfg.events){
                 if (typeof cfg.events[k] === 'function') {
                      handler.userEvents[k] = cfg.events[k];
+                } else {
+                    console.log('unknown type for event ' + k + ' | ' + typeof cfg.events[k]);
                 }
             }
         }

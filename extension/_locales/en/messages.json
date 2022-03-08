@@ -975,7 +975,7 @@
         "message":"contained <b>one of listed categories</b>"
     },
     "thread_sec_notice":{  
-        "message":"Requests speed settings when use \"Load related docs\" function. <b>Change settings carefully.</b><br>* For randomize requests delays can be setted several values separated by comma"
+        "message":"Requests speed settings when use \"Load related links\" function. <b>Change settings carefully.</b><br>* For randomize requests delays can be setted several values separated by comma"
     },
     "thread_pauseEvery":{  
         "message":"Pause after N requests *"
@@ -1123,6 +1123,18 @@
     },
     "recorder_load_proportions":{  
         "message":"Load proportions..."
+    }, 
+    "recorder_related_links_notice":{  
+        "message":"You can load addtion images for <b>__HOST__</b>"
+    },  
+    "recorder_related_links_notice_1":{  
+        "message":"Click <b>Load related links</b> if only preview images for publications was found and not all images related to publications was loaded, or images has low quality"
+    },   
+    "recorder_dont_show_again":{  
+        "message":"Dont show again"
+    },   
+    "recorder_read_about":{  
+        "message":"About feature"
     },
     "recorder_displayed_info":{  
         "message":"Items : __ITEMS__ | Documents : __RELATED_DOCS__"
