@@ -344,8 +344,6 @@ KellyDPage.showAdditionFilters = function() {
     KellyDPage.statInfoBlock.className = cl + '-displayed-info';
     
     var compatibleFilter = KellyDPage.defaultPageParser.getCompatibleFilter();
-    console.log(compatibleFilter);
-    
     var isLoadRelatedSupport = compatibleFilter && compatibleFilter.manifest.detectionLvl.indexOf('imageByDocument') != -1;
     
     KellyDPage.env.getMainContainers().menu.appendChild(KellyDPage.statInfoBlock);
