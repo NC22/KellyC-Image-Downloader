@@ -109,7 +109,7 @@ KellyPopupPage.buttons = {
         
     }}, 
     'support_project' : {loc : 'link_support', icon : 'cup', event : function() {
-         KellyTools.getBrowser().tabs.create({url: 'https://kellydownloader.com/ru/donate/'}, function(tab){});  
+         KellyTools.getBrowser().tabs.create({url: 'https://kellydownloader.com/donate/'}, function(tab){});  
     }},
 };
 
