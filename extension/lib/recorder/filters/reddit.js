@@ -40,8 +40,6 @@ KellyRecorderFilterReddit.addItemByDriver = function(handler, data) {
             data.item.relatedSrc = [];
         }
         
-        console.log(data.item);
-        
         return data.item.relatedSrc.length > 0 ? handler.addDriverAction.ADD : handler.addDriverAction.SKIP;
     }
 }
