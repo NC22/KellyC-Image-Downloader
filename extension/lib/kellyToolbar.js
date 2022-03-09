@@ -150,24 +150,26 @@ function KellyToolbar(cfg) {
             if (document.body.classList.contains(handler.env.className + '-dark')) {
                 
                 document.body.classList.remove(handler.env.className + '-dark');
+                document.body.classList.add(handler.env.className + '-white');
                 options.darkTheme = false;
                 
             } else {
                 
-                if (!document.getElementById(handler.className + '-dyn-css')) {
-                    KellyTools.getBrowser().runtime.sendMessage({method: "getResources", items : ['dark']}, function(request) {
-                        if (!request || !request.data.loadedData) return false; 
-                        
-                        KellyTools.addCss(handler.className + '-dyn-css', KellyTools.replaceAll(request.data.loadedData, '__BASECLASS__', handler.env.className), true);
-                        handler.favController.updateImageGrid();
-                    });  
-                    
-                    delayUpdate = true;
-                } 
-                
                 document.body.classList.add(handler.env.className + '-dark');
+                document.body.classList.remove(handler.env.className + '-white');
                 options.darkTheme = true;
             }
+            
+            if (!document.getElementById(handler.className + '-dyn-css')) {
+                KellyTools.getBrowser().runtime.sendMessage({method: "getResources", items : [options.darkTheme ? 'dark' : 'white']}, function(request) {
+                    if (!request || !request.data.loadedData) return false; 
+                    
+                    KellyTools.addCss(handler.className + '-dyn-css', KellyTools.replaceAll(request.data.loadedData, '__BASECLASS__', handler.env.className), true);
+                    handler.favController.updateImageGrid();
+                });  
+                
+                delayUpdate = true;
+            } 
             
             if (!delayUpdate) handler.favController.updateImageGrid();
             handler.favController.save('cfg');

@@ -171,10 +171,11 @@ li.__BASECLASS__-additions-menu-item-li {
 }
 
 .__BASECLASS__-active.__BASECLASS__-additions-page-item ul li a {
-    background: #ffefc9;
-    padding: 5px;
+    padding: 3px;
     margin-bottom: 6px;
-    display : block;
+    display: block;
+    color: #000;
+    text-decoration: underline;
 }
 
 .__BASECLASS__-additions-additions_menu {

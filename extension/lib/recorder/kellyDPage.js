@@ -1110,12 +1110,14 @@ KellyDPage.init = function() {
             var resources = ['core', 'single', 'recorderDownloader'];
             
             if (K_FAV.getGlobal('options').darkTheme) {
+                
                 document.body.classList.add(KellyDPage.env.className + '-dark');
                 resources.push('dark');
-            } else {
-            // todo    
-            //    document.body.classList.add(KellyDPage.env.className + '-white');
-            //    resources.push('white');
+                
+            } else {          
+                // ready - need to test
+                // document.body.classList.add(KellyDPage.env.className + '-white');
+                // resources.push('white');
             }
             
             K_FAV.initFormatPage(resources); 
