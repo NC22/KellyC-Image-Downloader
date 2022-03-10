@@ -11,7 +11,7 @@ KellyRecorderFilterReddit.addItemByDriver = function(handler, data) {
         
         // bookmarks, upvoted, downvoted etc.
         
-        if (handler.url.indexOf('/user/') != -1) {
+        if (handler.url.indexOf('/user/') != -1 || handler.url.indexOf('/search/?q=') != -1) {
         
             var preview = data.el.querySelector('[data-click-id="image"]');
             if (preview) {
