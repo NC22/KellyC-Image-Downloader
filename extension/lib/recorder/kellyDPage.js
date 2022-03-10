@@ -454,7 +454,7 @@ KellyDPage.showAdditionFilters = function() {
     
     KellyTools.getElementByClass(KellyDPage.commonFilters, cl + '-help').onclick = function() {
         
-        if (K_FAV.dataFilterLock) return;
+        if (K_FAV.dataFilterLock) return false;
         
         var tooltip = KellyTools.getNoticeTooltip(KellyDPage.env.hostClass, KellyDPage.env.className), data = {CHECKMARK : '<span class="' + cl + '-checkmark"></span>'};
         var html = KellyLoc.s('', 'recorder_filter_help', data);

@@ -196,18 +196,29 @@ function KellyFavItems(cfg)
         handler.showSidebarMessage(false);
         clearSidebarLoadEvents();
         
-        // + data.isCfg ? '_cfg' : '' - обновляем сразу и только элементы, без настроек
+        var tooltip = KellyTools.getNoticeTooltip(env.hostClass, env.className); 
+            tooltip.updateCfg({ 
+                closeButton : false,
+                closeByBody : false,
+                offset : {left : -40, top : -40},
+                positionX : 'right',
+            });
         
-        var html = '<p>' + lng.s('Данные избранного были обновлены с другой вкладки. Перезагрузить список избранных элементов для текущей страницы? ', 'storage_deprecated') + '</p>';
-            html += '<p class="' + env.className + '-ModalBox-controll-buttons"><a href="#" class="' + env.className + 'Reload">' + lng.s('Перезагрузить', 'reload')  +  '</a>';
-            html += '<a href="#" class="' + env.className + 'Cancel">' + lng.s('Отменить', 'cancel')  +  '</a></p>';   
-            
-        KellyTools.setHTMLData(modalBoxContent, '<div class="' +  env.className + '-updateStorageDialog">' + html + '</div>');
+        if (!handler.dataFilterLock) handler.dataFilterLock = {updateStorage : true, message : 'Wait update storage'};
+          
+        var html = '<p>' + lng.s('', 'storage_deprecated') + '</p>\
+                    <p class="' + env.className + '-ModalBox-controll-buttons">\
+                        <a href="#" class="' + env.className + 'Reload">' + lng.s('Перезагрузить', 'reload')  +  '</a>\
+                        <a href="#" class="' + env.className + 'Cancel">' + lng.s('Отменить', 'cancel')  +  '</a>\
+                    </p>';   
+          
+        KellyTools.setHTMLData(tooltip.getContent(), '<div style="max-width : 330px;" class="' +  env.className + '-updateStorageDialog">' + html + '</div>');
         
-        var updateReloadButton = KellyTools.getElementByClass(modalBoxContent, env.className + 'Reload');
-        var updateDialog = KellyTools.getElementByClass(modalBoxContent, env.className + '-updateStorageDialog');
+        var updateReloadButton = KellyTools.getElementByClass(tooltip.getContent(), env.className + 'Reload');
+        var updateDialog = KellyTools.getElementByClass(tooltip.getContent(), env.className + '-updateStorageDialog');
      
         updateReloadButton.onclick = function() {
+            if (handler.dataFilterLock && typeof handler.dataFilterLock != 'boolean' && handler.dataFilterLock.updateStorage) handler.dataFilterLock = false;            
             if (!checkDataFilterLock()) return false;
             
             handler.load('items', function() {
@@ -225,27 +236,27 @@ function KellyFavItems(cfg)
             if (onReload) {
                 onReload();
             } else {
-                handler.closeSidebar();  
+                tooltip.show(false);  
             } 
             
             return false; 
         }
          
         var onCancelCommon = function() {
+            if (handler.dataFilterLock && typeof handler.dataFilterLock != 'boolean' && handler.dataFilterLock.updateStorage) handler.dataFilterLock = false;
             if (!checkDataFilterLock()) return false;
             
             if (onCancel) {
                 onCancel();
             } else {
-                handler.closeSidebar();  
+                tooltip.show(false);  
             } 
             
             return false; 
         }
         
-        KellyTools.getElementByClass(modalBoxContent, env.className + 'Cancel').onclick = onCancelCommon;
-        
-        handler.showSidebar(false, onCancelCommon);
+        KellyTools.getElementByClass(tooltip.getContent(), env.className + 'Cancel').onclick = onCancelCommon;
+        tooltip.show(true);
         onSideBarUpdate();
         return false;
     }
@@ -4270,8 +4281,7 @@ function KellyFavItems(cfg)
                     
                     var dbName = handler.getStorageManager().prefix + fav.coptions.storage;
                
-                    // todo - пока только на обновление списка изображений - 
-                    // обновление конфига тригирится в некоторых случаях без изменения - если реализовывать - нужно добавлять проверку
+                    // called only on changes in profile list
                     
                     if (!request.isCfg && dbName == request.dbName) { 
                         handler.showUpdateStorageDialog(request);
