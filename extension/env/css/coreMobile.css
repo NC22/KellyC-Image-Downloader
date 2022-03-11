@@ -7,6 +7,14 @@
         padding-left : 0; 
     }
     
+    .__BASECLASS__-mobile .__BASECLASS__-pointer-arrow {
+        display : none;
+    }
+    
+    .__BASECLASS__-mobile .__BASECLASS__-tooltipster-wrap {
+        padding: 12px;
+    }
+    
     .__BASECLASS__-mobile .__BASECLASS__-tab-list, .__BASECLASS__-tab {        
         padding: 0;
         padding-bottom : 0px;

@@ -821,14 +821,15 @@ KellyDPage.showRelatedLinksNotice = function() {
           }
           
           tooltip.updateCfg({
-              target : KellyTools.getElementByClass(KellyDPage.commonFilters, KellyDPage.env.className + '-related-links'), 
+              target : K_FAV.mobileOptimization ? 'screen' : KellyTools.getElementByClass(KellyDPage.commonFilters, KellyDPage.env.className + '-related-links'), 
               closeButton : false,
               positionY : 'bottom',
-              positionX : 'right',
+              positionX : K_FAV.mobileOptimization ? 'center' : 'right',
               ptypeX : 'inside',
               ptypeY : 'outside',
               closeByBody : true,
-              offset : {left : 0, top : 40},
+              avoidOutOfBounds : false,
+              offset : K_FAV.mobileOptimization ? {left : 0, top : -40} : {left : 0, top : 40},
               events : {
                   onClose : tooltip.saveNoticeReadedState,
               },
@@ -844,7 +845,7 @@ KellyDPage.showRelatedLinksNotice = function() {
                         <li><a href="https://kellydownloader.com/links/loadrelated/" target="_blank" class="' + KellyDPage.env.className + '-more">' + KellyLoc.s('', 'recorder_read_about') + '</a></li>\
                     </ul>';
                     
-        KellyTools.setHTMLData(tooltip.getContent(), '<div style="max-width : 330px;">' + html + '</div>');     
+        KellyTools.setHTMLData(tooltip.getContent(), '<div style="' + (!K_FAV.mobileOptimization ? 'max-width : 330px;' : '') + '">' + html + '</div>');     
         KellyTools.getElementByClass(tooltip.getContent(), KellyDPage.env.className + '-readed').onclick = function() {
             tooltip.noticeReaded = true;
             tooltip.show(false);

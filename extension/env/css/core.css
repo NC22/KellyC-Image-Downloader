@@ -210,6 +210,7 @@
 	border-radius : 0px;
 	padding : 12px;
     box-sizing: border-box;
+    position : relative;
 }
 
 .__BASECLASS__-tooltipster-container ul {

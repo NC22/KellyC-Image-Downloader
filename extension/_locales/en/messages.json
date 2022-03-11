@@ -1128,7 +1128,7 @@
         "message":"You can load addtion images for <b>__HOST__</b>"
     },  
     "recorder_related_links_notice_1":{  
-        "message":"Click <b>Load related links</b> if only preview images for publications was found and not all images related to publications was loaded, or images has low quality"
+        "message":"Click <b>Load related links</b> (extra filters) if only preview images for publications was found and not all images related to publications was loaded, or images has low quality"
     },   
     "recorder_dont_show_again":{  
         "message":"Dont show again"

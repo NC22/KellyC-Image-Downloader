@@ -5,7 +5,7 @@
    @description    creates tooltip elements (attaches to an element or screen) widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.0.5 23.12.21
+   @version        v 1.0.7 11.03.22
    
    ToDo : 
    
@@ -530,8 +530,8 @@ KellyTooltip.loadDefaultCss = function(className) {
             padding : 16px;\
         }\
         .' + className + '-wrap.' + className + '-target-screen .' + className + '-close {\
-            top: -19px;\
-            left: 17px;\
+            top: -35px;\
+            left: 0px;\
         }\
         .' + className + '-container {\
             min-width: 210px;\
@@ -543,6 +543,7 @@ KellyTooltip.loadDefaultCss = function(className) {
             color : #fff;\
             border-radius : 0px;\
             padding : 12px;\
+            position : relative;\
             max-width: 510px;\
         }\
         .' + className + '-close {\
