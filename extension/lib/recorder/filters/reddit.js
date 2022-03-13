@@ -11,23 +11,21 @@ KellyRecorderFilterReddit.addItemByDriver = function(handler, data) {
         
         // bookmarks, upvoted, downvoted etc.
         
+        var preview = false;
         if (handler.url.indexOf('/user/') != -1 || handler.url.indexOf('/search/?q=') != -1) {
         
-            var preview = data.el.querySelector('[data-click-id="image"]');
+                preview = data.el.querySelector('[data-click-id="image"]');
             if (preview) {
                 handler.addSrcFromStyle(preview, data.item, 'reddit_post');
             }
+        }
         
-        // regular pages posts listing 
-        
-        } else {
-            
-            var preview = data.el.querySelector('[data-click-id="media"] img');
+        if (!preview) {
+                preview = data.el.querySelector('[data-click-id="media"] img');
             if (preview) {
                 handler.addSingleSrc(data.item, preview.src, 'addSrcFromAttributes-src', preview, 'reddit_post');
             }
         }
-        
         
         // console.log(data.item);
         // console.log(handler.lastError);
