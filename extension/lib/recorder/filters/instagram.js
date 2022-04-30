@@ -2,15 +2,16 @@ KellyRecorderFilterInstagram = new Object();
 KellyRecorderFilterInstagram.manifest = {host : 'instagram.com', detectionLvl : ['imageAny', 'imageByDocument']};
 KellyRecorderFilterInstagram.addItemByDriver = function(handler, data) {
     
-    if (handler.url.indexOf('instagram') != -1 && data.el.tagName == 'IMG' && data.el.src.indexOf('instagram.com') != -1 && data.el.getAttribute('srcset')) { 
+    if (handler.url.indexOf('instagram') != -1 && data.el.tagName == 'IMG' && data.el.src.indexOf('instagram.com') != -1) { 
             
         var link = KellyTools.getParentByTag(data.el, 'A'); // match pattern https://www.instagram.com/p/CJdsKX4DEDK/
         if (link && link.getAttribute('href').length > 4) data.item.relatedDoc = link.href;
         
-        if (data.item.relatedDoc) {
+        if (data.item.relatedDoc && KellyTools.getParentByTag(data.el, 'ARTICLE')) {
             var cat = 'inst_post';
-        } else {
+        } else {         
             var cat = 'inst_story';
+            if (link || !KellyTools.getParentByTag(data.el, 'SECTION')) return handler.addDriverAction.SKIP;
         }
         
         handler.addSingleSrc(data.item, data.el.getAttribute('src'), 'addSrcFromAttributes-src', data.el, cat); 
