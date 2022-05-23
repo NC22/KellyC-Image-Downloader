@@ -35,7 +35,8 @@ var KellyEDispetcher = new Object;
             return false;
         }
         
-        // if urlmap is not setted - accept only media data
+        // check is url headers needed to modify. if urlmap is not setted - by default accept only media urls (with ext jpg, png, etc)
+        
         var isValidRequest = function(e) {
              
             if (!tabData.eventsEnabled) return 'Events disabled';
@@ -140,7 +141,7 @@ var KellyEDispetcher = new Object;
                    
                    KellyTools.wRequestSetHeader(e.responseHeaders, "Access-Control-Allow-Origin",  "*" );  
                    
-                   var urlData = getRulesDataForUrl(e.url);
+                   var urlData = getRulesDataForUrl(e.url); // addition headers from url map
                    if (urlData !== false && typeof urlData[3] != 'undefined') {
                         for (var key in urlData[3]) KellyTools.wRequestSetHeader(e.responseHeaders, key, urlData[3][key]);  
                    }

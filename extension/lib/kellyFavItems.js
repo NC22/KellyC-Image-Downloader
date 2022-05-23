@@ -193,6 +193,8 @@ function KellyFavItems(cfg)
     
     this.showUpdateStorageDialog = function(data, onCancel, onReload) {
         
+        if (handler.dataFilterLock && handler.dataFilterLock.updateStorage) return false;
+        
         handler.showSidebarMessage(false);
         clearSidebarLoadEvents();
         
