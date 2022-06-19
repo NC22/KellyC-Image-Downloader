@@ -4,7 +4,7 @@ var KellyLoc = new Object();
     KellyLoc.locs = {};		
     KellyLoc.browser = -1;
     
-    // deprecated, detectLanguage not required for i18n mode
+    // deprecated, detectLanguage not required for i18n mode, - better replace to chrome.i18n.getAcceptLanguages(callback?: function,) if needed
     KellyLoc.detectLanguage = function() {	
 
         var language = window.navigator.userLanguage || window.navigator.language;

@@ -17,10 +17,17 @@ KellyRecorderFilterDA.parseImagesDocByDriver = function(handler, data) {
                     if ((!mediaQuality || type.h > mediaQuality.h) && (type.c || type.t == 'gif')) mediaQuality = type;
                 });
                 
-                var url = '';
+                var url = '', baseUrl = deviation['media']['baseUri'];
+                if (baseUrl[baseUrl.length-1] == '/') baseUrl = baseUrl.substr(0, baseUrl.length-1); // double delimiter simbol / is not allowed
                 
-                     if (mediaQuality && mediaQuality.c) url = deviation['media']['baseUri'] + '/' + mediaQuality.c.replace('<prettyName>', deviation['media']['prettyName'] ? deviation['media']['prettyName'] : '');
-                else if (mediaQuality && mediaQuality.t == 'gif') url = mediaQuality.b;
+                if (mediaQuality && mediaQuality.c) {
+                         
+                         url = mediaQuality.c.replace('<prettyName>', deviation['media']['prettyName'] ? deviation['media']['prettyName'] : '');
+                         
+                         if (url[0] != '/') url = '/' + url;
+                         url = baseUrl + url;
+                         
+                } else if (mediaQuality && mediaQuality.t == 'gif') url = mediaQuality.b;
                 
                 if (url) handler.imagesPool.push({relatedSrc : [url + '?token=' + deviation['media']['token'][0]]});
             }

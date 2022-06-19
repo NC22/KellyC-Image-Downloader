@@ -973,13 +973,13 @@
 /* image viewer */
 
 .__BASECLASS__-ImgView {
-     position : absolute;
-     top : 0px;
-     left : 0px;
+     position : fixed!important;
+     top : 0px!important;
+     left : 0px!important;
      background : rgba(0, 0, 0, 0.80);
      transition : opacity 0.5s;
-     width : 100%;
-     height : 100%;
+     width : 100%!important;
+     height : 100%!important;
      z-index : 1008;
      visibility : hidden;
      opacity : 0;
