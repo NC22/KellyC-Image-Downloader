@@ -27,7 +27,7 @@ KellyAdditionsForm = {
       }
       
       pageId = pageId ? pageId : KellyAdditionsForm.menu[0];
-            
+      
       favEnv.closeSidebar();
       
       KellyTools.getBrowser().runtime.sendMessage({method: "getResources", asObject : true, items : KellyAdditionsForm.tpl, itemsRoute : {module : 'additions', type : 'html'}}, function(request) {
@@ -100,7 +100,9 @@ KellyAdditionsForm = {
             }
             
             var selectMenu = function(el) {
-                
+                     
+                fetch('https://kellydownloader.com/?stat-source=extension-nav-' + el.getAttribute('data-target'));  
+      
                 var opened = el.parentElement.classList.contains(bc + '-active');
                 
                 for (var i = 0; i < KellyAdditionsForm.menu.length; i++) { 
@@ -142,9 +144,11 @@ KellyAdditionsForm = {
                 heart[i].onclick = function() { 
                     
                     if (this.classList.contains(bc + '-heart-hide')) {
-                        options.toolbar.heartHidden = true;
+                        options.toolbar.heartHidden = true;                        
+                        fetch('https://kellydownloader.com/?stat-source=extension-nav-heart-hidden');  
                     } else {
-                        options.toolbar.heartHidden = false;                        
+                        options.toolbar.heartHidden = false;         
+                        fetch('https://kellydownloader.com/?stat-source=extension-nav-heart-showed');                
                     }
                     
                     favEnv.getToolbar().init();
