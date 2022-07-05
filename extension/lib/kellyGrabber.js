@@ -1927,6 +1927,8 @@ function KellyGrabber(cfg) {
             
         } else {
             
+            // fallback single file download method
+            
             var startDownload = function() {
                 
                 var link = document.createElement("A");                

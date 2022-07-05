@@ -731,7 +731,7 @@ KellyTools.getUrlFileName = function(url, excludeExt, noDecode) {
     } 
     
     if (excludeExt && url.indexOf('.') != -1) {       
-        url = url.substr(0, url.indexOf('.'));
+        url = url.substr(0, url.lastIndexOf('.'));
     }
     
     return url;
