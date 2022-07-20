@@ -34,17 +34,55 @@ KellyRecorderFilterInstagram.getBestQuality = function(instImageItem, imagesPool
     if (mediaQuality) imagesPool.push({relatedSrc : [mediaQuality.url]});
 }
 
-KellyRecorderFilterInstagram.parseImagesDocByDriver = function(handler, data) {
+KellyRecorderFilterInstagram.onBeforeParseImagesDocByDriver = function(handler, data) {
+    
+    if (data.thread.instagramRequest) return;
     
     if (handler.url.indexOf('instagram') != -1){ 
+        
+        var appIdRegExp = /\"appId\"\:\"([0-9]+)?\"/;
+        var mediaIdRegExp = /\"media_id\"\:\"([0-9]+)?\"/;
+        
+        var pageData = {
+            appId : appIdRegExp.exec(data.thread.response),
+            mediaId : mediaIdRegExp.exec(data.thread.response),
+        };
+        
+        if (pageData.appId) pageData.appId = pageData.appId[1].trim();
+        if (pageData.mediaId) pageData.mediaId = pageData.mediaId[1].trim();
+
+        if (!pageData.appId  || !pageData.mediaId) {
+            
+            console.log('[Instagram] : bad media info');
+            console.log(pageData);
+            return;
+        } else {
+            
+            console.log(pageData);
+        }
+
+        var requestUrl = 'https://i.instagram.com/api/v1/media/' + pageData.mediaId + '/info/';
+        
+        data.thread.instagramRequest = 'mediaRequest';
+        
+        return {requestUrl : requestUrl, cfg : {method : 'GET', xHeaders : {'x-ig-app-id' : pageData.appId}, responseType : 'json'}};
+    }
+}
+
+// debug throw KellyDPage.aDProgress.docLoader.parser
+
+KellyRecorderFilterInstagram.parseImagesDocByDriver = function(handler, data) {
+    
+    if (data.thread.instagramRequest == 'mediaRequest' && handler.url.indexOf('instagram') != -1){ 
     
         try {
-            var pageDataRegExp = /__additionalDataLoaded\([\'\"]?[-A/-Za-z0-9_]+[\'\"],\{([\s\S]*)\}\);/g, pageData = pageDataRegExp.exec(data.thread.response);
-            if (pageData === null) return;
+            handler.lastThreadJson = data.thread.response;
+            if (!handler.lastThreadJson) {
+                
+                handler.lastThreadJson = {error : 'empty page data. check regexp'};
+                return;
+            }
             
-            handler.lastThreadJson = JSON.parse('{' + pageData[1] + '}');
-            // console.log(handler.lastThreadJson);
-             
             var item = handler.lastThreadJson.items[0];
             if (item.carousel_media) {
                 item.carousel_media.forEach(function(instImageItem) {
@@ -55,6 +93,8 @@ KellyRecorderFilterInstagram.parseImagesDocByDriver = function(handler, data) {
             }
             
         } catch (e) {
+            
+            handler.lastThreadJson = {error : 'parse fail'};
             console.log(e);
         }
         

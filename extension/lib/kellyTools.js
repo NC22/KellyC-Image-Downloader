@@ -218,6 +218,12 @@ KellyTools.xmlRequest = function(urlOrig, cfg, callback) {
         
         // todo dynamic list of x-headers
         if (cfg.xRequestedWith) xhr.setRequestHeader('x-requested-with', cfg.xRequestedWith);
+        if (cfg.xHeaders) {
+            for (var k in cfg.xHeaders){
+                xhr.setRequestHeader(k, cfg.xHeaders[k]);         
+            }
+        }
+        
         if (cfg.contentType) xhr.setRequestHeader('Content-Type', cfg.contentType);
         
         if (cfg.formData) xhr.send(cfg.formData) 

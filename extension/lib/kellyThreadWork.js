@@ -111,6 +111,10 @@ function KellyThreadWork(cfg) {
         return jobs;
     }
     
+    this.getThreads = function() {
+        return threads;
+    }
+    
     this.setEvent = function(name, f) {
         
         events[name] = f;    
@@ -141,7 +145,8 @@ function KellyThreadWork(cfg) {
             KellyTools.log(thread, 'KellyThreadWork');
         }
 
-        thread.job.onLoad(handler, thread, jobs.length);
+        var isUnfinished = thread.job.onLoad(handler, thread, jobs.length); // for addition sub requests, dont use unfinished state if you dont know how threads class works
+        if (isUnfinished === true) return;
         
         if (events.onProcess) events.onProcess(jobs.length, thread);
         
@@ -202,17 +207,6 @@ function KellyThreadWork(cfg) {
         }  
         
         var config = thread.job.config ? thread.job.config : {method : 'GET', responseType : 'text'};
-        var defaultCallback = function(urlOrig, data, errorCode, errorText, controller) {
-
-            if (data !== false) {
-                thread.response = data;
-            } else {
-                thread.response = false;
-                thread.error = '[HTTP Request ERROR] Error code : ' + errorCode + ' |  error message : ' + errorText;
-            }
-        
-            handler.onJobEnd(thread);
-        }
         
         // method | responseType
         
@@ -230,11 +224,28 @@ function KellyThreadWork(cfg) {
             });
         }
         
-        thread.request = KellyTools.xmlRequest(thread.job.url, config, defaultCallback);
+        thread.request = KellyTools.xmlRequest(thread.job.url, config, handler.createDefaultHttpRequestCallback(thread));
         thread.timeoutTimer = setTimeout(function() {  handler.onJobEnd(thread); }, timeout * 1000);        
         threads.push(thread);
         
         return true;            
+    }
+    
+    this.createDefaultHttpRequestCallback = function(thread) {
+        
+        var defaultCallback = function(urlOrig, data, errorCode, errorText, controller) {
+
+            if (data !== false) {
+                thread.response = data;
+            } else {
+                thread.response = false;
+                thread.error = '[HTTP Request ERROR] Error code : ' + errorCode + ' |  error message : ' + errorText;
+            }
+        
+            handler.onJobEnd(thread);
+        }
+        
+        return defaultCallback;
     }
     
     this.isBeasy = function() {
@@ -261,7 +272,7 @@ function KellyThreadWork(cfg) {
     
     function onEnd(cname, forced) {
                             
-        for (var i = 0; i < threads.length; i++) handler.clearThreadTimers(threads[i]);
+        for (var i = 0; i < threads.length; i++) handler.clearThreadTimers(threads[i]); // stops any requests and addition timers
         
         threads = []; jobs = [];
         
@@ -303,7 +314,7 @@ function KellyThreadWork(cfg) {
         if (typeof onLoad !== 'function') {
             onLoad = false;
         }
-            
+
         var job = {
             url : url,
             onLoad : onLoad,

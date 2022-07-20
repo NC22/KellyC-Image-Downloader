@@ -187,6 +187,34 @@ function KellyLoadDocControll(cfg)
     handler.onDownloadDoc = function(self, thread, jobsLength) {
         
         var error = '';
+        var threadLocation = KellyTools.getLocationFromUrl(thread.job.url);
+        
+        handler.parser.imagesPool = [];   
+        handler.parser.setLocation({url : thread.job.url, host : threadLocation.origin}); // KellyTools.getLocationFromUrl(thread.job.url).hostname
+   
+        // untrustedData - can we be sure that collected handler.parser.imagesPool is original HD images
+        // If false - add images as originals to final results ( handler.parser.imagesPool -> handler.docsImages -> onQualityImageFound -> KellyDPage.addStorageItem) without check [width x height]
+        // Trust by default if some thing added by external site driver
+        
+        handler.parser.untrustedData = false;
+            
+        // todo - add hook to handler.run afterAddJob for manual configure base request too
+        var threadWorkSubRequest = handler.parser.filterCallback('onBeforeParseImagesDocByDriver', {thread : thread}, true);
+        
+        // driver needs addition request
+        
+        if ( threadWorkSubRequest ) {
+            
+            handler.thread.clearThreadTimers(thread);
+            thread.timeoutTimer = setTimeout(function() {  handler.thread.onJobEnd(thread); },  handler.threadOptions.timeout * 1000);
+            KellyTools.xmlRequest(threadWorkSubRequest.requestUrl, threadWorkSubRequest.cfg, handler.thread.createDefaultHttpRequestCallback(thread));
+
+            handler.thread.getThreads().push(thread);
+            
+            handler.log('[LOADED] ' + thread.job.url + ' - Addition request in same Thread Process initiated');
+            
+            return true;
+        }
         
         if (!thread.response) {
         
@@ -203,18 +231,7 @@ function KellyLoadDocControll(cfg)
             //    thread.job.data
             // );
             
-        } else {
-            
-            var threadLocation = KellyTools.getLocationFromUrl(thread.job.url);
-            
-            handler.parser.imagesPool = [];   
-            handler.parser.setLocation({url : thread.job.url, host : threadLocation.origin}); // KellyTools.getLocationFromUrl(thread.job.url).hostname
-           
-            // untrustedData - can we be sure that collected handler.parser.imagesPool is original HD images
-            // If false - add images as originals to final results ( handler.parser.imagesPool -> handler.docsImages -> onQualityImageFound -> KellyDPage.addStorageItem) without check [width x height]
-            // Trust by default if some thing added by external site driver
-            
-            handler.parser.untrustedData = false;
+        } else {            
 
             // Optional addition validator setted by user via extended options
             if (handler.additionOptions.relatedDocTrustedUrl) {
