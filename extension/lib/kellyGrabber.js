@@ -1823,7 +1823,22 @@ function KellyGrabber(cfg) {
  
         var download = {}, validKeys = ['filename', 'conflictAction', 'method', 'url', 'saveAs'];
         for (var i = 0; i < validKeys.length; i++) {
-            if (typeof downloadOptions[validKeys[i]] != 'undefined') download[validKeys[i]] = downloadOptions[validKeys[i]];
+            if (typeof downloadOptions[validKeys[i]] != 'undefined') {
+                
+                var keyValue = downloadOptions[validKeys[i]];
+                
+                if (validKeys[i] == 'filename') {
+                    if (downloadOptions.ext) {
+                        keyValue += '.' + downloadOptions.ext;
+                        // KellyTools.log('download url :  ' + keyValue, 'KellyGrabber', KellyTools.E_ERROR);
+                    } else {
+                        
+                        KellyTools.log('download url : no ext key specifed for file ' + keyValue, 'KellyGrabber', KellyTools.E_ERROR);
+                    }
+                }
+                
+                download[validKeys[i]] = keyValue;
+            }
         }
         
         KellyTools.getBrowser().runtime.sendMessage({method: "downloads.download", referrer : downloadOptions.referrer, download : download}, function(downloadDelta){
@@ -1896,12 +1911,15 @@ function KellyGrabber(cfg) {
              mimetype = KellyTools.getMimeType(ext);
         }
         
-        if (filename.indexOf('.') == -1) filename += '.' + ext;
-        
+        if (filename.indexOf('.') != -1) {       
+            filename = filename.substr(0, filename.lastIndexOf('.'));
+        }
+    
         var downloadOptions = {
             filename : filename, 
             conflictAction : 'uniquify',
             method : 'GET',
+            ext : ext,
         }
         
             downloadOptions.url = {blob : new Blob([fileData], {type : mimetype}), type : mimetype};

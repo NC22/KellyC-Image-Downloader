@@ -722,7 +722,12 @@ KellyTools.getUrlFileName = function(url, excludeExt, noDecode) {
      
     if (url.indexOf('data:') === 0) {
         return 'dataUrl__' + KellyTools.getMimeType(url).replace('\\', '_').replace('-', '_');
-    } 
+    }
+
+    var ext = false;
+    if (url.lastIndexOf('.') != -1) {
+        ext = url.substr(url.lastIndexOf('.'));
+    }
     
     url = url.split("?");
     url = url[0];
@@ -736,8 +741,14 @@ KellyTools.getUrlFileName = function(url, excludeExt, noDecode) {
         url = url.replace(/[^а-яА-Яa-z0-9áéíóúñü ._-]/gim, "");
     } 
     
-    if (excludeExt && url.indexOf('.') != -1) {       
+    if (url.indexOf('.') != -1) {       
         url = url.substr(0, url.lastIndexOf('.'));
+    }
+    
+    // url = KellyTools.replaceAll(url, '\\.', '_');
+    
+    if (!excludeExt) {
+        url += ext;
     }
     
     return url;
