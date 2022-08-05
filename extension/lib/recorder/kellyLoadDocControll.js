@@ -51,6 +51,8 @@ function KellyLoadDocControll(cfg)
         handler.thread = new KellyThreadWork(handler.threadOptions);
 
         handler.parser = new KellyPageWatchdog();
+        handler.parser.directAccess = false;
+        
         handler.imageLoader = false;
     }   
 
@@ -259,6 +261,8 @@ function KellyLoadDocControll(cfg)
                     thread.loadDoc = KellyTools.val(KellyTools.validateHtmlDoc(thread.response), 'html');
                     handler.parser.parseImages(thread.loadDoc);                
                     KellyTools.stopMediaLoad(thread.loadDoc);
+                    
+                    handler.lastThreadDoc = thread.response;
                 } 
             }
             

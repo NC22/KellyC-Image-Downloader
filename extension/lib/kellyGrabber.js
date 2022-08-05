@@ -1811,9 +1811,7 @@ function KellyGrabber(cfg) {
         if (!downloadOptions) return false;
         if (!downloadOptions.url) return false;
         if (!downloadOptions.filename) return false;
-        
-        if (downloadOptions.ext && downloadOptions.filename.indexOf('.') == -1) downloadOptions.filename += '.' + downloadOptions.ext;
-        
+                
         var blob = false;
         if (typeof downloadOptions.url == 'object' && downloadOptions.url.blob) {
             

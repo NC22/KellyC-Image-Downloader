@@ -4,6 +4,7 @@ function KellyPageWatchdog(cfg)
     var lng = KellyLoc;
     var updateAF = true;
     var directAccessEls = {'A' : ['href'], 'IMG' : ['src']};  // to get absolute link from img \ a elements 
+    this.directAccess = true; // MUST be disabled for extension tab and load related doc feature - because tab protocol will be chrome-extension://
     
     this.addDriverAction = {SKIP : 1, ADD : 2, CONTINUE : 3};
     
@@ -344,7 +345,7 @@ function KellyPageWatchdog(cfg)
             
                 var posibleLink = el.attributes[i].value;
                                
-                if (directAccessEls[el.tagName] && directAccessEls[el.tagName].indexOf(el.attributes[i].name) != -1) {
+                if (handler.directAccess && directAccessEls[el.tagName] && directAccessEls[el.tagName].indexOf(el.attributes[i].name) != -1) {
                     posibleLink = el[el.attributes[i].name];
                 }
                 
