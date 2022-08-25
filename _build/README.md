@@ -5,4 +5,5 @@ Old versions was merged to single files for background and front js by merge.bat
 <br>
 Use manifest.v[2-3].all.json from main "extension" folder as main manifest.json file, remove unused \ missed libs if needed
 <br>
-Manifest v3 support currently in testing mode.
+Unused \ optional libs : <br><br>
+"lib/profiles/joyreactor.js", "lib/profiles/joyreactor.unlock.js", "lib/profiles/topjoyreactor.js", "env/init/joyreactorFront.js", "lib/profiles/joyreactor.unlock.d.js"
