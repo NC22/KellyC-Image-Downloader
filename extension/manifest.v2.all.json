@@ -13,7 +13,10 @@
             "lib/kellyTools.js", 
             "lib/kellyOptions.js", 
             "lib/kellyAdditionsForm.js", 
-            "lib/kellyFavItems.js", 
+            "lib/kellyFavItems.js",
+            "lib/profiles/joyreactor.js", 
+            "lib/profiles/joyreactor.unlock.js", 
+            "lib/profiles/topjoyreactor.js",             
             "lib/recorder/kellyPageWatchdog.js", 
             "lib/recorder/kellyLoadDocControll.js", 
             "lib/recorder/kellyDPage.js", 
@@ -34,7 +37,8 @@
             "lib/recorder/filters/_validators.js", 
             "lib/profiles/default.js", 
             "lib/profiles/recorder.js", 
-            "env/init/recorderFront.js"
+            "env/init/recorderFront.js",
+            "env/init/joyreactorFront.js"
       ],
       "all_frames": false,
       "matches": [ 
@@ -43,7 +47,7 @@
         ]
    } ],
    "manifest_version" : 2,
-   "version": "1.2.2.0",
+   "version": "1.2.3.6",
    "name": "KellyC Image Downloader",
    "description": "__MSG_ext_description_recorder__",
    "icons": { 
@@ -64,7 +68,8 @@
    "background": {
     "scripts": [
         "lib/kellyTools.js", 
-        "lib/kellyDispetcher.js",     
+        "lib/kellyDispetcher.js",
+        "lib/profiles/joyreactor.unlock.d.js",
         "env/init/background.js", 
         "lib/recorder/kellyEDRecorder.js"
     ],
