@@ -607,6 +607,7 @@ KellyDPage.showAdditionFilters = function() {
                 // now we need update urlmap to assoc with referers of related item before load and check images proportions
                 
                 if (KellyDPage.aDProgress.docLoader.docsImages.length > 0) {
+                    
                     KellyDPage.aDProgress.docLoader.docsImages.forEach(function(item) {
                          
                         KellyDPage.addUrlMapItem(KellyTools.getUrlExt(item.src), KellyTools.getLocationFromUrl(item.src), item.relatedItem.referrer);        
@@ -615,9 +616,11 @@ KellyDPage.showAdditionFilters = function() {
                     // Start stage 2.
                     
                     KellyDPage.updateUrlMap(function() {
+                        
                         self.innerText = KellyLoc.s('', 'recorder_load_prop_skip');
                         KellyDPage.aDProgress.docLoader.runImgLoad();
-                    }, true);
+                        
+                    }, true);                    
                     
                 } else {
                     
@@ -662,7 +665,7 @@ KellyDPage.showAdditionFilters = function() {
                     return indexA - indexB;
                 });
             
-                // some of images was added in onQualityImageFound by addStorageItem - urllist changed - need to refresh BG list again
+                // some of images can be added in onQualityImageFound by addStorageItem - urllist changed - need to refresh BG list again
                 
                 KellyDPage.updateUrlMap(function() {
                     
