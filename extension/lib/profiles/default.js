@@ -101,7 +101,7 @@ function KellyProfileDefault() {
         onInitWorktop : function() {return false; },
         
         onExtensionReady : function() {
-            handler.sidebarConfig.topMax = handler.getMainContainers().siteContent.getBoundingClientRect().top + KellyTools.getScrollTop();
+            handler.sidebarConfig.topMax = handler.getMainContainers().siteContent.getBoundingClientRect().top;
             
             KellyTools.addEventPListener(window, "resize", updateSidebarPosition, '_fav_dialog');
             KellyTools.addEventPListener(window, "scroll", updateSidebarPosition, '_fav_dialog');
@@ -196,21 +196,10 @@ function KellyProfileDefault() {
         
         var scrollTop = KellyTools.getScrollTop(), scrollLeft = KellyTools.getScrollLeft();   
         var topMax = handler.sidebarConfig.topMax, top = topMax;
-         
-        // if (!handler.fav.sideBarLock && handler.sidebarConfig.paddingTop + scrollTop > top) top = handler.sidebarConfig.paddingTop + scrollTop; - position absolute mode
-        
-        // position fixed
-        
-        sideBarWrap.style.position = ''; 
-        
-        if (!handler.fav.sideBarLock && handler.sidebarConfig.paddingTop + scrollTop > top) {
-            top = handler.sidebarConfig.paddingTop;
-            sideBarWrap.style.position = 'fixed'; 
-        }
-        
-        
+                           
+        if (!handler.fav.sideBarLock && handler.sidebarConfig.paddingTop + scrollTop > top) top = handler.sidebarConfig.paddingTop + scrollTop;
+                
         sideBarWrap.style.top = top + 'px';
-        
        
         if (sideBlock) {
             
