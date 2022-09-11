@@ -2,11 +2,109 @@
 // only background extensions has access to download API, so we create one
 
 var KellyEDispetcher = new Object;
+
+    KellyEDispetcher.updatePageRevision = ['1.2.3.8']; // versions, that related to update.html page text, if already notified on one of listed versions - skip
+
     KellyEDispetcher.eventsAccepted = false;
     KellyEDispetcher.envDir = 'env/';
     KellyEDispetcher.api = KellyTools.getBrowser();
     KellyEDispetcher.downloaderTabs = []; 
     KellyEDispetcher.events = []; // [... , {onMessage : callback(KellyEDispetcher, response, request, sender, callback), onTabConnect : callback(KellyEDispetcher, port), onTabMessage : callback(KellyEDispetcher, tabData)}]
+        
+    KellyEDispetcher.blobData = {};
+    
+    KellyEDispetcher.isDownloadSupported = function() {
+    
+        if (!KellyEDispetcher.api || typeof KellyEDispetcher.api.downloads == 'undefined') {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    KellyEDispetcher.init = function() {
+    
+        if (this.eventsAccepted) return true;
+               
+        this.api.runtime.onMessage.addListener(this.onMessage);    
+        this.api.runtime.onConnect.addListener(this.onTabConnect);
+
+        this.api.downloads.onChanged.addListener( this.initEvents.onChanged );
+        this.api.runtime.onInstalled.addListener( this.initEvents.onInstalled );
+                        
+        this.eventsAccepted = true;
+        
+        return true;
+    }
+    
+    // BG Dispetcher subscriptions to API
+    
+    KellyEDispetcher.initEvents = {
+        onChanged :  function(downloadDelta) { // this.api.downloads.onChanged
+            
+            // Clean up for localy (from bg) created blob urls
+                                 
+            if (downloadDelta && downloadDelta.state) {
+                
+                if (downloadDelta.state.current == "interrupted" || downloadDelta.state.current == "complete") {
+                                        
+                    if (KellyEDispetcher.blobData[downloadDelta.id]) {
+                        
+                        URL.revokeObjectURL(KellyEDispetcher.blobData[downloadDelta.id]);
+                        delete KellyEDispetcher.blobData[downloadDelta.id];
+                    }                   
+                }
+            }
+            
+            // Notify tabs
+            
+            KellyEDispetcher.sendNotification({method: "onChanged", downloadDelta : downloadDelta});
+        },
+        onInstalled :  function(details) { // this.api.runtime.onInstalled
+            
+                if (details.reason == "install") {
+                    
+                   console.log('[install]');  
+                   // KellyEDispetcher.api.tabs.create({url: '/env/html/update.html?mode=install'}, function(tab){});
+                   
+                } else if (details.reason == "update") {
+                   
+                   console.log('[update] ' + details.previousVersion + ' - ' + KellyEDispetcher.api.runtime.getManifest().version);
+                   if ( details.previousVersion.indexOf(KellyEDispetcher.api.runtime.getManifest().version) === 0 ) {
+                        console.log('[update] skip update info - same version');
+                        return;
+                   }
+                   
+                   if ( KellyEDispetcher.updatePageRevision.indexOf(KellyEDispetcher.api.runtime.getManifest().version) == -1 ) {
+                        console.log('[update] skip update info - mismatch version');
+                        return;
+                   }
+                   
+                   KellyEDispetcher.api.storage.local.get('kelly-extension-update-inform', function(item) {
+         
+                        if (KellyEDispetcher.api.runtime.lastError) {                        
+                            console.log(KellyEDispetcher.api.runtime.lastError);                            
+                        } else {
+                            
+                            var revisionInfo = item['kelly-extension-update-inform'];                        
+                            if (!revisionInfo || KellyEDispetcher.updatePageRevision.indexOf(revisionInfo.revision) == -1) {
+                                
+                                console.log('[update] needs to notify');                                
+                                KellyEDispetcher.api.tabs.create({url: '/env/html/update.html?mode=update'}, function(tab){});
+                                KellyEDispetcher.api.storage.local.set({'kelly-extension-update-inform' : {revision : KellyEDispetcher.api.runtime.getManifest().version}}, function() {
+                                
+                                    if (KellyEDispetcher.api.runtime.lastError) {                            
+                                        console.log(KellyEDispetcher.api.runtime.lastError);                       
+                                    }
+                                });
+                            } else {
+                                console.log('[update] already notified in ' + revisionInfo.revision);
+                            }
+                        }
+                    });	
+                }
+        },
+    }
     
     /*
         tabData request rules
@@ -156,30 +254,6 @@ var KellyEDispetcher = new Object;
         KellyTools.log(filter);
     }
     
-    // bg subscriptions to API
-    KellyEDispetcher.initEvents = {
-        onChanged :  function(downloadDelta) {
-            
-            // Clean up for localy (from bg) created blob urls
-                                 
-            if (downloadDelta && downloadDelta.state) {
-                
-                if (downloadDelta.state.current == "interrupted" || downloadDelta.state.current == "complete") {
-                                        
-                    if (KellyEDispetcher.blobData[downloadDelta.id]) {
-                        
-                        URL.revokeObjectURL(KellyEDispetcher.blobData[downloadDelta.id]);
-                        delete KellyEDispetcher.blobData[downloadDelta.id];
-                    }                   
-                }
-            }
-            
-            // Notify tabs
-            
-            KellyEDispetcher.sendNotification({method: "onChanged", downloadDelta : downloadDelta});
-        },
-    }
-    
     KellyEDispetcher.sendNotification = function(data, excludeTabIds) {
         
         if (!data || !data.method) return;
@@ -204,31 +278,6 @@ var KellyEDispetcher = new Object;
         }
         
         onLoadTabsMap(KellyEDispetcher.downloaderTabs, true);        
-    }
-    
-    KellyEDispetcher.blobData = {};
-    
-    KellyEDispetcher.isDownloadSupported = function() {
-    
-        if (!KellyEDispetcher.api || typeof KellyEDispetcher.api.downloads == 'undefined') {
-            return false;
-        }
-        
-        return true;
-    }
-    
-    KellyEDispetcher.init = function() {
-    
-        if (this.eventsAccepted) return true;
-               
-        this.api.runtime.onMessage.addListener(this.onMessage);    
-        this.api.runtime.onConnect.addListener(this.onTabConnect);
-
-        this.api.downloads.onChanged.addListener( this.initEvents.onChanged );
-                
-        this.eventsAccepted = true;
-        
-        return true;
     }
     
     // custom connections posible only by setting up port connection (onConnectExternal \ onMessageExternal)

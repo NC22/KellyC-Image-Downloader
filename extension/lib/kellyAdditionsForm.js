@@ -101,8 +101,6 @@ KellyAdditionsForm = {
             
             var selectMenu = function(el) {
                      
-                fetch('https://kellydownloader.com/?stat-source=extension-nav-' + el.getAttribute('data-target'));  
-      
                 var opened = el.parentElement.classList.contains(bc + '-active');
                 
                 for (var i = 0; i < KellyAdditionsForm.menu.length; i++) { 
@@ -145,10 +143,8 @@ KellyAdditionsForm = {
                     
                     if (this.classList.contains(bc + '-heart-hide')) {
                         options.toolbar.heartHidden = true;                        
-                        fetch('https://kellydownloader.com/?stat-source=extension-nav-heart-hidden');  
                     } else {
-                        options.toolbar.heartHidden = false;         
-                        fetch('https://kellydownloader.com/?stat-source=extension-nav-heart-showed');                
+                        options.toolbar.heartHidden = false;                       
                     }
                     
                     favEnv.getToolbar().init();

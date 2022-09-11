@@ -747,7 +747,7 @@ KellyTools.getUrlFileName = function(url, excludeExt, noDecode) {
     
     // url = KellyTools.replaceAll(url, '\\.', '_');
     
-    if (!excludeExt) {
+    if (!excludeExt && ext !== false) {
         url += ext;
     }
     
@@ -1058,11 +1058,11 @@ KellyTools.getBrowser = function() {
     
     // chrome - Opera \ Chrome, browser - Firefox
     
-    if (typeof chrome !== 'undefined' && typeof chrome.runtime !== 'undefined') { // Edge has this object, but runtime is undefined
-        return chrome;
-    } else if (typeof browser !== 'undefined' && typeof browser.runtime !== 'undefined') {
+    if (typeof browser !== 'undefined' && typeof browser.runtime !== 'undefined') {
         return browser;
-    } else {
+    }  else if (typeof chrome !== 'undefined' && typeof chrome.runtime !== 'undefined') { // Edge has this object, but runtime is undefined
+        return chrome;
+    }  else {
         console.log('browser not suppot runtime API method');
         return false;
     }

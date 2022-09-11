@@ -33,7 +33,7 @@
         "message":"About"
     },
     "additions_Donate":{  
-        "message":"Donate"
+        "message":"About project"
     },
     "additions_modules":{  
         "message":"Enabled site modules"
@@ -618,7 +618,7 @@
         "message":"List of images is empty"
     },      
     "link_support": {
-        "message":"Support project"
+        "message":"About project"
     },
     "link_report_issue": {
         "message":"Report problem"

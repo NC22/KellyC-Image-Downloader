@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+    
+        <meta charset="utf-8">
+        
+        <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1">
+        
+        <title>KellyC Image Downloader</title>
+        <!-- put last news notice to "update" blocks and set list of versions in kellyDispetcher if some important news needs to be shown for them -->
+        
+        <style>
+        
+            html, body {
+                background: #686970;
+                color: #181819;
+                margin : 0;
+                padding : 0;  
+                width: 100%;
+                height: 100%;  
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 14px;
+                line-height: 22px;
+                font-weight: 400;
+            }
+            
+            body {
+                padding-top: 20px;
+                overflow-y : scroll;
+            }
+            
+            * {
+                box-sizing: border-box;
+            }   
+
+            a {
+                color : #fff;
+            }
+            
+            p {
+                margin: 9px 0;
+            }
+            
+            .notice-wrap {
+        
+                width: 80%;
+                background-size: cover;
+                color: #bfbfbf;
+                font-size: 16px;
+                margin: 0 auto;
+                padding-bottom : 24px;
+            }
+            
+            .notice-header {
+               /* position: absolute; */
+                height: 55px;
+                background: #393e5873;
+                width: 100%;
+                left: 0;
+                top: 0;
+                z-index: 1;
+                /* border-bottom: 1px solid #a5a5a5; */
+                padding-top: 16px;
+                padding-left: 29px;
+                color: #fff;
+            }
+            
+            .notice {
+                margin: 0 auto;
+                min-height: 80%;
+                padding: 23px;
+                font-size: 16px;
+                color: #fff;
+                border-radius: 2px;
+                position: relative;
+                padding-top: 7px;
+                background: #130e1b94;
+            }
+
+            ul li {
+                margin-left: 31px;
+            }
+            
+            ul {
+                padding: 0;
+                margin : 0;
+                list-style: circle;
+            }
+            
+            .updates, .about, .jr {
+                display : none;
+            }
+            
+            .env-jr .jr, .mode-update .updates, .mode-about .about {
+                display : block;
+            }
+            
+            .mode-update span.updates, .mode-about span.about {
+               display : inline-block;
+            }
+            
+            .addition-item {
+            
+                position: relative;
+                color: #fff;
+                background: #8997c4;
+                padding: 9px;
+                background: #62636c;
+                padding: 9px;
+                text-align: center;
+                white-space: nowrap;
+                display: inline-block;
+                margin-top: 107px;
+                min-width: 100px;
+                text-decoration: none;
+                text-align : left;
+                
+                margin-right: 30px;
+                margin-bottom: 20px;
+             }  
+             
+             .addition-item:hover div {
+                width: 120px;
+                height: 120px;
+                margin-left: -60px;
+                top: -117px;
+                background-size: 127px;
+            }
+            
+            .addition-item div {
+                transition: 0.2s background-size, 0.2s top, 0.2s margin-left, 0.2s width, 0.2s height;
+                width: 100px;
+                height: 100px;
+                background-size: 107px;
+                background-position: -4px -3px;
+                border-radius: 6px;
+                border: 2px solid #fff;
+                box-sizing: border-box;
+                margin-right: 34px;
+                display: inline-block;
+                position: absolute;
+                left: 50%;
+                margin-left: -50px;
+                top: -107px;
+            }
+            
+            .addition-item span {
+                display: block;
+                font-size: 12px;
+            }
+            
+            .addition-item .sticker {
+                background-repeat: no-repeat;
+                background-position : center;
+                background-color: rgba(158, 159, 168, 1);
+            }
+            
+            .additions {
+                margin-top: 30px;
+                text-align : center;
+            } 
+            
+            
+            @keyframes char-move {
+              0%, 100% {
+                left: -58px;
+              }
+              50% {
+                left: 10px;
+              }
+            }
+                            
+            .random-character {
+            
+                position: fixed;
+                bottom: 0;
+                width : 100%;
+                height : 100%;
+                box-sizing: border-box;
+                padding: 0;
+                transition: opacity 1s;
+                opacity: 0;
+                background-size : cover;
+                
+            }
+            
+            .random-character-ghost {
+                z-index : 1;
+            }
+          
+            .random-character-main {
+                z-index : 2;
+            }
+            
+            .random-character.fade-in {
+                opacity : 1;
+            }
+            
+            .notice-wrap {
+                position : relative;
+                z-index : 4;
+            }
+            
+            .mobile {
+                display : none;
+            }
+            
+            .default-spoiler {
+                margin-bottom: 12px;
+            }
+            
+            .important-spoiler .spoiler-show a {
+                color: #ff7209;
+            }
+            
+            .spoilers {
+                margin-top : 24px;
+            }
+            
+            .spoiler {
+                max-width : 100%;
+            }
+            
+            .spoiler {
+                transition: 0.4s opacity;
+                overflow: hidden;
+            }
+            
+            .spoiler-show a {
+                color: #fff;
+                text-decoration: none;
+                background : #62636c;
+                padding : 4px;
+            }
+            
+            .spoiler-hidden {
+                opacity: 0;
+                height: 0;
+                margin: 0;
+                padding: 0;
+            }
+            
+            video {
+                width : 100%;
+                max-width : 720px;
+            }
+            
+            @media (max-width: 800px) {
+            
+                body {
+                    padding-top : 0;
+                }
+                
+                .notice-wrap {
+                    width: 100%;
+                }
+                
+                .addition-item {
+                    width : 100%;
+                }
+                
+                .notice-header {
+                    height: unset;
+                    padding: 18px;
+                }
+                
+                .mobile {
+                    display: list-item;
+                    font-style: italic;
+                }
+            }
+        </style>
+        
+    </head>
+
+    <body>
+       
+        
+        <div class="random-character random-character-ghost"></div>
+        <div class="random-character random-character-main"></div>
+        
+          
+        <div class="notice-wrap notice-ru" style="display : none;">
+        
+            <div class="notice-header">
+                <b>KellyC Image Downloader</b> <span class="updates">обновление до версии <b class="version"></span></b>            
+            </div>
+            
+            <div class="notice">
+            
+            
+            <p>Hello. Thank you for using <b>KellyC Image Downloader</b> <span class="about">This extension done by me in spare time, so some functions can be bit untested \ unfinished. Source code and additional information are presented on the github page</span><span class="updates">Current changes:</span></p>
+
+
+
+                <ul class="updates">
+                    <li>Added filters for collecting images from Reddit, Instagram (Fixes), DeviantArt (Fixes), 9GAG</li>
+                    <li>Optimized mobile version</li>
+                    <li>Fixed preservation of original file names during Downloading process in some cases</li>
+                </ul>
+              
+            
+            <div class="spoilers">  
+                 <div class="updates important-spoiler default-spoiler">
+
+                    <div class="spoiler-show">
+                        <a href="#">New requirements from Google for extension developers</a>
+                    </div>
+                    
+                    <div class="spoiler spoiler-hidden">
+                    
+                        <p>Google requires developers to be sure to migrate to the new API V3 (a set of accessible instructions by which an extension can control browser functions) by the end of 2022 or extension will be deleted. Most likely this will affect both versions - FireFox and Chrome in order to ensure normal functionality support both browsers. Because v3 version is still not stable and partially truncated in functionality by the browser (in v3, extensions will have to share a common pool of routing rules, which can lead to instability during a mass transition of other developers - for example, ad blockers), this may affect the proper operation of all extensions.</p>
+                
+                        <p>I created the instruction for manual install, on case if something unexpected happen. Also, cases of banning extensions for "unfriendly content" have become more frequent, which also adds to the uncertainty, moderation of new versions takes more and more time, and became more unexpected and its hard to publish actuall version of extension in store now.</p>
+                        
+                    </div>
+                    
+                </div>  
+                <div class="default-spoiler">
+
+                    <div class="spoiler-show">
+                        <a href="https://github.com/NC22/KellyC-Image-Downloader/wiki/Install-extension-manually" target="_blank">How to install the extension manually?</a> (actual & old versions, outside the extension store)
+                    </div>
+                </div>  
+                
+                <div class="default-spoiler">
+
+                    <div class="spoiler-show">
+                        <a href="#">How to bulk download pictures from any site through the recording function?</a>
+                    </div>
+                    
+                    <div class="spoiler spoiler-hidden">
+                        <p><a href="https://kellydownloader.com/links/recorder/" target="_blank">Learn more about the recording function and advanced settings</a><br><a href="https://kellydownloader.com/crawlers-table/"  target="_blank">List of tested sites</a> with additional auto filters. In some cases, you may need to click on <a href="https://kellydownloader.com/ru/links/loadrelated/"  target="_blank">Load related links</a> to get original size images</p>
+                        <p><video src="https://nradiowave.ru/userfiles/media/custom/recorder.mp4" preload="none" poster="https://nradiowave.ru/userfiles/media/custom/recordermp4.png" controls></video></p>
+                    </div>
+                    
+                </div>  
+                <div class="default-spoiler jr">
+
+                    <div class="spoiler-show">
+                        <a href="#">Как скачать все картинки из конкретного тега или избранного на реакторе?</a>
+                    </div>
+                    
+                    <div class="spoiler spoiler-hidden">
+                        <p>Видео-пример. В общем случае достаточно перейти на необходимый тег, страничку избранного или поиска и создать профиль со списком ссылок на картинки, выбрать получившийся профиль, далее эти картинки можно будет скачать через режим "Загрузки" приведенный на видео, отсеив ненужное и поправив шаблон имен при необходимости (название файлов меняется в расширенных настройках в меню загрузок)</p>
+                        <p><video src="https://nradiowave.ru/userfiles/media/custom/joyreactor.mp4" preload="none" poster="https://nradiowave.ru/userfiles/media/custom/joyreactormp4.png" controls></video></p>
+                    </div>
+                    
+                </div> 
+            </div>
+ 
+                <h2>Want to help ?</h2>
+                <p>If you notice any problems in the work of the extension, you can help in fast diagnostics by creating ticket on GitHub, suggest <a href="https://kellydownloader.com/en/links/dev/" target="_blank">custom filter</a> for some additional site or suggest any other solution. Post any information, examples anywhere is also welcome (English is not my native language, so my tutorial texts can contain mistakes). If you have some texts or videos, I can share them with your copyrights on project page.
+                </p>
+                
+                <div class="additions">
+                    
+                    <a class="addition-item" href="https://nradiowave.ru/?kellyc=1" target="_blank">
+                        
+                        Author (nradiowave) <span>my artworks, other projects</span>
+                        
+                        <div href="#" class="sticker material-image-show" style="background-image: url(https://nradiowave.ru/style/Default/img/nradiowave_228x228c.png);"></div>
+
+                    </a>
+                    
+                    
+                    <a class="addition-item" href="https://github.com/NC22/KellyC-Image-Downloader" target="_blank">
+                    
+                        GitHub <span>source files, bug reports & wiki</span>
+                       
+                        <div href="#" class="sticker material-image-show" style="background-image: url(https://nradiowave.ru/style/Default/img/nradiowave/icons/git.png);"></div>
+                        
+                    </a>       
+                </div>
+            
+            </div>
+        
+        </div>     
+         
+        <div class="notice-wrap notice-ru" style="display : none;">
+        
+            <div class="notice-header">
+                <b>KellyC Image Downloader</b> <span class="updates">обновление до версии <b class="version"></span></b>            
+            </div>
+            
+            <div class="notice">
+            
+            
+            <p>Привет. Спасибо что пользуетесь <b>KellyC Image Downloader</b>. <span class="about">Это расширение разрабатывается мной в свободное время по мере возможности, потому некоторые функции могут быть полностью не протестированы или реализованы частично. Исходный код и подробное описание расширения представлено на странице на гитхабе</span> <span class="updates">Актуальные изменения:</span></p>
+
+                <ul class="updates">
+                    <li>Добавлены фильтр для сбора изображений с Reddit, Instagram (исправления), DeviantArt (исправления), 9GAG</li>
+                    <li>Оптимизирован дизайн мобильной версии</li>
+                    <li>Скорректировано сохранение оригинальных имен файлов в названии которых присутствовали некоторые спец. символы</li>
+                </ul>
+              
+            
+            <div class="spoilers">  
+                 <div class="updates important-spoiler default-spoiler">
+
+                    <div class="spoiler-show">
+                        <a href="#">Новые требования от Google для разработчиков расширений</a>
+                    </div>
+                    
+                    <div class="spoiler spoiler-hidden">
+                    
+                        <p>Гугл требует от разработчиков обязательно перейти на новый API V3 (набор доступных инструкций по которым расширение может управлять функциями браузера) к концу 2022 года. Скорей всего это затронет обе версии - FireFox и Chrome в целях обеспечения нормальной поддержки функционала и там и там. Т.к. данная версия все еще не стабильна и частично урезана по функционалу на уровне браузера (в дальнейшем расширениям придется делить общий пул правил маршрутизации, что может привести к нестабильной работе при массовом переходе остальных разработчиков - например блокировщиков рекламы), это может сказаться на работе всех расширений вцелом не в лучшую сторону.</p>
+                
+                        <p>На всякий случай оставляю инструкцию по сборке раширения вручную, в обход магазина, если в магазине будут и дальше вводить ограничения и усложнять выпуск обновлений. Так же участились случаи бана расширений за "недоброжелательный контент", что тоже добавляет неопределенности т.к. модерация новых версий занимает у проверяющих все больше времени и рано или поздно новую версию могут не пропустить из-за политик платформы \ гугла или вовсе удалить расширение</p>
+                        
+                    </div>
+                    
+                </div>  
+                <div class="default-spoiler">
+
+                    <div class="spoiler-show">
+                        <a href="https://github.com/NC22/KellyC-Image-Downloader/wiki/%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-%D1%80%D0%B0%D1%81%D1%88%D0%B8%D1%80%D0%B5%D0%BD%D0%B8%D1%8F-%D0%B2%D1%80%D1%83%D1%87%D0%BD%D1%83%D1%8E" target="_blank">Как установить расширение вручную?</a> (актуальные версии, вне магазина расширений)
+                    </div>
+                </div>  
+                
+                <div class="default-spoiler">
+
+                    <div class="spoiler-show">
+                        <a href="#">Как массово скачать картинки с любого сайта через функцию записи?</a>
+                    </div>
+                    
+                    <div class="spoiler spoiler-hidden">
+                        <p><a href="https://kellydownloader.com/ru/links/recorder/" target="_blank">Подробнее о функции записи и дополнительных настройках</a><br><a href="https://kellydownloader.com/ru/crawlers-table/"  target="_blank">Список протестированных сайтов</a> на которых реализованы доп. фильтры. В некоторых случаях может потребоваться кликнуть на <a href="https://kellydownloader.com/ru/links/loadrelated/"  target="_blank">Загрузить доп. документы</a> для того чтобы получить картинки исходного размера</p>
+                        <p><video src="https://nradiowave.ru/userfiles/media/custom/recorder.mp4" preload="none" poster="https://nradiowave.ru/userfiles/media/custom/recordermp4.png" controls></video></p>
+                    </div>
+                    
+                </div>  
+                <div class="default-spoiler jr">
+
+                    <div class="spoiler-show">
+                        <a href="#">Как скачать все картинки из конкретного тега или избранного на реакторе?</a>
+                    </div>
+                    
+                    <div class="spoiler spoiler-hidden">
+                        <p>Видео-пример. В общем случае достаточно перейти на необходимый тег, страничку избранного или поиска и создать профиль со списком ссылок на картинки, выбрать получившийся профиль, далее эти картинки можно будет скачать через режим "Загрузки" приведенный на видео, отсеив ненужное и поправив шаблон имен при необходимости (название файлов меняется в расширенных настройках в меню загрузок)</p>
+                        <p><video src="https://nradiowave.ru/userfiles/media/custom/joyreactor.mp4" preload="none" poster="https://nradiowave.ru/userfiles/media/custom/joyreactormp4.png" controls></video></p>
+                    </div>
+                    
+                </div> 
+            </div>
+ 
+                <h2>Хотите помочь ?</h2>
+                <p>
+                    Если заметите какие-либо проблемы в работе расширения, то для оперативного решения проблемы Вы можете создать тикет на GitHub, предложить <a href="https://kellydownloader.com/ru/links/dev/"   target="_blank">кастомный фильтр</a> сделаный по аналогии с уже существующими под какой-то доп. сайт или предложить какое-либо другое решение. Распространение информации так же приветствуется.
+                </p>
+                
+                <div class="additions">
+                    
+                    <a class="addition-item" href="https://nradiowave.ru/?kellyc=1" target="_blank">
+                        
+                        Автор (nradiowave) <span>мои рисунки, остальные проекты</span>
+                        
+                        <div href="#" class="sticker material-image-show" style="background-image: url(https://nradiowave.ru/style/Default/img/nradiowave_228x228c.png);"></div>
+
+                    </a>
+                    
+                    
+                    <a class="addition-item" href="https://github.com/NC22/KellyC-Image-Downloader" target="_blank">
+                    
+                        GitHub <span>исходники, багрепорты и доп. информация</span>
+                       
+                        <div href="#" class="sticker material-image-show" style="background-image: url(https://nradiowave.ru/style/Default/img/nradiowave/icons/git.png);"></div>
+                        
+                    </a>           
+                </div>
+            
+            </div>
+        
+        </div>     
+    
+    
+        <script src="../../lib/kellyTools.js"></script>
+        <script src="../../lib/kellyCAbout.js"></script>
+        <script src="../../lib/kellyNradiowaveBg.js"></script>
+        <script src="../init/commonAbout.js"></script>
+        
+        
+    </body>
+
+</html> 

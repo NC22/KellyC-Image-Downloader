@@ -30,7 +30,7 @@
         "message":"Справка"
     },
     "additions_donate":{  
-        "message":"Поддержать проект"
+        "message":"О проекте"
     },
     "additions_modules":{  
         "message":"Модули сайтов"
@@ -627,7 +627,7 @@
         "message":"Список картинок пуст"
     },
     "link_support": {
-        "message":"Поддержать проект"
+        "message":"О проекте"
     },
     "link_report_issue": {
         "message":"Сообщить о проблеме"

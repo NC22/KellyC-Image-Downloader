@@ -45,7 +45,7 @@
    } ],
    "host_permissions": ["*://*/*"], 
    "manifest_version" : 3,
-   "version": "1.2.3.7",
+   "version": "1.2.3.8",
    "name": "KellyC Image Downloader",
    "description": "__MSG_ext_description_recorder__",
    "icons": { 
