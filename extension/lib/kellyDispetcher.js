@@ -3,7 +3,7 @@
 
 var KellyEDispetcher = new Object;
 
-    KellyEDispetcher.updatePageRevision = ['1.2.3.8']; // versions, that related to update.html page text, if already notified on one of listed versions - skip
+    KellyEDispetcher.updatePageRevision = ['1.2.3.8', '1.2.3.9']; // versions, that related to update.html page text, if already notified on one of listed versions - skip
 
     KellyEDispetcher.eventsAccepted = false;
     KellyEDispetcher.envDir = 'env/';
@@ -65,7 +65,7 @@ var KellyEDispetcher = new Object;
                 if (details.reason == "install") {
                     
                    console.log('[install]');  
-                   // KellyEDispetcher.api.tabs.create({url: '/env/html/update.html?mode=install'}, function(tab){});
+                   KellyEDispetcher.api.tabs.create({url: '/env/html/update.html?mode=install'}, function(tab){});
                    
                 } else if (details.reason == "update") {
                    
