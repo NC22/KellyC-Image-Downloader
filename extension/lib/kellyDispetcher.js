@@ -3,7 +3,7 @@
 
 var KellyEDispetcher = new Object;
 
-    KellyEDispetcher.updatePageRevision = ['1.2.3.8', '1.2.3.9', '1.2.4.0']; // versions, that related to update.html page text, if already notified on one of listed versions - skip
+    KellyEDispetcher.updatePageRevision = ['1.2.3.8', '1.2.3.9', '1.2.4.0', '1.2.4.1', '1.2.4.2']; // versions, that related to update.html page text, if already notified on one of listed versions - skip
 
     KellyEDispetcher.eventsAccepted = false;
     KellyEDispetcher.envDir = 'env/';
@@ -220,14 +220,14 @@ var KellyEDispetcher = new Object;
                    
                    if (e.statusCode == 200) KellyTools.wRequestSetHeader(e.responseHeaders, 'expires', 'Tue, 01 Jan 1980 1:00:00 GMT');
                        
-                   if (tabData.urlMap && e.statusCode == 301) { // extend url map list with redirect links for use in (onBeforeSendHeaders | onHeadersReceived) on new request
+                   if (tabData.urlMap && (e.statusCode == 301 || e.statusCode == 302)) { // extend url map list with redirect links for use in (onBeforeSendHeaders | onHeadersReceived) on new request
                        var referrer = getRulesDataForUrl(e.url);
                        if (referrer !== false) tabData.urlMap.push([KellyTools.wRequestGetHeader(e.responseHeaders, 'location'), referrer[1]]);
                    }
                    
                    // Mixed Content - fetch [https] request get response with [http] redirect - force attempt to load throw https
                    
-                   if (tabData.referrer && e.type == "xmlhttprequest" && e.statusCode == 301 && tabData.referrer.indexOf('https') != -1) {
+                   if (tabData.referrer && e.type == "xmlhttprequest" && (e.statusCode == 301 || e.statusCode == 302) && tabData.referrer.indexOf('https') != -1) {
                        var responseRedirect = KellyTools.wRequestGetHeader(e.responseHeaders, 'location');
                        if (responseRedirect !== false && responseRedirect.indexOf('http://') != -1) {
                            responseRedirect = responseRedirect.replace('http://', 'https://');

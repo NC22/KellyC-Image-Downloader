@@ -3636,7 +3636,7 @@ function KellyFavItems(cfg)
                 }
                 
                 favNativeParser.pageInfo.censoredNum++;
-                selectedImages = ['censored:' + postId[0]];
+                selectedImages = ['censored:' + postId[0]]; // temp placeholder
                 lastCensoredPostId = postId[0];
                 
             } else if (fav.coptions.downloader.skipEmpty && !selectedImages.length) {
@@ -3787,8 +3787,9 @@ function KellyFavItems(cfg)
                     
                     var blockPostId = pageInfo.censoredPostIds[i], blockPostData = unlockedData.data['node' + (i+1)];                    
                     var itemIndex = pageInfo.censoredPosts[blockPostId].itemIndex;
-                    var item = worker.collectedData.items[itemIndex];
-                                            
+                    var item = worker.collectedData.items[itemIndex];                                
+                    var urlPrefix = env.unlockManager.getUrlNamePrefix(blockPostData.tags);
+                    
                     if (!blockPostData) {
                         
                         handler.getStorageManager().createDbItem({ 
@@ -3800,7 +3801,7 @@ function KellyFavItems(cfg)
                         continue;
                     }
                     
-                    KellyTools.setHTMLData(pageInfo.censoredPosts[blockPostId].post, env.unlockManager.getTpl('post', {PICS : env.unlockManager.getPublicationAttributesHtml(blockPostData.attributes)}));    
+                    KellyTools.setHTMLData(pageInfo.censoredPosts[blockPostId].post, env.unlockManager.getTpl('post', {PICS : env.unlockManager.getPublicationAttributesHtml(blockPostData.attributes, false, false, urlPrefix)}));    
                     
                     // update db item by index
                     handler.getStorageManager().createDbItem({ 
