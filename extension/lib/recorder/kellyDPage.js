@@ -940,8 +940,8 @@ KellyDPage.init = function() {
 
      var badItems = []; 
      
-     K_FAV = new KellyFavItems({env : KellyProfileRecorder.getInstance(), allowMobile : true});
-              
+     K_FAV = new KellyFavItems({env : KellyProfileRecorder.getInstance(), allowMobile : true, hideAllLock : true});
+
      KellyDPage.env = K_FAV.getGlobal('env');
      KellyDPage.env.hostClass = 'options_page';
      

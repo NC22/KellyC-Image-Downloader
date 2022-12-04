@@ -91,6 +91,7 @@ function KellyFavItems(cfg)
     this.sideBarLock = false;
     this.tooltipBeasy = false; // set true if shown something important throw handler.getTooltip() with close button, prevent create another tooltips onmouseover and hide onmouseout, until close section
     this.dataFilterLock = false;
+    this.hideAllLock = false; // lock hide all menu blocks - allow to show placeholder \ base env container if false 
     
     // buffer for page loaded as media resource
     var selfData = false, selfUrl = window.location.href;
@@ -176,7 +177,10 @@ function KellyFavItems(cfg)
             return;
         } 
         
-        if (typeof cfg.allowMobile != 'undefined') handler.allowMobile = cfg.allowMobile ? true : false;
+        if (typeof cfg.allowMobile != 'undefined') {
+            handler.allowMobile = cfg.allowMobile ? true : false;
+            handler.hideAllLock = cfg.hideAllLock ? true : false;
+        }
         
         env = cfg.env;
         env.setLocation(cfg.location ? cfg.location : { href : '', protocol : 'http:', host : ''});          
@@ -1046,7 +1050,7 @@ function KellyFavItems(cfg)
     
     this.hideFavoritesBlock = function() {
         
-        //if (env.hostClass == 'options_page') return;
+        if (handler.hideAllLock) return;
         
         
         var envContainers = env.getMainContainers();
