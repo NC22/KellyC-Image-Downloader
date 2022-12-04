@@ -39,6 +39,8 @@ function KellyPageWatchdog(cfg)
     this.additionCats = {}; // unused, maybe changed in future - if needed - must be setted from addition filter only once
     this.srcs = []; // list of all added relatedSrc strings during record process, to prevent dublicates
     
+    // imgList - img el attribute observers
+    
     // context for parser functions    
           
     function constructor(cfg) {
@@ -503,7 +505,7 @@ function KellyPageWatchdog(cfg)
             resetPool();	
             resetConfig();
             
-        } else if (request.method == "startRecord") {       
+        } else if (request.method == "startTabRecord") {       
             
             resetPool();  
             resetConfig();          
@@ -516,7 +518,7 @@ function KellyPageWatchdog(cfg)
             
             if (callback) callback(response); 			
             
-        } else if (request.method == "stopRecord") {
+        } else if (request.method == "stopTabRecord") {
             
             if (handler.observer) handler.observer.disconnect();
             if (handler.recorder) handler.recorder.parentElement.removeChild(handler.recorder);

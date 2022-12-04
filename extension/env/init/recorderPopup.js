@@ -40,7 +40,7 @@ KellyPopupPage.buttons = {
           
           if (['loading', 'stopping', 'starting'].indexOf(KellyPopupPage.recordingState) != -1) return false;
           
-          if (KellyPopupPage.recordingState == 'enabled') {   
+          if (KellyPopupPage.recordingState == 'enabled') {
           
              KellyPopupPage.recordingState = 'stopping';             
              KellyTools.getBrowser().runtime.sendMessage({method: "stopRecord"}, function(recorderResponse) {
@@ -53,10 +53,13 @@ KellyPopupPage.buttons = {
                         
                         for (var i = 0; i < tabs.length; i++) {
                             
-                            KellyPopupPage.sendTabMessage(tabs[i].id, {method: "stopRecord"}, function(tabResponse) {
+                            KellyPopupPage.sendTabMessage(tabs[i].id, {method: "stopTabRecord"}, function(tabResponse) {
                                 
                                 tabsAnswered++;
-                                KellyTools.log('stopRecord [' + tabsAnswered + '/' + tabs.length + '][Disabled tab recording - ' + (tabResponse && tabResponse.isStopped ? 'STOPPED' : 'IGNORED') + ']', 'KellyPopupPage');
+                                
+                                KellyTools.log('stopTabRecord [' + tabsAnswered + '/' + tabs.length + '][Disabled tab recording - ' + (tabResponse && tabResponse.isStopped ? 'STOPPED' : 'IGNORED') + ']', 'KellyPopupPage');
+                                console.log(recorderResponse); console.log(tabResponse);
+                                
                                 if (tabResponse && tabResponse.isStopped) tabsAffected++;
                                 
                                 if (tabsAnswered >= tabs.length) {
@@ -83,7 +86,7 @@ KellyPopupPage.buttons = {
                     
                     KellyTools.getBrowser().tabs.query({ active: true, currentWindow: true }, function(tab){
                         
-                        KellyPopupPage.sendTabMessage(tab[0].id, {method: "startRecord"}, function(response) {
+                        KellyPopupPage.sendTabMessage(tab[0].id, {method: "startTabRecord"}, function(response) {
                             
                             KellyTools.log('startRecord [Enable active tab recording module - ' + (response ? 'OK' : 'FAIL') + ']', 'KellyPopupPage');
                             if (!response || !response.isRecorded) {                                

@@ -238,6 +238,21 @@ function KellyTooltip(cfg) {
         
         document.body.addEventListener('click', events.onBodyClick);
         
+        // prevent from unexpected close tooltip while mouse drag \ select text in tooltip frame
+        
+        document.body.addEventListener('mousedown', function(e) {
+            
+            if (handler.closeByBody && handler.isShown() && handler.isChild(e.target, handler.self)) {
+                closeByBodyPrevent = true;
+            }
+        });
+               
+        document.body.addEventListener('mouseup', function(e) {
+            if (handler.closeByBody && closeByBodyPrevent) {
+                setTimeout(function() { closeByBodyPrevent = false; }, 100);
+            }
+        }); 
+        
         events.onResize = function(e) {
         
             if (handler.userEvents.onResize && handler.userEvents.onResize(handler, e)) {
