@@ -230,13 +230,14 @@ KellyDPage.updateUrlMap = function(onReady, restart) {
         hostList : KellyDPage.env.hostList,
         types : false,
         method : 'registerDownloader',
+        unlistedReferer : KellyDPage.defaultPageParser.host, // referer for unexpected requests - manifest v3 cant dinamicly add new urls on redirects, so this can be usefull if site return 301
         browser : KellyTools.getBrowserName(),
     };
     
     if (restart) {
         var request = KellyDPage.env.webRequestsRules;
     } else {
-        var request = {method : 'updateUrlMap', urlMap : KellyDPage.urlMap};
+        var request = {method : 'updateUrlMap', urlMap : KellyDPage.urlMap, unlistedReferer : KellyDPage.defaultPageParser.host,};
     }
     
     K_FAV.initWebRequestRules(request, onReady);
@@ -917,6 +918,8 @@ KellyDPage.showRecordedImages = function(onShow) {
           
           K_FAV.getGlobal('fav').dbName = KellyTools.generateIdWord(responseLocation.hostname.replace('.', '_') + '_record');          
           KellyDPage.defaultPageParser.setLocation({url : response.host, host : responseLocation.origin});
+          
+          KellyTools.log('defaultPageParser : default TAB url : ' + response.url + ' | default referer : ' +  responseLocation.origin, 'KellyDPage');
           
           KellyDPage.updateUrlMap(function(){  
               K_FAV.showFavouriteImages(); 

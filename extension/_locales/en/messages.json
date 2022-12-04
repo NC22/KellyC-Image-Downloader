@@ -751,7 +751,10 @@
     }, 
     "unlock_censored_auth":{  
         "message":"Enable posting, vote"
-    },  
+    },     
+    "unlock_censored_showtv":{  
+        "message":"Show tag viewer"
+    }, 
     "unlock_censored_cache":{  
         "message":"Enable cache"
     },          

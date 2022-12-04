@@ -1460,16 +1460,19 @@ p.__BASECLASS__-options-notice {
 	background : #fdb201;
 }
 
+.__BASECLASS__-MainMenuItem-iconed.active .__BASECLASS__-icon,
 .__BASECLASS__-MainMenuItem-fav.active .__BASECLASS__-icon {
 	background-color : #fdb201;
 }
 
+.__BASECLASS__-MainMenuItem-iconed .__BASECLASS__-icon,
 .__BASECLASS__-MainMenuItem-fav .__BASECLASS__-icon {
 
     background-color: rgba(239, 239, 239, 0.4);
 	border-radius : 15px;
 }
-	
+
+.__BASECLASS__-MainMenuItem.__BASECLASS__-MainMenuItem-iconed,
 .__BASECLASS__-MainMenuItem.__BASECLASS__-MainMenuItem-fav {
 	width: 30px;
 	text-align: center;
@@ -2167,11 +2170,14 @@ p.__BASECLASS__-options-notice {
     text-decoration : none;
 }
 
+.__BASECLASS__-MainMenuItem.__BASECLASS__-MainMenuItem-iconed.active a,
+.__BASECLASS__-MainMenuItem.__BASECLASS__-MainMenuItem-iconed a,
 .__BASECLASS__-MainMenuItem.__BASECLASS__-MainMenuItem-fav.active a,
 .__BASECLASS__-MainMenuItem.__BASECLASS__-MainMenuItem-fav a {
 	background : transparent;
 }
 
+.__BASECLASS__-MainMenuItem-iconed a,
 .__BASECLASS__-MainMenuItem-fav a {
     text-decoration : none;
     margin : 0px;

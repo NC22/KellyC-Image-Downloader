@@ -7,6 +7,9 @@
 // CONNECTED  Error  already connected - check tab disconnect
 // todo - keep alive
 
+// todo - предусмотреть инструменты для фикса 301 редиректов которые легко учесть в webRequestах но нельзя в declarativeNetRequest - возможно подстановка referer так же сработает
+// например добавлять в редирект контрольный get параметр или cookie и по ней отсеивать для простановки referer (+2 правила на каждую картинку)
+
 var KellyEDispetcherDR = {
     declaredRulesId : 1000,
 };
@@ -85,6 +88,13 @@ KellyEDispetcherDR.addRequestListeners = function(tabData, onRegistered) {
      
     var addRule = function(params) {
        
+       var priority = 2;
+       
+       if (typeof params.matches == "string" && params.matches == 'ANY') {
+           priority = 1;
+           params.matches = '|http*';
+       }
+       
        var responseHeaders = [
             { "header" : "Access-Control-Allow-Origin", "operation" : "set", "value": "*" },  
             
@@ -133,7 +143,7 @@ KellyEDispetcherDR.addRequestListeners = function(tabData, onRegistered) {
                     "resourceTypes" : tabData.types ? tabData.types : ['main_frame', 'image', 'xmlhttprequest', 'media'],
                     "tabIds" : [tabData.id],
                 },
-                "priority" : 1,
+                "priority" : priority,
            }); 
        }
     }
@@ -144,6 +154,7 @@ KellyEDispetcherDR.addRequestListeners = function(tabData, onRegistered) {
     
     if (tabData.urlMap) {
         for (var i = 0; i < tabData.urlMap.length; i++) {
+                        
             addRule({
                 matches : tabData.urlMap[i][0], 
                 referrer : tabData.urlMap[i][1], 
@@ -220,6 +231,7 @@ KellyEDispetcherDR.onTabConnect = function(self, data) {
                     tabData.hostList = request.hostList;
                     
                     if (request.urlMap) tabData.urlMap = request.urlMap;
+                    if (tabData.urlMap && request.unlistedReferer) tabData.urlMap.push(['ANY', request.unlistedReferer]);
                     
                     KellyEDispetcherDR.addRequestListeners(tabData, response.ready);  
        
@@ -256,6 +268,8 @@ KellyEDispetcherDR.onTabConnect = function(self, data) {
                 if (request.urlMap) {
                     tabData.urlMap = request.urlMap;
                 }
+                
+                if (tabData.urlMap && request.unlistedReferer) tabData.urlMap.push(['ANY', request.unlistedReferer]);
                                     
                 KellyEDispetcherDR.addRequestListeners(tabData, response.ready);
                 

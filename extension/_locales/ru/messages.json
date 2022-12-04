@@ -760,7 +760,10 @@
     }, 
     "unlock_censored_auth":{  
         "message":"Вкл. отправку комментов, плюсомет (если авторизован)"
-    },  
+    },    
+    "unlock_censored_showtv":{  
+        "message":"Показывать кнопку Tag Viewer"
+    }, 
     "unlock_censored_cache":{  
         "message":"Кэш (в автоматическом режиме)"
     }, 

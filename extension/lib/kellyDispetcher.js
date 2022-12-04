@@ -12,6 +12,7 @@ var KellyEDispetcher = new Object;
     KellyEDispetcher.events = []; // [... , {onMessage : callback(KellyEDispetcher, response, request, sender, callback), onTabConnect : callback(KellyEDispetcher, port), onTabMessage : callback(KellyEDispetcher, tabData)}]
         
     KellyEDispetcher.blobData = {};
+    KellyEDispetcher.openTabData = false;
     
     KellyEDispetcher.isDownloadSupported = function() {
     
@@ -746,9 +747,15 @@ var KellyEDispetcher = new Object;
                 setTimeout(function() { callback(response); }, request.ms);
             }
             
+        } else if (request.method == "getOpenTabData") {
+            
+            response.tabData = KellyEDispetcher.openTabData;
+        
         } else if (request.method == 'openTab') {
             
             if (request.url) {
+                
+                if (request.tabData) KellyEDispetcher.openTabData = request.tabData;
                 
                 KellyTools.getBrowser().tabs.create({url: request.url}, function(tab){
                     response.opened = true;

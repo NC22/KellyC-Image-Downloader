@@ -8,6 +8,7 @@ function KellyPageWatchdog(cfg)
     
     this.addDriverAction = {SKIP : 1, ADD : 2, CONTINUE : 3};
     
+    // todo - currently .origin used as referer - maybe more correct use full url of tab - handler.url
     // todo - exclude on____ events from attribute parse
     // todo - add left | right record icon position, "collect video" setting in Options
     // todo - rename handler.host to origin

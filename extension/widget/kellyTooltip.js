@@ -5,7 +5,7 @@
    @description    creates tooltip elements (attaches to an element or screen) widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.0.7 11.03.22
+   @version        v 1.0.8 03.12.22
    
    ToDo : 
    
@@ -52,6 +52,8 @@ function KellyTooltip(cfg) {
     this.avoidLostTarget = true;
     
     this.userEvents = getDefaultUserEvents();
+    
+    // .displayNoneTimer - full hide tooltip by style : display:none, after show(false) animation ends 
     
     var events = {};
     
@@ -320,7 +322,12 @@ function KellyTooltip(cfg) {
         if (!handler.self) return;
         
         handler.self.className = handler.self.className.replace(handler.classGroup + '-show', '').trim();
-    
+        if (handler.displayNoneTimer) {
+            clearTimeout(handler.displayNoneTimer);
+        }
+        
+        handler.self.style.display = '';
+         
         if (show) {			
         
             if (!checkRequiredWidth()) return;
@@ -343,6 +350,7 @@ function KellyTooltip(cfg) {
             
         } else {
             
+            handler.displayNoneTimer = setTimeout(function() { handler.self.style.display = 'none'; }, handler.removeSelfDelay); // 
             if (handler.userEvents.onClose) handler.userEvents.onClose(handler);
             
             if (handler.removeOnClose) handler.remove();

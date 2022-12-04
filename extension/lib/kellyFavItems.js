@@ -1019,6 +1019,12 @@ function KellyFavItems(cfg)
         return menuButtonContainer;
     }     
     
+    // alias 
+    
+    this.addMenuButton = function(name, onclick, index) {
+        return createMainMenuButton(name, onclick, index);
+    }
+    
     this.defaultNavigation = function() {
         
         if (typeof URLSearchParams == 'undefined') return false;
@@ -1040,7 +1046,7 @@ function KellyFavItems(cfg)
     
     this.hideFavoritesBlock = function() {
         
-        if (env.hostClass == 'options_page') return;
+        //if (env.hostClass == 'options_page') return;
         
         
         var envContainers = env.getMainContainers();
