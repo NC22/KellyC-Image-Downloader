@@ -1,5 +1,28 @@
 KellyRecorderFilterDA = new Object();
-KellyRecorderFilterDA.manifest = {host : 'deviantart.com', detectionLvl : ['imageAny', 'imageByDocument']};
+KellyRecorderFilterDA.manifest = {host : 'deviantart.com', detectionLvl : ['imagePreview', 'imageAny', 'imageByDocument']};
+
+KellyRecorderFilterDA.addItemByDriver = function(handler, data) {
+
+    if (handler.url.indexOf('deviantart') == -1) return;
+   
+    if (data.el.tagName == 'IMG' && data.el.src.indexOf('images-wixmp') != -1) {
+        
+        
+        handler.addSrcFromAttributes(data.el, data.item); 
+        if (data.item.relatedSrc.length <= 0) return handler.addDriverAction.SKIP;
+        
+        var relatedDoc = KellyTools.getParentByTag(data.el, 'A');
+        if (!relatedDoc) return handler.addDriverAction.SKIP;
+        
+        data.item.relatedDoc = relatedDoc.href;
+        
+        data.item.relatedGroups = [];
+        data.item.relatedGroups[data.item.relatedSrc.length-1] = ['imagePreview'];
+        
+        return (data.item.relatedSrc.length > 0 && data.item.relatedDoc) ? handler.addDriverAction.ADD : handler.addDriverAction.SKIP;
+    }
+}
+
 KellyRecorderFilterDA.parseImagesDocByDriver = function(handler, data) {
     
     if (handler.url.indexOf('deviantart') != -1) {
@@ -12,7 +35,7 @@ KellyRecorderFilterDA.parseImagesDocByDriver = function(handler, data) {
             
             // todo - DA currently have some JSON stringified blocks inside comments sections and this brock parse sintax
             
-            var da = JSON.parse(JSON.parse('"' + KellyRecorderFilterDA.strDa + '"')); 
+            var da = JSON.parse(JSON.parse('"' + KellyRecorderFilterDA.strDa.replace(/\\'/g, '') + '"')); 
             
             KellyRecorderFilterDA.lastDa = da;
             
