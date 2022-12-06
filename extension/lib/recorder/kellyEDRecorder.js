@@ -72,11 +72,11 @@ var KellyEDRecorder = new Object;
             
             response.imagesNum = 0;
             
-            if (request.clean) {
+            if (request.clean) { // start record and skip check recording state
                        
                  KellyEDRecorder.recorder = KellyEDRecorder.getDefaultRecorder();
                      
-            } else if (!KellyEDRecorder.recorder.record) {
+            } else if (!KellyEDRecorder.recorder.record) { // add if recording
                 
                 response.error = 'Record is not enabled';
                 return callback();
@@ -102,7 +102,7 @@ var KellyEDRecorder = new Object;
                     }
                 }
             }
-            
+    
             if (request.images) {
                                 
                 for (var i = 0; i < request.images.length; i++) {
@@ -112,16 +112,17 @@ var KellyEDRecorder = new Object;
                     for (var srcIndex = 0; srcIndex < request.images[i].relatedSrc.length; srcIndex++) {
                         
                         if (KellyEDRecorder.recorder.srcs.indexOf(request.images[i].relatedSrc[srcIndex]) != -1) {
-                            // console.log('skip ' + request.images[i].relatedSrc[srcIndex]);
-                            continue;
+                            
+                            if (!request.allowDuplicates) continue;
+                            // console.log('skip ' + request.images[i].relatedSrc[srcIndex]);                
                             
                         } else {
                             
-                            validatedSrc.push(request.images[i].relatedSrc[srcIndex]);
-                            
                             KellyEDRecorder.recorder.srcs.push(request.images[i].relatedSrc[srcIndex]);
-                            if (request.images[i].relatedGroups && request.images[i].relatedSrc[srcIndex]) validatedGroups[srcIndex] = request.images[i].relatedGroups[srcIndex];
-                        }            
+                        }
+                        
+                        validatedSrc.push(request.images[i].relatedSrc[srcIndex]);
+                        if (request.images[i].relatedGroups && request.images[i].relatedSrc[srcIndex]) validatedGroups[srcIndex] = request.images[i].relatedGroups[srcIndex];
                     }
                     
                     if (validatedSrc.length > 0) {

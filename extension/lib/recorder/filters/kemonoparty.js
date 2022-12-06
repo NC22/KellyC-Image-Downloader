@@ -16,6 +16,11 @@ KellyRecorderFilterKemono.parseImagesDocByDriver = function(handler, data) {
 
     data.thread.response = ''; 
     return true;
+}    
+ 
+KellyRecorderFilterKemono.onStartRecord = function(handler, data) {
+     if (handler.url.indexOf('kemono.party') == -1) return;
+     handler.allowDuplicates = true;
 }
 
 KellyPageWatchdog.validators.push({

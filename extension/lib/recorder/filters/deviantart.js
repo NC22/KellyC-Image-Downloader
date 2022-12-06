@@ -7,7 +7,12 @@ KellyRecorderFilterDA.parseImagesDocByDriver = function(handler, data) {
         try {
                 
             var begin = 'window.__INITIAL_STATE__ = JSON.parse("', end = '")';
-            var da = JSON.parse(JSON.parse('"' + data.thread.response.substring( data.thread.response.lastIndexOf(begin) + begin.length, data.thread.response.lastIndexOf(end)) + '"')); 
+            
+            KellyRecorderFilterDA.strDa = data.thread.response.substring( data.thread.response.lastIndexOf(begin) + begin.length, data.thread.response.lastIndexOf(end));
+            
+            // todo - DA currently have some JSON stringified blocks inside comments sections and this brock parse sintax
+            
+            var da = JSON.parse(JSON.parse('"' + KellyRecorderFilterDA.strDa + '"')); 
             
             KellyRecorderFilterDA.lastDa = da;
             

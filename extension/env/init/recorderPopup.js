@@ -21,7 +21,10 @@ KellyPopupPage.buttons = {
                  KellyTools.log('parseImages [Get images from active tab without record - ' + (response ? 'OK' : 'FAIL') + ']', 'KellyPopupPage');
                  if (response && response.images) {
                      
-                     KellyTools.getBrowser().runtime.sendMessage({method: "addRecord", clean : true, images : response.images, cats : response.cats, url : response.url, host : response.host}, function(request) {                         
+                     response.method = 'addRecord';
+                     response.clean = true;
+                     
+                     KellyTools.getBrowser().runtime.sendMessage(response, function(request) {                         
                            KellyTools.getBrowser().tabs.create({url: '/env/html/recorderDownloader.html'}, function(tab){});
                            window.close();
                      });

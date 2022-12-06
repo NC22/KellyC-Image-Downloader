@@ -1551,6 +1551,10 @@ function KellyGrabber(cfg) {
         var tmpFolder = KellyTools.validateFolderPath(folder);
         if (tmpFolder) {
             options.baseFolder = tmpFolder;
+        } else {
+            
+            options.baseFolder = '';
+            
         }
         
         return options.baseFolder;

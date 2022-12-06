@@ -39,6 +39,8 @@ function KellyPageWatchdog(cfg)
     this.additionCats = {}; // unused, maybe changed in future - if needed - must be setted from addition filter only once
     this.srcs = []; // list of all added relatedSrc strings during record process, to prevent dublicates
     
+    this.allowDuplicates = false; // ignore list of already added srcs and add anyway
+    
     // imgList - img el attribute observers
     
     // context for parser functions    
@@ -53,7 +55,8 @@ function KellyPageWatchdog(cfg)
         // some changable by filters options | more will be added here
         
         handler.additionCats = {};
-        handler.videoDetect = true;        
+        handler.videoDetect = true; 
+        handler.allowDuplicates = false;
     }
     
     function setDefaultLocation() {
@@ -312,8 +315,10 @@ function KellyPageWatchdog(cfg)
             src = (handler.url.indexOf('http://') === 0 ? 'http' : 'https') + '://' + src;
         }
         
-             if (ext == 'dataUrl' && handler.srcs.indexOf(src.substr(0, 258)) != -1) return lastError('dataUrl already added');
-        else if (handler.srcs.indexOf(src) != -1) return lastError('src already added ' + src);
+        if (!handler.allowDuplicates) {
+                 if (ext == 'dataUrl' && handler.srcs.indexOf(src.substr(0, 258)) != -1) return lastError('dataUrl already added');
+            else if (handler.srcs.indexOf(src) != -1) return lastError('src already added ' + src);
+        }
         
         var newIndex = addItemSrc(item, src, groups);     
         
@@ -492,10 +497,12 @@ function KellyPageWatchdog(cfg)
             handler.filterCallback('onStartRecord', {context : 'parseImages'});
             
             handler.parseImages(); 
+            
             response.url = handler.url;
             response.host = handler.host;
             response.images = handler.imagesPool;
             response.cats = handler.additionCats;
+            response.allowDuplicates = handler.allowDuplicates;
             
             handler.filterCallback('onStopRecord', {context : 'parseImages'});
             handler.log('[parseImages][Current tab images] Added items : ' + handler.imagesPool.length + ' | custom groups : ' + Object.keys(handler.additionCats).length);
@@ -571,7 +578,14 @@ function KellyPageWatchdog(cfg)
         setTimeout(function(){            
             updateAF = true;
             
-            KellyTools.getBrowser().runtime.sendMessage({method: "addRecord", images : handler.imagesPool, cats : handler.additionCats, url : handler.url, host : handler.host}, function(response) {
+            KellyTools.getBrowser().runtime.sendMessage({
+                method: "addRecord", 
+                images : handler.imagesPool,
+                cats : handler.additionCats, 
+                url : handler.url, 
+                allowDuplicates : handler.allowDuplicates,
+                host : handler.host,
+            }, function(response) {
 
                 showRecorder(response.imagesNum);
             });   
