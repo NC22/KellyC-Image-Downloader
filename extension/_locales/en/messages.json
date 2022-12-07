@@ -752,6 +752,9 @@
     "unlock_censored_auth":{  
         "message":"Enable posting, vote"
     },     
+    "unlock_censored_showtv_any":{  
+        "message":"Show tag viewer on any tag by right click"
+    },
     "unlock_censored_showtv":{  
         "message":"Show tag viewer"
     }, 
