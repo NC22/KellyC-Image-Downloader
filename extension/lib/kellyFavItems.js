@@ -3786,7 +3786,8 @@ function KellyFavItems(cfg)
             favNativeParser.addToLog('Восстанавливаю заблокированный контент...');
             favNativeParser.pause(true);
             
-            var unlockRequest = env.unlockManager.unlockPostList(pageInfo.censoredPostIds, env.unlockManager.getTpl('query-post'), function(rids, unlockedData) {
+            env.unlockManager.unlockPool.tpl = 'query-post';
+            var unlockRequest = env.unlockManager.unlockPostList(pageInfo.censoredPostIds, function(rids, unlockedData) {
         
                 if (rids === false || !unlockedData) {
                     favNativeParser.addToLog('Не удалось получить информацию о заблокированных публикациях - Сервис не доступен более 20 сек.'); 
