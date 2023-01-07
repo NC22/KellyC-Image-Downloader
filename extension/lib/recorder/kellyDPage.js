@@ -670,7 +670,7 @@ KellyDPage.showAdditionFilters = function() {
                 
                 KellyDPage.updateUrlMap(function() {
                     
-                    KellyDPage.setDefaultCatFilters();
+                    KellyDPage.setDefaultCatFilters(true);
                     
                     K_FAV.updateCategoryList();
                     K_FAV.updateFavCounter();
@@ -859,13 +859,16 @@ KellyDPage.showRelatedLinksNotice = function() {
         tooltip.show(true);
 }
 
-KellyDPage.setDefaultCatFilters = function() {
+KellyDPage.setDefaultCatFilters = function(byDocument) {
     
       var filters = {catIgnoreFilters : [], catFilters : [], logic : 'or'};
       
       var sKey = false;
       for (var k in KellyDPage.cats) {
             if (KellyDPage.cats[k].id) {
+                    
+                     if (k.indexOf('imageByDocument') != -1 && !byDocument) continue;                    
+                    
                      if (KellyDPage.cats[k].selected && (sKey === false || KellyDPage.cats[k].selected > KellyDPage.cats[sKey].selected)) sKey = k;
                 else if (KellyDPage.cats[k].exclude) filters.catIgnoreFilters.push(KellyDPage.cats[k].id);
             }
