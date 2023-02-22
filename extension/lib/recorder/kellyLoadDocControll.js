@@ -15,6 +15,10 @@ function KellyLoadDocControll(cfg)
         'relatedDocDeepSearch' : false, // if true - always use 2-steps process
         'relatedDocTrustedUrl' : false, // replaces _validators.js by custom input url string for mark items as trusted images by handler.parser[KellyPageWatchdog].parseImages() method
         'relatedDocTrustedUrlReg' : false, // is input url string is reg-exp
+        
+        // todo - add to options - add addition notices on qualityimagefound event or on image load to keep stage 2 more informative feedback
+        'relatedDocDeepSearchMaxMaches' : false, // max number of images that much with preview proportions and can be taken from one related document
+        'relatedDocAspectRatioCheck' : false, // check proportions and skip if ratio differs (> 0.05)
     };
     
     this.docs = []; // common list of all related docs from all storage items (used to prevent add duplicate jobs)  
@@ -39,6 +43,8 @@ function KellyLoadDocControll(cfg)
     
     this.thread = false;
     this.threadOptions = false;
+    
+    this.lastError = false;
     
     function constructor(cfg) {
         // todo - configure image loader thread num
@@ -106,6 +112,8 @@ function KellyLoadDocControll(cfg)
         }            
     }
     
+    // Stage 2. or "Deep search" - optional stage for "untrusted media items that was found in related documents" during stage 1. - its skipped for items if parseImagesDocByDriver return true and used as default behaiveour
+    
     handler.runImgLoad = function() {
         
         if (handler.docsImages.length <= 0) return false;
@@ -130,15 +138,41 @@ function KellyLoadDocControll(cfg)
                  if (reason == 'stop') return;
                  
                  var items = handler.storage.items;
+                 var imagesTaken = 0;
+                 
                  for (var i = 0; i < handler.docsImages.length; i++) {
-                    if (!handler.docsImages[i].untrustedData) continue;
+                     
+                    if (!handler.docsImages[i].untrustedData) continue; // doument already parsed by external driver, skipped
                     
                     if (handler.events.onRelatedDocImageCheck && handler.events.onRelatedDocImageCheck(handler.docsImages[i]) === true) continue;
                     
-                    // todo - optional check ratio - preview can have different ratio because of crop for ex ? | optional skip other if one original found ?
                     if (!handler.docsImages[i].relatedItem.pw || (handler.docsImages[i].relatedItem.pw <= handler.docsImages[i].pw && handler.docsImages[i].relatedItem.ph <= handler.docsImages[i].ph)) {
+                        
+                        // optionaly validate loaded images by ratio (compare related to document "preview" image WxH and document image WxH)
+                        
+                        if (handler.additionOptions.relatedDocAspectRatioCheck && handler.docsImages[i].relatedItem.pw) {
+
+                            var aspectRatio = handler.docsImages[i].pw / handler.docsImages[i].ph;
+                            var aspectRatioPreview = handler.docsImages[i].relatedItem.pw / handler.docsImages[i].relatedItem.ph;
+
+                            if (Math.abs(aspectRatioPreview - aspectRatio) > 0.05) { 
+                                continue;
+                            }
+                        }
+                        
                         handler.addDocItem(handler.docsImages[i]);
-                    } else handler.docsImages[i].refused = 'proportions';
+                        imagesTaken++;
+                        
+                        // optionaly limit maximum amount of images that can be taken from one document
+                        
+                        if (handler.additionOptions.relatedDocDeepSearchMaxMaches !== false && imagesTaken >= handler.additionOptions.relatedDocDeepSearchMaxMaches) {
+                            break;
+                        }
+                        
+                    } else {
+                        handler.docsImages[i].refused = 'proportions';
+                    }
+                    
                  }
                  
                  stage = 'off';
@@ -198,8 +232,9 @@ function KellyLoadDocControll(cfg)
         // If false - add images as originals to final results ( handler.parser.imagesPool -> handler.docsImages -> onQualityImageFound -> KellyDPage.addStorageItem) without check [width x height]
         // Trust by default if some thing added by external site driver
         
-        handler.parser.untrustedData = false;
-            
+        handler.parser.untrustedData = false;            
+        handler.lastError = false; // error state can be assigned by parseImagesDocByDriver external drivers also
+        
         // todo - add hook to handler.run afterAddJob for manual configure base request too
         var threadWorkSubRequest = handler.parser.filterCallback('onBeforeParseImagesDocByDriver', {thread : thread}, true);
         
@@ -220,18 +255,12 @@ function KellyLoadDocControll(cfg)
         
         if (!thread.response) {
         
-            error = 'Документ не доступен [' + thread.job.url + '] (ошибка загрузки или превышен интервал ожидания)'; // window.document null  
+            error = '<b>' + thread.job.url + '</b> (cant load or timeout reached)'; // window.document null  
             if (thread.error) {
-                error += ' | Ошибка : [' + thread.error + ']';
+                error += '<br>Error : [' + thread.error + ']';
             }
             
-            // restart on Fail ? n attempts ?
-            
-            // handler.addJob(
-            //    thread.job.url, 
-            //    KellyDPage.onDownloadDoc, 
-            //    thread.job.data
-            // );
+            handler.lastError = error;
             
         } else {            
 
@@ -248,7 +277,7 @@ function KellyLoadDocControll(cfg)
             
             // try to add data to handler.parser.imagesPool by external driver - if fail - read data by default controller
             
-            if (handler.parser.parseImagesDocByDriver(thread) !== true) { 
+            if (handler.parser.parseImagesDocByDriver(thread) !== true && !handler.lastError) {
                 
                 // Content-type image
                 if (thread.request.contentType.indexOf('image') != -1) {
@@ -266,38 +295,35 @@ function KellyLoadDocControll(cfg)
                 } 
             }
             
-            // todo - optional put this info to log el on page
-            handler.log('[LOADED] ' + thread.job.url + ' - images found : ' + handler.parser.imagesPool.length);
-            
-            for (var i = 0; i < handler.parser.imagesPool.length; i++) {
+            if (!handler.lastError) {
+                // todo - optional put this info to log el on page
+                handler.log('[LOADED] ' + thread.job.url + ' - images found : ' + handler.parser.imagesPool.length);
                 
-                handler.parser.imagesPool[i].relatedSrc.forEach(function(src, index) {
+                for (var i = 0; i < handler.parser.imagesPool.length; i++) {
                     
-                    var itemGroups = handler.parser.imagesPool[i].relatedGroups && handler.parser.imagesPool[i].relatedGroups[index] ? handler.parser.imagesPool[i].relatedGroups[index] : [];
-                    
-                    // array, that will be used in callback KellyDPage.aDProgress.docLoader.events.onQualityImageFound, after all image proportions will be loaded (or will be used imidiatly if untrustedData = false)
-                    
-                    handler.docsImages.push({
-                        src : src,
-                        groups : itemGroups, // itemGroups currently only used here in untrustedData key for check is trusted item or not (trusted group - imageByDocument)
-                        relatedItem : thread.job.data, // item data attached to request by [handler.thread.addJob] method 
-                        untrustedData : itemGroups.indexOf('imageByDocument') != -1 ? false : handler.parser.untrustedData,
+                    handler.parser.imagesPool[i].relatedSrc.forEach(function(src, index) {
+                        
+                        var itemGroups = handler.parser.imagesPool[i].relatedGroups && handler.parser.imagesPool[i].relatedGroups[index] ? handler.parser.imagesPool[i].relatedGroups[index] : [];
+                        
+                        // array, that will be used in callback KellyDPage.aDProgress.docLoader.events.onQualityImageFound, after all image proportions will be loaded (or will be used imidiatly if untrustedData = false)
+                        
+                        handler.docsImages.push({
+                            src : src,
+                            groups : itemGroups, // itemGroups currently only used here in untrustedData key for check is trusted item or not (trusted group - imageByDocument)
+                            relatedItem : thread.job.data, // item data attached to request by [handler.thread.addJob] method 
+                            untrustedData : itemGroups.indexOf('imageByDocument') != -1 ? false : handler.parser.untrustedData,
+                        });
+                        
                     });
-                    
-                });
+                }
             }
         }
         
-        handler.updateState('onDownloadDoc'); // after preparations on event in controller, handler.runImgLoad will be called
-        
-        if (error) {
-        
-            handler.errors += error;
-            handler.log(error);
-           
-            return;
+        if (handler.lastError) {            
+            handler.lastErrorData = thread.job.data;
         }
-            
+        
+        handler.updateState('onDownloadDoc'); // after preparations on event in controller, handler.runImgLoad will be called 
     }
     
     handler.updateState = function(context) {

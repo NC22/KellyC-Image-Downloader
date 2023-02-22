@@ -742,7 +742,10 @@
     }, 
     "unlock_censored_auto":{  
         "message":"Automaticly"
-    }, 
+    },    
+    "unlock_mreact":{  
+        "message":"Enable for m.reactor.cc (after save browser restart required)"
+    },
     "unlock_censored_mode":{  
         "message":"Unlock post mode"
     },

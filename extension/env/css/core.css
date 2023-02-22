@@ -1806,6 +1806,18 @@ p.__BASECLASS__-options-notice {
     box-sizing: border-box;
 }
 
+.__BASECLASS__-error-list-errorsLine-box {
+    max-height: 300px;
+    overflow: auto;
+    min-height: 100px;
+}
+
+.__BASECLASS__-error-list-errorsLine div > div {
+    font-size: 12px;
+    background: rgba(0, 0, 0, 0.22);
+    margin-bottom: 2px;
+}
+
 .__BASECLASS__-downloader-error-list-errorsLine textarea {
     width: 100%;
     height: 200px; 

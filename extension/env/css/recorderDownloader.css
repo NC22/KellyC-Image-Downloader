@@ -91,6 +91,7 @@
 }
 
 .__BASECLASS__-ModalBox-addition .__BASECLASS__-downloader-statistic.hidden, 
+.__BASECLASS__-ModalBox-addition .__BASECLASS__-downloader-errors.hidden,
 .__BASECLASS__-ModalBox-addition .__BASECLASS__-downloader-progressbar.hidden {
     display : none;
 }

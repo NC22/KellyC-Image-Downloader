@@ -25,6 +25,9 @@ KellyDPage.cats = {
 
     // post processing \ detected by driver groups that helps to filter good images from recorded stream
     
+    
+    loadDocError : {name : 'Load fail (Doc)', color : "#db5471"},  
+    
     imageByDocument : {name : 'Original Image (Doc)', selected : 110},    
     imageOriginal : {name : 'Original (HD)', selected : 100, color : '#45ea6b'},
     imagePreview : {name : 'Preview', selected : 2, color : '#45dbea'},
@@ -63,16 +66,78 @@ KellyDPage.cats = {
 
 KellyDPage.aDProgress = {
     
-    current : 0, total : 0, fail : 0, 
+    current : 0, total : 0, fail : 0, errorItems : [], errors : [], // todo - restart fail items - add them "Fail load doc"
     
     minW : 0, maxW : 0, 
     minH : 0, maxH : 0,
     
+    maxErrorsShow : 1000,
     progressbar : false, // progressbar container
     statistic : false, // statistic container
+    statisticErrors : false,
     
     set : function(cfg) {
-        for (var k in cfg) KellyDPage.aDProgress[k] = cfg[k];
+        
+        for (var k in cfg) {
+            
+            if (k == 'resetErrors') {
+                
+                KellyDPage.aDProgress.errorItems = [];        
+                KellyDPage.aDProgress.errors = [];
+                
+            }
+            
+            KellyDPage.aDProgress[k] = cfg[k];
+        }
+    },
+    
+    getErrorListToolTip : function() {
+        
+        if (!KellyDPage.aDProgress.etooltip) {
+            KellyDPage.aDProgress.etooltip = KellyTools.getNoticeTooltip(KellyDPage.env.hostClass, KellyDPage.env.className);
+            KellyDPage.aDProgress.etooltip.updateCfg({closeByBody : false, closeButton : true, removeOnClose : false});
+        }
+        
+        return KellyDPage.aDProgress.etooltip;
+    },
+    
+    addErrorItem : function(item, error) {
+        
+        var handler = KellyDPage.aDProgress;            
+            handler.errorItems.push(item);
+            handler.errors.push(error); 
+
+        if (handler.etooltip && handler.etooltip.isShown()) {
+            handler.updateErrorList();
+        }
+    },
+    
+    updateErrorList : function() {
+        
+        var handler = KellyDPage.aDProgress;
+        var html = '';
+        for (var i=0; i < handler.errors.length; i++) {
+            
+            if (i+1 <= handler.maxErrorsShow) {
+                html+= '<div>' + handler.errors[i] + '</div>';
+            }
+        }
+        
+        KellyTools.setHTMLData(handler.getErrorListToolTip().getContent().getElementsByClassName(KellyDPage.env.className + '-error-list-errorsLine-box')[0], html); 
+    },
+    
+    showErrorList : function() {
+         
+        var handler = KellyDPage.aDProgress;
+        html = '<div class="' + KellyDPage.env.className + '-error-list-errorsLine">\
+                    <div>Errors:</div>\
+                    <div class="' + KellyDPage.env.className + '-error-list-errorsLine-box">' + html + '</div>\
+               </div>';                    
+       
+        
+        KellyTools.setHTMLData(handler.getErrorListToolTip().getContent(), html);   
+        handler.updateErrorList();
+        handler.getErrorListToolTip().show(true);        
     },
     
     update : function(show) {
@@ -85,11 +150,19 @@ KellyDPage.aDProgress = {
             
             handler.progressbar.classList.add('hidden');
             handler.statistic.classList.add('hidden');
+            handler.statisticErrors.classList.add('hidden');
             return;
         }
                 
         handler.statistic.classList.remove('hidden');
         KellyDPage.commonFiltersInfo.classList.remove('collapsed');
+        
+        if (handler.errors.length > 0) {            
+            handler.statisticErrors.classList.remove('hidden');
+            handler.errorCounter.innerText = 'Errors : ' + handler.errors.length;
+        } else {            
+            handler.statisticErrors.classList.add('hidden');
+        }
         
         if (handler.current && handler.total) {
            
@@ -264,7 +337,7 @@ KellyDPage.loadProportions = function(items, displayed, onEnd) {
     if (K_FAV.dataFilterLock) return false;
     K_FAV.dataFilterLock = {message : KellyLoc.s('', 'recorder_load_beasy'), context : 'loadProportions'};
   
-    KellyDPage.aDProgress.set({total : displayed ? displayed.length : items.length, current : 0, fail : 0});
+    KellyDPage.aDProgress.set({resetErrors : true, total : displayed ? displayed.length : items.length, current : 0, fail : 0});
     
     var getStatistic = function(context) {
         
@@ -337,6 +410,11 @@ KellyDPage.loadProportions = function(items, displayed, onEnd) {
                 item.ph = proportions[1];
                 
                 KellyTools.setHTMLData(KellyDPage.aDProgress.statistic, getStatistic('onImageLoad'));
+                
+                if (error) {
+                    KellyDPage.aDProgress.addErrorItem(item, "Image load fail : " + item.pImage);
+                }
+                
                 KellyDPage.aDProgress.update(true);
             },
         }, KellyDPage.storage.coptions.recorderThread);
@@ -429,18 +507,20 @@ KellyDPage.showAdditionFilters = function() {
     html += '</div>';                 
 
     html += '</div>';
-    html += '<div class="' + cl + '-extra-filters ' + cl + '-section-header-inline ' + cl + '-section-sidebar_section_extra_progress" data-target="sidebar_section_extra_progress"></div>';    
-    html += '<div class="' + cl + '-ModalBox ' + cl + '-ModalBox-section ' + cl + '-ModalBox-addition ' + cl + '-ModalBox-addition-informer collapsed" data-title="sidebar_section_extra_progress">'; 
-    html += '<div class="' + cl + '-ModalBox-content ' + cl + '-ModalBox-addition-content">';
+    html += '<div class="' + cl + '-extra-filters ' + cl + '-section-header-inline ' + cl + '-section-sidebar_section_extra_progress" data-target="sidebar_section_extra_progress"></div>';
     
-    html += '<div class="' + cl + '-downloader-statistic hidden"></div>';                
-    html += '<div class="' + cl + '-downloader-progressbar hidden">\
-                 <div class="' + cl + '-downloader-progressbar-line ' + cl + '-downloader-progressbar-line-ok" style="width: 0%;"></div>\
-                 <div class="' + cl + '-downloader-progressbar-line ' + cl + '-downloader-progressbar-line-err" style="width: 0px;"></div>\
-                 <div class="' + cl + '-downloader-progressbar-state"></div>\
-             </div>';
-             
-    html += '</div>';          
+    html += '<div class="' + cl + '-ModalBox ' + cl + '-ModalBox-section ' + cl + '-ModalBox-addition ' + cl + '-ModalBox-addition-informer collapsed" data-title="sidebar_section_extra_progress">'; 
+        html += '<div class="' + cl + '-ModalBox-content ' + cl + '-ModalBox-addition-content">';
+        
+            html += '<div class="' + cl + '-downloader-statistic hidden"></div>';                
+            html += '<div class="' + cl + '-downloader-progressbar hidden">\
+                         <div class="' + cl + '-downloader-progressbar-line ' + cl + '-downloader-progressbar-line-ok" style="width: 0%;"></div>\
+                         <div class="' + cl + '-downloader-progressbar-line ' + cl + '-downloader-progressbar-line-err" style="width: 0px;"></div>\
+                         <div class="' + cl + '-downloader-progressbar-state"></div>\
+                     </div>';
+            html += '<div class="' + cl + '-downloader-errors hidden"><a href="#" class="' + cl + '-downloader-errors-counter"></a></div>';
+            
+        html += '</div>';
     html += '</div>';  
              
 
@@ -473,7 +553,14 @@ KellyDPage.showAdditionFilters = function() {
     KellyDPage.aDProgress.lineErr =  KellyTools.getElementByClass(KellyDPage.commonFilters, cl + '-downloader-progressbar-line-err');
     KellyDPage.aDProgress.state = KellyTools.getElementByClass(KellyDPage.commonFilters, cl + '-downloader-progressbar-state');
     KellyDPage.aDProgress.statistic = KellyTools.getElementByClass(KellyDPage.commonFilters, cl + '-downloader-statistic');
+    KellyDPage.aDProgress.statisticErrors = KellyTools.getElementByClass(KellyDPage.commonFilters, cl + '-downloader-errors');
+    KellyDPage.aDProgress.errorCounter = KellyTools.getElementByClass(KellyDPage.commonFilters, cl + '-downloader-errors-counter');
     KellyDPage.commonFiltersInfo = KellyTools.getElementByClass(KellyDPage.commonFilters, cl + '-ModalBox-addition-informer');
+    
+    KellyDPage.aDProgress.errorCounter.onclick = function() {
+        KellyDPage.aDProgress.showErrorList();
+        return false;
+    }
     
     var sections = KellyDPage.commonFilters.getElementsByClassName(cl + '-section-header-inline');
     for (var i = 0; i < sections.length; i++) {
@@ -566,6 +653,7 @@ KellyDPage.showAdditionFilters = function() {
         if (K_FAV.dataFilterLock) return false;                
         K_FAV.dataFilterLock =  {message : KellyLoc.s('', 'recorder_load_beasy'), context : 'loadRelatedDoc'};  
         
+        KellyDPage.aDProgress.set({resetErrors : true});
         KellyDPage.aDProgress.docLoader = new KellyLoadDocControll({
                 storage : KellyDPage.storage, 
                 filtered : K_FAV.getGlobal('filtered'), 
@@ -599,11 +687,19 @@ KellyDPage.showAdditionFilters = function() {
                 var data = {};
                 if (stage == 'loadDoc') data = {IMAGESNUM : stat.images, IMAGESNUM_TRUSTED : stat.trustedImages}; 
                                 
-                KellyTools.setHTMLData(KellyDPage.aDProgress.statistic, KellyLoc.s('', 'recorder_load_doc_' + stage, data));         
+                KellyTools.setHTMLData(KellyDPage.aDProgress.statistic, KellyLoc.s('', 'recorder_load_doc_' + stage, data));  // todo - statistic этап перезатирается заметкой, не информативно. recorder_load_doc_loadImg    
             } 
-
-            if (context == 'onDownloadDocEnd') {
-                            
+                
+            if (context == 'onDownloadDoc') {
+                
+                if (KellyDPage.aDProgress.docLoader.lastError) {
+                    
+                    var failJobItem = KellyDPage.aDProgress.docLoader.lastErrorData;
+                    KellyDPage.aDProgress.addErrorItem(failJobItem, '[FAIL] ' + KellyDPage.aDProgress.docLoader.lastError);
+                }
+                
+            } else if (context == 'onDownloadDocEnd') {
+                                
                 // onDownloadDocEnd - calls on end of stage 1. - temp switch to stage - off. - all related documents loaded
                 // now we need update urlmap to assoc with referers of related item before load and check images proportions
                 
@@ -618,22 +714,25 @@ KellyDPage.showAdditionFilters = function() {
                     
                     KellyDPage.updateUrlMap(function() {
                         
-                        self.innerText = KellyLoc.s('', 'recorder_load_prop_skip');
+                        // self.innerText = KellyLoc.s('', 'recorder_load_prop_skip'); - todo - skip not implemented
                         KellyDPage.aDProgress.docLoader.runImgLoad();
                         
                     }, true);                    
                     
                 } else {
                     
-                    KellyDPage.aDProgress.statistic.innerText = KellyLoc.s('', KellyDPage.aDProgress.docLoader.docs.length <= 0 ? 'recorder_no_related_docs' : 'recorder_cant_find_images');
-                    K_FAV.dataFilterLock = false;            
-                    self.innerText = KellyLoc.s('', 'recorder_load_related_doc');                       
-                    KellyDPage.commonFilters.classList.remove(cl + '-process-docLoader-work'); 
+                    // cant get any data to work with - no images, or no any related documents at all
+                    
+                    KellyDPage.aDProgress.docLoader.events.onStagesEnd('done', 0, KellyDPage.aDProgress.docLoader.docs.length <= 0 ? 'recorder_no_related_docs' : 'recorder_cant_find_images');
                 }
                 
             } else if (context == 'onDownloadDoc') {
                 
                 // onDownloadDoc - calls on download any document during stage 1. process
+                
+            } else if (context == 'onImageLoad') {
+                
+                // onImageLoad - calls on Stage 2. any image from related doc load Fail \ Success - currently no any errors logged - require addition assgins to handler.runImgLoad - handler.lastError in LoadDocControll class
                 
             }
             
@@ -655,8 +754,35 @@ KellyDPage.showAdditionFilters = function() {
             }
         }
         
-        KellyDPage.aDProgress.docLoader.events.onStagesEnd = function(reason, addedTotal) {
- 
+        // reason - done \ stop
+        
+        KellyDPage.aDProgress.docLoader.events.onStagesEnd = function(reason, addedTotal, notice) {
+                        
+            var markFailedItems = function(update) {
+                
+                if (KellyDPage.aDProgress.errorItems.length > 0) {
+                    
+                    if (KellyDPage.aDProgress.errorFolderNum && !KellyDPage.cats['loadDocError_' + KellyDPage.aDProgress.errorFolderNum]) {                        
+                        KellyDPage.cats['loadDocError_' + KellyDPage.aDProgress.errorFolderNum] = {
+                                name : KellyDPage.cats['loadDocError'].name + ' (' + KellyDPage.aDProgress.errorFolderNum + ')', 
+                                color : KellyDPage.cats['loadDocError'].color,
+                        };
+                    }
+                    
+                    var errorGroupName = 'loadDocError' + (KellyDPage.aDProgress.errorFolderNum ? '_' + KellyDPage.aDProgress.errorFolderNum : '');                    
+                    KellyDPage.aDProgress.errorFolderNum = KellyDPage.aDProgress.errorFolderNum ? KellyDPage.aDProgress.errorFolderNum + 1 : 2;
+                    
+                    // items from KellyDPage.storage.items with fail load .relatedDoc
+                    for (var i=0; i < KellyDPage.aDProgress.errorItems.length; i++) {
+                        KellyDPage.aDProgress.errorItems[i].categoryId.push(KellyDPage.getCat(errorGroupName).id);
+                    }
+                    
+                    if (update) {
+                        K_FAV.updateCategoryList();
+                    }
+                } 
+            }            
+            
             if (addedTotal > 0) {
                 
                 KellyDPage.aDProgress.statistic.innerText = KellyLoc.s('', 'recorder_added_images_num', {IMAGESNUM : addedTotal});    
@@ -665,8 +791,9 @@ KellyDPage.showAdditionFilters = function() {
                     var indexA = !a.orderIndex ? 0 : a.orderIndex, indexB = !b.orderIndex ? 0 : b.orderIndex;
                     return indexA - indexB;
                 });
-            
-                // some of images can be added in onQualityImageFound by addStorageItem - urllist changed - need to refresh BG list again
+                
+                markFailedItems();
+                // new images can be added in onQualityImageFound by addStorageItem - urllist changed - need to refresh BG list again
                 
                 KellyDPage.updateUrlMap(function() {
                     
@@ -677,7 +804,9 @@ KellyDPage.showAdditionFilters = function() {
                     K_FAV.updateFilteredData();                    
                     K_FAV.updateImagesBlock();                
                     K_FAV.updateImageGrid();   
-                });
+                });                
+                
+                // update group counter, add related groups for next possible round
                 
                 KellyDPage.aDProgress.folderNum = KellyDPage.aDProgress.folderNum ? KellyDPage.aDProgress.folderNum + 1 : 2;                
                 KellyDPage.cats['imageByDocument_' + KellyDPage.aDProgress.folderNum] = {
@@ -686,8 +815,13 @@ KellyDPage.showAdditionFilters = function() {
                 };
                 
             } else {
-                     
-               KellyDPage.aDProgress.statistic.innerText = KellyLoc.s('', reason == 'stop' ? 'recorder_canceled' : 'recorder_cant_find_originals_images');       
+                
+               if (!notice) {
+                    notice = reason == 'stop' ? 'recorder_canceled' : 'recorder_cant_find_originals_images';                
+               }
+               
+               markFailedItems(true);               
+               KellyDPage.aDProgress.statistic.innerText = KellyLoc.s('', notice);       
                 
             }
         
@@ -695,7 +829,7 @@ KellyDPage.showAdditionFilters = function() {
             self.innerText = KellyLoc.s('', 'recorder_load_related_doc');                       
             KellyDPage.commonFilters.classList.remove(cl + '-process-docLoader-work');
                 
-            KellyDPage.aDProgress.update(true); // false
+            KellyDPage.aDProgress.update(true);
         }
         
         self.innerText = KellyLoc.s('', 'recorder_load_doc_stop');
@@ -1093,7 +1227,17 @@ KellyDPage.init = function() {
     var nativeOnSideBarShow = KellyDPage.env.events.onSideBarShow;            
     KellyDPage.env.events.onSideBarShow = function(sideBarWrap, close) {
         
-        if (!close) KellyDPage.showRelatedLinksNotice();
+        if (!close) {
+            
+            // show help tip on first start to describe "load related documents" function 
+            KellyDPage.showRelatedLinksNotice();
+            
+            // collapse all sections on show item editor
+            if (KellyDPage.commonFilters && sideBarWrap.innerHTML.indexOf('SavePost') != -1) {
+                var sections = KellyDPage.commonFilters.getElementsByClassName( KellyDPage.env.className + '-ModalBox-section');
+                for (var i = 0; i < sections.length; i++) sections[i].classList.add('collapsed');
+            }
+        }
     }
     
     KellyDPage.env.events.onValidateCfg = function(data) {

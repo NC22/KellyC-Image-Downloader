@@ -112,7 +112,7 @@ function KellyFavItems(cfg)
         // fires when fav element preview dimensions loaded
         // also dimensions can be catched by setSelectionInfo method in showAddToFavDialog
         
-        // return false - initiate tilegrid UpdateTileGrid method - new or changed proportions
+        // return false - initiate tilegrid UpdateTileGrid method - need to fit tile grid according to new dimensions of images
         
         onLoadFavGalleryImage : function(imgElement, error) {
             
@@ -3022,6 +3022,9 @@ function KellyFavItems(cfg)
         }     
     }
         
+    // PostBlock - exist fav item id, or new publication DOM element to get media data from by enviroment profile env.getAllMedia method
+    // comment - child element to get media data from by enviroment profile env.getAllMedia method
+    
     this.showAddToFavDialog = function(postBlock, comment, onAdd, onRemove, onClose) {
         
         var postIndex = typeof postBlock == 'number' ? postBlock : false, existItem = false;        
