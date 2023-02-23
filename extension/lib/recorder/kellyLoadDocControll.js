@@ -58,6 +58,7 @@ function KellyLoadDocControll(cfg)
 
         handler.parser = new KellyPageWatchdog();
         handler.parser.directAccess = false;
+        handler.parser.docLoader = handler;
         
         handler.imageLoader = false;
     }   
@@ -287,6 +288,8 @@ function KellyLoadDocControll(cfg)
                 if (typeof thread.response == 'string') {
                                    
                     handler.parser.untrustedData = true;
+                    
+                    // TODo check image load for relative pathes in common non driver case - may be need validate links before loading if setted only \\ instead of protocol - chrome-extension:\\ used in this cases
                     thread.loadDoc = KellyTools.val(KellyTools.validateHtmlDoc(thread.response), 'html');
                     handler.parser.parseImages(thread.loadDoc);                
                     KellyTools.stopMediaLoad(thread.loadDoc);

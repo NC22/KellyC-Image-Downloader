@@ -1,6 +1,7 @@
 {
    "content_scripts": [ {
-      "js": [ 
+      "run_at": "document_start",
+      "js": [
             "widget/kellyTooltip.js", 
             "widget/kellyTileGrid.js", 
             "widget/kellyImageView.js", 
@@ -13,10 +14,10 @@
             "lib/kellyTools.js", 
             "lib/kellyOptions.js", 
             "lib/kellyAdditionsForm.js", 
-            "lib/kellyFavItems.js",
+            "lib/kellyFavItems.js", 
             "lib/profiles/joyreactor.js", 
             "lib/profiles/joyreactor.unlock.js", 
-            "lib/profiles/topjoyreactor.js",             
+            "lib/profiles/topjoyreactor.js", 
             "lib/recorder/kellyPageWatchdog.js", 
             "lib/recorder/kellyLoadDocControll.js", 
             "lib/recorder/kellyDPage.js", 
@@ -38,17 +39,14 @@
             "lib/recorder/filters/_validators.js", 
             "lib/profiles/default.js", 
             "lib/profiles/recorder.js", 
-            "env/init/recorderFront.js",
-            "env/init/joyreactorFront.js"
+            "env/init/recorderFront.js", 
+            "env/init/joyreactorFront.js" 
       ],
-      "all_frames": false,
-      "matches": [ 
-        "http://*/*",
-        "https://*/*"
-        ]
+      "matches": ["*://*/*"]
    } ],
-   "manifest_version" : 2,
-   "version": "1.2.5.2",
+   "host_permissions": ["*://*/*"], 
+   "manifest_version" : 3,
+   "version": "1.2.5.1",
    "name": "KellyC Image Downloader",
    "description": "__MSG_ext_description_recorder__",
    "icons": { 
@@ -60,35 +58,26 @@
    "permissions": [
         "downloads",
         "storage",
+        "declarativeNetRequest",
         "tabs",
-        "unlimitedStorage",
-        "webRequest",
-        "webRequestBlocking",
-        "<all_urls>"
-    ],
+        "unlimitedStorage"
+   ],
    "background": {
-    "scripts": [
-        "lib/kellyTools.js", 
-        "lib/kellyDispetcher.js",
-        "lib/profiles/joyreactor.unlock.d.js",
-        "env/init/background.js", 
-        "lib/recorder/kellyEDRecorder.js"
-    ],
-    "persistent": true
-   },  
+        "service_worker": "background.js"
+   },
    "options_ui": {
     "page": "env/html/recorderDownloader.html?tab=modules",
     "open_in_tab": true
    },
-   "browser_action": {
+   "action": {
         "default_popup": "env/html/recorderPopup.html",
         "default_icon": {
             "32": "env/img/icon32x32.png"
         }
    },
-   "web_accessible_resources": [
-        "env/css/*.css",
-        "env/html/*.html",
-        "env/dynamic/*.js"
-    ]
+   "web_accessible_resources":  [{
+      "resources": ["env/css/*.css", "env/html/*.html", "env/dynamic/*.js"],
+      "matches": ["*://*/*"],
+      "extension_ids": []
+    }]
 }

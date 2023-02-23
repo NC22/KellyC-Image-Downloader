@@ -3,8 +3,10 @@ function KellyPageWatchdog(cfg)
     var handler = this;
     var lng = KellyLoc;
     var updateAF = true;
+    
     var directAccessEls = {'A' : ['href'], 'IMG' : ['src']};  // to get absolute link from img \ a elements 
     this.directAccess = true; // MUST be disabled for extension tab and load related doc feature - because tab protocol will be chrome-extension://
+    this.docLoader = false; // setted if parser used in context of doc loader from chrome-extension page
     
     this.addDriverAction = {SKIP : 1, ADD : 2, CONTINUE : 3};
     
