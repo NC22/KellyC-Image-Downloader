@@ -60,6 +60,7 @@
                 left: 0;
                 top: 0;
                 z-index: 1;
+                border-radius: 8px 8px 0px 0px;
                 /* border-bottom: 1px solid #a5a5a5; */
                 padding-top: 16px;
                 padding-left: 29px;
@@ -76,6 +77,7 @@
                 position: relative;
                 padding-top: 7px;
                 background: #130e1b94;
+                border-radius: 0 0 8px 8px;
             }
 
             ul li {
@@ -289,18 +291,16 @@
             
             <div class="notice">
             
-            
             <p>Hello. Thank you for using <b>KellyC Image Downloader</b> <span class="about">This extension done by me in spare time, so some functions can be bit untested \ unfinished. Source code and additional information are presented on the github page</span><span class="updates">Current changes:</span></p>
 
             <ul class="updates">
-                <li>Added filters for collecting images from Reddit, Instagram (Fixes), DeviantArt (Fixes), 9GAG</li>
-                <li>Optimized mobile version</li>
-                <li>Fixed preservation of original file names during Downloading process in some cases</li>
+                <li>Added filters for collecting images from <a href="https://github.com/NC22/KellyC-Image-Downloader/issues/7" target="_blank">DeviantArt</a>, <a href="https://github.com/NC22/KellyC-Image-Downloader/issues/8" target="_blank">Joy</a>, Instagram and other not reported on github</li>
+                <li>Added error logs & groups when collecting data with "Load related docs" (problem documents moved to "Load fail (Doc)" group</li>
             </ul>
               
             
             <div class="spoilers">  
-                 <div class="updates important-spoiler default-spoiler">
+                 <!--div class="updates important-spoiler default-spoiler">
 
                     <div class="spoiler-show">
                         <a href="#">New requirements from Google for extension developers</a>
@@ -314,30 +314,12 @@
                         
                     </div>
                     
-                </div>  
-                <div class="default-spoiler">
-
-                    <div class="spoiler-show">
-                        <a href="https://github.com/NC22/KellyC-Image-Downloader/wiki/Install-extension-manually" target="_blank">How to install the extension manually?</a> (actual & old versions, outside the extension store)
-                    </div>
-                </div>  
+                </div-->  
                 
-                <div class="default-spoiler">
-
-                    <div class="spoiler-show">
-                        <a href="#">How to bulk download pictures from any site through the recording function?</a>
-                    </div>
-                    
-                    <div class="spoiler spoiler-hidden">
-                        <p><a href="https://kellydownloader.com/links/recorder/" target="_blank">Learn more about the recording function and advanced settings</a><br><a href="https://kellydownloader.com/crawlers-table/"  target="_blank">List of tested sites</a> with additional auto filters. In some cases, you may need to click on <a href="https://kellydownloader.com/ru/links/loadrelated/"  target="_blank">Load related links</a> to get original size images</p>
-                        <p><video src="https://nradiowave.ru/userfiles/media/custom/recorder.mp4" preload="none" poster="https://nradiowave.ru/userfiles/media/custom/recordermp4.png" controls></video></p>
-                    </div>
-                    
-                </div>  
                 <div class="default-spoiler jr">
 
                     <div class="spoiler-show">
-                        <a href="#">Как скачать все картинки из конкретного тега или избранного на реакторе?</a>
+                        <a href="#">Как скачать все картинки из конкретного тега или избранного на <span style="color: #ff6400;font-weight: bold;">реакторе</span> ?</a>
                     </div>
                     
                     <div class="spoiler spoiler-hidden">
@@ -346,13 +328,36 @@
                     </div>
                     
                 </div> 
+                
+                <div class="default-spoiler">
+
+                    <div class="spoiler-show">
+                        <a href="#">How to bulk download pictures from any site through the recording function ?</a>
+                    </div>
+                    
+                    <div class="spoiler spoiler-hidden">
+                        <p><a href="https://kellydownloader.com/links/recorder/" target="_blank">Learn more about the recording function and advanced settings</a><br><a href="https://kellydownloader.com/crawlers-table/"  target="_blank">List of tested sites</a> with additional auto filters. In some cases, you may need to click on <a href="https://kellydownloader.com/ru/links/loadrelated/"  target="_blank">Load related links</a> to get original size images</p>
+                        <p><video src="https://nradiowave.ru/userfiles/media/custom/recorder.mp4" preload="none" poster="https://nradiowave.ru/userfiles/media/custom/recordermp4.png" controls></video></p>
+                    </div>
+                    
+                </div>  
+                
+                <div class="default-spoiler">
+
+                    <div class="spoiler-show">
+                        <a href="https://github.com/NC22/KellyC-Image-Downloader/wiki/Install-extension-manually" target="_blank">How to install the extension manually ?</a> (actual & old versions, outside the extension store)
+                    </div>
+                </div>  
             </div>
  
                 <h2>Want to help ?</h2>
-                <p>If you find any issues with extension, you can help in fast diagnostics by creating ticket on GitHub, suggest <a href="https://kellydownloader.com/en/links/dev/" target="_blank">custom filter</a> for some additional site or suggest any other solution. Post any information, examples anywhere is also welcome (English is not my native language, so my tutorial texts can contain mistakes). If you have some texts or videos, I can share them with your copyrights on project page.
-                </p>
                 
-                <div class="additions">
+                <div>
+                    <p>This project exists thanks to your support. If you want to support me and my projects you can use BuyMeCoffee service or just share information about the project where you want</p>
+                    <a href="https://www.buymeacoffee.com/nradiowave" target="_blank" rel="noreferrer"><img src="/env/img/arial-yellow.png" alt="Buy Me A Coffee" style="width: 250px;"></a>
+                </div>
+                
+                <!--div class="additions">
                     
                     <a class="addition-item" href="https://nradiowave.ru/?kellyc=1" target="_blank">
                         
@@ -370,7 +375,7 @@
                         <div href="#" class="sticker material-image-show" style="background-image: url(https://nradiowave.ru/style/Default/img/nradiowave/icons/git.png);"></div>
                         
                     </a>       
-                </div>
+                </div-->
             
             </div>
         
@@ -388,14 +393,13 @@
             <p>Привет. Спасибо что пользуетесь <b>KellyC Image Downloader</b>. <span class="about">Это расширение разрабатывается мной в свободное время по мере возможности, потому некоторые функции могут быть полностью не протестированы или реализованы частично. Исходный код и подробное описание расширения представлено на странице на гитхабе</span> <span class="updates">Актуальные изменения:</span></p>
 
                 <ul class="updates">
-                    <li>Добавлены фильтр для сбора изображений с Reddit, Instagram (исправления), DeviantArt (исправления), 9GAG</li>
-                    <li>Оптимизирован дизайн мобильной версии</li>
-                    <li>Скорректировано сохранение оригинальных имен файлов в названии которых присутствовали некоторые спец. символы</li>
+                    <li>Скорректированы фильтры для сбора изображений с <a href="https://github.com/NC22/KellyC-Image-Downloader/issues/7" target="_blank">DeviantArt</a>, <a href="https://github.com/NC22/KellyC-Image-Downloader/issues/8" target="_blank">Joy</a>, Instagram и других отрепорченых не на гитхабе</li>
+                    <li>Добавлено отслеживание ошибок при сборе данных с доп. документов (проблемные документы отправляются в группу "Load fail (Doc)")</li>
                 </ul>
               
             
             <div class="spoilers">  
-                 <div class="updates important-spoiler default-spoiler">
+                 <!--div class="updates important-spoiler default-spoiler">
 
                     <div class="spoiler-show">
                         <a href="#">Новые требования от Google для разработчиков расширений</a>
@@ -409,30 +413,11 @@
                         
                     </div>
                     
-                </div>  
-                <div class="default-spoiler">
-
-                    <div class="spoiler-show">
-                        <a href="https://github.com/NC22/KellyC-Image-Downloader/wiki/%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-%D1%80%D0%B0%D1%81%D1%88%D0%B8%D1%80%D0%B5%D0%BD%D0%B8%D1%8F-%D0%B2%D1%80%D1%83%D1%87%D0%BD%D1%83%D1%8E" target="_blank">Как установить расширение вручную?</a> (актуальные версии, вне магазина расширений)
-                    </div>
-                </div>  
-                
-                <div class="default-spoiler">
-
-                    <div class="spoiler-show">
-                        <a href="#">Как массово скачать картинки с любого сайта через функцию записи?</a>
-                    </div>
-                    
-                    <div class="spoiler spoiler-hidden">
-                        <p><a href="https://kellydownloader.com/ru/links/recorder/" target="_blank">Подробнее о функции записи и дополнительных настройках</a><br><a href="https://kellydownloader.com/ru/crawlers-table/"  target="_blank">Список протестированных сайтов</a> на которых реализованы доп. фильтры. В некоторых случаях может потребоваться кликнуть на <a href="https://kellydownloader.com/ru/links/loadrelated/"  target="_blank">Загрузить доп. документы</a> для того чтобы получить картинки исходного размера</p>
-                        <p><video src="https://nradiowave.ru/userfiles/media/custom/recorder.mp4" preload="none" poster="https://nradiowave.ru/userfiles/media/custom/recordermp4.png" controls></video></p>
-                    </div>
-                    
-                </div>  
+                </div-->  
                 <div class="default-spoiler jr">
 
                     <div class="spoiler-show">
-                        <a href="#">Как скачать все картинки из конкретного тега или избранного на реакторе?</a>
+                        <a href="#">Как скачать все картинки из конкретного тега или избранного на <span style="color: #ff6400;font-weight: bold;">реакторе</span> ?</a>
                     </div>
                     
                     <div class="spoiler spoiler-hidden">
@@ -441,14 +426,35 @@
                     </div>
                     
                 </div> 
+                <div class="default-spoiler">
+
+                    <div class="spoiler-show">
+                        <a href="#">Как массово скачать картинки с любого сайта через функцию записи ?</a>
+                    </div>
+                    
+                    <div class="spoiler spoiler-hidden">
+                        <p><a href="https://kellydownloader.com/ru/links/recorder/" target="_blank">Подробнее о функции записи и дополнительных настройках</a><br><a href="https://kellydownloader.com/ru/crawlers-table/"  target="_blank">Список протестированных сайтов</a> на которых реализованы доп. фильтры. В некоторых случаях может потребоваться кликнуть на <a href="https://kellydownloader.com/ru/links/loadrelated/"  target="_blank">Загрузить доп. документы</a> для того чтобы получить картинки исходного размера</p>
+                        <p><video src="https://nradiowave.ru/userfiles/media/custom/recorder.mp4" preload="none" poster="https://nradiowave.ru/userfiles/media/custom/recordermp4.png" controls></video></p>
+                    </div>
+                    
+                </div>  
+                <div class="default-spoiler">
+
+                    <div class="spoiler-show">
+                        <a href="https://github.com/NC22/KellyC-Image-Downloader/wiki/%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-%D1%80%D0%B0%D1%81%D1%88%D0%B8%D1%80%D0%B5%D0%BD%D0%B8%D1%8F-%D0%B2%D1%80%D1%83%D1%87%D0%BD%D1%83%D1%8E" target="_blank">Как установить расширение вручную ?</a> (актуальные версии, вне магазина расширений)
+                    </div>
+                </div>  
+                
             </div>
  
                 <h2>Хотите помочь ?</h2>
-                <p>
-                    Если заметите какие-либо проблемы в работе расширения, то для оперативного решения проблемы Вы можете создать тикет на GitHub, предложить <a href="https://kellydownloader.com/ru/links/dev/"   target="_blank">кастомный фильтр</a> сделаный по аналогии с уже существующими под какой-то доп. сайт или предложить какое-либо другое решение. Распространение информации так же приветствуется.
-                </p>
                 
-                <div class="additions">
+                <div>
+                    <p>Проект существует благодаря вашей поддержке. Если хотите поддержать меня и мои проекты, можно использовать сервис BuyMeCoffee или просто поделится информацией о проекте где вам удобнее</p>
+                    <a href="https://www.buymeacoffee.com/nradiowave" target="_blank" rel="noreferrer"><img src="/env/img/arial-yellow.png" alt="Buy Me A Coffee" style="width: 250px;"></a>
+                </div>
+            
+                <!--div class="additions">
                     
                     <a class="addition-item" href="https://nradiowave.ru/?kellyc=1" target="_blank">
                         
@@ -466,7 +472,7 @@
                         <div href="#" class="sticker material-image-show" style="background-image: url(https://nradiowave.ru/style/Default/img/nradiowave/icons/git.png);"></div>
                         
                     </a>           
-                </div>
+                </div-->
             
             </div>
         

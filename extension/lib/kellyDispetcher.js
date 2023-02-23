@@ -3,7 +3,7 @@
 
 var KellyEDispetcher = new Object;
 
-    KellyEDispetcher.updatePageRevision = []; // versions, that related to update.html page text, if already notified on one of listed versions - skip
+    KellyEDispetcher.updatePageRevision = []; // versions, that related to update.html page text, if already notified on one of listed versions - skip | '1.2.5.0', '1.2.5.1', '1.2.5.2', '1.2.5.3'
 
     KellyEDispetcher.eventsAccepted = false;
     KellyEDispetcher.envDir = 'env/';
