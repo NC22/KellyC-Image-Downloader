@@ -95,32 +95,47 @@ KellyEDispetcherDR.addRequestListeners = function(tabData, onRegistered) {
            params.matches = '|http*';
        }
        
-       var responseHeaders = [
-            { "header" : "Access-Control-Allow-Origin", "operation" : "set", "value": "*" },  
-            
-            { "header" : "Pragma-directive", "operation" : "set", "value": "no-cache" },             
-            { "header" : "Cache-directive", "operation" : "set", "value": "no-cache" }, 
-            { "header" : "Cache-control", "operation" : "set", "value": "no-cache" }, 
-            { "header" : "Pragma", "operation" : "set", "value": "no-cache" },
-            { "header" : "Expires", "operation" : "set", "value": "0" }, 
-        ];
+       var responseHeaders, requestHeaders;
         
         if (typeof params.additionResponseHeaders != 'undefined') {
+            
+            responseHeaders = [];
+            
             for (var key in params.additionResponseHeaders) {
+                
                 responseHeaders.push({"header" : key, "operation" : "set", "value" : params.additionResponseHeaders[key]});
             }
+            
+        } else {
+            
+            responseHeaders = [
+                { "header" : "Access-Control-Allow-Origin", "operation" : "set", "value": "*" },  
+                
+                { "header" : "Pragma-directive", "operation" : "set", "value": "no-cache" },             
+                { "header" : "Cache-directive", "operation" : "set", "value": "no-cache" }, 
+                { "header" : "Cache-control", "operation" : "set", "value": "no-cache" }, 
+                { "header" : "Pragma", "operation" : "set", "value": "no-cache" },
+                { "header" : "Expires", "operation" : "set", "value": "0" }, 
+            ]
         }
         
-        var requestHeaders = [
-            { "header" : "cache-control", "operation" : "set", "value" : "no-cache, must-revalidate, post-check=0, pre-check=0" },
-            { "header" : "pragma", "operation" : "set",  "value" : 'no-cache' },
-            { "header" : "Referer", "operation" : "set", "value" : params.referrer },    
-        ];
-
         if (typeof params.additionRequestHeaders != 'undefined') {
+            
+            requestHeaders = [];
+            
             for (var key in params.additionRequestHeaders) {
+                
                 requestHeaders.push({"header" : key, "operation" : "set", "value" : params.additionRequestHeaders[key]});
             }
+            
+        } else {
+            
+            requestHeaders = [
+                { "header" : "cache-control", "operation" : "set", "value" : "no-cache, must-revalidate, post-check=0, pre-check=0" },
+                { "header" : "pragma", "operation" : "set",  "value" : 'no-cache' },
+                { "header" : "Referer", "operation" : "set", "value" : params.referrer },    
+            ];
+            
         }
         
         if (typeof params.matches == "string") {

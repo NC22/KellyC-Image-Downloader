@@ -48,7 +48,7 @@
         ]
    } ],
    "manifest_version" : 2,
-   "version": "1.2.5.2",
+   "version": "1.2.5.4",
    "name": "KellyC Image Downloader",
    "description": "__MSG_ext_description_recorder__",
    "icons": { 
@@ -70,7 +70,6 @@
     "scripts": [
         "lib/kellyTools.js", 
         "lib/kellyDispetcher.js",
-        "lib/profiles/joyreactor.unlock.d.js",
         "env/init/background.js", 
         "lib/recorder/kellyEDRecorder.js"
     ],
