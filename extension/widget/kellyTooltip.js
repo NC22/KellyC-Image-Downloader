@@ -5,7 +5,7 @@
    @description    creates tooltip elements (attaches to an element or screen) widget
    @author         Rubchuk Vladimir <torrenttvi@gmail.com>
    @license        GPLv3
-   @version        v 1.0.8 03.12.22
+   @version        v 1.0.9 26.02.2023
    
    ToDo : 
    
@@ -365,7 +365,7 @@ function KellyTooltip(cfg) {
             
         } else {
             
-            handler.displayNoneTimer = setTimeout(function() { handler.self.style.display = 'none'; }, handler.removeSelfDelay); // 
+            handler.displayNoneTimer = setTimeout(function() { if (handler.self) handler.self.style.display = 'none'; }, handler.removeSelfDelay);
             if (handler.userEvents.onClose) handler.userEvents.onClose(handler);
             
             if (handler.removeOnClose) handler.remove();

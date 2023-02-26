@@ -1582,6 +1582,13 @@ p.__BASECLASS__-options-notice {
 	height : 200px;
 }
 
+.__BASECLASS__-FavContainer td, .__BASECLASS__-FavContainer table,
+.__BASECLASS__-ModalBox-content td, .__BASECLASS__-ModalBox-content table {
+    border: 0;
+    padding: 0;
+    background: unset;
+}
+
 .__BASECLASS__-filters-AdditionButtons td {
 	text-align: center;
     width: 33%;

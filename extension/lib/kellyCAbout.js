@@ -19,10 +19,9 @@ KellyCAbout.showPage = function(cfg) {
     handler.container = document.getElementsByClassName('notice-' + handler.language)[0];
     handler.container.style.display = '';
     
-    if (mode == 'update') {        
-        handler.container.getElementsByClassName('version')[0].innerText = KellyTools.getBrowser().runtime.getManifest().version;
-    }
+    if (mode == 'update') {}
     
+    handler.container.getElementsByClassName('version')[0].innerText = KellyTools.getBrowser().runtime.getManifest().version;
     handler.bgManager = new KellyNradiowaveBg();
     handler.bgManager.init();
 }
