@@ -9,7 +9,7 @@
 <h2>Manual install</h2>
 <p><a href="https://github.com/NC22/KellyC-Image-Downloader/wiki/Install-extension-manually">How to install manualy from source code or from releases</a></p>
 <p></p>
-<b><a href="https://kellydownloader.com/">Project homepage</a> | <a href="https://twitter.com/KellyCLibs">Twitter</a></b>
+<b><a href="https://kellydownloader.com/">Project homepage</a></b>
 <p></p>
 <h2>EN | Description</h2>
 <p>A browser extension for batch downloading artworks and images from sites. It allows you to download all images on the page filtering by size or other settings.</p>
