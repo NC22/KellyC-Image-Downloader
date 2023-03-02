@@ -165,8 +165,9 @@ var KellyEDispetcher = new Object;
         }
         
         if (tabData.browser != 'firefox') { // webRequests frome extension returns tabId = -1 for firefox for content-script events
-            // todo : pay attention (limit by download items if not options page) \ send bug report
             filter.tabId = tabData.id;
+        } else {
+            if (filter.types) filter.types.push('other'); // firefox <56.x return other for xmlhttprequest
         }
         
         if (tabData.referrer || tabData.urlMap) {
@@ -180,9 +181,10 @@ var KellyEDispetcher = new Object;
                 }
                 
                 var urlData = getRulesDataForUrl(e.url);
+                var additionRequestHeaders = urlData !== false && typeof urlData[2] != 'undefined' ? urlData[2] : false;
                 var referrer = urlData !== false ? urlData[1] : tabData.referrer;
                 
-                if (referrer) {
+                if (!additionRequestHeaders && referrer) {
                     
                     KellyTools.wRequestSetHeader(e.requestHeaders, 'cache-control', 'no-cache, must-revalidate, post-check=0, pre-check=0');
                     
@@ -192,17 +194,8 @@ var KellyEDispetcher = new Object;
                     
                     KellyTools.wRequestSetHeader(e.requestHeaders, 'pragma', 'no-cache');
                     KellyTools.wRequestSetHeader(e.requestHeaders, "Referer", referrer);
-                    
-                    if (urlData !== false && typeof urlData[2] != 'undefined') {
-                        for (var key in urlData[2]) KellyTools.wRequestSetHeader(e.requestHeaders, key, urlData[2][key]);
-                    }
-                    
-                    // validate origin, set origin = referer if incorrect
-                    var origin = KellyTools.wRequestGetHeader(e.requestHeaders, 'Origin');
-                    if (origin && origin.indexOf('http') == -1) {
-                        KellyTools.wRequestSetHeader(e.requestHeaders, "Origin", referrer);
-                    }
-                    
+                } else if (additionRequestHeaders) {
+                    for (var key in additionRequestHeaders) KellyTools.wRequestSetHeader(e.requestHeaders, key, additionRequestHeaders[key]);
                 }
                 
                 KellyTools.log(e.url + ' | ' + referrer + ' [Modify REQUEST HEADERS]');                
@@ -218,6 +211,9 @@ var KellyEDispetcher = new Object;
                        KellyTools.log('[SKIP RESPONSE] ' + validatorResult  + ' | ' + e.url);
                        return;
                    }
+                   
+                   var urlData = getRulesDataForUrl(e.url); // addition headers from url map
+                   var additionResponseHeaders = urlData !== false && typeof urlData[3] != 'undefined' ? urlData[3] : false;
                    
                    if (e.statusCode == 200) KellyTools.wRequestSetHeader(e.responseHeaders, 'expires', 'Tue, 01 Jan 1980 1:00:00 GMT');
                        
@@ -238,11 +234,10 @@ var KellyEDispetcher = new Object;
                    
                    // prevent CORS limitations 
                    
-                   KellyTools.wRequestSetHeader(e.responseHeaders, "Access-Control-Allow-Origin",  "*" );  
-                   
-                   var urlData = getRulesDataForUrl(e.url); // addition headers from url map
-                   if (urlData !== false && typeof urlData[3] != 'undefined') {
-                        for (var key in urlData[3]) KellyTools.wRequestSetHeader(e.responseHeaders, key, urlData[3][key]);  
+                   if (!additionResponseHeaders) {
+                        KellyTools.wRequestSetHeader(e.responseHeaders, "Access-Control-Allow-Origin",  "*" );  
+                   } else {
+                        for (var key in additionResponseHeaders) KellyTools.wRequestSetHeader(e.responseHeaders, key, additionResponseHeaders[key]);  
                    }
                    
                    KellyTools.log(e.url + ' [Modify RECEIVED HEADERS][Allow access][Status code : ' + e.statusCode + ']');    
