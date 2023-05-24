@@ -32,6 +32,19 @@ button:hover {
     color: #bfbfbf;
 }
 
+.__BASECLASS__-dark.__BASECLASS__-with-extra .__BASECLASS__-button-download_tab_extra {
+    border-right: 2px solid;
+}
+
+.__BASECLASS__-dark .__BASECLASS__-button-download_right {
+    border-left: 2px solid;
+}
+
+.__BASECLASS__-dark.__BASECLASS__-with-extra .__BASECLASS__-button-download_tab_extra, 
+.__BASECLASS__-dark .__BASECLASS__-button-download_right  {
+    border-color : #363838;
+}
+
 .popup-page-button-download_recorded {
     background: #e63d3d;
 }

@@ -1,6 +1,18 @@
 KellyRecorderFilterPikabu = new Object();
 KellyRecorderFilterPikabu.manifest = {host : 'pikabu.ru', detectionLvl : ['imageOriginal', 'imagePreview']};
 
+KellyRecorderFilterDA.addItemByDriver = function(handler, data) {
+
+    if (handler.url.indexOf('pikabu.ru') == -1) return;
+    
+    if (data.el.tagName == 'SOURCE' && data.el.getAttribute('type') == 'video/mp4' && data.el.src.indexOf('.mp4') != -1) {
+        
+        handler.addSingleSrc(data.item, data.el.src, 'srcVideo', data.el, ['pikabu_post_video']);
+        if (data.item.relatedSrc.length <= 0) return handler.addDriverAction.SKIP;
+        return handler.addDriverAction.ADD;
+    }
+}
+
 KellyRecorderFilterPikabu.validateByDriver = function(handler, data) {
     if (handler.url.indexOf('pikabu.ru') == -1 || data.item.relatedSrc.length <= 0 || !data.item.relatedDoc || !data.item.relatedGroups) return;
     
@@ -33,6 +45,7 @@ KellyRecorderFilterPikabu.onStartRecord = function(handler, data) {
      handler.additionCats = {
         pikabu_comment : {name : 'Comment', color : '#b7dd99'},
         pikabu_post : {name : 'Post', color : '#b7dd99'},
+        pikabu_post_video : {name : 'Post Video', color : '#218bea'},
      };
      KellyRecorderFilterPikabu.dirName = false; 
      KellyRecorderFilterPikabu.addCategory(KellyRecorderFilterPikabu, handler, document.querySelector('.saved-stories__category.button_success'));         

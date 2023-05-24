@@ -1007,6 +1007,15 @@
     "thread_imgLoaderTimeout":{  
         "message":"Timeout for long requests (sec.)"
     }, 
+    "recorder_popup_left":{  
+        "message":"left"
+    }, 
+    "recorder_popup_right":{  
+        "message":"right"
+    },    
+    "recorder_popup_all":{  
+        "message":"all tabs"
+    }, 
     "recorder_request_settings":{  
         "message":"Requests addition doc. settings"
     }, 

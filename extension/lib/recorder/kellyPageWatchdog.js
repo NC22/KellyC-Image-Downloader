@@ -527,6 +527,35 @@ function KellyPageWatchdog(cfg)
             
             if (callback) callback(response); 			
             
+        } else if (request.method == "startTabRecordPacketMode") {       
+            
+            resetPool();  
+            resetConfig();          
+            handler.filterCallback('onStartRecord', 'startRecord');
+            
+            handler.parseImages(); 
+            
+            KellyTools.getBrowser().runtime.sendMessage({
+                method: "addRecord", 
+                images : handler.imagesPool,
+                cats : handler.additionCats, 
+                url : handler.url, 
+                allowDuplicates : handler.allowDuplicates,
+                host : handler.host,
+            }, function(bgResponse) {
+            
+                response.isRecorded = true;
+                response.imagesNum = bgResponse ? bgResponse.imagesNum : 0;
+                
+                if (callback) {
+                    callback(response); 
+                }
+            });   
+            
+            resetPool();  
+            
+            return true;
+            
         } else if (request.method == "stopTabRecord") {
             
             if (handler.observer) handler.observer.disconnect();

@@ -1016,6 +1016,15 @@
     "thread_imgLoaderTimeout":{  
         "message":"Таймаут при длительном ожидании ответа (сек.)"
     },
+    "recorder_popup_left":{  
+        "message":"слева"
+    }, 
+    "recorder_popup_right":{  
+        "message":"справа"
+    },    
+    "recorder_popup_all":{  
+        "message":"все вкладки"
+    }, 
     "recorder_request_settings":{  
         "message":"Параметры запросов доп. документов"
     },    

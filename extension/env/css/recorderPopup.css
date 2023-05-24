@@ -33,23 +33,23 @@ button:hover {
     background-color: #b7b7b7;
 }
 
-.popup-page-button-support_project:hover {
+.__BASECLASS__-button-support_project:hover {
     background-color : #56afdf;
 }
 
-.popup-page-button-support_project {
+.__BASECLASS__-button-support_project {
     background-color: #3cc0ff;
     color: #fff;
     border-color: #717171;
 }   
 
-button span.popup-page-icon {
+button span.__BASECLASS__-icon {
     display: inline-block;
     vertical-align: middle;
     margin : 0;
 }
 
-button span.popup-page-icon-cup {
+button span.__BASECLASS__-icon-cup {
     background-image: url(../../env/img/cup.png);
     background-size: 28px;
     width: 28px;
@@ -58,12 +58,12 @@ button span.popup-page-icon-cup {
     background-position: center;
 }
 
-button span.popup-page-text {
+button span.__BASECLASS__-text {
     vertical-align: middle;
     margin-left: 4px;
 }
     
-.popup-page-recorded-block {
+.__BASECLASS__-recorded-block {
     width: 100%;
     padding: 6px;
     color: #000000;
@@ -76,18 +76,57 @@ button span.popup-page-text {
     color: #ff1515;
 }
 
-.popup-page-button-download_recorded {
+.__BASECLASS__-with-extra .__BASECLASS__-button-download_current_tab {
+    width : 80%;  
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+}
+
+.__BASECLASS__-with-extra .__BASECLASS__-button-download_tab_extra {
+    width : 20%;
+    float : left; 
+    border-right: 0px;
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.__BASECLASS__-button-download_right {
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+    border-left: 0px;
+}
+
+.__BASECLASS__-button-download_left {
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.__BASECLASS__-button-download_right, .__BASECLASS__-button-download_left {
+    width: 50%;
+}
+
+.__BASECLASS__-recording button {
+    opacity : 0.1;
+    pointer-events: none;
+}
+
+.__BASECLASS__-recording button.__BASECLASS__-button-download_record {
+    opacity : 1;
+    pointer-events: unset;
+}
+
+.__BASECLASS__-button-download_recorded {
     background: #4bb9ff;
     border-color: #4b8db7;
     color: #fff;
-    margin-bottom: 10px;
+    margin-bottom: 3px;
 }
 
-.popup-page-button-download_recorded:hover {
+.__BASECLASS__-button-download_recorded:hover {
     background: #70bff2;
 }
 
-.popup-page-button-download_record span:before {
+.__BASECLASS__-button-download_record span:before {
     display: inline-block;
     content: " ";
     width: 12px;
