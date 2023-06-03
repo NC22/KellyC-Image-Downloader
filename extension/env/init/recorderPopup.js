@@ -6,7 +6,7 @@ KellyPopupPage.recordingState = 'loading'; // loading (init), stopping (stopReco
 KellyPopupPage.recordingNum = false;
 KellyPopupPage.recordingInfoEls = false;
 
-KellyTools.DEBUG = true;
+KellyTools.DEBUG = false;
 
 KellyPopupPage.getTabs = function(direction, onLoad) {
     

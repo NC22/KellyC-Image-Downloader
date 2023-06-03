@@ -3815,7 +3815,7 @@ function KellyFavItems(cfg)
                         continue;
                     }
                     
-                    KellyTools.setHTMLData(pageInfo.censoredPosts[blockPostId].post, env.unlockManager.getTpl('post', {PICS : env.unlockManager.getPublicationAttributesHtml(blockPostData.attributes, false, false, urlPrefix)}));    
+                    KellyTools.setHTMLData(pageInfo.censoredPosts[blockPostId].post, env.unlockManager.getTpl('post', {PICS : env.unlockManager.getPublicationAttributesHtml(false, urlPrefix, blockPostData)}));    
                     
                     // update db item by index
                     handler.getStorageManager().createDbItem({ 
@@ -4102,7 +4102,7 @@ function KellyFavItems(cfg)
             
             // favNativeParser.unlockFailCat = handler.getStorageManager().categoryCreate({name : 'Unlock Fail'}, favNativeParser.collectedData);
             favNativeParser.stopUnlockRequests = function() {
-                for (var i = 0; i < favNativeParser.unlockRequests.length; i++) favNativeParser.unlockRequests[i].abort();        
+                for (var i = 0; i < favNativeParser.unlockRequests.length; i++) if (favNativeParser.unlockRequests[i] && favNativeParser.unlockRequests[i].abort) favNativeParser.unlockRequests[i].abort();        
             }
             
             favNativeParser.removeUnlockRequest = function(request) {
