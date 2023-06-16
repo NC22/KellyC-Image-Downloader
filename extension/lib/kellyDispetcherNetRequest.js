@@ -90,6 +90,8 @@ KellyEDispetcherDR.addRequestListeners = function(tabData, onRegistered) {
        
        var priority = 2;
        
+       // match any url - used in downloader to prevent 301 redirects go without referer from extension page
+       
        if (typeof params.matches == "string" && params.matches == 'ANY') {
            priority = 1;
            params.matches = '|http*';

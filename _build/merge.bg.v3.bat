@@ -26,4 +26,4 @@ for %%x in (
     @echo.>> %background% 
     
 popd
-pause
+::pause

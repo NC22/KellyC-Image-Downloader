@@ -60,9 +60,9 @@ var KellyEDRecorder = new Object;
         
         var response = data.response; // default response array {senderId : 'dispetcher', error : '', method : request.method,}
         var request = data.request;
-        var callback = function () {
+        var callback = function (cacheUpdate) {
            
-           if (KellyEDRecorder.cacheEnabled) KellyEDRecorder.saveState(); 
+           if (cacheUpdate && KellyEDRecorder.cacheEnabled) KellyEDRecorder.saveState(); 
            if (data.callback) data.callback(response);
            
            return true;
@@ -140,8 +140,9 @@ var KellyEDRecorder = new Object;
                 }  
             }
             
+            // todo - skip save state for zero
             response.imagesNum = KellyEDRecorder.recorder.images.length;
-            return callback();
+            return callback(true);
             
         } else if (request.method == 'getRecord') {
             
@@ -163,7 +164,7 @@ var KellyEDRecorder = new Object;
             KellyEDRecorder.recorder = KellyEDRecorder.getDefaultRecorder();            
             KellyEDRecorder.recorder.record = true;
             
-            return callback();
+            return callback(true);
             
         }  else if (request.method == 'stopRecord') {
             
@@ -173,7 +174,7 @@ var KellyEDRecorder = new Object;
             response.imagesNum = KellyEDRecorder.recorder.images.length;
             KellyEDRecorder.recorder.record = false;
             
-            return callback();
+            return callback(true);
             
         } else if (request.method == 'isRecorded') {
             

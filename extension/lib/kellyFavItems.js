@@ -1017,7 +1017,8 @@ function KellyFavItems(cfg)
         var menuButtonA = KellyTools.getElementByTag(menuButtonContainer, 'a');
             menuButtonA.onclick = onclick;
             
-        submenu.appendChild(menuButtonContainer);                   
+            submenu.appendChild(menuButtonContainer); 
+        
         if (env.events.onCreateMenuItem) menuButtonContainer = env.events.onCreateMenuItem(submenu, menuButtonContainer, menuButtonA); 
        
         return menuButtonContainer;
@@ -1025,8 +1026,8 @@ function KellyFavItems(cfg)
     
     // alias 
     
-    this.addMenuButton = function(name, onclick, index) {
-        return createMainMenuButton(name, onclick, index);
+    this.addMenuButton = function(name, onclick, index, toBegin) {
+        return createMainMenuButton(name, onclick, index, toBegin);
     }
     
     this.defaultNavigation = function() {

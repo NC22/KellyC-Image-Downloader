@@ -1505,14 +1505,15 @@ KellyTools.showPagination = function(params) {
         
     for (var pageNum = pageStart; pageNum <= pageEnd; pageNum++) {
         
+        var reversedNum = totalPages - pageNum + 1;
         var pageEl = document.createElement('a');
             pageEl.href = '#';
-            pageEl.innerText = pageNum;
+            pageEl.innerText = params.reversNames ? reversedNum : pageNum;
             pageEl.className = params.classPrefix + '-item';
             
-            if (pageNum >= 100) pageEl.className += ' ' + params.classPrefix + '-item-100';
+            if ((params.reversNames && reversedNum >= 100) || pageNum >= 100) pageEl.className += ' ' + params.classPrefix + '-item-100';
 
-            pageEl.setAttribute('pageNum', pageNum);
+            pageEl.setAttribute('pageNum', params.reversNum ? reversedNum : pageNum);
              
         if (page == pageNum) {
             pageEl.className += ' active';

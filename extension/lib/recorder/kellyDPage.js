@@ -303,7 +303,7 @@ KellyDPage.updateUrlMap = function(onReady, restart) {
         hostList : KellyDPage.env.hostList,
         types : false,
         method : 'registerDownloader',
-        unlistedReferer : KellyDPage.defaultPageParser.host, // referer for unexpected requests - manifest v3 cant dinamicly add new urls on redirects, so this can be usefull if site return 301
+        unlistedReferer : KellyDPage.defaultPageParser.host, // DEFAULT referer for unlisted \ unexpected requests dont with 301 redirect - manifest v3 cant dinamicly add new urls on redirects, so this can be usefull if site return 301
         browser : KellyTools.getBrowserName(),
     };
     

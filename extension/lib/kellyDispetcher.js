@@ -247,6 +247,7 @@ var KellyEDispetcher = new Object;
             KellyTools.wRequestAddListener('onHeadersReceived', tabData.onHeadersReceived, filter, ['responseHeaders', 'blocking'], true);              
         }
         
+        KellyTools.log("[WEBREQUEST EVENT REGISTERED] :");
         KellyTools.log(filter);
     }
     
