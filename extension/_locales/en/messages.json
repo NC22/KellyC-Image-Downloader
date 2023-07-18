@@ -755,6 +755,9 @@
     "unlock_censored_auth":{  
         "message":"Enable posting, vote"
     },     
+    "unlock_censored_showtv_routing":{  
+        "message":"Detect \"censorship\" blocked tags while browsing and unlock them automaticly"
+    },
     "unlock_censored_showtv_any":{  
         "message":"Show tag viewer on any tag by right click"
     },
