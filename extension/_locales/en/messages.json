@@ -218,9 +218,6 @@
     "download_preview":{  
         "message":"Download preview"
     },
-    "download_example":{  
-        "message":"Please enter pages, that need to be downloaded (ex. 2, 4, 66-99, 44, 78, 8-9, 29-77 etc."
-    },
     "download_log":{  
         "message":"Log"
     },
@@ -235,9 +232,6 @@
     },
     "download_start":{  
         "message":"Run import"
-    },
-    "download_tip":{  
-        "message":"If you want download all pages, just keep field empty"
     },
     "download_form_open":{  
         "message":"Create data profile"
@@ -275,9 +269,6 @@
     "download_pages_autosave" : {
         "message":"Save to separate file after set number of pages"
     },
-    "download_save_notice":{  
-        "message":"Saved profile can be added to extension throw menu (Options -> Profiles -> Add new profile)"
-    },   
     "download_limitpages":{  
         "message":"Extension tested with only max. 1200 pages. Please enable <b>Save to separate file</b> feature<br> if you have some problems during parsing data"
     },    

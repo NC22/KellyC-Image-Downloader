@@ -1,67 +1,75 @@
-<input type="submit" value="@download_form_open@" class="__CLASSNAME__-exporter-form-show __CLASSNAME__-toogle-filter" data-target="__CLASSNAME__-exporter-container">
+<input type="submit" value="Скачать посты" class="__CLASSNAME__-exporter-form-show __CLASSNAME__-toogle-filter" data-target="__CLASSNAME__-exporter-container">
 
 <div class="__CLASSNAME__-exporter-container __CLASSNAME__-hidden">
-
-     @pages_n@ <input class="__CLASSNAME__-PagesN" type="text" placeholder="@pages_n@" value="__PAGES__">
      
-     <br>@download_example@
-     <br>@download_tip@
-     <br>
-     
+     Страницы : (если нужно скачать все страницы, оставьте не заполненным) 
      <input class="__CLASSNAME__-PageArray" type="text" placeholder="@pages@" value="">
      
-    <label>
-        <input type="checkbox" class="__CLASSNAME__-exporter-autosave-show"> @download_pages_autosave@
-    </label>
-    
-    <div class="__CLASSNAME__-exporter-autosave-container">
-        <input class="__CLASSNAME__-PageAutosave" type="text" placeholder="" value="__PAGES_AUTO__">
-    </div>
-    
-    <label>
-    
-        <input type="checkbox" class="__CLASSNAME__-exporter-skip-empty" [__SKIP_EMPTY__checked]>@download_skip_empty@
-    </label>
-    
-    <label>
-        <input type="checkbox" class="__CLASSNAME__-exporter-tag-filter-show __CLASSNAME__-toogle-filter" data-target="__CLASSNAME__-exporter-tag-filter-container">@download_tag_filter_show@
-    </label>
-    
-    <div class="__CLASSNAME__-exporter-tag-filter-container __CLASSNAME__-hidden">
-        @download_tag_filter_1@<br>
-        @download_tag_filter_empty@</br>
-        <textarea class="__CLASSNAME__-exporter-tag-filter" placeholder="@download_tag_filter@">__TAGLIST_FILTER__</textarea>
-    </div>  
-    
-    <label>
-        <input type="checkbox" class="__CLASSNAME__-exporter-create-by-tag-show __CLASSNAME__-toogle-filter" data-target="__CLASSNAME__-exporter-create-by-tag-container">@download_createc_by_tag@
-    </label>
-    
-    <div class="__CLASSNAME__-exporter-create-by-tag-container __CLASSNAME__-hidden">
-        @download_createc_1@</br>
-        <textarea class="__CLASSNAME__-exporter-create-by-tag" placeholder="@download_createc_by_tag@">__TAGLIST_CREATE__</textarea>
-    </div>
-    
+     [__RATING_FILTER__Мин. рейтинг постов :
+     <input class="__CLASSNAME__-MinRating" type="text" placeholder="Минимальный рейтинг" value="__RATING__">]
+     
+     <div class="__CLASSNAME__-exporter-save-result"></div>
+     <div class="__CLASSNAME__-exporter-process"></div>
+     
     <div class="__CLASSNAME__-Save" style="display : none;">
     
-        <p>@download_save_notice@</p>
-        
         <a href="#" class="__CLASSNAME__-exporter-button-addtoprofile __CLASSNAME__-buttoncolor-dynamic" >@storage_parser_save_to_profile@</a>
         <a href="#" class="__CLASSNAME__-exporter-button-save" >@download_save@</a>
     </div>
     
-    <div class="__CLASSNAME__-exporter-save-result"></div>
+    
     
     <div class="__CLASSNAME__-exporter-buttons">
         <a href="#" class="__CLASSNAME__-exporter-button-start">@download_start@</a>
         <a href="#" class="__CLASSNAME__-exporter-log-show" style="display : none;">@download_log@</a>
-        [__EXTRA__<a href="#" class="__CLASSNAME__-tech-options-show __CLASSNAME__-toogle-filter" data-target="__CLASSNAME__-tech-options">@options_extra@</a>]
+        <a href="#" class="__CLASSNAME__-mainoptions-show __CLASSNAME__-toogle-filter" data-target="__CLASSNAME__-base-options">Доп. настройки</a>
+        [__EXTRA__<a href="#" class="__CLASSNAME__-tech-options-show __CLASSNAME__-toogle-filter" data-target="__CLASSNAME__-tech-options">Скрытые настройки</a>]
+        <a href="https://nradiowave.ru/userfiles/media/custom/man1.png" target="_blank" style="float : right;">Как пользоватся?</a>
+        <div style="clear : both"></div>
      </div>
      
-    <div class="__CLASSNAME__-tech-options __CLASSNAME__-hidden"><table><tbody>__EXTRA_OPTIONS__</tbody></table></div>
-    <div class="__CLASSNAME__-exporter-process"></div>
-    
+        
     <div class="__CLASSNAME__-exporter-log-container" style="display : none;">
         <div class="__CLASSNAME__-exporter-log"></div>
     </div>
+    
+    <div class="__CLASSNAME__-base-options __CLASSNAME__-hidden">
+        
+        @pages_n@ <input class="__CLASSNAME__-PagesN" type="text" placeholder="@pages_n@" value="__PAGES__">
+     
+        <label>
+            <input type="checkbox" class="__CLASSNAME__-exporter-autosave-show"> @download_pages_autosave@
+        </label>
+        
+        <div class="__CLASSNAME__-exporter-autosave-container">
+            <input class="__CLASSNAME__-PageAutosave" type="text" placeholder="" value="__PAGES_AUTO__">
+        </div>
+        
+       <label>        
+            <input type="checkbox" class="__CLASSNAME__-exporter-skip-empty" [__SKIP_EMPTY__checked]>@download_skip_empty@
+        </label>
+        
+        <label>
+            <input type="checkbox" class="__CLASSNAME__-exporter-tag-filter-show __CLASSNAME__-toogle-filter" data-target="__CLASSNAME__-exporter-tag-filter-container">@download_tag_filter_show@
+        </label>
+        
+        <div class="__CLASSNAME__-exporter-tag-filter-container __CLASSNAME__-hidden">
+            @download_tag_filter_1@<br>
+            @download_tag_filter_empty@</br>
+            <textarea class="__CLASSNAME__-exporter-tag-filter" placeholder="@download_tag_filter@">__TAGLIST_FILTER__</textarea>
+        </div>  
+        
+        <label>
+            <input type="checkbox" class="__CLASSNAME__-exporter-create-by-tag-show __CLASSNAME__-toogle-filter" data-target="__CLASSNAME__-exporter-create-by-tag-container">@download_createc_by_tag@
+        </label>
+        
+        <div class="__CLASSNAME__-exporter-create-by-tag-container __CLASSNAME__-hidden">
+            @download_createc_1@</br>
+            <textarea class="__CLASSNAME__-exporter-create-by-tag" placeholder="@download_createc_by_tag@">__TAGLIST_CREATE__</textarea>
+        </div>
+        
+    </div>
+    
+    <div class="__CLASSNAME__-tech-options __CLASSNAME__-hidden"><table><tbody>__EXTRA_OPTIONS__</tbody></table></div>
+    
 </div>    

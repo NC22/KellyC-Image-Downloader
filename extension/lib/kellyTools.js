@@ -179,9 +179,11 @@ KellyTools.getTpl = function(tplPool, tplName, data, noLoc) {
     return html;
 }
 
-// added formData support at cfg.formData for POST requests
+// added formData \ json support at cfg.formData or cfg.body for POST requests
+
 // var formData = new FormData();
 //     formData.append("test-post", 'test');
+
 // KellyTools.xmlRequest(postForm.action, {method : 'POST', responseType : 'json', formData : new FormData(postForm)}, function(url, response, errorStatus, errorText) {})
 
 KellyTools.xmlRequest = function(urlOrig, cfg, callback) {
@@ -216,7 +218,7 @@ KellyTools.xmlRequest = function(urlOrig, cfg, callback) {
         xhr.open(cfg.method ? cfg.method : 'GET', urlOrig, true);        
         xhr.responseType = cfg.responseType ? cfg.responseType : 'blob';
         
-        // todo dynamic list of x-headers
+        // todo dynamic list of x-headers, make compatible with fetchrequest config
         if (cfg.xRequestedWith) xhr.setRequestHeader('x-requested-with', cfg.xRequestedWith);
         if (cfg.xHeaders) {
             for (var k in cfg.xHeaders){
@@ -226,12 +228,15 @@ KellyTools.xmlRequest = function(urlOrig, cfg, callback) {
         
         if (cfg.contentType) xhr.setRequestHeader('Content-Type', cfg.contentType);
         
-        if (cfg.formData) xhr.send(cfg.formData) 
+             if (cfg.formData) xhr.send(cfg.formData);
+        else if (cfg.body) xhr.send(cfg.body);
         else xhr.send();  
         
         controller.abortController = xhr;
         return controller;
-}            
+}      
+
+// modern method. cfg has back compatibility with contentType \ formData xml options      
 
 KellyTools.fetchRequest = function(urlOrig, cfg, callback) {
       
@@ -265,13 +270,23 @@ KellyTools.fetchRequest = function(urlOrig, cfg, callback) {
         if (cfg) {
             for (var k in cfg) {
                 
-                if (k == 'formData') {
+                     if (k == 'formData') {
+                         
                     fetchRequest.cfg['body'] = cfg[k];
+                    
+                } else if (k == 'contentType') {
+                    
+                    if (typeof fetchRequest.cfg.headers == 'undefined') {
+                        fetchRequest.cfg.headers = {};
+                    }
+                    
+                    fetchRequest.cfg.headers['Content-Type'] = cfg[k];
+                    
                 } else {
                     fetchRequest.cfg[k] = cfg[k];
                 }
             }
-        }
+        }                
         
         fetchRequest.cfg.signal = fetchRequest.abortController.signal;      
         fetchRequest.id = 'fetch_' + KellyTools.tId;
@@ -1150,6 +1165,24 @@ KellyTools.log = function(info, module, errorLevel) {
     if (errorLevel >= KellyTools.E_ERROR && console.trace) {        
         console.trace();
     }
+}
+
+KellyTools.searchPoolString = function(s1, spool) {
+               
+    if (!s1) s1 = '';
+    if (!spool) spool = [''];
+    
+    s1 = KellyTools.val(s1, 'string').toLowerCase().trim().normalize();
+            
+    for (var i = 0; i < spool.length; i++) {
+        
+        var tname = KellyTools.val(spool[i], 'string').toLowerCase().trim().normalize();
+        if (tname === s1) {
+            return i;
+        }
+    }
+ 
+    return -1;
 }
 
 // 01:12

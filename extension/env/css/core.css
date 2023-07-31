@@ -1501,6 +1501,17 @@ p.__BASECLASS__-options-notice {
 	font-weight : bold;
 }
 
+.__BASECLASS__-exporter-process {
+    margin-top: 24px;
+}
+
+.__BASECLASS__-exporter-container input[type="text"] {
+    width: 100%;
+    height: 28px;
+    padding-left: 6px;
+}
+
+    
 .__BASECLASS__-exporter-buttons {
     margin-top : 16px;
 }

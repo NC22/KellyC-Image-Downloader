@@ -3512,6 +3512,7 @@ function KellyFavItems(cfg)
     this.onDownloadNativeFavPagesEnd = function(stage, canceled) {
         
         log(stage);
+        handler.dataFilterLock = false;
         
         // we can safely close window only on autosave data. keep prevent close true in other case 
         
@@ -3530,7 +3531,7 @@ function KellyFavItems(cfg)
         
         log('onDownloadNativeFavPagesEnd : ' + (canceled ? ' canceled' : 'job finished successfull'));
             
-        if (!favNativeParser || !favNativeParser.collectedData.items.length) {
+        if (!favNativeParser || !favNativeParser.collectedData.items.length) { // check what if autosave
             
             if (notice) {
                 notice.innerText = canceled ? lng.s('', 'download_empty') : '';            
@@ -3538,7 +3539,7 @@ function KellyFavItems(cfg)
             
             return false;
         }
-                
+           
         // notify about profile data was download automaticly
         
         if (!canceled &&
@@ -3551,10 +3552,12 @@ function KellyFavItems(cfg)
             
             saveNoticeHtml += '<br><b>' + lng.s('', 'download_autosaved_ok') + '</b>';    
                     
-            setPreventClose(false);
+            setPreventClose(false);            
             
         } else {
-            
+                 
+            notice.innerText = 'Сохраните найденные изображения (найдено : ' + favNativeParser.collectedData.items.length + ')';
+        
             KellyTools.getElementByClass(document, env.className + '-Save').style.display = 'block';
             
             if (favNativeParser.jobAutosave && favNativeParser.jobSaved && favNativeParser.jobBeforeAutosave) {
@@ -3589,8 +3592,9 @@ function KellyFavItems(cfg)
         
         var error = '';
         
-        KellyTools.getElementByClass(document, env.className + '-exporter-process').innerText = lng.s('Страниц в очереди __PAGESN__', 'download_pages_left', {PAGESN : jobsLength});
-     
+        // todo KellyFastSave can be used for instant download
+        
+        KellyTools.setHTMLData(KellyTools.getElementByClass(document, env.className + '-exporter-process'), lng.s('Страниц в очереди __PAGESN__', 'download_pages_left', {PAGESN : jobsLength}));
         if (!thread.response) {
         
             error = 'Страница не доступна ' + thread.job.data.page + ' (ошибка загрузки или превышен интервал ожидания)'; // window.document null  
@@ -3601,18 +3605,61 @@ function KellyFavItems(cfg)
             favNativeParser.addJob(
                 thread.job.url, 
                 handler.onDownloadNativeFavPage, 
-                {page : thread.job.data.page}
+                thread.job.data,
+                thread.job.config
             );
             
         } else {
-        
             
-            var loadDoc = KellyTools.val(KellyTools.validateHtmlDoc(thread.response), 'html');                
+            var loadDoc = false;
+            var htmlDoc = '';
+            
+            if (thread.job.data.api) {
+                
+                if (!thread.response || !thread.response.data || !thread.response.data['tagData1']) {  
+                
+                    error += ' [Отсутствуют данные из API для страницы ' + thread.job.data.page + '] ';
+                    
+                    
+                } else {                
+                
+                    htmlDoc = '<body>' + env.unlockManager.tagViewer.getPostsHtml(thread.response.data['tagData1'].postPager.posts) + '</body>';
+                    loadDoc = KellyTools.val(htmlDoc, 'html');  
+                    
+                     for (var i = 0; i < thread.response.data['tagData1'].postPager.posts.length; i++) {
+                         
+                         var postMediaData = thread.response.data['tagData1'].postPager.posts[i];
+                         
+                         if (fav.coptions.downloader.minRating !== false && postMediaData.rating < fav.coptions.downloader.minRating) {
+                            favNativeParser.addToLog('Пропущена публикация ' + env.unlockManager.getNodeId(postMediaData.id) + ' (рейтинг ' + postMediaData.rating + ')');
+                            continue;
+                         }
+                         
+                         var postBlock = loadDoc.querySelector('#postContainer' + env.unlockManager.getNodeId(postMediaData.id));
+                         var cImageItem = postBlock.getElementsByTagName('img')[0]; 
+                         var mediaBlock = document.createElement('DIV');
+                         
+                        cImageItem.parentNode.insertBefore(mediaBlock, cImageItem);
+                        cImageItem.parentElement.removeChild(cImageItem);
+                        
+                        KellyTools.setHTMLData(mediaBlock, env.unlockManager.getTpl('post', {PICS : env.unlockManager.getPublicationAttributesHtml(false, false, postMediaData), COUNT : postMediaData.attributes.length})); 
+                        
+                     }
+                }
+                     
+            } else {
+                
+                htmlDoc = KellyTools.validateHtmlDoc(thread.response); 
+                loadDoc = KellyTools.val(htmlDoc, 'html');              
+            }
+            
             var posts = env.getPosts(loadDoc);
             if (posts.length <= 0) {
             
-                error = 'Отсутствуют публикации для страницы ' + thread.job.data.page;
+                error += 'Отсутствуют публикации для страницы ' + thread.job.data.page;
+                
             } else {  
+            
                 favNativeParser.addToLog('---');
                 favNativeParser.addToLog('Страница : ' + thread.job.data.page + ' найдено ' + posts.length + ' постов');
             }
@@ -3636,19 +3683,19 @@ function KellyFavItems(cfg)
         
             selectedComment = false;
             selectedPost = posts[i];
-            var lastCensoredPostId = false;
+            var lastCensoredPostId = false, postId = selectedPost.id.match(/[0-9]+/g);
+            
+            if (postId && postId.length <= 0) {
+                log('onDownloadNativeFavPage : skip item without id');
+                log(selectedPost);
+                continue;
+            }
             
             handler.setSelectionInfo(false);
             
             selectedImages = env.getAllMedia(posts[i]);
             if (!selectedImages.length && favNativeParser.unlockRequests !== false && env.unlockManager.isCensored(selectedPost) === true) {
-                var postId = selectedPost.id.match(/[0-9]+/g);
-                if (postId.length <= 0) {
-                    log('onDownloadNativeFavPage : skip item without id');
-                    log(selectedPost);
-                    continue;
-                }
-                
+                 
                 favNativeParser.pageInfo.censoredNum++;
                 selectedImages = ['censored:' + postId[0]]; // temp placeholder
                 lastCensoredPostId = postId[0];
@@ -3666,7 +3713,7 @@ function KellyFavItems(cfg)
             }
             
             worker.collectedData.selected_cats_ids = [];
-            
+
             var sm = handler.getStorageManager();
                 sm.selectAutoCategories(worker.collectedData, false, selectedImages);
                         
@@ -3674,18 +3721,20 @@ function KellyFavItems(cfg)
             
                 for(var b = 0; b < worker.catByTagList.length; b++) {
                 
-                    if (postTags.indexOf(worker.catByTagList[b]) != -1) {
+                    if (KellyTools.searchPoolString(worker.catByTagList[b], postTags) != -1) {
                 
                         var itemCatId = sm.getCategoryBy(worker.collectedData, worker.catByTagList[b], 'name');
                             itemCatId = itemCatId.id;
                             
                         if (itemCatId == -1) {
-                            itemCatId = handler.getStorageManager().categoryCreate({name : worker.catByTagList[b], nsfw : false}, worker.collectedData);                                
+                            itemCatId = handler.getStorageManager().categoryCreate({name : worker.catByTagList[b], nsfw : false}, worker.collectedData);   
+                            favNativeParser.addToLog('[Автосоздание категорий] пост : ' + postId + ' Добавлена категория : ' + worker.catByTagList[b]);                             
                         }
                         
                         if (itemCatId > 0 && worker.collectedData.selected_cats_ids.indexOf(itemCatId) == -1) {                                
                             worker.collectedData.selected_cats_ids.push(itemCatId);
                         }
+                        
                     }
                 }
             }
@@ -3703,8 +3752,9 @@ function KellyFavItems(cfg)
                 if (worker.tagList.exclude && worker.tagList.exclude.length > 0) {
                 
                     for(var b = 0; b < worker.tagList.exclude.length; b++) {
-                        if (postTags.indexOf(worker.tagList.exclude[b]) != -1) {
+                        if (KellyTools.searchPoolString(worker.tagList.exclude[b], postTags) != -1) {
                             postOk = false;
+                            favNativeParser.addToLog('[Фильтр по тегу] Иключен пост : ' + postId + ' по тегу : ' + worker.tagList.exclude[b]);
                             break;
                         }
                     }
@@ -3720,20 +3770,9 @@ function KellyFavItems(cfg)
                     
                     for(var b = 0; b < worker.tagList.include.length; b++) {
                     
-                        if (postTags.indexOf(worker.tagList.include[b]) != -1) {
+                        if (KellyTools.searchPoolString(worker.tagList.include[b], postTags) != -1) {
                             postOk = true;
-                            
-                            var itemCatId = handler.getStorageManager().getCategoryBy(worker.collectedData, worker.tagList.include[b], 'name');
-                                itemCatId = itemCatId.id;
-                                
-                            if (itemCatId == -1) {
-                                itemCatId = handler.getStorageManager().categoryCreate({name : worker.tagList.include[b], nsfw : false}, worker.collectedData);                                
-                            }
-                            
-                            if (itemCatId > 0 && worker.collectedData.selected_cats_ids.indexOf(itemCatId) == -1) {                                
-                                worker.collectedData.selected_cats_ids.push(itemCatId);
-                            }
-                            
+                            favNativeParser.addToLog('[Фильтр по тегу] Добавлен пост : ' + postId + ' по тегу : ' + worker.tagList.include[b]);
                             break;
                         }
                         
@@ -3785,7 +3824,8 @@ function KellyFavItems(cfg)
             log('--'); 
         }
         
-        if (favNativeParser.unlockRequests !== false && pageInfo.censoredPostIds.length > 0) {
+        // allow addition unlock requests if not in API mode
+        if (!thread.job.data.api && favNativeParser.unlockRequests !== false && pageInfo.censoredPostIds.length > 0) {
             
             favNativeParser.addToLog('Восстанавливаю заблокированный контент...');
             favNativeParser.pause(true);
@@ -3855,9 +3895,9 @@ function KellyFavItems(cfg)
             setPreventClose(false);
             return false;
         }
-                        
-        var updateOptions = false;
-        
+                  
+        if (!checkDataFilterLock()) return false;
+              
         favNativeParser.resetData();
         if (favNativeParser.pageInfo.contentName) favNativeParser.collectedData.dbName = KellyTools.generateIdWord(favNativeParser.pageInfo.contentName);
         
@@ -3868,6 +3908,12 @@ function KellyFavItems(cfg)
         } else {
             KellyTools.getElementByClass(document, env.className + '-PagesN').value = favNativeParser.pageInfo.pages;
             pagesN = favNativeParser.pageInfo.pages;
+        }
+        
+        fav.coptions.downloader.minRating = false;
+        var ratingEl = KellyTools.getElementByClass(document, env.className + '-MinRating'); 
+        if (ratingEl && ratingEl.value.trim().length > 0) {
+            fav.coptions.downloader.minRating = KellyTools.val(ratingEl.value, 'float');
         }
         
         // for big selections that can oversize localstorage
@@ -3890,10 +3936,7 @@ function KellyFavItems(cfg)
                 autosave = favNativeParser.maxPagesPerExport;
             }
             
-            if (fav.coptions.downloader.autosave != autosave) {
-                updateOptions = true;
-                fav.coptions.downloader.autosave = autosave;
-            }
+            fav.coptions.downloader.autosave = autosave;
             
             if (autosave != autosaveInput.value) {
                 autosaveInput.value = autosave;
@@ -3910,15 +3953,7 @@ function KellyFavItems(cfg)
         if (customUrlEl && customUrlEl.value) {
             var customUrl = KellyTools.val(customUrlEl.value, 'longtext');
             
-            if (customUrl) {
-                
-                // if (customUrl.indexOf(window.location.origin) !== 0) {
-                //  
-                //    if (customUrl[0] != '/') customUrl = '/' + customUrl;
-                //    
-                //    customUrl = window.location.origin + customUrl;                    
-                // }
-                
+            if (customUrl) {                                
                 customUrlEl.value = customUrl;    
                 
                 if (favNativeParser.pageInfo.url != customUrl) {
@@ -3931,10 +3966,7 @@ function KellyFavItems(cfg)
         var skipEmpty = KellyTools.getElementByClass(document, env.className + '-exporter-skip-empty');
             skipEmpty = skipEmpty && skipEmpty.checked ? true : false;
         
-        if (fav.coptions.downloader.skipEmpty != skipEmpty) {
-            updateOptions = true;
-            fav.coptions.downloader.skipEmpty = skipEmpty;
-        }
+        fav.coptions.downloader.skipEmpty = skipEmpty;
                
         var pagesList = [];
         
@@ -3993,14 +4025,38 @@ function KellyFavItems(cfg)
         }
         
         for (var i = 0; i < pagesList.length; i++) {
-            
+               
             var pageNumber = pagesList[i];
             
-            favNativeParser.addJob(
-                favNativeParser.pageInfo.url.replace('__PAGENUMBER__', pageNumber), 
-                handler.onDownloadNativeFavPage, 
-                {page : pageNumber}
-            );
+            if (env.unlockManager && env.unlockManager.tagViewer.tagName) {
+               
+                var tagQuery = env.unlockManager.getTpl('query-tag', {
+                    QUERY_POST : env.unlockManager.getTpl('query-post'), 
+                    OFFSET : (env.unlockManager.tagViewer.tagData.pageCount - pageNumber) * env.unlockManager.tagViewer.perPage, 
+                    TYPE : env.unlockManager.tagViewer.type
+                });
+                
+                favNativeParser.addJob(
+                    'https://api.joyreactor.cc/graphql?unlocker=1', 
+                    handler.onDownloadNativeFavPage, 
+                    {page : pageNumber, api : true},
+                    {
+                        method : 'POST', 
+                        contentType : 'application/json',
+                        body: env.unlockManager.getTpl('query', { QUERY : "tagData1:tag(name : \\\"" + env.unlockManager.tagViewer.tagName + "\\\") {" + tagQuery.replace(/(?:\r\n|\r|\n)/g, '') + "}" }),
+                        responseType : 'json',
+                    }
+                );
+            
+            } else {            
+                
+                favNativeParser.addJob(
+                    favNativeParser.pageInfo.url.replace('__PAGENUMBER__', pageNumber), 
+                    handler.onDownloadNativeFavPage, 
+                    {page : pageNumber}
+                );
+                
+            }
         }
         
         var showLogButton = KellyTools.getElementByClass(document, env.className + '-exporter-log-show');
@@ -4030,8 +4086,7 @@ function KellyFavItems(cfg)
         if (tagFilterEnabled && tagFilter) {
             if (tagFilter.value != fav.coptions.downloader.tagList) {
                 
-                fav.coptions.downloader.tagList = KellyTools.inputVal(tagFilter, 'longtext');                 
-                updateOptions = true;
+                fav.coptions.downloader.tagList = KellyTools.inputVal(tagFilter, 'longtext');       
             }
             
             favNativeParser.tagList = KellyTools.parseTagsList(fav.coptions.downloader.tagList);
@@ -4044,8 +4099,7 @@ function KellyFavItems(cfg)
         if (catCreateEnabled && catCreate) {
             if (catCreate.value != fav.coptions.downloader.catByTagList) {
                 
-                fav.coptions.downloader.catByTagList = KellyTools.inputVal(catCreate, 'longtext');                 
-                updateOptions = true;
+                fav.coptions.downloader.catByTagList = KellyTools.inputVal(catCreate, 'longtext');        
             }
             
             favNativeParser.catByTagList = KellyTools.parseTagsList(fav.coptions.downloader.catByTagList);
@@ -4056,9 +4110,7 @@ function KellyFavItems(cfg)
             }
         }
         
-        if (updateOptions) {
-            handler.save('cfg');
-        }
+        handler.save('cfg');
         
         favNativeParser.addToLog('Инициализация...', true);
         el.innerText = lng.s('Загрузка... (Отменить)', 'download_started_cancel');  
@@ -4070,6 +4122,7 @@ function KellyFavItems(cfg)
         // add beforeunload
         
         setPreventClose(true);
+        handler.dataFilterLock = {message : 'Остановите обработку стрниц.'};
         favNativeParser.exec();        
     }
     
@@ -4197,6 +4250,8 @@ function KellyFavItems(cfg)
 
             KellyTools.setHTMLData(favPageInfo.container, KellyTools.getTpl(request.data.loadedData, 'parser-form', {
                 CLASSNAME : env.className, 
+                RATING_FILTER : env.unlockManager && env.unlockManager.tagViewer.tagName ? true : false,
+                RATING : fav.coptions.downloader.minRating ? fav.coptions.downloader.minRating : '',
                 EXTRA_OPTIONS : dhtml, 
                 EXTRA : KellyTools.DEBUG, 
                 SKIP_EMPTY : fav.coptions.downloader.skipEmpty ? true : false,

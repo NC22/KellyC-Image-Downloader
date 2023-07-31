@@ -212,7 +212,7 @@ function KellyFastSave(cfg) {
         
     */
     
-    this.downloadPostData = function(postData, onDownloadEnd, onDownloadInit, dmOptions) {
+    this.downloadPostData = function(postData, onDownloadEnd, onDownloadInit, dmOptions, type) {
         
         if (!handler.isAvailable()) {
             
@@ -221,8 +221,12 @@ function KellyFastSave(cfg) {
             if (onDownloadEnd) onDownloadEnd(false);
             return false;
         }
-                      
-        var postMedia = handler.favEnv.getGlobal('env').getAllMedia(postData);        
+        
+        var postMedia = postData;
+        if (!type || type == 'el') {
+            postMedia = handler.favEnv.getGlobal('env').getAllMedia(postData);        
+        }
+        
         if (!postMedia || !postMedia.length) {
         
             KellyTools.log('downloadPostData - fail to get media from post', 'KellyFastSave');

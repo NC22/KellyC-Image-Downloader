@@ -1,7 +1,7 @@
 KellyPageWatchdog.validators.push({url : 'catface.ru', host : 'catface.ru', patterns : [['catface.ru/get', 'imageOriginal'], ['/userfiles/media/previews', 'imagePreview'] ]});
 KellyPageWatchdog.validators.push({url : 'patreon.com', host : 'patreon.com', patterns : [['patreon-media/p/post/', 'imageAny']]});
 KellyPageWatchdog.validators.push({url : 'pinterest.', host : ['pinterest.com', 'pinterest.ru'],  patterns : [['/originals/', 'imageOriginal'], ['i.pinimg.com/474x', 'imagePreview'], ['i.pinimg.com/736x', 'imagePreview'], ['i.pinimg.com/236x', 'imagePreview']]});
-KellyPageWatchdog.validators.push({url : 'discord.', host : 'discord.com', patterns : [['cdn.discordapp.com/attachments', 'imageOriginal'], ['&height=', 'imagePreview']]});
+
 KellyPageWatchdog.validators.push({url : 'fanbox.cc', host : 'fanbox.cc',  patterns : [['fanbox/public/images', 'imagePreview']]});https://thumbs.hentai-foundry.com/thumb.php?pid=768245&size=1550
 KellyPageWatchdog.validators.push({url : '2ch.hk', host : '2ch.hk', patterns : [[new RegExp('//2ch.hk/[a-zA-Z0-9]+/src/'), 'imageOriginal'], [new RegExp('//2ch.hk/[a-zA-Z0-9]+/thumb/'), 'imagePreview']]});
 KellyPageWatchdog.validators.push({url : 'furaffinity.net', host : 'furaffinity.net', patterns : [[new RegExp('//t.[a-zA-Z0-9]+.net/[0-9]+@[0-9]+\-[0-9]+.[a-zA-Z]+'), 'imagePreview'], ['/profile_banner', 'imageTrash'], [new RegExp('//d.[a-zA-Z0-9]+.net/art'), 'imageByDocument']]});

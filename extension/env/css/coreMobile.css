@@ -63,6 +63,11 @@
     .__BASECLASS__-mobile .__BASECLASS__-ModalBox .__BASECLASS__-ModalBox-content {
         min-height : 0px;
     }
+    
+    .__BASECLASS__-mobile .__BASECLASS__-exporter-buttons a {
+        margin-right: 16px;
+        display: block;
+    }
 }
 
 @media (max-width: 800px) { 
@@ -166,4 +171,6 @@
 .__BASECLASS__-mobile .__BASECLASS__-sidebar-wrap {
     padding-bottom: 0;
 }
+
+
     
