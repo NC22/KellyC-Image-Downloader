@@ -3028,6 +3028,8 @@ function KellyFavItems(cfg)
     
     this.showAddToFavDialog = function(postBlock, comment, onAdd, onRemove, onClose) {
         
+        if (!checkDataFilterLock()) return false;
+              
         var postIndex = typeof postBlock == 'number' ? postBlock : false, existItem = false;        
         selectedPost = postBlock;
         selectedImages = [];
@@ -4122,7 +4124,7 @@ function KellyFavItems(cfg)
         // add beforeunload
         
         setPreventClose(true);
-        handler.dataFilterLock = {message : 'Остановите обработку стрниц.'};
+        handler.dataFilterLock = {message : 'Выполняется скачивание постов. Сначала остановите обработку страниц.'};
         favNativeParser.exec();        
     }
     

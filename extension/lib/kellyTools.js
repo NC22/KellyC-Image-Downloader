@@ -989,7 +989,8 @@ KellyTools.validateHtmlDoc = function(response) {
 }
 
 KellyTools.validateFloatString = function(val) {
-
+    
+    if (typeof val == 'number') return val;
     if (!val) return 0.0;
     
     val = val.trim();
