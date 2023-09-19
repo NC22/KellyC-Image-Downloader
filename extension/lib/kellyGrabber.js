@@ -204,6 +204,7 @@ function KellyGrabber(cfg) {
             animationFormat : 'gif',
             titleUpdate : true,
             keepAliveTimer : true,
+            webpToPng : true,
             manualExclude : false,
         }        
     }
@@ -377,6 +378,11 @@ function KellyGrabber(cfg) {
                     </td></tr>\
                     <tr class="' + extendedClass + ' ' + extendedClass + '-grabber_anim_format' + extShown + '"><td colspan="2">\
                         <span>' + lng.s('Формат для больших гифок', 'grabber_anim_format') + ' ' + htmlAnimSelect + '</span>\
+                    </td></tr>\
+                    <tr class="' + extendedClass + ' ' + extendedClass + '-webpToPng' + extShown + '"><td colspan="2">\
+                        <label><input type="checkbox" class="' + className + '-webpToPng" data-option="webpToPng" ' + (options.webpToPng ? 'checked' : '') + '>\
+                            Convert WEBP to PNG\
+                        </label>\
                     </td></tr>\
                     <tr class="' + extendedClass + ' ' + extendedClass + '-keepAliveTimer' + extShown + '"><td colspan="2">\
                         <label><input type="checkbox" class="' + className + '-keepAliveTimer" data-option="keepAliveTimer" ' + (options.keepAliveTimer ? 'checked' : '') + '>\
@@ -641,7 +647,7 @@ function KellyGrabber(cfg) {
                 return;
             }  
             
-        var commonCheckbox = ['keepAliveTimer', 'titleUpdate', 'skipDownloaded'];
+        var commonCheckbox = ['keepAliveTimer', 'titleUpdate', 'skipDownloaded', 'webpToPng'];
         for (var i = 0; i < commonCheckbox.length; i++) {
              var cbox = KellyTools.getElementByClass(handler.container, className + '-' + commonCheckbox[i]);
              if (cbox) cbox.onchange = function() {
@@ -1238,6 +1244,7 @@ function KellyGrabber(cfg) {
                 if (blobData[downloadDelta.id]) {
                     
                     URL.revokeObjectURL(blobData[downloadDelta.id]);
+                    blobData[downloadDelta.id] = null;
                     delete blobData[downloadDelta.id];
                 } 
             }
@@ -1808,7 +1815,7 @@ function KellyGrabber(cfg) {
         return false;
     }
     
-    // downloadOptions.url - {base64 : [base64 blob data]} or {blob : blob data} or "string" url
+    // downloadOptions.url - {base64 : [base64 blob data], type} or {blob : blob data, type} or "string" url
     
     this.downloadUrl = function(downloadOptions, onDownload) {
         
@@ -1845,8 +1852,8 @@ function KellyGrabber(cfg) {
         
         KellyTools.getBrowser().runtime.sendMessage({method: "downloads.download", referrer : downloadOptions.referrer, download : download}, function(downloadDelta){
             
-                 if (blob && downloadDelta.id == -1) URL.revokeObjectURL(blob); // revoke 
-            else if (blob && downloadDelta.id > 0) blobData[downloadDelta.id] = blob; // revoke in onDownloadProcessChanged
+                 if (blob && downloadDelta.id == -1) URL.revokeObjectURL(blob); // download init fail - revoke url 
+            else if (blob && downloadDelta.id > 0) blobData[downloadDelta.id] = blob; // ok, revoke will be in onDownloadProcessChanged
             
             if (onDownload) onDownload(downloadDelta);
         });             
@@ -1859,27 +1866,78 @@ function KellyGrabber(cfg) {
         log += '[' + KellyTools.getTime() + '] ' + str + "\r\n";
     }
     
+    // data recieved from image server
+    // currently checks only binary data for webp image format and turn it to png optionaly. Can be used for check bad image data lenght \ fake content type
+    
+    function validateImageBuffer(arrayBuffer, contentTypeHeader, urlOrig, onReady) {
+                  
+        var blob = new Blob([arrayBuffer], { type: contentTypeHeader});
+        if (options.webpToPng) {
+            
+            var view = new Uint8Array( arrayBuffer );
+            if ( KellyTools.isWebp(view) ) {
+                
+                var canvas = document.createElement('CANVAS');
+                var ctx = canvas.getContext('2d');
+                var img = document.createElement('IMG');
+                
+                img.onload = function(event) {
+                    
+                    canvas.width = this.naturalWidth;				
+                    canvas.height = this.naturalHeight;
+                    
+                    URL.revokeObjectURL(this.src);
+                    blob = null;
+                    
+                    ctx.drawImage(this, 0, 0);
+                    
+                    var pngBlob = KellyTools.base64toBlob(canvas.toDataURL('image/png').split(',')[1], 'image/png');
+                    onReady(pngBlob, 'image/png');
+                }
+                
+                img.src = URL.createObjectURL(blob);
+                
+            } else {                
+                onReady(blob, contentTypeHeader);
+            }
+            
+            view = null;
+            
+        } else {
+            
+            onReady(blob, contentTypeHeader);
+        }
+    }
+    
     // download file by request as blob data. GET | ASYNC
     // callback(url, data (false on fail), errorCode, errorNotice);
     
     this.getDataFromUrl = function(urlOrig, callback) {
         
-        var defaultCallback = function(urlOrig, blob, errorCode, errorText, controller) {
+        var defaultCallback = function(urlOrig, arrayBuffer, errorCode, errorText, controller) {
             if (controller.canceled) return;
             
-            if (blob === false) {                            
+            if (arrayBuffer === false) {          
+            
                 callback(urlOrig, false, errorCode, errorText);
+                
             } else {
+                           
+                validateImageBuffer(arrayBuffer, controller.contentType, urlOrig, function(blob, type) {
+                    
+                    if (transportMethod == KellyGrabber.TRANSPORT_BLOBBASE64) {
                 
-                if (transportMethod == KellyGrabber.TRANSPORT_BLOBBASE64) {
-                
-                    KellyTools.blobToBase64(blob, function(base64) {                                
-                        callback(urlOrig, {base64 : base64, type : controller.contentType});                              
-                    });
-                
-                } else {                            
-                    callback(urlOrig, {blob : blob, type : controller.contentType});
-                }                            
+                        KellyTools.blobToBase64(blob, function(base64) {                                
+                            callback(urlOrig, {base64 : base64, type : type});                              
+                        });
+                    
+                    } else {    
+                    
+                        callback(urlOrig, {blob : blob, type : type});
+                    }  
+                    
+                });               
+                                  
             }
         }
                     
@@ -1890,11 +1948,11 @@ function KellyGrabber(cfg) {
             
         } else if (requestMethod == KellyGrabber.REQUEST_XML) {
             
-            return KellyTools.xmlRequest(urlOrig, false, defaultCallback);
+            return KellyTools.xmlRequest(urlOrig, {responseType : 'arrayBuffer'}, defaultCallback);
                 
         } else if (requestMethod == KellyGrabber.REQUEST_FETCH) {
             
-            return KellyTools.fetchRequest(urlOrig, false, defaultCallback);
+            return KellyTools.fetchRequest(urlOrig, {responseType : 'arrayBuffer'}, defaultCallback);
             
         }
     }

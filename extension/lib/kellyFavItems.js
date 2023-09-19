@@ -3644,7 +3644,7 @@ function KellyFavItems(cfg)
                         cImageItem.parentNode.insertBefore(mediaBlock, cImageItem);
                         cImageItem.parentElement.removeChild(cImageItem);
                         
-                        KellyTools.setHTMLData(mediaBlock, env.unlockManager.getTpl('post', {PICS : env.unlockManager.getPublicationAttributesHtml(false, false, postMediaData), COUNT : postMediaData.attributes.length})); 
+                        KellyTools.setHTMLData(mediaBlock, env.unlockManager.getTpl('post', {PICS : env.unlockManager.getPublicationAttributesHtml(false, env.unlockManager.getUrlNamePrefix(postMediaData.tags), postMediaData), COUNT : postMediaData.attributes.length})); 
                         
                      }
                 }

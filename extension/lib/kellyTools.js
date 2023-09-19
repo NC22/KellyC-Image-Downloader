@@ -309,6 +309,7 @@ KellyTools.fetchRequest = function(urlOrig, cfg, callback) {
                  if (fetchRequest.cfg.responseType == 'blob') return response.blob().then(getResponseFormated);
             else if (fetchRequest.cfg.responseType == 'json') return response.json().then(getResponseFormated);
             else if (fetchRequest.cfg.responseType == 'text') return response.text().then(getResponseFormated);
+            else if (fetchRequest.cfg.responseType == 'binary' || fetchRequest.cfg.responseType == 'arrayBuffer') return response.arrayBuffer().then(getResponseFormated);
             
         } else {
             callback(urlOrig, false, response.status, 'fetchRequest [error] : ' + response.statusText, fetchRequest);
@@ -538,7 +539,47 @@ KellyTools.val = function(value, type) {
         return value.replace(/[^а-яА-Яa-z0-9 ._-]/gim, "_");
     } 
 }
+    
+KellyTools.readArrayBufferViewBytes = function(view, start, n, asText) {
+        
+    var data = '';
+    for (var i = start; i < start+n; i++ ) {
+      
+      if (asText) {
+            data += String.fromCharCode(view[i]); // ASCII Character
+      } else {
+            data += view[i].toString(16); // HEX str
+            if (data == '0') data += '0';
+      }
 
+    }
+        
+    return data;
+}
+
+// view = new Uint8Array(imageArrayBuffer);
+
+KellyTools.isWebp = function(view) {
+
+    if (view.length < 12) return false;
+    
+    var header1 = KellyTools.readArrayBufferViewBytes(view, 0, 4, true);
+    var header2 = KellyTools.readArrayBufferViewBytes(view, 8, 4, true);
+    
+    if (header1 == 'RIFF' && header2 == 'WEBP') {
+        return true;
+    }
+    
+    return false;
+    
+    // var fileSize = "";
+    //
+    // for (var i = 3; i >= 0; i--) {
+    //  fileSize += KellyTools.readArrayBufferViewBytes(view, 4 + i, 1, false);
+    // }
+}
+    
+    
 KellyTools.getElementText = function(el) {
     
     if (el) {
