@@ -560,12 +560,12 @@ KellyTools.readArrayBufferViewBytes = function(view, start, n, asText) {
 // view = new Uint8Array(imageArrayBuffer);
 
 KellyTools.isWebp = function(view) {
-
+    
     if (view.length < 12) return false;
     
     var header1 = KellyTools.readArrayBufferViewBytes(view, 0, 4, true);
     var header2 = KellyTools.readArrayBufferViewBytes(view, 8, 4, true);
-    
+
     if (header1 == 'RIFF' && header2 == 'WEBP') {
         return true;
     }

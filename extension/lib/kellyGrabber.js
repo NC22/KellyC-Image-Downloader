@@ -1824,12 +1824,17 @@ function KellyGrabber(cfg) {
         if (!downloadOptions.filename) return false;
                 
         var blob = false;
+        var mimeType = false;
         if (typeof downloadOptions.url == 'object' && downloadOptions.url.blob) {
             
             downloadOptions.url.blob = URL.createObjectURL(downloadOptions.url.blob);
             blob = downloadOptions.url.blob;
         }
- 
+        
+        if (typeof downloadOptions.url == 'object' && downloadOptions.url.type) {            
+            mimeType = downloadOptions.url.type;
+        }
+        
         var download = {}, validKeys = ['filename', 'conflictAction', 'method', 'url', 'saveAs'];
         for (var i = 0; i < validKeys.length; i++) {
             if (typeof downloadOptions[validKeys[i]] != 'undefined') {
@@ -1837,9 +1842,21 @@ function KellyGrabber(cfg) {
                 var keyValue = downloadOptions[validKeys[i]];
                 
                 if (validKeys[i] == 'filename') {
+                   
                     if (downloadOptions.ext) {
+                        
+                        // extension based on mime type + validated binary array (getDataFromUrl partly validates blob data returned from server side), not just by file name
+                        // so overwrite ext if available
+                        
+                        if (mimeType) {
+                            var trueExt = KellyTools.getExtByMimeType(mimeType);
+                            if (trueExt !== false) downloadOptions.ext = trueExt;
+                        }
+                        
                         keyValue += '.' + downloadOptions.ext;
+                        
                         // KellyTools.log('download url :  ' + keyValue, 'KellyGrabber', KellyTools.E_ERROR);
+                        
                     } else {
                         
                         KellyTools.log('download url : no ext key specifed for file ' + keyValue, 'KellyGrabber', KellyTools.E_ERROR);
