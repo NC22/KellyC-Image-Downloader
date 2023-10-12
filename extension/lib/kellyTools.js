@@ -343,6 +343,7 @@ KellyTools.getExtByMimeType = function(mimetype) {
     
     if (mimetype.length == 2) {
         if (mimetype[1] == 'plain') return 'txt';
+        if (mimetype[1] == 'jpeg') return 'jpg';
         if (mimetype[1].length < 10) return mimetype[1];
     }
     

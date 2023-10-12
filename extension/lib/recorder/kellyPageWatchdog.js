@@ -191,10 +191,10 @@ function KellyPageWatchdog(cfg)
      
     var addItemSrc = function(item, src, groups) {
         
-        if (src.indexOf('data:') === 0) {
-           handler.srcs.push(src.substr(0, 258)); 
+        if (src.indexOf('data:') === 0 && src.length > 280) {
+           handler.srcs.push(src.substr(src.length-258, 258));
         } else {
-            handler.srcs.push(src); 
+           handler.srcs.push(src); 
         }
          
         var key = item.relatedSrc.length;

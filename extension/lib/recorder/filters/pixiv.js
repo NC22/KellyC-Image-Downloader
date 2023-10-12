@@ -11,6 +11,10 @@ KellyRecorderFilterPixiv.validateByDriver = function(handler, data) {
     data.item.relatedDoc = 'https://www.pixiv.net/ajax/illust/' + artworkId + '/pages' + '##FETCH_RULES##method=GET&responseType=json';
     data.item.relatedGroups = [['imagePreview']];
     
+    // https://www.pixiv.net/ajax/illust/112344306/ugoira_meta
+    // https://github.com/Stuk/jszip/tree/main
+    // https://github.com/thenickdude/webm-writer-js
+    
     // animations on pixiv has different design and require zip archivator libraries to work with
 }
 

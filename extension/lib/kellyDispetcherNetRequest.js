@@ -135,7 +135,8 @@ KellyEDispetcherDR.addRequestListeners = function(tabData, onRegistered) {
             requestHeaders = [
                 { "header" : "cache-control", "operation" : "set", "value" : "no-cache, must-revalidate, post-check=0, pre-check=0" },
                 { "header" : "pragma", "operation" : "set",  "value" : 'no-cache' },
-                { "header" : "Referer", "operation" : "set", "value" : params.referrer },    
+                { "header" : "Referer", "operation" : "set", "value" : params.referrer }, 
+               // { "header" : "Origin", "operation" : "set", "value" : params.referrer },                
             ];
             
         }

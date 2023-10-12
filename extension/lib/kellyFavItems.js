@@ -2000,7 +2000,7 @@ function KellyFavItems(cfg)
         var baseClass = env.className + '-FiltersMenu', deleteButtonHtml = '', nsfwEnableHtml = '';
         
         if (!category.protect) deleteButtonHtml += ' <a class="' + baseClass + '-delete-button" href="#">' + lng.s('Удалить', 'delete') + '</a>';
-        if (env.isNSFW && !env.isNSFW()) nsfwEnableHtml = '<label><input class="' + baseClass + '-nsfw" type="checkbox" ' + (category.nsfw ? 'checked' : '') + '> NSFW </label>'
+        if (typeof env.isNSFW != 'undefined') nsfwEnableHtml = '<label><input class="' + baseClass + '-nsfw" type="checkbox" ' + (category.nsfw ? 'checked' : '') + '> NSFW </label>'
             
         var itemIndex = fav.categories.indexOf(category);
         

@@ -1849,8 +1849,16 @@ function KellyGrabber(cfg) {
                         // so overwrite ext if available
                         
                         if (mimeType) {
-                            var trueExt = KellyTools.getExtByMimeType(mimeType);
-                            if (trueExt !== false) downloadOptions.ext = trueExt;
+                            
+                            if (mimeType == 'image/jpeg' && ['jpeg', 'jpg'].indexOf(downloadOptions.ext) != -1) {
+                                
+                                // allow varouse names for jpeg mime type
+                                
+                            } else {
+                            
+                                var trueExt = KellyTools.getExtByMimeType(mimeType);
+                                if (trueExt !== false) downloadOptions.ext = trueExt;
+                            }
                         }
                         
                         keyValue += '.' + downloadOptions.ext;

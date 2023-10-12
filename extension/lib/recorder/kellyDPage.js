@@ -21,7 +21,7 @@ KellyDPage.cats = {
     
     imageBasic : {name : 'Basic image', id : false, color : false, l : false}, 
     imageRelated : {name : 'Related image'},
-    imageError : {name : 'Load error', exclude : true}, // load errors \ 1x1 images
+    imageError : {name : 'Load error', exclude : true, order : 1}, // load errors \ 1x1 images
 
     // post processing \ detected by driver groups that helps to filter good images from recorded stream
     
