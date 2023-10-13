@@ -34,7 +34,7 @@
     cursor : pointer;
 }
 
-#__UNIQID__ > div {
+#__UNIQID__-num {
     position: absolute;
     bottom: 0;
     border-radius: 3px;
@@ -44,6 +44,18 @@
     text-align: center;
     padding: 0;
     width: 100%;
+}
+
+#__UNIQID__-notice {
+    position: absolute;
+    display: none;
+    right: 0;
+    background: rgba(0,0,0,0.29);
+    color: #fff;
+    padding: 6px;
+    min-width: 255px;
+    text-align: left;
+    bottom: 88px;
 }
 
 @keyframes __UNIQID__blink {  

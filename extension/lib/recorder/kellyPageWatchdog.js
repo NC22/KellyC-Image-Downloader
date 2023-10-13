@@ -5,6 +5,8 @@ function KellyPageWatchdog(cfg)
     var updateAF = true;
     
     var directAccessEls = {'A' : ['href'], 'IMG' : ['src']};  // to get absolute link from img \ a elements 
+    
+    this.noticeTxt = '';
     this.directAccess = true; // MUST be disabled for extension tab and load related doc feature - because tab protocol will be chrome-extension://
     this.docLoader = false; // setted if parser used in context of doc loader from chrome-extension page
     
@@ -482,7 +484,20 @@ function KellyPageWatchdog(cfg)
         dc.querySelectorAll('*').forEach(parseItem);
         
         return handler.imagesPool.length - itemsNum;
-    }     
+    } 
+
+    this.notice = function(txt) { 
+        var notice = document.getElementById(handler.recorder.id + '-notice');
+        handler.noticeTxt = (typeof txt == 'string' && txt.length > 0) ? txt : '';
+
+        if (!notice) return;        
+        if (handler.noticeTxt.length > 0) {            
+            notice.innerText = handler.noticeTxt;
+            notice.style.display = 'block';            
+        } else {
+            notice.style.display = 'none';
+        }
+    }
         
     function getApiMessage(request, sender, callback) {
 
@@ -575,7 +590,7 @@ function KellyPageWatchdog(cfg)
         
         if (handler.recorder) {
             
-            KellyTools.getElementByTag(handler.recorder, 'div').innerText = imagesNum;
+            document.getElementById(handler.recorder.id + '-num').innerText = imagesNum;
             
         } else {
             
@@ -589,7 +604,7 @@ function KellyPageWatchdog(cfg)
                 
                 KellyTools.addCss(KellyTools.generateUniqId('kelly-recorder-css'), KellyTools.replaceAll(request.data.loadedData, '__UNIQID__', handler.recorder.id)); 
 
-                KellyTools.setHTMLData(handler.recorder, 'REC<div>' + imagesNum + '</div>');
+                KellyTools.setHTMLData(handler.recorder, 'REC<div id="' + handler.recorder.id + '-num">' + imagesNum + '</div><div id="' + handler.recorder.id + '-notice">' + handler.noticeTxt +'</div>');
                 
                 handler.recorder.onclick = function() { delayAddImages();}
                 document.body.appendChild(handler.recorder);

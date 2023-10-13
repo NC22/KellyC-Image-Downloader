@@ -1,7 +1,7 @@
 KellyRecorderFilterPikabu = new Object();
 KellyRecorderFilterPikabu.manifest = {host : 'pikabu.ru', detectionLvl : ['imageOriginal', 'imagePreview']};
 
-KellyRecorderFilterDA.addItemByDriver = function(handler, data) {
+KellyRecorderFilterPikabu.addItemByDriver = function(handler, data) {
 
     if (handler.url.indexOf('pikabu.ru') == -1) return;
     
@@ -14,6 +14,9 @@ KellyRecorderFilterDA.addItemByDriver = function(handler, data) {
         handler.addSingleSrc(data.item, data.el.src, 'addSrcFromAttributes-src', data.el, ['pikabu_post_preview']);
         
         if (data.item.relatedSrc.length <= 0) return handler.addDriverAction.SKIP;
+        
+        KellyRecorderFilterPikabu.deNSFW.total++;
+        KellyRecorderFilterPikabu.deNSFW.updateNotice();
         
         KellyTools.fetchRequest(data.el.getAttribute('data-large-image'), {responseType : 'arrayBuffer'}, function(urlOrig, arrayBuffer, errorCode, errorText, controller) {
             
@@ -40,6 +43,9 @@ KellyRecorderFilterDA.addItemByDriver = function(handler, data) {
                 }                
             }
             
+            KellyRecorderFilterPikabu.deNSFW.ready++;
+            KellyRecorderFilterPikabu.deNSFW.updateNotice();
+            
         });
         
         return handler.addDriverAction.ADD;
@@ -60,8 +66,17 @@ KellyRecorderFilterDA.addItemByDriver = function(handler, data) {
         
     } else if (data.el.tagName == 'IMG' && data.el.getAttribute('data-src') && data.el.getAttribute('data-viewable') && KellyTools.getParentByTag(data.el, 'ARTICLE')) {
         
-        handler.addSingleSrc(data.item, data.el.getAttribute('data-src'), 'addSrcFromAttributes-src', data.el, ['pikabu_post_preview']);
-        handler.addSingleSrc(data.item, data.el.getAttribute('data-large-image'), 'addSrcFromAttributes-src', data.el, KellyRecorderFilterPikabu.getPostGroups(false));  
+        var pdata = data.el.getAttribute('data-src');
+        var fdata = data.el.getAttribute('data-large-image');
+        var fGroups = KellyRecorderFilterPikabu.getPostGroups(false);
+        
+        if (fdata && pdata && pdata.indexOf(fdata) == -1) {
+            handler.addSingleSrc(data.item, data.el.getAttribute('data-src'), 'addSrcFromAttributes-src', data.el, ['pikabu_post_preview']);
+        } else {
+            fGroups.push('pikabu_post_preview');
+        }
+        
+        handler.addSingleSrc(data.item, data.el.getAttribute('data-large-image'), 'addSrcFromAttributes-src', data.el, fGroups);  
         
         if (data.item.relatedSrc.length <= 0) return handler.addDriverAction.SKIP;
         return handler.addDriverAction.ADD;
@@ -122,7 +137,7 @@ KellyRecorderFilterPikabu.onStartRecord = function(handler, data) {
         
      };
      
-     
+     KellyRecorderFilterPikabu.wd = handler;
      KellyRecorderFilterPikabu.dirName = false; 
      
      KellyRecorderFilterPikabu.addCategory(KellyRecorderFilterPikabu, handler, document.querySelector('.saved-stories__category.button_success'));        
@@ -139,6 +154,23 @@ KellyRecorderFilterPikabu.onStartRecord = function(handler, data) {
 }
    
 KellyRecorderFilterPikabu.deNSFW = {
+    
+    total : 0,
+    ready : 0,
+    
+    updateNotice : function() {
+        
+        var handler = KellyRecorderFilterPikabu;
+        if (!handler.wd) return;
+        
+        if (handler.deNSFW.total <= 0) handler.wd.notice(false);
+        else {
+            var txt = 'дождитесь подгрузки NSFW картинок : ' + handler.deNSFW.ready + ' из ' + handler.deNSFW.total;
+            
+            if (handler.deNSFW.ready == handler.deNSFW.total) txt += ' ... готово'; 
+            handler.wd.notice(txt);
+        }
+    },
     
     IMAGE_DATA_SEPARATOR : "\0\0\0\0scramble:",
     MIME_LENGTH : 20,
