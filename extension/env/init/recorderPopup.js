@@ -423,17 +423,20 @@ KellyPopupPage.showRecorder = function() {
 
 KellyPopupPage.init = function() {
     
-    // todo - can be optimized - dont need to load KellyFavItems env, just need to take cfg vars
-    var favEnv = new KellyFavItems({env : KellyProfileRecorder.getInstance()});
-        favEnv.load('cfg', function(fav) { 
+    var sm = new KellyFavStorageManager();
+        sm.prefix += 'recorder_';      
+        sm.prefixCfg += 'recorder_';
+        sm.loadDB('config', function(fav) { 
             
-            if (fav.coptions.toolbar && fav.coptions.toolbar.heartHidden) {
-                KellyPopupPage.buttons['support_project'].hidden = true; 
+            if (fav) {
+                if (fav.coptions.toolbar && fav.coptions.toolbar.heartHidden) {
+                    KellyPopupPage.buttons['support_project'].hidden = true; 
+                }
+                
+                // console.log(fav.coptions);
+                
+                if (fav.coptions.darkTheme) KellyPopupPage.css.push('darkRecorderPopup');
             }
-            
-            // console.log(fav.coptions);
-            
-            if (fav.coptions.darkTheme) KellyPopupPage.css.push('darkRecorderPopup');
             
             KellyTools.getBrowser().runtime.sendMessage({method: "getResources", items : KellyPopupPage.css}, function(request) {
                 if (!request || !request.data.loadedData) return false; 
@@ -441,10 +444,11 @@ KellyPopupPage.init = function() {
                 KellyTools.addCss(KellyPopupPage.className, KellyTools.replaceAll(request.data.loadedData, '__BASECLASS__', KellyPopupPage.className));
                 KellyPopupPage.showRecorder();
             });   
-        });
-    
+            
+        }, true);
+        
     return true;
 }
 
-
-KellyTools.loadFrontJs(KellyPopupPage.init);
+KellyPopupPage.init();
+// KellyTools.loadFrontJs(KellyPopupPage.init);

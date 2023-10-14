@@ -1500,6 +1500,8 @@ function KellyGrabber(cfg) {
                 fileUrlName = 'default' + item.id; 
             }
             
+            fileUrlName = fileUrlName.substring(0, 128);
+            
             fileName = KellyTools.replaceAll(fileName, '#filename#', fileUrlName);
         }
         
@@ -1855,7 +1857,7 @@ function KellyGrabber(cfg) {
                    
                     if (downloadOptions.ext) {
                         
-                        // extension based on mime type + validated binary array (getDataFromUrl partly validates blob data returned from server side), not just by file name
+                        // extension based on mime type that came from validated binary array (getDataFromUrl partly validates blob data returned from server side), not just by file name
                         // so overwrite ext if available
                         
                         if (mimeType) {
@@ -1877,7 +1879,15 @@ function KellyGrabber(cfg) {
                         
                     } else {
                         
-                        KellyTools.log('download url : no ext key specifed for file ' + keyValue, 'KellyGrabber', KellyTools.E_ERROR);
+                        // fallback if no any extension was detected in file name
+                        
+                        if (mimeType && KellyTools.getExtByMimeType(mimeType)) {
+                            
+                            keyValue += '.' + KellyTools.getExtByMimeType(mimeType);
+                            
+                        } else {
+                            KellyTools.log('download url : no ext key specifed for file ' + keyValue, 'KellyGrabber', KellyTools.E_ERROR);
+                        }
                     }
                 }
                 
@@ -1905,9 +1915,7 @@ function KellyGrabber(cfg) {
     // currently checks only binary data for webp image format and turn it to png optionaly. Can be used for check bad image data lenght \ fake content type
     
     function validateImageBuffer(arrayBuffer, contentTypeHeader, urlOrig, onReady) {
-                  
-        var blob = new Blob([arrayBuffer], { type: contentTypeHeader});
-        
+             
         if (events.onBeforeDownloadValidate) {
             
              var result = events.onBeforeDownloadValidate(handler, arrayBuffer, contentTypeHeader, urlOrig, onReady);
@@ -1918,9 +1926,14 @@ function KellyGrabber(cfg) {
              }  
         }
         
+        var getDefaultBlob = function() {
+            return new Blob([arrayBuffer], { type: contentTypeHeader});
+        }
+        
         if (options.webpToPng) {
             
             var view = new Uint8Array( arrayBuffer );
+            
             if ( KellyTools.isWebp(view) ) {
                 
                 var canvas = document.createElement('CANVAS');
@@ -1932,26 +1945,23 @@ function KellyGrabber(cfg) {
                     canvas.width = this.naturalWidth;				
                     canvas.height = this.naturalHeight;
                     
-                    URL.revokeObjectURL(this.src);
-                    blob = null;
-                    
+                    URL.revokeObjectURL(this.src);                    
                     ctx.drawImage(this, 0, 0);
                     
-                    var pngBlob = KellyTools.base64toBlob(canvas.toDataURL('image/png').split(',')[1], 'image/png');
-                    onReady(pngBlob, 'image/png');
+                    onReady(KellyTools.base64toBlob(canvas.toDataURL('image/png').split(',')[1], 'image/png'), 'image/png');
                 }
                 
-                img.src = URL.createObjectURL(blob);
+                img.src = URL.createObjectURL(getDefaultBlob());
                 
             } else {                
-                onReady(blob, contentTypeHeader);
+                onReady(getDefaultBlob(), contentTypeHeader);
             }
             
             view = null;
             
         } else {
             
-            onReady(blob, contentTypeHeader);
+            onReady(getDefaultBlob(), contentTypeHeader);
         }
     }
     
@@ -2192,7 +2202,9 @@ function KellyGrabber(cfg) {
                 handler.updateStateForImageGrid();
             }			
         }
-                
+
+        // fileData - validated file data blob
+        
         var onLoadFile = function(url, fileData, errorCode, errorNotice) {
             
             if (mode != 'download') return false;
@@ -2237,6 +2249,7 @@ function KellyGrabber(cfg) {
                 
                 toTxtLog('DOWNLOADID ' + download.id + ' | file LOADED as DATA ARRAY OR BLOB ' + download.url + ', send to browser API for save to folder : ' + downloadOptions.filename);
                 if (!downloadOptions.ext) downloadOptions.ext = KellyTools.getExtByMimeType(fileData.type);
+        
                 downloadOptions.url = fileData;     
 
                 handler.downloadUrl(downloadOptions, onDownloadApiStart);

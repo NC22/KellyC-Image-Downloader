@@ -44,8 +44,8 @@ function KellyFavStorageManager(cfg) {
     this.fav = false; // KellyFavItems
     this.favValidKeys = {cfg : ['coptions', 'selected_cats_ids', 'meta', 'cats_assoc_buffer'], items : ['categories', 'items', 'ids', 'profile']};
              
-    var lng = KellyLoc; // singleton
-    
+    var lng = KellyTools.getLoc();
+        
     this.format = 'json';
     this.slist = false;
     

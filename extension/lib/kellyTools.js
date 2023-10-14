@@ -11,6 +11,10 @@ KellyTools.E_ERROR = 2;
 KellyTools.events = [];
 KellyTools.tId = 1000;
 
+KellyTools.getLoc = function() {
+    return typeof KellyLoc != 'undefined' ? KellyLoc : { s : function(txt) { return txt; }};    
+}
+
 // Get screen width \ height
 
 KellyTools.loadFrontJs = function(callback) {
@@ -342,9 +346,14 @@ KellyTools.getExtByMimeType = function(mimetype) {
     var mimetype = mimetype.split('/');    
     
     if (mimetype.length == 2) {
-        if (mimetype[1] == 'plain') return 'txt';
-        if (mimetype[1] == 'jpeg') return 'jpg';
-        if (mimetype[1].length < 10) return mimetype[1];
+        
+        if (mimetype[1].indexOf('plain') != -1) return 'txt';
+        if (mimetype[1].indexOf('jpeg') != -1) return 'jpg';
+        
+        if (mimetype[1].length < 10) {
+            mimetype[1] = mimetype[1].split(';')[0].trim();
+            return mimetype[1];
+        }
     }
     
     return false;

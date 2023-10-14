@@ -66,7 +66,7 @@ function KellyFavItems(cfg)
     var galleryImages = [];
     var galleryImagesData = [];
     
-    var lng = KellyLoc;
+    var lng = KellyTools.getLoc();
     
     /*  fav - current loaded throw this.load method profile data object
     
