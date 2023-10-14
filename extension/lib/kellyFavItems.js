@@ -2285,12 +2285,20 @@ function KellyFavItems(cfg)
                             setPreventClose(false);
                             // remove beforeunload
                         }
+                        
                     },
                     
                     onDownloadAllEnd : function(handler, result) {
                         
-                        KellyTools.log(result, 'KellyFavItems | downloadManager');   
+                        KellyTools.log(result, 'KellyFavItems | downloadManager');  
                         
+                        if (env.events.onDownloadAllEnd) env.events.onDownloadAllEnd(handler, result);
+                        
+                    },
+                    
+                   onBeforeDownloadValidate : function(handler, responseArrayBuffer, responseContentType, requestUrl, onReady) {
+                        
+                        if (env.events.onBeforeDownloadValidate) return env.events.onBeforeDownloadValidate(handler, responseArrayBuffer, responseContentType, requestUrl, onReady);                        
                     },
                 }
             })

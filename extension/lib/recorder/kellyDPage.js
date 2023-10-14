@@ -1056,6 +1056,8 @@ KellyDPage.showRecordedImages = function(onShow) {
           K_FAV.getGlobal('fav').dbName = KellyTools.generateIdWord(responseLocation.hostname.replace('.', '_') + '_record');          
           KellyDPage.defaultPageParser.setLocation({url : response.host, host : responseLocation.origin});
           
+          KellyDPage.defaultPageParser.filterCallback('onRecorderImagesShow', {});   
+         
           KellyTools.log('defaultPageParser : default TAB url : ' + response.url + ' | default referer : ' +  responseLocation.origin, 'KellyDPage');
           
           KellyDPage.updateUrlMap(function(){  
@@ -1083,6 +1085,11 @@ KellyDPage.init = function() {
      KellyDPage.env.hostClass = 'options_page';
      
      KellyDPage.defaultPageParser = new KellyPageWatchdog();
+     
+     KellyDPage.env.events.onBeforeDownloadValidate = function(handler, arrayBuffer, contentType, urlOrig, onReady) {
+         
+         return KellyDPage.defaultPageParser.filterCallback('onBeforeDownloadValidate', {dm : handler, arrayBuffer : arrayBuffer, contentType : contentType, url : urlOrig, onReady : onReady}, true);         
+     }
      
      KellyDPage.env.events.onDisplayBlock = function(mode, action, oldMode) {
          

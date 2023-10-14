@@ -76,6 +76,16 @@ function KellyGrabber(cfg) {
         */
         
         onDownloadAllEnd : false, 
+                   
+        /*
+            onBeforeDownloadValidate(handler, responseArrayBuffer, responseContentType, requestUrl, onReady) 
+            
+            Calls before onDownloadEnd & before return downloaded binary data from server. 
+            If return true - you need to call onReady(blob, type, error) callback with new blob and result state
+            
+        */
+             
+        onBeforeDownloadValidate : false,
         
         /*
             onDownloadEnd(downloadItem) - download of downloadItem ended
@@ -1897,6 +1907,17 @@ function KellyGrabber(cfg) {
     function validateImageBuffer(arrayBuffer, contentTypeHeader, urlOrig, onReady) {
                   
         var blob = new Blob([arrayBuffer], { type: contentTypeHeader});
+        
+        if (events.onBeforeDownloadValidate) {
+            
+             var result = events.onBeforeDownloadValidate(handler, arrayBuffer, contentTypeHeader, urlOrig, onReady);
+             if (result === true) {
+                 
+                 KellyTools.log('Download ready, enviroment event handler taked controll, before return blob, wait external onReady call', 'KellyGrabber');
+                 return;
+             }  
+        }
+        
         if (options.webpToPng) {
             
             var view = new Uint8Array( arrayBuffer );
@@ -1936,6 +1957,7 @@ function KellyGrabber(cfg) {
     
     // download file by request as blob data. GET | ASYNC
     // callback(url, data (false on fail), errorCode, errorNotice);
+    // todo - maybe return download item related to, for more universal use
     
     this.getDataFromUrl = function(urlOrig, callback) {
         
@@ -1948,9 +1970,13 @@ function KellyGrabber(cfg) {
                 
             } else {
                            
-                validateImageBuffer(arrayBuffer, controller.contentType, urlOrig, function(blob, type) {
+                validateImageBuffer(arrayBuffer, controller.contentType, urlOrig, function(blob, type, error) {
                     
-                    if (transportMethod == KellyGrabber.TRANSPORT_BLOBBASE64) {
+                    if (blob === false) {
+                        
+                        callback(urlOrig, false, -1, 'validateImageBuffer : ' + error);
+                        
+                    } else if (transportMethod == KellyGrabber.TRANSPORT_BLOBBASE64) {
                 
                         KellyTools.blobToBase64(blob, function(base64) {                                
                             callback(urlOrig, {base64 : base64, type : type});                              

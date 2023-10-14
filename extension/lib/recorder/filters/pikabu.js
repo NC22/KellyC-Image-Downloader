@@ -1,56 +1,50 @@
 KellyRecorderFilterPikabu = new Object();
 KellyRecorderFilterPikabu.manifest = {host : 'pikabu.ru', detectionLvl : ['imageOriginal', 'imagePreview']};
 
+KellyRecorderFilterPikabu.onBeforeDownloadValidate = function(handler, data) {
+    
+    if (handler.url.indexOf('pikabu.ru') == -1) return;
+    
+    if (data.url.indexOf('#nsfw') != -1) {
+        
+        var byteArray = new Uint8Array( data.arrayBuffer );
+        
+        var result = KellyRecorderFilterPikabu.deNSFW.descramble(byteArray, parseInt(data.url.split('#nsfw')[1]));
+        if (result.base64) {
+            data.onReady(KellyTools.base64toBlob(result.base64, result.contentType), result.contentType);   
+        } else {
+            data.onReady(false, false, "Способ расшифровки NSFW не сработал - " + data.url);   
+        } 
+        
+        byteArray = null;
+        return true;
+    }
+    
+}
+
+KellyRecorderFilterPikabu.onRecorderImagesShow = function(handler, data) {
+    
+    if (handler.url.indexOf('pikabu.ru') == -1) return;
+
+    if (KellyDPage.cats['pikabu_nsfw'] && KellyDPage.cats['pikabu_nsfw'].id) {
+        
+        var tooltip = KellyTools.getNoticeTooltip(KellyDPage.env.hostClass, KellyDPage.env.className); 
+        
+            KellyTools.setHTMLData(tooltip.getContent(), '<div>На странице обнаружены <b>NSFW</b> картинки которые сайт отдает в зашифрованном виде. ' + 
+            'При скачивании расширение попробует их автоматически разблокировать и сохранить в исходном виде. ' + 
+            'Если разработчики сайта поменяли алгоритм и разблокировка перестала работать, дайте знать на <b>radiokellyc@gmail.com</b></div>'); 
+            
+            tooltip.show(true);            
+    }
+}
+
 KellyRecorderFilterPikabu.addItemByDriver = function(handler, data) {
 
     if (handler.url.indexOf('pikabu.ru') == -1) return;
     
     // protected image
     
-    if (data.el.tagName == 'IMG' && data.el.getAttribute('data-scrambler-offset') !== null) {     
-        
-        if (!data.el.getAttribute('src')) return handler.addDriverAction.SKIP;
-        
-        handler.addSingleSrc(data.item, data.el.src, 'addSrcFromAttributes-src', data.el, ['pikabu_post_preview']);
-        
-        if (data.item.relatedSrc.length <= 0) return handler.addDriverAction.SKIP;
-        
-        KellyRecorderFilterPikabu.deNSFW.total++;
-        KellyRecorderFilterPikabu.deNSFW.updateNotice();
-        
-        KellyTools.fetchRequest(data.el.getAttribute('data-large-image'), {responseType : 'arrayBuffer'}, function(urlOrig, arrayBuffer, errorCode, errorText, controller) {
-            
-            // console.log('fetch Pikabu nsfw item ' + data.el.getAttribute('data-large-image'));
-                
-            if (arrayBuffer === false) {          
-            
-                console.log('Fail to get arraybuffer for Pikabu nsfw item ' + data.el.getAttribute('data-large-image'));
-                
-            } else {
-                   
-                var byteArray = new Uint8Array( arrayBuffer );
-                var base64 = KellyRecorderFilterPikabu.deNSFW.descramble(byteArray, parseInt(data.el.getAttribute('data-scrambler-offset')));
-                
-                if (base64 !== false && base64.length > 256) {
-                    
-                    var parentEl = data.el.parentElement;                    
-                    var img = document.createElement('IMG');                    
-                        img.setAttribute('kelly-nsfw-decompiled', 1);
-                        img.src = base64;
-                        img.style.display = 'none';
-                        
-                        parentEl.appendChild(img);
-                }                
-            }
-            
-            KellyRecorderFilterPikabu.deNSFW.ready++;
-            KellyRecorderFilterPikabu.deNSFW.updateNotice();
-            
-        });
-        
-        return handler.addDriverAction.ADD;
-        
-    } else if (data.el.tagName == 'SOURCE' && data.el.getAttribute('type') == 'video/mp4' && data.el.src.indexOf('.mp4') != -1) {
+    if (data.el.tagName == 'SOURCE' && data.el.getAttribute('type') == 'video/mp4' && data.el.src.indexOf('.mp4') != -1) {
                 
         handler.addSingleSrc(data.item, data.el.src, 'srcVideo', data.el, ['pikabu_post_video']);
         if (data.item.relatedSrc.length <= 0) return handler.addDriverAction.SKIP;
@@ -58,25 +52,27 @@ KellyRecorderFilterPikabu.addItemByDriver = function(handler, data) {
 
     // catch decompiled item, oreder is important (must be upper common "article" detector)
     
-    } else if (data.el.tagName == 'IMG' && data.el.getAttribute('kelly-nsfw-decompiled') == '1') {
-        
-        handler.addSingleSrc(data.item, data.el.src, 'addSrcFromAttributes-src', data.el, KellyRecorderFilterPikabu.getPostGroups(true));
-        if (data.item.relatedSrc.length <= 0) return handler.addDriverAction.SKIP;
-        return handler.addDriverAction.ADD;
-        
     } else if (data.el.tagName == 'IMG' && data.el.getAttribute('data-src') && data.el.getAttribute('data-viewable') && KellyTools.getParentByTag(data.el, 'ARTICLE')) {
         
         var pdata = data.el.getAttribute('data-src');
         var fdata = data.el.getAttribute('data-large-image');
         var fGroups = KellyRecorderFilterPikabu.getPostGroups(false);
+        var pGroups = ['pikabu_post_preview'];
+        
+        var marker = '';        
+        if (data.el.getAttribute('data-scrambler-offset') !== null) {
+            marker = '#nsfw' + data.el.getAttribute('data-scrambler-offset');
+            fGroups.push('pikabu_nsfw');
+            pGroups.push('pikabu_nsfw');
+        }
         
         if (fdata && pdata && pdata.indexOf(fdata) == -1) {
-            handler.addSingleSrc(data.item, data.el.getAttribute('data-src'), 'addSrcFromAttributes-src', data.el, ['pikabu_post_preview']);
+            handler.addSingleSrc(data.item, data.el.getAttribute('data-src') + marker, 'addSrcFromAttributes-src', data.el, pGroups);
         } else {
             fGroups.push('pikabu_post_preview');
         }
         
-        handler.addSingleSrc(data.item, data.el.getAttribute('data-large-image'), 'addSrcFromAttributes-src', data.el, fGroups);  
+        handler.addSingleSrc(data.item, data.el.getAttribute('data-large-image') + marker, 'addSrcFromAttributes-src', data.el, fGroups);  
         
         if (data.item.relatedSrc.length <= 0) return handler.addDriverAction.SKIP;
         return handler.addDriverAction.ADD;
@@ -90,9 +86,6 @@ KellyRecorderFilterPikabu.getPostGroups = function(nsfw){
     if (KellyRecorderFilterPikabu.dirName) {            
         postGroups.push('pikabu_' + KellyRecorderFilterPikabu.dirName);
     }
-    if (nsfw) {            
-        postGroups.push('pikabu_nsfw');
-    }   
     
     return postGroups;
 }
@@ -132,7 +125,7 @@ KellyRecorderFilterPikabu.onStartRecord = function(handler, data) {
         pikabu_comment : {name : 'Comment', color : '#b7dd99', selected : 110},
         pikabu_post : {name : 'Post', color : '#b7dd99', selected : 110},
         pikabu_post_preview : {name : 'Post preview', color : '#b7dd99', selected : 100},
-        pikabu_nsfw : {name : 'NSFW', color : '#ff0983'},
+        pikabu_nsfw : {name : 'Encoded NSFW', color : '#ff0983'},
         pikabu_post_video : {name : 'Post Video', color : '#218bea'},
         
      };
@@ -154,23 +147,6 @@ KellyRecorderFilterPikabu.onStartRecord = function(handler, data) {
 }
    
 KellyRecorderFilterPikabu.deNSFW = {
-    
-    total : 0,
-    ready : 0,
-    
-    updateNotice : function() {
-        
-        var handler = KellyRecorderFilterPikabu;
-        if (!handler.wd) return;
-        
-        if (handler.deNSFW.total <= 0) handler.wd.notice(false);
-        else {
-            var txt = 'дождитесь подгрузки NSFW картинок : ' + handler.deNSFW.ready + ' из ' + handler.deNSFW.total;
-            
-            if (handler.deNSFW.ready == handler.deNSFW.total) txt += ' ... готово'; 
-            handler.wd.notice(txt);
-        }
-    },
     
     IMAGE_DATA_SEPARATOR : "\0\0\0\0scramble:",
     MIME_LENGTH : 20,
@@ -210,7 +186,7 @@ KellyRecorderFilterPikabu.deNSFW = {
             r.push(String.fromCharCode.apply(null, Array.from(byteArray.slice(o, o + 5e3))));
         }
         
-        return 'data:' + mimeType + ';base64,' + btoa(r.join(""));
+        return { contentType : mimeType, base64 : btoa(r.join("")) };
     },
     
     findEncodedImageBytesOffset : function(byteArray) {
