@@ -1065,7 +1065,7 @@ function KellyGrabber(cfg) {
                 var html = '';
                 if (options.manualExclude) {
                     html += '\
-                     <input type="checkbox" class="' + imageClassName + '-download-enabled" data-no-tip="1" id="' + downloadItemId + '-download-enabled" name="' + downloadItemId + '-download-enabled" value="' + i + '" ' + (manualExcludeItems.indexOf(i) != -1 ? '' : 'checked') + (mode == 'download' ? ' disabled' : '') + '>\
+                     <input type="checkbox" class="' + imageClassName + '-download-enabled" data-no-tip="1" id="' + downloadItemId + '-download-enabled" name="' + downloadItemId + '-download-enabled" ' + (manualExcludeItems.indexOf(i) != -1 ? '' : 'checked') + (mode == 'download' ? ' disabled' : '') + '>\
                     <label title="Включить картинку в список выгрузки" class="' + imageClassName + '-download-enabled-label" data-no-tip="1" for="' + downloadItemId + '-download-enabled"></label>\
                     ';
                 }
@@ -1082,9 +1082,14 @@ function KellyGrabber(cfg) {
                     
                     var downloadEnabled = KellyTools.getElementByClass(itemContainer, imageClassName + '-download-enabled'); 
                         downloadEnabled.onchange = function() {  
-                        
-                            var itemIndex = parseInt(this.value);
+                            
+                            var holder = KellyTools.getParentByClass(this, imageClassName + '-download-state-holder');
+                            var itemIndex = parseInt(holder.getAttribute('downloadindex'));
+                            
+                            // get all download items indexes that related to item index if it contains sub items
                             var indexList = downloads[itemIndex].subItem !== false ? subItems[downloads[itemIndex].item.id] : [itemIndex];
+                            
+                            // exclude / add all to list
                             for (var b = 0; b < indexList.length; b++) {  
                                
                                 var index = manualExcludeItems.indexOf(indexList[b]);
