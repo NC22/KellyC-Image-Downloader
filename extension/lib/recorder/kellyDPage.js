@@ -498,6 +498,10 @@ KellyDPage.showAdditionFilters = function() {
              
     html += '<div class="' + cl + '-related-links-options-wrap ' + cl + '-hidden">\
                 <div class="' + cl + '-related-links-options">\
+                    <select class="' + cl + '-relatedDocLimit">\
+                        <option value="one" selected>' + KellyLoc.s('', 'related_doc_limit_one') + '</option>\
+                        <option value="all" >' + KellyLoc.s('', 'related_doc_limit_all') + '</option>\
+                    </select>\
                     <input type="text" class="' + cl + '-filter-url-related ' + cl + '-relatedDocTrustedUrl" placeholder="' + KellyLoc.s('', 'recorder_related_doc_trusted_url') + '">\
                     <label><input type="checkbox" class="' + cl + '-relatedDocTrustedUrlReg"> ' + KellyLoc.s('Reqular expression', 'recorder_regular_expr') + '</label>\
                     <label><input type="checkbox" class="' + cl + '-relatedDocDeepSearch"> ' + KellyLoc.s('', 'recorder_related_doc_deep_search') + '</label>\
@@ -660,7 +664,12 @@ KellyDPage.showAdditionFilters = function() {
                 threadOptions : KellyDPage.storage.coptions.recorderThread,
         });
         
-        KellyDPage.aDProgress.docLoader.additionOptions = {'relatedDocDeepSearch' : false, 'relatedDocTrustedUrl' : false, 'relatedDocTrustedUrlReg' : false};
+        KellyDPage.aDProgress.docLoader.additionOptions = {
+            'relatedDocDeepSearch' : false, 
+            'relatedDocTrustedUrl' : false, 
+            'relatedDocTrustedUrlReg' : false,
+            'relatedDocLimit' : 'all',
+       };
         
         for (var aOptionKey in KellyDPage.aDProgress.docLoader.additionOptions) {
             
@@ -1157,10 +1166,13 @@ KellyDPage.init = function() {
      KellyDPage.env.events.onGridResizeImages = function(self, itemInfo) {
          if (!itemInfo.boundEl.getAttribute('data-width')) return;
          if (!itemInfo.tile || !itemInfo.boundEl || itemInfo.boundEl.tagName != 'IMG') return false;
-                    
+         
          var dimensionsInfo = KellyTools.getElementByClass(itemInfo.tile, KellyDPage.env.className + '-preview-dimensions'); 
          if (!dimensionsInfo) {
-             dimensionsInfo = document.createElement('DIV');
+             dimensionsInfo = document.createElement('A');
+             dimensionsInfo.title = KellyLoc.s('', 'image_main');
+             dimensionsInfo.href = itemInfo.boundEl.src;
+             dimensionsInfo.target = '_blank';
              dimensionsInfo.className = KellyDPage.env.className + '-preview-dimensions';
              dimensionsInfo.innerText = itemInfo.boundEl.getAttribute('data-width') + 'x' + itemInfo.boundEl.getAttribute('data-height');
              itemInfo.tile.appendChild(dimensionsInfo);

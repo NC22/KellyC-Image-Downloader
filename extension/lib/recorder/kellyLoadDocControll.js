@@ -15,9 +15,9 @@ function KellyLoadDocControll(cfg)
         'relatedDocDeepSearch' : false, // if true - always use 2-steps process
         'relatedDocTrustedUrl' : false, // replaces _validators.js by custom input url string for mark items as trusted images by handler.parser[KellyPageWatchdog].parseImages() method
         'relatedDocTrustedUrlReg' : false, // is input url string is reg-exp
+        'relatedDocLimit' : 'all',
         
         // todo - add to options - add addition notices on qualityimagefound event or on image load to keep stage 2 more informative feedback
-        'relatedDocDeepSearchMaxMaches' : false, // max number of images that much with preview proportions and can be taken from one related document
         'relatedDocAspectRatioCheck' : false, // check proportions and skip if ratio differs (> 0.05)
     };
     
@@ -113,6 +113,25 @@ function KellyLoadDocControll(cfg)
         }            
     }
     
+    function isBetterMatchDocData(imageData, testData) {
+        
+        if (!imageData.pw || (imageData.pw <= testData.pw && imageData.ph <= testData.ph)) {
+            
+            if (handler.additionOptions.relatedDocAspectRatioCheck && imageData.pw) {
+
+                var aspectRatio = testData.pw / testData.ph;
+                var aspectRatioPreview = imageData.pw / imageData.ph;
+
+                if (Math.abs(aspectRatioPreview - aspectRatio) > 0.05) { 
+                    return false;
+                }
+            }
+            
+            return true;
+            
+        } else return false;
+    }
+    
     // Stage 2. or "Deep search" - optional stage for "untrusted media items that was found in related documents" during stage 1. - its skipped for items if parseImagesDocByDriver return true and used as default behaiveour
     
     handler.runImgLoad = function() {
@@ -139,41 +158,48 @@ function KellyLoadDocControll(cfg)
                  if (reason == 'stop') return;
                  
                  var items = handler.storage.items;
-                 var imagesTaken = 0;
                  
                  for (var i = 0; i < handler.docsImages.length; i++) {
-                     
-                    if (!handler.docsImages[i].untrustedData) continue; // doument already parsed by external driver, skipped
-                    
-                    if (handler.events.onRelatedDocImageCheck && handler.events.onRelatedDocImageCheck(handler.docsImages[i]) === true) continue;
-                    
-                    if (!handler.docsImages[i].relatedItem.pw || (handler.docsImages[i].relatedItem.pw <= handler.docsImages[i].pw && handler.docsImages[i].relatedItem.ph <= handler.docsImages[i].ph)) {
+                                        
+                    if (!handler.docsImages[i].untrustedData) continue; // document already parsed by external driver, skipped                    
+                    if (handler.events.onRelatedDocImageCheck && handler.events.onRelatedDocImageCheck(handler.docsImages[i], handler) === true) continue;
+                                       
+                    if (handler.additionOptions.relatedDocLimit != 'all') {
                         
-                        // optionaly validate loaded images by ratio (compare related to document "preview" image WxH and document image WxH)
-                        
-                        if (handler.additionOptions.relatedDocAspectRatioCheck && handler.docsImages[i].relatedItem.pw) {
+                        var imageData = handler.docsImages[i].relatedItem;
+                        if (handler.docsImages[i].relatedItem.docsImagesBM) { // currently already found some best match by size \ proportions ratio
+                            imageData = handler.docsImages[i].relatedItem.docsImagesBM;                        
+                        } 
 
-                            var aspectRatio = handler.docsImages[i].pw / handler.docsImages[i].ph;
-                            var aspectRatioPreview = handler.docsImages[i].relatedItem.pw / handler.docsImages[i].relatedItem.ph;
-
-                            if (Math.abs(aspectRatioPreview - aspectRatio) > 0.05) { 
-                                continue;
-                            }
-                        }
-                        
-                        handler.addDocItem(handler.docsImages[i]);
-                        imagesTaken++;
-                        
-                        // optionaly limit maximum amount of images that can be taken from one document
-                        
-                        if (handler.additionOptions.relatedDocDeepSearchMaxMaches !== false && imagesTaken >= handler.additionOptions.relatedDocDeepSearchMaxMaches) {
-                            break;
+                        if (isBetterMatchDocData(imageData, handler.docsImages[i])) {
+                            
+                            handler.docsImages[i].relatedItem.docsImagesBM = handler.docsImages[i];
+                            
+                        } else {
+                            handler.docsImages[i].refused = 'proportions';
                         }
                         
                     } else {
-                        handler.docsImages[i].refused = 'proportions';
+                        
+                        if (isBetterMatchDocData(handler.docsImages[i].relatedItem, handler.docsImages[i])) {
+                            
+                            handler.addDocItem(handler.docsImages[i]);
+                            
+                        } else {
+                            handler.docsImages[i].refused = 'proportions';
+                        }
                     }
-                    
+    
+                 }
+                 
+                 // post-add images by best proportion match where needed
+                 if (handler.additionOptions.relatedDocLimit != 'all') {
+                     for (var i = 0; i < handler.docsImages.length; i++) {
+                         
+                        if (handler.docsImages[i].untrustedData && handler.docsImages[i].relatedItem.docsImagesBM) {
+                            handler.addDocItem(handler.docsImages[i].relatedItem.docsImagesBM);
+                        }
+                     }
                  }
                  
                  stage = 'off';

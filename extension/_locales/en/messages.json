@@ -564,7 +564,7 @@
         "message":"Image №__IMAGEN__"
     },
     "image_main":{  
-        "message":"Main image"
+        "message":"Image"
     },
     "image_total":{  
         "message":"Images total : __IMAGEN__"
@@ -766,6 +766,12 @@
     }, 
     "related_doc":{  
         "message":"Related doc"
+    },   
+    "related_doc_limit_one":{  
+        "message":"Take only biggest one image per document"
+    },   
+    "related_doc_limit_all":{  
+        "message":"Take any image that bigger then preview"
     }, 
     "restore":{  
         "message":"Restore"

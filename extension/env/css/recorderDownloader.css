@@ -30,10 +30,11 @@
     position: absolute;
     bottom: 6px;
     display: block;
-    line-height: 20px;
-    height: 20px;
     background: #ffa73acc;
-    padding: 0 2px;
+    line-height: 20px;
+    text-decoration : none;
+    height: 22px;
+    padding: 0px 4px;
 }
 
 .__BASECLASS__-FavItem-small .__BASECLASS__-preview-wrap {
@@ -72,7 +73,7 @@
     margin-right : 0;
 }
 
-.__BASECLASS__-ModalBox-addition input[type=text] {
+.__BASECLASS__-ModalBox-addition input[type=text], .__BASECLASS__-ModalBox-addition select {
     width: 100%;
     height: 32px;
     margin-bottom: 6px;

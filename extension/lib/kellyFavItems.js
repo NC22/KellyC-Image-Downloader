@@ -824,9 +824,13 @@ function KellyFavItems(cfg)
         if (item.pw) text += item.pw + 'x' + item.ph + ' (' + lng.s('Кэш  пропорций : ', 'cache_wh') + ')';
         
         text += '<div class="' + env.className + '-ItemTip-controll">';
+                
+        if (item.relatedDoc) {
+             text += '<a href="' + item.relatedDoc + '" target="_blank">' + lng.s('Документ', 'related_doc') + '</a>' + '<br>';  
+        } else if (item.link) {
+             text += '<a href="' + KellyTools.validateUrlForLocation(item.link, env.location) + '" target="_blank">' + lng.s('Показать пост', 'go_to_publication') + '</a>' + '<br>';       
+        }
         
-        if (item.relatedDoc) text += '<a href="' + item.relatedDoc + '" target="_blank">' + lng.s('Документ', 'related_doc') + '</a>' + '<br>';  
-        else if (item.link) text += '<a href="' + KellyTools.validateUrlForLocation(item.link, env.location) + '" target="_blank">' + lng.s('Показать пост', 'go_to_publication') + '</a>' + '<br>';        
         if (item.commentLink)  text += '<a href="' + KellyTools.validateUrlForLocation(item.commentLink, env.location) + '" target="_blank">' + lng.s('Показать комментарий', 'go_to_comment') + '</a>' + '<br>';
         
         text += '</div>';

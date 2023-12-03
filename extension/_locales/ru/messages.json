@@ -573,7 +573,7 @@
         "message":"Изображение __IMAGEN__"
     },
     "image_main":{  
-        "message":"Основное изображение"
+        "message":"Картинка"
     },
     "image_total":{  
         "message":"Изображений : __IMAGEN__"
@@ -769,6 +769,12 @@
     }, 
     "related_doc":{  
         "message":"Документ"
+    }, 
+    "related_doc_limit_one":{  
+        "message":"Только одно изображение на документ"
+    },   
+    "related_doc_limit_all":{  
+        "message":"Все картинки которые больше превью"
     }, 
     "remove_from_fav":{  
         "message":"удалить"
