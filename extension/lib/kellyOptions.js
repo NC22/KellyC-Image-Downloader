@@ -333,7 +333,7 @@ function KellyOptions(cfg) {
         if (!fav.coptions.grid.rowHeight || fav.coptions.grid.rowHeight <= 0) fav.coptions.grid.rowHeight = 250;
         if (!fav.coptions.grid.min || fav.coptions.grid.min <= 0) fav.coptions.grid.min = 2;
         if (!fav.coptions.grid.heightDiff || fav.coptions.grid.heightDiff <= 0) fav.coptions.grid.heightDiff = 10;
-        if (!fav.coptions.grid.perPage || fav.coptions.grid.perPage <= 0) fav.coptions.grid.perPage = 60;        
+        if (!fav.coptions.grid.perPage || fav.coptions.grid.perPage <= 0) fav.coptions.grid.perPage = 40;        
         if (fav.coptions.grid.perPage > 1000) fav.coptions.grid.perPage = 1000;        
         if (fav.coptions.grid.heightDiff > 60) fav.coptions.grid.heightDiff = 60;
                                

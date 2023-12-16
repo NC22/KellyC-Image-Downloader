@@ -429,13 +429,15 @@ KellyPopupPage.init = function() {
         sm.loadDB('config', function(fav) { 
             
             if (fav) {
+                
                 if (fav.coptions.toolbar && fav.coptions.toolbar.heartHidden) {
                     KellyPopupPage.buttons['support_project'].hidden = true; 
                 }
                 
-                // console.log(fav.coptions);
-                
                 if (fav.coptions.darkTheme) KellyPopupPage.css.push('darkRecorderPopup');
+                
+            } else {
+                 KellyPopupPage.css.push('darkRecorderPopup');
             }
             
             KellyTools.getBrowser().runtime.sendMessage({method: "getResources", items : KellyPopupPage.css}, function(request) {

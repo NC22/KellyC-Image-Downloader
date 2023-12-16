@@ -946,10 +946,10 @@ function KellyGrabber(cfg) {
     
     function showDownloadItemInfoTooltip(downloadIndex, target) {
     
-        if (KellyTools.getElementByClass(document, fav.getGlobal('env').className + '-tooltipster-help')) {
-            KellyTools.log('tooltip is not exist', 'KellyGrabber');
-            return;
-        }
+       // if (KellyTools.getElementByClass(document, fav.getGlobal('env').className + '-tooltipster-help')) {
+       //     KellyTools.log('tooltip is not exist', 'KellyGrabber');
+       //     return;
+       // }
         
         if (!downloads[downloadIndex]) {
             KellyTools.log('cant display item info by downloadIndex : ' + downloadIndex, 'KellyGrabber');

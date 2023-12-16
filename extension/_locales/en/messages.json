@@ -768,10 +768,10 @@
         "message":"Related doc"
     },   
     "related_doc_limit_one":{  
-        "message":"Take only biggest one image per document"
+        "message":"Take only one best match image"
     },   
     "related_doc_limit_all":{  
-        "message":"Take any image that bigger then preview"
+        "message":"Take all images that bigger then preview"
     }, 
     "restore":{  
         "message":"Restore"

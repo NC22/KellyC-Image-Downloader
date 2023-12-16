@@ -101,10 +101,16 @@ KellyDPage.aDProgress = {
         return KellyDPage.aDProgress.etooltip;
     },
     
+    // item - optional to push bad items to "bad items" category later (load related doc process)
+    
     addErrorItem : function(item, error) {
         
-        var handler = KellyDPage.aDProgress;            
+        var handler = KellyDPage.aDProgress;
+        
+        if (item !== false) {
             handler.errorItems.push(item);
+        }
+        
             handler.errors.push(error); 
 
         if (handler.etooltip && handler.etooltip.isShown()) {
@@ -1150,9 +1156,13 @@ KellyDPage.init = function() {
       KellyDPage.env.events.onUpdateFilteredData = function(displayedItems){
           KellyDPage.updateDisplayedState();
       }
-      
+            
       KellyDPage.env.events.onGridUpdated = function(self, isAllBoundsLoaded) {
-       
+          
+          if (isAllBoundsLoaded) {              
+                KellyDPage.defaultPageParser.filterCallback('onImagesGridReady', {self : KellyDPage, grid : K_FAV.getImageGrid()}, true);  // grid.getTilesBlock 
+          }
+          
           if (isAllBoundsLoaded && badItems.length) {
               
               console.log('Bad items : ' + badItems.length); // todo showCatList public?
@@ -1163,6 +1173,10 @@ KellyDPage.init = function() {
           }
      }   
      
+     KellyDPage.env.events.onUpdateImagesBlock = function(self, imagesBlock, startItem, end, page, totalPages) {
+          KellyDPage.defaultPageParser.filterCallback('onUpdateImagesBlock', {self : KellyDPage, imagesBlock : imagesBlock, startItem : startItem, end : end}, true);  // grid.getTilesBlock 
+     }   
+     
      KellyDPage.env.events.onGridResizeImages = function(self, itemInfo) {
          if (!itemInfo.boundEl.getAttribute('data-width')) return;
          if (!itemInfo.tile || !itemInfo.boundEl || itemInfo.boundEl.tagName != 'IMG') return false;
@@ -1171,10 +1185,15 @@ KellyDPage.init = function() {
          if (!dimensionsInfo) {
              dimensionsInfo = document.createElement('A');
              dimensionsInfo.title = KellyLoc.s('', 'image_main');
-             dimensionsInfo.href = itemInfo.boundEl.src;
+             
+             var index = parseInt(itemInfo.tile.getAttribute('itemIndex')), item = K_FAV.getGlobal('fav').items[index];
+             if (item && item.pImage && item.pImage.indexOf('data:') === -1 && item.pImage.indexOf('blob:') === -1) {
+                 dimensionsInfo.href = item.pImage;
+             }            
+             
              dimensionsInfo.target = '_blank';
              dimensionsInfo.className = KellyDPage.env.className + '-preview-dimensions';
-             dimensionsInfo.innerText = itemInfo.boundEl.getAttribute('data-width') + 'x' + itemInfo.boundEl.getAttribute('data-height');
+             dimensionsInfo.innerText = itemInfo.tile.classList.contains(KellyDPage.env.className + '-FavItem-error') ? '? x ?' : itemInfo.boundEl.getAttribute('data-width') + 'x' + itemInfo.boundEl.getAttribute('data-height');
              itemInfo.tile.appendChild(dimensionsInfo);
          }
      }

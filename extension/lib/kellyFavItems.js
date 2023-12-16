@@ -1858,7 +1858,12 @@ function KellyFavItems(cfg)
             }
         }
         
-        updatePagination(KellyTools.getElementByClass(sideBarWrap, env.className + '-pagination'));     
+        updatePagination(KellyTools.getElementByClass(sideBarWrap, env.className + '-pagination'));  
+         
+        if (env.events.onUpdateImagesBlock) {
+            env.events.onUpdateImagesBlock(handler, imagesBlock, startItem, end, page, totalPages);
+        }
+        
         return true;
     }
     

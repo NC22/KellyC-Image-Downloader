@@ -1329,7 +1329,7 @@ function KellyFavStorageManager(cfg) {
                 addToFavSide : false,                
                 addToFavNoConfirm : false,
                 webRequest : true,
-                // darkTheme : true,
+                darkTheme : true,
                 // storageDesc - associations of .storage keys with pretty names | todo - make changable from options [Profiles] tab
             };
         }
@@ -1358,7 +1358,7 @@ function KellyFavStorageManager(cfg) {
                 heightDiff : 10,
                 min : 2, 
                 cssItem : '',
-                perPage : 60,                
+                perPage : 40,                
                 viewerShowAs : 'hd',
                 autoScroll : 1,
                 lazy : true,
