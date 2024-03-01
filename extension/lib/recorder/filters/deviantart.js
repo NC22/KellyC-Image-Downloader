@@ -31,7 +31,8 @@ KellyRecorderFilterDA.parseImagesDocByDriver = function(handler, data) {
                 
             var begin = 'window.__INITIAL_STATE__ = JSON.parse("', end = '")';
             
-            KellyRecorderFilterDA.strDa = data.thread.response.substring( data.thread.response.lastIndexOf(begin) + begin.length, data.thread.response.lastIndexOf(end));
+            KellyRecorderFilterDA.strDa = data.thread.response.substring(data.thread.response.lastIndexOf(begin) + begin.length);
+            KellyRecorderFilterDA.strDa = KellyRecorderFilterDA.strDa.substring(0, KellyRecorderFilterDA.strDa.indexOf(end));
             
             // todo - DA currently have some JSON stringified blocks inside comments sections and this brock parse sintax
             
@@ -71,6 +72,7 @@ KellyRecorderFilterDA.parseImagesDocByDriver = function(handler, data) {
             }
             
        } catch (e) {
+            handler.docLoader.lastError = 'DeviantArt page JSON parse (KellyRecorderFilterDA.strDa) error in url : <br> <b>' + handler.url + '</b>';
             console.log(e);
        }
            

@@ -3,7 +3,7 @@
 
 var KellyEDispetcher = new Object;
 
-    KellyEDispetcher.updatePageRevision = []; // versions, that related to update.html page text, if already notified on one of listed versions - skip | '1.2.5.0', '1.2.5.1', '1.2.5.2', '1.2.5.3', '1.2.5.4'
+    KellyEDispetcher.updatePageRevision = ['1.2.8.5']; // versions, that related to update.html page text, if already notified on one of listed versions - skip | '1.2.5.0', '1.2.5.1', '1.2.5.2', '1.2.5.3', '1.2.5.4'
 
     KellyEDispetcher.eventsAccepted = false;
     KellyEDispetcher.envDir = 'env/';
@@ -62,11 +62,13 @@ var KellyEDispetcher = new Object;
             KellyEDispetcher.sendNotification({method: "onChanged", downloadDelta : downloadDelta});
         },
         onInstalled :  function(details) { // this.api.runtime.onInstalled
-            
+                
+                // console.log(details);
+                
                 if (details.reason == "install") {
                     
-                   console.log('[install]');  
-                   KellyEDispetcher.api.tabs.create({url: '/env/html/update.html?mode=install'}, function(tab){});
+                 //  console.log('[install]');  
+                 //  KellyEDispetcher.api.tabs.create({url: '/env/html/update.html?mode=install'}, function(tab){});
                    
                 } else if (details.reason == "update") {
                    
@@ -77,7 +79,7 @@ var KellyEDispetcher = new Object;
                    }
                    
                    if ( KellyEDispetcher.updatePageRevision.indexOf(KellyEDispetcher.api.runtime.getManifest().version) == -1 ) {
-                        console.log('[update] skip update info - mismatch version');
+                        console.log('[update] skip update info - mismatch version ' + KellyEDispetcher.api.runtime.getManifest().version);
                         return;
                    }
                    
