@@ -1082,7 +1082,10 @@ KellyDPage.showRecordedImages = function(onShow) {
           
           // console.log(KellyDPage.env.webRequestsRules);          
           // window.requestAnimationFrame(function(){ });  
-
+          
+          // todo - configurable for loadrelateddoc
+          // K_FAV.getImageGrid().updateConfig({rules : {lazy : true, loadLimit : 1}});
+          // delayUpdateTileGrid set timeout
           K_FAV.save('items'); // save to default profile (setted in .init method) last loaded data   
      });
 }
