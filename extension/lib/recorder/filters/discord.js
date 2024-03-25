@@ -29,9 +29,7 @@ KellyRecorderFilterDiscord.addItemByDriver = function(handler, data) {
                     url.searchParams.delete('width');
                     
                 handler.addSingleSrc(data.item, url.href, 'addSrcFromAttributes-src', full[0], ['imageOriginal']);
-                console.log('erro ' + handler.lastError); 
-                
-                console.log(data.item);
+
             }
             
         }

@@ -220,7 +220,7 @@ KellyTools.xmlRequest = function(urlOrig, cfg, callback) {
         };
 
         xhr.open(cfg.method ? cfg.method : 'GET', urlOrig, true);        
-        xhr.responseType = cfg.responseType ? cfg.responseType : 'blob';
+        xhr.responseType = cfg.responseType ? cfg.responseType.toLowerCase() : 'blob';
         
         // todo dynamic list of x-headers, make compatible with fetchrequest config
         if (cfg.xRequestedWith) xhr.setRequestHeader('x-requested-with', cfg.xRequestedWith);
@@ -409,7 +409,7 @@ KellyTools.getMimeType = function(ext) {
     else if (ext == 'zip' ) mimetype = 'application/zip';
     else if (ext == 'mp4' ) mimetype = 'video/mp4';
     else if (ext == 'webm' ) mimetype = 'video/webm';
-    else if (ext == 'txt' ) mimetype = 'text/plain';
+    else if (ext == 'txt' || ext == 'log') mimetype = 'text/plain';
     else if (ext == 'json' ) mimetype = 'application/json';
     
     return mimetype;

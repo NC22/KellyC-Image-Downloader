@@ -50,7 +50,7 @@
         ]
    } ],
    "manifest_version" : 2,
-   "version": "1.2.8.6",
+   "version": "1.2.8.7",
    "name": "KellyC Image Downloader",
    "description": "__MSG_ext_description_recorder__",
    "icons": { 

@@ -1931,16 +1931,35 @@ function KellyGrabber(cfg) {
              }  
         }
         
+        var view = false;
+        
+        if (!contentTypeHeader) {
+            
+            // todo add all media extensions headers checks, and trust only this info
+            
+            if (!view) view = new Uint8Array( arrayBuffer );
+            
+            var ext = KellyTools.getExt(urlOrig);
+            if (KellyTools.isWebp(view)) ext = 'webp';
+            if (!ext) ext = 'jpg';
+            
+            contentTypeHeader = KellyTools.getMimeType(ext);   
+            toTxtLog('DOWNLOAD URL ' + urlOrig + " | warning : server not returned any content-type header, will manualy check extension - " + ext + " " + contentTypeHeader + "\n\r");
+                  
+        }
+        
         var getDefaultBlob = function() {
             return new Blob([arrayBuffer], { type: contentTypeHeader});
         }
         
         if (options.webpToPng) {
             
-            var view = new Uint8Array( arrayBuffer );
+            if (!view) view = new Uint8Array( arrayBuffer );
             
             if ( KellyTools.isWebp(view) ) {
                 
+                toTxtLog('DOWNLOAD URL ' + urlOrig + " | conversion to PNG\n\r");
+             
                 var canvas = document.createElement('CANVAS');
                 var ctx = canvas.getContext('2d');
                 var img = document.createElement('IMG');
@@ -1958,15 +1977,18 @@ function KellyGrabber(cfg) {
                 
                 img.src = URL.createObjectURL(getDefaultBlob());
                 
-            } else {                
+            } else {          
                 onReady(getDefaultBlob(), contentTypeHeader);
             }
             
-            view = null;
             
         } else {
             
             onReady(getDefaultBlob(), contentTypeHeader);
+        }
+        
+        if (view) {
+            view = null;
         }
     }
     
@@ -2251,10 +2273,11 @@ function KellyGrabber(cfg) {
                 }
                 
             } else {
-                
-                toTxtLog('DOWNLOADID ' + download.id + ' | file LOADED as DATA ARRAY OR BLOB ' + download.url + ', send to browser API for save to folder : ' + downloadOptions.filename);
+                                
                 if (!downloadOptions.ext) downloadOptions.ext = KellyTools.getExtByMimeType(fileData.type);
-        
+                
+                toTxtLog('DOWNLOADID ' + download.id + ' | file LOADED as DATA ARRAY OR BLOB ' + download.url + ', send to browser API for save to folder : ' + downloadOptions.filename + ' | ' + downloadOptions.ext + ' | ' + fileData.type);
+                
                 downloadOptions.url = fileData;     
 
                 handler.downloadUrl(downloadOptions, onDownloadApiStart);
@@ -2605,7 +2628,7 @@ KellyGrabber.DOWNLOADID_INACTIVE = false;
 KellyGrabber.validateDriver = function(driver) {
             
     var availableTransport = [KellyGrabber.TRANSPORT_BLOB, KellyGrabber.TRANSPORT_BLOBBASE64];          
-    var availableRequest = [KellyGrabber.REQUEST_XML, KellyGrabber.REQUEST_FETCH, KellyGrabber.REQUEST_FETCHBG];
+    var availableRequest = [KellyGrabber.REQUEST_FETCH, KellyGrabber.REQUEST_XML, KellyGrabber.REQUEST_FETCHBG];
     
     var defaultDriver = {
            requestMethod : availableRequest[0], 
