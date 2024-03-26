@@ -656,7 +656,7 @@ KellyDPage.showAdditionFilters = function() {
         
         var self = this;
         if (KellyDPage.aDProgress.docLoader && KellyDPage.aDProgress.docLoader.getCurrentStage() != 'off') {
-            KellyDPage.aDProgress.docLoader.stop();
+            KellyDPage.aDProgress.docLoader.pause(true);
             return false;
         }
         
@@ -836,7 +836,29 @@ KellyDPage.showAdditionFilters = function() {
                }
                
                markFailedItems(true);               
-               KellyDPage.aDProgress.statistic.innerText = KellyLoc.s('', notice);       
+               KellyDPage.aDProgress.statistic.innerText = KellyLoc.s('', notice) + " ";
+               
+               if (reason == 'stop') {
+                   
+                   if (
+                    (KellyDPage.aDProgress.docLoader.getCurrentStage() == 'loadDoc' && KellyDPage.aDProgress.docLoader.thread.getJobs().length > 0) ||
+                    (KellyDPage.aDProgress.docLoader.getCurrentStage() == 'loadImg')
+                    ) {
+                   
+                       var continueBtn = document.createElement('A');
+                           continueBtn.onclick = function() {
+                               
+                               KellyDPage.aDProgress.docLoader.pause(false);
+                               self.innerText = KellyLoc.s('', 'recorder_load_doc_stop');
+                               this.parentNode.removeChild(this);
+                               return false;
+                           }
+                           
+                           continueBtn.innerText = "[continue]";
+                           continueBtn.href = "#";
+                           KellyDPage.aDProgress.statistic.appendChild(continueBtn);
+                    }
+               }
                 
             }
         

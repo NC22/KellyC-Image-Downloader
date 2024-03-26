@@ -72,11 +72,29 @@ function KellyThreadWork(cfg) {
     }
     
     this.pause = function(state) {
-        if (!handler.isBeasy()) return;
         
         pause = state ? true : false;
+        
         if (pause == false) {
-            for (var i = 1; i <= maxThreads; i++) if (!applayJob()) break;
+            
+            handler.exec();
+            KellyTools.log('work continue', 'KellyThreadWork');
+            
+        } else {
+            
+            for (var i = 0; i < threads.length; i++) {
+                
+                if (threads[i].job) {
+                    jobs.push(threads[i].job);
+                    KellyTools.log('work paused - return task back to jobs pool', 'KellyThreadWork');
+                }
+                handler.clearThreadTimers(threads[i]);  
+                removeThreadItem(threads[i]);
+       
+                
+            }
+            
+            beasy = false;
         }
     }
     
@@ -138,6 +156,10 @@ function KellyThreadWork(cfg) {
     this.onJobEnd = function(thread) {
         
         removeThreadItem(thread);
+        
+        if (pause) {
+            return;
+        }
         
         if (!thread.response) {
             // error
@@ -234,7 +256,9 @@ function KellyThreadWork(cfg) {
     this.createDefaultHttpRequestCallback = function(thread) {
         
         var defaultCallback = function(urlOrig, data, errorCode, errorText, controller) {
-
+            
+            if (pause) return;
+            
             if (data !== false) {
                 thread.response = data;
             } else {

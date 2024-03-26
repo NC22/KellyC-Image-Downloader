@@ -8,6 +8,7 @@ function KellyLoadDocControll(cfg)
     this.filtered = false; 
     
     var stage = 'off'; // step 1. - loadDoc - download data from related links / step 2. - loadImg - check proportions for loaded images from related doc
+    var pause = false;
     
     var validatorIndex = false;
     
@@ -307,7 +308,7 @@ function KellyLoadDocControll(cfg)
             if (handler.parser.parseImagesDocByDriver(thread) !== true && !handler.lastError) {
                 
                 // Content-type image
-                if (thread.request.contentType.indexOf('image') != -1) {
+                if (thread.request.contentType && thread.request.contentType.indexOf('image') != -1) {
                     thread.response = '<body><img src="' + thread.job.url + '"></body>';
                 }
                 
@@ -360,10 +361,45 @@ function KellyLoadDocControll(cfg)
         handler.events.onUpdateState(stage, context, handler.getStat());        
     }
     
+    handler.pause = function(state) {
+        
+        pause = state;
+        if (pause) {
+            
+            if (stage == 'loadDoc') {
+                
+                handler.thread.pause(true);
+                
+            } else if (stage == 'loadImg') {
+                
+                handler.imageLoader.stop();
+            }
+            
+            handler.events.onStagesEnd('stop', qImages);
+            
+        } else {
+             
+                
+            if (stage == 'loadDoc') {
+                console.log(handler.thread)
+                handler.thread.pause(false);
+                
+            } else if (stage == 'loadImg') {
+                
+                handler.runImgLoad();
+            }
+            
+        }
+    }    
+    
     handler.stop = function() {
+        
         if (stage == 'loadDoc') {
+            
             handler.thread.stop();
+            
         } else if (stage == 'loadImg') {
+            
             handler.imageLoader.stop();
         }
         
@@ -415,7 +451,11 @@ function KellyLoadDocControll(cfg)
     handler.getCurrentStage = function() {
         return stage;
     }
-   
+    
+    handler.isPaused = function(){
+        return pause;
+    }
+    
     constructor(cfg);
 }
 
