@@ -116,6 +116,8 @@ function KellyLoadDocControll(cfg)
     
     function isBetterMatchDocData(imageData, testData) {
         
+        // todo - add optional best match by mp4
+        
         if (!imageData.pw || (imageData.pw <= testData.pw && imageData.ph <= testData.ph)) {
             
             if (handler.additionOptions.relatedDocAspectRatioCheck && imageData.pw) {

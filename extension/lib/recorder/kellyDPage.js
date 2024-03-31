@@ -655,9 +655,18 @@ KellyDPage.showAdditionFilters = function() {
     KellyTools.getElementByClass(KellyDPage.commonFilters, cl + '-related-links').onclick = function() {
         
         var self = this;
-        if (KellyDPage.aDProgress.docLoader && KellyDPage.aDProgress.docLoader.getCurrentStage() != 'off') {
-            KellyDPage.aDProgress.docLoader.pause(true);
-            return false;
+        
+        if (KellyDPage.aDProgress.docLoader) {
+                       
+            if (KellyDPage.aDProgress.docLoader.isPaused()) {  // stoped \ paused -> reset
+                
+                KellyDPage.aDProgress.docLoader.reset();
+                
+            } else if (KellyDPage.aDProgress.docLoader.getCurrentStage() != 'off') { // runing -> pause, return
+                
+                KellyDPage.aDProgress.docLoader.pause(true);
+                return false;
+            }            
         }
         
         if (K_FAV.dataFilterLock) return false;                
@@ -772,8 +781,8 @@ KellyDPage.showAdditionFilters = function() {
         // reason - done \ stop
         
         KellyDPage.aDProgress.docLoader.events.onStagesEnd = function(reason, addedTotal, notice) {
-                        
-            var markFailedItems = function(update) {
+            
+            var markFailedItems = function() {
                 
                 if (KellyDPage.aDProgress.errorItems.length > 0) {
                     
@@ -791,12 +800,10 @@ KellyDPage.showAdditionFilters = function() {
                     for (var i=0; i < KellyDPage.aDProgress.errorItems.length; i++) {
                         KellyDPage.aDProgress.errorItems[i].categoryId.push(KellyDPage.getCat(errorGroupName).id);
                     }
-                    
-                    if (update) {
-                        K_FAV.updateCategoryList();
-                    }
                 } 
             }            
+            
+            // onQualityImageFound counter
             
             if (addedTotal > 0) {
                 
@@ -834,8 +841,7 @@ KellyDPage.showAdditionFilters = function() {
                if (!notice) {
                     notice = reason == 'stop' ? 'recorder_canceled' : 'recorder_cant_find_originals_images';                
                }
-               
-               markFailedItems(true);               
+                            
                KellyDPage.aDProgress.statistic.innerText = KellyLoc.s('', notice) + " ";
                
                if (reason == 'stop') {
@@ -858,6 +864,9 @@ KellyDPage.showAdditionFilters = function() {
                            continueBtn.href = "#";
                            KellyDPage.aDProgress.statistic.appendChild(continueBtn);
                     }
+               } else {
+                    markFailedItems(); 
+                    K_FAV.updateCategoryList(); 
                }
                 
             }
