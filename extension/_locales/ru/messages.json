@@ -1165,5 +1165,8 @@
     },
     "recorder_displayed_info":{  
         "message":"Картинки : __ITEMS__ | Доп. документы : __RELATED_DOCS__"
+    },
+    "tweek_twitter_18w":{  
+        "message":"[Twitter] Disable blur & content warnings"
     }
 }

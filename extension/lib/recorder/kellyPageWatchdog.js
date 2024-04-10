@@ -4,6 +4,8 @@ function KellyPageWatchdog(cfg)
     var lng = KellyLoc;
     var updateAF = true;
     
+    this.userConfig = false;
+    
     var directAccessEls = {'A' : ['href'], 'IMG' : ['src']};  // to get absolute link from img \ a elements 
     
     this.noticeTxt = '';
@@ -761,6 +763,28 @@ function KellyPageWatchdog(cfg)
     this.log = function(text) {
         KellyTools.log(text);
     }
+    
+    // can be used for event filters to detect system settings
+    
+    this.getConfig = function(callback) {
+        
+        if (typeof K_FAV != 'undefined') return callback(K_FAV.getGlobal('options'), 'K_FAV'); 
+        
+        if (handler.userConfig) return callback(handler.userConfig, 'userConfigCache');
+                
+        var sm = new KellyFavStorageManager();
+            sm.prefix += 'recorder_';      
+            sm.prefixCfg += 'recorder_';
+            sm.loadDB('config', function(fav) { 
+                
+                console.log(fav);
+                handler.userConfig = fav.coptions;
+                callback(handler.userConfig, 'userConfig');
+            }, true);
+            
+         return true;
+    }
+    
     
     this.exec = function() {
         
