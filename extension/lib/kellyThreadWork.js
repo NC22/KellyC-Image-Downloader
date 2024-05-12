@@ -73,14 +73,16 @@ function KellyThreadWork(cfg) {
     
     this.pause = function(state) {
         
+        var oldPause = pause;
         pause = state ? true : false;
         
         if (pause == false) {
             
-            handler.exec();
+            if (oldPause) jobContinue();
             KellyTools.log('work continue', 'KellyThreadWork');
             
         } else {
+            
             
             for (var i = 0; i < threads.length; i++) {
                 
@@ -88,12 +90,11 @@ function KellyThreadWork(cfg) {
                     jobs.push(threads[i].job);
                     KellyTools.log('work paused - return task back to jobs pool', 'KellyThreadWork');
                 }
-                handler.clearThreadTimers(threads[i]);  
-                removeThreadItem(threads[i]);
-       
                 
+                handler.clearThreadTimers(threads[i]);  
             }
-            
+               
+            threads = [];
             beasy = false;
         }
     }
@@ -152,27 +153,8 @@ function KellyThreadWork(cfg) {
         threads.splice(threadIndex, 1);
         return true;
     }
-      
-    this.onJobEnd = function(thread) {
-        
-        removeThreadItem(thread);
-        
-        if (pause) {
-            return;
-        }
-        
-        if (!thread.response) {
-            // error
-            KellyTools.log('job end without load document', 'KellyThreadWork');
-            KellyTools.log(thread, 'KellyThreadWork');
-        }
-
-        var isUnfinished = thread.job.onLoad(handler, thread, jobs.length); // for addition sub requests, dont use unfinished state if you dont know how threads class works
-        if (isUnfinished === true) return;
-        
-        if (events.onProcess) events.onProcess(jobs.length, thread);
-        
-        handler.clearThreadTimers(thread);
+    
+    function jobContinue() {
         
         if (!jobs.length && !threads.length) {   
         
@@ -204,18 +186,56 @@ function KellyThreadWork(cfg) {
             threads.push(threadPlaceholder);
         }
     }
+      
+    this.onJobEnd = function(thread) {
+        
+        removeThreadItem(thread);
+        
+        if (pause) {
+            return;
+        }
+        
+        if (!thread.response) {
+            // error
+            KellyTools.log('job end without load document', 'KellyThreadWork');
+            KellyTools.log(thread, 'KellyThreadWork');
+        }
+
+        var isUnfinished = thread.job.onLoad(handler, thread, jobs.length); // for addition sub requests, dont use unfinished state if you dont know how threads class works
+        if (isUnfinished === true) return;
+        
+        if (events.onProcess) events.onProcess(jobs.length, thread);
+        
+        handler.clearThreadTimers(thread);
+        
+        if (pause) {
+            
+            KellyTools.log('Global pause, dont take actions', 'KellyThreadWork');
+            
+        } else jobContinue();
+    }
 
     function applayJob(threadPlaceholder) {
     
         if (threadPlaceholder) removeThreadItem(threadPlaceholder);
     
-        if (threads.length >= maxThreads || pause) return false;
-        if (!jobs.length && !threads.length) { 
-            onEnd('applayJob');
+        if (threads.length >= maxThreads || pause) {
+            console.log('[applayJob] threads.length >= maxThreads || pause');
+            console.log(threads.length);
+            console.log(maxThreads);
+            console.log(pause);
+            console.log(threads);
             return false;
         }
         
-        if (!jobs.length) {            
+        if (!jobs.length && !threads.length) { 
+            onEnd('applayJob');
+            console.log('[applayJob] jobs.length && !threads.length');
+            return false;
+        }
+        
+        if (!jobs.length) {
+            console.log('[applayJob] ALL DONE');
             return false;
         }
         
@@ -315,7 +335,7 @@ function KellyThreadWork(cfg) {
             onEnd('exec');
             return false;
         }
-               
+        
         for (var i = 1; i <= maxThreads; i++) {
             if (!applayJob()) break;
             else beasy = true;
