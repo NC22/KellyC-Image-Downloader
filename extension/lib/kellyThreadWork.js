@@ -220,22 +220,15 @@ function KellyThreadWork(cfg) {
         if (threadPlaceholder) removeThreadItem(threadPlaceholder);
     
         if (threads.length >= maxThreads || pause) {
-            console.log('[applayJob] threads.length >= maxThreads || pause');
-            console.log(threads.length);
-            console.log(maxThreads);
-            console.log(pause);
-            console.log(threads);
             return false;
         }
         
         if (!jobs.length && !threads.length) { 
             onEnd('applayJob');
-            console.log('[applayJob] jobs.length && !threads.length');
             return false;
         }
         
         if (!jobs.length) {
-            console.log('[applayJob] ALL DONE');
             return false;
         }
         
