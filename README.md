@@ -1,11 +1,13 @@
 <h1><img src="https://catface.ru/userfiles/media/udata_1544561629_uixtxchu.png" width="32"> KellyC Image Downloader</h1>
 
+<!--
 ![GitHub](https://img.shields.io/github/license/nc22/KellyCImageDownloader) ![Chrome Web Store](https://img.shields.io/chrome-web-store/users/mbhkdmjolnhcppnkldbdfaomeabjiofm?label=chrome%20users%3A) ![Chrome Web Store](https://img.shields.io/chrome-web-store/rating/mbhkdmjolnhcppnkldbdfaomeabjiofm) ![Mozilla Add-on](https://img.shields.io/amo/users/kellyc-favorites?label=firefox%20users%3A) ![Mozilla Add-on](https://img.shields.io/amo/rating/kellyc-favorites)
+-->
 
 <p></p>
-<h2>Install</h2>
+<!--h2>Install</h2>
 <p><b>Install</b> for <a href="https://chrome.google.com/webstore/detail/kellyc-favorites/mbhkdmjolnhcppnkldbdfaomeabjiofm?hl=en">Chrome</a>, <a href="https://addons.mozilla.org/ru/firefox/addon/kellyc-favorites/">FireFox</a>, <a href="https://microsoftedge.microsoft.com/addons/detail/kellyc-image-downloader/dgjfegjceojpbngijkaekoihllhhdocn">Edge</a>, <a href="https://kellydownloader.com/ru/install-opera/">Opera</a></p>
-<p></p>
+<p></p-->
 <h2>Manual install</h2>
 <p><a href="https://github.com/NC22/KellyC-Image-Downloader/wiki/Install-extension-manually">How to install manualy from source code or from releases</a></p>
 <p></p>
