@@ -1,6 +1,5 @@
 KellyRecorderFilterEHentai = new Object();
 KellyRecorderFilterEHentai.manifest = {host : ['e-hentai.org', 'exhentai.org'], detectionLvl : ['imagePreview', 'imageByDocument']};
-KellyRecorderFilterEHentai.previewMatch = new RegExp('http[:\/0-9a-zA-Z\.]+/m/[0-9]+/[0-9]+\-[0-9]+\\.[a-zA-Z]+');
 KellyRecorderFilterEHentai.previewTileMap = false;
 KellyRecorderFilterEHentai.canvas = document.createElement('canvas');
 KellyRecorderFilterEHentai.previewImagesPool = [];
@@ -15,13 +14,13 @@ KellyRecorderFilterEHentai.addItemByDriver = function(handler, data) {
     
     if (data.el.tagName != 'DIV') return;    
     
-    var previewUrl = data.el.style.backgroundImage.match(KellyRecorderFilterEHentai.previewMatch);    
-    if (previewUrl !== null) {
+    var previewUrl = handler.getSrcFromStyle(data.el);
+    if (previewUrl && data.el.style.backgroundPosition) {
         
         var relatedDoc = KellyTools.getElementByTag(data.el, 'A'), bounds = KellyRecorderFilterEHentai.getPreviewTileBounds(data.el);        
         if (!relatedDoc) return handler.addDriverAction.SKIP; 
         
-        handler.addSingleSrc(data.item, 'data:image-tilemap;' + previewUrl[0] + ',' + bounds.x + ',' + bounds.y + ',' + bounds.width + ',' + bounds.height, 'addSrcFromStyle', data.el, 'imagePreview');        
+        handler.addSingleSrc(data.item, 'data:image-tilemap;' + previewUrl + ',' + bounds.x + ',' + bounds.y + ',' + bounds.width + ',' + bounds.height, 'addSrcFromStyle', data.el, 'imagePreview');        
         data.item.relatedDoc = relatedDoc.href;
         
         console.log(data.item);

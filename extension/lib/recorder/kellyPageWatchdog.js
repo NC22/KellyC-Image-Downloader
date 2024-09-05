@@ -367,12 +367,24 @@ function KellyPageWatchdog(cfg)
             }
        }              
     }
-            
-    this.addSrcFromStyle = function(el, item, bgGroup) {
-        if (el.getAttribute('style') && el.getAttribute('style').indexOf('url(') != -1) {
-            var styleRegExp = /url\((.*?)\)/g, styleUrlData = styleRegExp.exec(el.getAttribute('style')), src = '';
+    
+    this.getSrcFromStyle = function(el) {
+        
+        var src = '';        
+        if (el && el.getAttribute('style') && el.getAttribute('style').indexOf('url(') != -1) {
+                
+            var styleRegExp = /url\((.*?)\)/g, styleUrlData = styleRegExp.exec(el.getAttribute('style'));
             if (styleUrlData !== null && typeof styleUrlData[1] == 'string') src = styleUrlData[1].replace(/['"]+/g, '').trim();
             
+        }
+        
+        return src;        
+    }
+
+    this.addSrcFromStyle = function(el, item, bgGroup) {
+        
+        var src = handler.getSrcFromStyle(el);
+        if (src) {
             handler.addSingleSrc(item, src, 'addSrcFromStyle', el, bgGroup ? bgGroup : 'imageBg');
         }
     }
