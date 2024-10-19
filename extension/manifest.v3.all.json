@@ -33,6 +33,7 @@
             "lib/recorder/filters/flickr.js", 
             "lib/recorder/filters/pikabu.js", 
             "lib/recorder/filters/reddit.js", 
+            "lib/recorder/filters/bsky.js", 
             "lib/recorder/filters/9gag.js", 
             "lib/recorder/filters/hfoundry.js",
             "lib/recorder/filters/yandex.js",
@@ -47,7 +48,7 @@
    } ],
    "host_permissions": ["*://*/*"], 
    "manifest_version" : 3,
-   "version": "1.2.9.2",
+   "version": "1.2.9.3",
    "name": "KellyC Image Downloader",
    "description": "__MSG_ext_description_recorder__",
    "icons": { 
