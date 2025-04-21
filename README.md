@@ -1,5 +1,8 @@
 <h1><img src="https://catface.ru/userfiles/media/udata_1544561629_uixtxchu.png" width="32"> KellyC Image Downloader</h1>
 
+<p>Due to low interest in the project, the project has been removed from all extension stores and left for personal use as an open source project. The project remains free and open source, any forks \ modifications are welcome</p>
+<p>Из за низкого интереса к проекту, проект убран со всех магазинов расширений и оставлен для личного использования в качестве открытого проекта. Проект остается бесплатным и открытым, любые изменения под себя приветствуются</p>
+
 <!--
 ![GitHub](https://img.shields.io/github/license/nc22/KellyCImageDownloader) ![Chrome Web Store](https://img.shields.io/chrome-web-store/users/mbhkdmjolnhcppnkldbdfaomeabjiofm?label=chrome%20users%3A) ![Chrome Web Store](https://img.shields.io/chrome-web-store/rating/mbhkdmjolnhcppnkldbdfaomeabjiofm) ![Mozilla Add-on](https://img.shields.io/amo/users/kellyc-favorites?label=firefox%20users%3A) ![Mozilla Add-on](https://img.shields.io/amo/rating/kellyc-favorites)
 -->
@@ -11,7 +14,6 @@
 <h2>Manual install</h2>
 <p><a href="https://github.com/NC22/KellyC-Image-Downloader/wiki/Install-extension-manually">How to install manualy from source code or from releases</a></p>
 <p></p>
-<b><a href="https://kellydownloader.com/">Project homepage</a></b>
 <p></p>
 <h2>EN | Description</h2>
 <p>A browser extension for batch downloading artworks and images from sites. It allows you to download all images on the page filtering by size or other settings.</p>
@@ -33,13 +35,7 @@
 <p>Некоторые сайты поддерживают дополнительный функционал, позволяющий быстро захватить оригиналы изображений без дополнительной фильтрации в ручную. Примеры использования и список сайтов с которых можно быстро скачать оригиналы изображений - <a href="https://kellydownloader.com/crawlers/">открыть</a></p>
 <p>Функция "Загрузка дочерних документов" используется если на основной странице доступно только изображение с низким разрешением и ссылка ведет на страницу с оригиналом. (функционал поумолчанию может не всегда сработать, см. страницу поддержки сайтов)</p>
 <p></p>
-<p>Несколько примеров использования</p>
-<p><a href="https://www.youtube.com/watch?v=XpXhwndWYyg">Скачать картинки из альбома <b>Вконтакте</b></a> (Пример использования ф-ции)</p>
-<p><a href="https://www.youtube.com/watch?v=ImKbC_1Oz8c">Скачать картинки с <b>Pinterest</b></a> (Сбор данных из закладок пользователя)</p>
-<p><a href="https://www.youtube.com/watch?v=x1-kqKMnMmA">Скачать картинки с <b>Twitter</b></a> (Сбор данных из раздела "Media")</p>
-<p><a href="https://youtu.be/1Nivs34BDbI">Скачать картинки с <b>Pixiv</b></a> (Сбор данных из раздела "Закладки")</p>
 <p></p>
-<p>Если вы знаете JS и хотите расширить список поддерживаемых сайтов, можете добавить дополнительный фильтр в соответствии с документацией <a href="https://kellydownloader.com/links/dev/">здесь</a></p>
 
 <p></p>
 <h2>License</h2>
