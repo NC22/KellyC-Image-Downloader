@@ -17,22 +17,15 @@
 <p></p>
 <h2>EN | Description</h2>
 <p>A browser extension for batch downloading artworks and images from sites. It allows you to download all images on the page filtering by size or other settings.</p>
-<p>Some of the sites (priority to Pixiv, Pinterest, Twitter, Joyreactor) support extended features (list of all sites described <a href="https://kellydownloader.com/crawlers/">here</a>) for collect "Original" version of images from preview automatically without use filters by size manually.</p>
+<p>Some of the sites (priority to Pixiv, Pinterest, Twitter, Joyreactor) support extended features for collect "Original" version of images from preview automatically without use filters by size manually.</p>
 <p>"Load related document" - feature allows you to download additional images from related documents of preview, if original image is not actually placed on current page. (may be helpful in some cases, check if site is supported)</p>
 
-<p>Several usage examples:</p>
-<p></p>
-<p><a href="https://www.youtube.com/watch?v=ImKbC_1Oz8c">Download images from <b>Pinterest</b></a> (Collect bookmarks from specifed folder)</p>
-<p><a href="https://www.youtube.com/watch?v=x1-kqKMnMmA">Download images from <b>Twitter</b></a> (Collect "Media" section)</p>
-<p><a href="https://youtu.be/1Nivs34BDbI">Download images from <b>Pixiv</b></a> (Collect "Bookmarks" example)</p>
-<p></p>
-<p>If you know JS and want to extend the list of supported sites read the documentation about addition filters <a href="https://kellydownloader.com/links/dev/">here</a></p>
 
 <p></p>
 <h2>RU | Описание</h2>
 <p>Расширение для пакетного скачивания картинок \ творчества с любых сайтов. Поддерживаются фильтры по пропорциям, строке url, загрузка дочерних документов.</p>
 <p></p>
-<p>Некоторые сайты поддерживают дополнительный функционал, позволяющий быстро захватить оригиналы изображений без дополнительной фильтрации в ручную. Примеры использования и список сайтов с которых можно быстро скачать оригиналы изображений - <a href="https://kellydownloader.com/crawlers/">открыть</a></p>
+<p>Некоторые сайты поддерживают дополнительный функционал, позволяющий быстро захватить оригиналы изображений без дополнительной фильтрации в ручную.</p>
 <p>Функция "Загрузка дочерних документов" используется если на основной странице доступно только изображение с низким разрешением и ссылка ведет на страницу с оригиналом. (функционал поумолчанию может не всегда сработать, см. страницу поддержки сайтов)</p>
 <p></p>
 <p></p>
