@@ -15,7 +15,7 @@ var KellyProfileRecorder = new Object();
             install_ff : 'https://addons.mozilla.org/ru/firefox/addon/kellyc-favorites/',
             install_chrome : 'https://chrome.google.com/webstore/detail/kellyc-image-downloader/mbhkdmjolnhcppnkldbdfaomeabjiofm?hl=en',
             install_edge : 'https://microsoftedge.microsoft.com/addons/detail/kellyc-image-downloader/dgjfegjceojpbngijkaekoihllhhdocn',
-            install_opera : 'https://kellydownloader.com/ru/install-opera/',
+            install_opera : 'https://kdl.catface.ru/ru/install-opera/',
             
             author : 'https://nradiowave.catface.ru/',
         };

@@ -1026,7 +1026,7 @@ KellyDPage.showRelatedLinksNotice = function() {
                     <p>' + KellyLoc.s('', 'recorder_related_links_notice_1') + '</p>\
                     <ul class="' + KellyDPage.env.className + '-menu-links">\
                         <li><a href="#" class="' + KellyDPage.env.className + '-readed">' + KellyLoc.s('', 'recorder_dont_show_again') + '</a></li>\
-                        <li><a href="https://kellydownloader.com/links/loadrelated/" target="_blank" class="' + KellyDPage.env.className + '-more">' + KellyLoc.s('', 'recorder_read_about') + '</a></li>\
+                        <li><a href="https://kdl.catface.ru/links/loadrelated/" target="_blank" class="' + KellyDPage.env.className + '-more">' + KellyLoc.s('', 'recorder_read_about') + '</a></li>\
                     </ul>';
                     
         KellyTools.setHTMLData(tooltip.getContent(), '<div style="' + (!K_FAV.mobileOptimization ? 'max-width : 330px;' : '') + '">' + html + '</div>');     
