@@ -318,11 +318,7 @@ function KellyPageWatchdog(cfg)
         // create absolute url for for relative links [ttt/test/te/st/t/t]
         
         if (ext != 'dataUrl' && src.indexOf('//') !== 0 && src.indexOf('http') !== 0) {
-            if (src[0] == '/') {
-                src = handler.host + src;
-            } else {
-                src = handler.host + handler.pathname + src;
-            }
+            src = new URL(src, handler.host + handler.pathname).href;
         }
         
         // specify protocol for url with relative protocol [://test.ru/test/]
