@@ -47,6 +47,8 @@ function KellyPageWatchdog(cfg)
     
     this.allowDuplicates = false; // ignore list of already added srcs and add anyway
     
+    this.pathname = "";
+    
     // imgList - img el attribute observers
     
     // context for parser functions    
@@ -66,7 +68,7 @@ function KellyPageWatchdog(cfg)
     }
     
     function setDefaultLocation() {
-        handler.setLocation({url : window.location.href, host : window.location.origin});   
+        handler.setLocation({url : window.location.href, host : window.location.origin, pathname : window.location.pathname});   
         handler.log('Set location by window ' + handler.url);
     }
     
@@ -76,6 +78,13 @@ function KellyPageWatchdog(cfg)
         this.url = data.url;
         this.host = data.host; // host = origin - used as referer - referrer : handler.host
         this.hostname = false;
+        
+        if (!data.pathname) {
+            var tmpUrl = new URL(data.url);
+            this.pathname = tmpUrl.pathname;
+        } else {
+            this.pathname = data.pathname;
+        }
         
         if (this.host) {
             this.hostname = KellyTools.getLocationFromUrl(handler.host).hostname;
@@ -309,7 +318,11 @@ function KellyPageWatchdog(cfg)
         // create absolute url for for relative links [ttt/test/te/st/t/t]
         
         if (ext != 'dataUrl' && src.indexOf('//') !== 0 && src.indexOf('http') !== 0) {
-            src = handler.host + (src[0] == '/' ? '' : '/') + src;
+            if (src[0] == '/') {
+                src = handler.host + src;
+            } else {
+                src = handler.host + handler.pathname + src;
+            }
         }
         
         // specify protocol for url with relative protocol [://test.ru/test/]

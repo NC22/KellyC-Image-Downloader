@@ -276,7 +276,11 @@ KellyDPage.addStorageItem = function(src, doc, referrer, groups) {
      if (ext == 'dataUrl' && src.indexOf('tilemap') != -1) {
          tileMapData = KellyDPage.tileMapControll.addUrlTileMapItem(src, referrer);
          location = tileMapData.location;
-     } else KellyDPage.addUrlMapItem(ext, location, referrer);
+     } else {
+         console.log(src);
+         console.log(location);
+         KellyDPage.addUrlMapItem(ext, location, referrer);
+     }
      
      var catList = [];
      for (var i = 0; i < groups.length; i++)  {
