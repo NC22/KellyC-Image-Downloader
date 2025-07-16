@@ -277,8 +277,6 @@ KellyDPage.addStorageItem = function(src, doc, referrer, groups) {
          tileMapData = KellyDPage.tileMapControll.addUrlTileMapItem(src, referrer);
          location = tileMapData.location;
      } else {
-         console.log(src);
-         console.log(location);
          KellyDPage.addUrlMapItem(ext, location, referrer);
      }
      
